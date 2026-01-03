@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/private/",
     },
-    sitemap: "https://smartbillpro@gmail.com/sitemap.xml",
+    sitemap: "https://smartbillpro.com/sitemap.xml",
   };
 }

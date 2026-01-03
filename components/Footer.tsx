@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">官方支持邮箱</p>
-                  <p className="text-sm font-black text-slate-900 select-all">support@smartbillpro@gmail.com</p>
+                  <p className="text-sm font-black text-slate-900 select-all">smartbillpro@gmail.com</p>
                 </div>
               </div>
 
