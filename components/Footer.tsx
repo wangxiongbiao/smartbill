@@ -24,42 +24,11 @@ const Footer: React.FC = () => {
             <p className="text-slate-500 text-sm leading-relaxed max-w-sm font-medium">
               SmartBill Pro 是专为现代企业家和自由职业者打造的顶级开票平台。我们通过创新的 AI 技术和极简的设计，帮助全球用户提升计费效率，塑造专业品牌形象。
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
-                <i className="fab fa-linkedin-in"></i>
-              </a>
-            </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">产品功能</h4>
-            <ul className="space-y-4 text-sm font-bold text-slate-600">
-              <li><a href="#" className="hover:text-blue-600 transition-colors">发票模板库</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">收据生成器</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">AI 智能填充</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">多语言支持</a></li>
-            </ul>
-          </div>
 
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">公司/支持</h4>
-            <ul className="space-y-4 text-sm font-bold text-slate-600">
-              <li><a href="#" className="hover:text-blue-600 transition-colors">关于我们</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">帮助中心</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">隐私政策</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">服务条款</a></li>
-            </ul>
-          </div>
-
-          {/* Contact Info (Required) */}
-          <div className="md:col-span-4 space-y-6">
+          {/* Contact Info */}
+          <div className="md:col-span-8 space-y-6">
             <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">联系我们</h4>
             <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 space-y-5">
               <div className="flex items-start gap-4">
@@ -68,10 +37,10 @@ const Footer: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">官方支持邮箱</p>
-                  <p className="text-sm font-black text-slate-900 select-all">smartbill@gamil.com</p>
+                  <p className="text-sm font-black text-slate-900 select-all">support@smartbillpro@gmail.com</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-600 flex-shrink-0">
                   <i className="fas fa-clock"></i>

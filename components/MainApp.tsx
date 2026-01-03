@@ -231,7 +231,7 @@ const App: React.FC = () => {
         lang={lang}
         setLang={setLang}
       />
-      <main className="flex-1">{renderContent()}</main>
+      <main className="flex-1 pt-16">{renderContent()}</main>
 
       {/* 网站页脚 */}
       <Footer />

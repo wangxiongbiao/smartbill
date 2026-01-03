@@ -10,55 +10,55 @@ interface HomeViewProps {
 }
 
 const INDUSTRIES = [
-  { 
-    name: '自由职业', 
+  {
+    name: '自由职业',
     nameKey: 'freelance',
-    color: 'bg-emerald-500', 
-    icon: 'fa-user-ninja', 
+    color: 'bg-emerald-500',
+    icon: 'fa-user-ninja',
     imageIds: [
-      '1497215728101-856f4ea42174', '1519389950473-47ba0277781c', '1522202176988-66273c2fd55f', 
+      '1497215728101-856f4ea42174', '1519389950473-47ba0277781c', '1522202176988-66273c2fd55f',
       '1486312338219-ce68d2c6f3ad', '1517245386807-bb43f82c33c4', '1515378960530-7c0da6231fb1',
       '1499750310107-5fef28a66643', '1504384308090-c894fdcc538d'
     ]
   },
-  { 
-    name: '建筑装修', 
+  {
+    name: '建筑装修',
     nameKey: 'construction',
-    color: 'bg-orange-500', 
-    icon: 'fa-hard-hat', 
+    color: 'bg-orange-500',
+    icon: 'fa-hard-hat',
     imageIds: [
       '1504307651254-3b5b198c67d8', '1541888941259-79273a460011', '1503387762-592deb58ef4e',
       '1581094794329-c8112a89af12', '1534237748181-6d473797656d', '1504917595217-d4dc5dba99bd',
       '1590001158193-e2c2a5aabc5f', '1517646272422-50d48ff70c7c'
     ]
   },
-  { 
-    name: '零售贸易', 
+  {
+    name: '零售贸易',
     nameKey: 'retail',
-    color: 'bg-pink-500', 
-    icon: 'fa-shopping-bag', 
+    color: 'bg-pink-500',
+    icon: 'fa-shopping-bag',
     imageIds: [
       '1441986300917-64674bd600d8', '1472851294608-062f824d28c5', '1528698827591-e19ccd7bc23d',
       '1556742044-3c52d6e88c62', '1567401893414-76b7b1e5a7a5', '1495474472287-4d71bcdd2085',
       '1533900298318-6b8da08a523e', '1491333078588-55b67d3c77fe'
     ]
   },
-  { 
-    name: '咨询服务', 
+  {
+    name: '咨询服务',
     nameKey: 'consulting',
-    color: 'bg-blue-500', 
-    icon: 'fa-briefcase', 
+    color: 'bg-blue-500',
+    icon: 'fa-briefcase',
     imageIds: [
       '1521737604893-d14cc237f11d', '1521791136364-798a7ad0d224', '1552664730-d307ca884978',
       '1542744173-8e7e53415bb0', '1557804506-669a67965ba0', '1522071823990-95529124430e',
       '1515378717757-69591459a047', '1573497019940-1c28c88b4f3e'
     ]
   },
-  { 
-    name: '创意设计', 
+  {
+    name: '创意设计',
     nameKey: 'design',
-    color: 'bg-purple-500', 
-    icon: 'fa-paint-brush', 
+    color: 'bg-purple-500',
+    icon: 'fa-paint-brush',
     imageIds: [
       '1558655146-d2ba2343260e', '1586717791821-3f44a563df92', '1550684848-fac1c5b4e853',
       '1513542789411-b6a5d4f31634', '1561070791-2526d30994b5', '1633356122544-f134324a6cee',
@@ -69,11 +69,11 @@ const INDUSTRIES = [
 
 const generateTemplates = (categoryName: string, count: number): IndustryTemplate[] => {
   const industry = INDUSTRIES.find(ind => ind.name === categoryName)!;
-  
+
   return Array.from({ length: count }).map((_, i) => {
     const imageId = industry.imageIds[i % industry.imageIds.length];
     const backgroundImage = `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
-    
+
     return {
       id: `${categoryName}-${i}`,
       category: categoryName,
@@ -82,11 +82,11 @@ const generateTemplates = (categoryName: string, count: number): IndustryTemplat
       backgroundImage,
       defaultData: {
         notes: `Generated via SmartBill Pro Template.`,
-        items: [{ 
-          id: `tpl-item-${i}`, 
-          description: `${categoryName} Service Package`, 
-          quantity: 1, 
-          rate: (450 + (i * 180)) 
+        items: [{
+          id: `tpl-item-${i}`,
+          description: `${categoryName} Service Package`,
+          quantity: 1,
+          rate: (450 + (i * 180))
         }]
       }
     };
@@ -108,7 +108,7 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
           {t.heroSub}
         </p>
         <div className="flex justify-center pt-8">
-          <button 
+          <button
             onClick={onCreateEmpty}
             className="bg-slate-900 hover:bg-black text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-black shadow-2xl flex items-center justify-center gap-3 transition-all active:scale-95 text-base sm:text-lg group mx-auto"
           >
@@ -130,23 +130,23 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
               </div>
             </div>
           </div>
-          
+
           <div className="flex overflow-x-auto gap-6 pb-6 px-2 scrollbar-hide snap-x">
             {generateTemplates(industry.name, 10).map((tpl) => (
-              <div 
+              <div
                 key={tpl.id}
                 onClick={() => onSelectTemplate(tpl.defaultData)}
-                className="flex-shrink-0 w-64 sm:w-72 h-[350px] sm:h-[400px] bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer group relative overflow-hidden snap-start"
+                className="flex-shrink-0 w-64 sm:w-72 xl:w-[calc(20%-1.25rem)] h-[350px] sm:h-[400px] bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer group relative overflow-hidden snap-start"
               >
                 <div className={`h-1/2 sm:h-3/5 w-full relative overflow-hidden ${tpl.previewColor} bg-opacity-20 flex items-center justify-center`}>
                   <div className="absolute inset-0 bg-slate-200 animate-pulse group-data-[loaded=true]:hidden"></div>
-                  <img 
-                    src={tpl.backgroundImage} 
-                    alt={tpl.title} 
+                  <img
+                    src={tpl.backgroundImage}
+                    alt={tpl.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-0"
                     onLoad={(e) => {
-                        const target = e.currentTarget as HTMLImageElement;
-                        target.style.opacity = '1';
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.opacity = '1';
                     }}
                     onError={(e) => {
                       const target = e.currentTarget as HTMLImageElement;

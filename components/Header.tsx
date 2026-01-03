@@ -23,19 +23,16 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
   ];
 
   const languages: { id: Language; label: string }[] = [
-    { id: 'zh-TW', label: '繁體中文' },
     { id: 'en', label: 'English' },
-    { id: 'fr', label: 'Français' },
-    { id: 'de', label: 'Deutsch' },
-    { id: 'ja', label: '日本語' },
+    { id: 'zh-TW', label: '繁體中文' },
   ];
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 no-print shadow-sm">
+    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 fixed top-0 w-full z-50 no-print shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo Section */}
-        <div 
-          className="flex items-center gap-2 cursor-pointer flex-shrink-0" 
+        <div
+          className="flex items-center gap-2 cursor-pointer flex-shrink-0"
           onClick={() => setView('home')}
         >
           <div className="bg-blue-600 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
@@ -51,37 +48,37 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
           </div>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                activeView === item.id 
-                  ? 'bg-blue-50 text-blue-600' 
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-              }`}
-            >
-              <i className={item.icon}></i>
-              {item.label}
-            </button>
-          ))}
-          <div className="w-px h-6 bg-slate-200 mx-2"></div>
-        </nav>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 relative">
+        {/* Desktop Navigation & Action Buttons */}
+        <div className="flex items-center gap-2 sm:gap-4 relative">
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setView(item.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeView === item.id
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                  }`}
+              >
+                <i className={item.icon}></i>
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="hidden md:block w-px h-6 bg-slate-200"></div>
+
           {/* Language Selector */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowLangMenu(!showLangMenu)}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all border border-slate-200 shadow-sm"
               title="Change Language"
             >
               <i className="fas fa-globe text-base"></i>
             </button>
-            
+
             {showLangMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowLangMenu(false)}></div>
@@ -93,9 +90,8 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
                         setLang(l.id);
                         setShowLangMenu(false);
                       }}
-                      className={`w-full px-5 py-3 text-left text-sm font-bold flex items-center justify-between transition-colors ${
-                        lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`w-full px-5 py-3 text-left text-sm font-bold flex items-center justify-between transition-colors ${lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       {l.label}
                       {lang === l.id && <i className="fas fa-check text-xs"></i>}
@@ -107,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
           </div>
 
           {activeView === 'editor' && (
-            <button 
+            <button
               onClick={onPrint}
               disabled={isExporting}
               className={`hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-5 py-2 rounded-xl font-black shadow-lg shadow-blue-100 items-center gap-2 transition-all active:scale-95 text-xs sm:text-sm ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
