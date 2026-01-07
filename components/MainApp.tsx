@@ -72,7 +72,6 @@ const App: React.FC = () => {
   const [template, setTemplate] = useState<TemplateType>('professional');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [isAppReversed, setIsAppReversed] = useState(false);
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
 
   const printAreaRef = useRef<HTMLDivElement>(null);
@@ -180,7 +179,7 @@ const App: React.FC = () => {
         return <HomeView onSelectTemplate={startNewInvoice} onCreateEmpty={() => startNewInvoice()} lang={lang} />;
       case 'records':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
-        return <RecordsView records={records} lang={lang} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} />; lang = { lang } />;
+        return <RecordsView records={records} lang={lang} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} />;
       case 'profile':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
         return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} lang={lang} />;
@@ -190,20 +189,19 @@ const App: React.FC = () => {
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
         return (
-          <div className={`container mx-auto px-4 py-8 lg:flex gap-8 ${isAppReversed ? 'flex-row-reverse' : ''}`}>
+          <div className="container mx-auto px-4 py-8 lg:flex gap-8">
             <div className="lg:w-1/2 flex flex-col gap-6">
               <Sidebar
                 template={template}
                 setTemplate={setTemplate}
                 onSmartFill={handleSmartFill}
                 isAiLoading={isAiLoading}
-                isAppReversed={isAppReversed}
-                setIsAppReversed={setIsAppReversed}
                 isHeaderReversed={isHeaderReversed}
                 setIsHeaderReversed={setIsHeaderReversed}
                 onSave={saveInvoiceToRecords}
+                lang={lang}
               />
-              <InvoiceForm invoice={invoice} onChange={updateInvoice} />
+              <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
               <div className="sm:hidden mt-10 mb-16 px-2">
                 <button
                   onClick={handleExportPdf}
@@ -224,7 +222,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="p-2 sm:p-8 bg-slate-100 min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
                   <div className="transform origin-top transition-transform duration-500 scale-[0.38] xs:scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.6] xl:scale-[0.85] flex-shrink-0">
-                    <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} />
+                    <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                   </div>
                 </div>
               </div>
@@ -255,7 +253,7 @@ const App: React.FC = () => {
 
       <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
         <div ref={printAreaRef} style={{ width: '210mm' }}>
-          <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} isForPdf={true} />
+          <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} isForPdf={true} lang={lang} />
         </div>
       </div>
       <BottomNav activeView={activeView} setView={setActiveView} lang={lang} />
