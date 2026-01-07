@@ -11,6 +11,8 @@ import RecordsView from './RecordsView';
 import ProfileView from './ProfileView';
 import BottomNav from './BottomNav';
 import AuthView from './AuthView';
+import AboutView from './AboutView';
+import HelpView from './HelpView';
 import Footer from './Footer';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
@@ -49,6 +51,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
 
   const [activeView, setActiveView] = useState<ViewType>('home');
+  const [prevView, setPrevView] = useState<ViewType>('home');
   const [lang, setLang] = useState<Language>('zh-TW');
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [records, setRecords] = useState<Invoice[]>([]);
@@ -94,6 +97,12 @@ const App: React.FC = () => {
     setActiveView('home');
   };
 
+  const changeView = (newView: ViewType) => {
+    setPrevView(activeView);
+    setActiveView(newView);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   /**
    * 退出登录核心逻辑
    * 1. 重置用户状态为 null
@@ -103,7 +112,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('sb_user_session');
     setUser(null);
-    setActiveView('home');
+    changeView('home');
     window.scrollTo(0, 0);
   };
 
@@ -173,8 +182,12 @@ const App: React.FC = () => {
         if (!user) return <AuthView onLogin={handleLogin} />;
         return <RecordsView records={records} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} />;
       case 'profile':
-        if (!user) return <AuthView onLogin={handleLogin} />;
-        return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
+        return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} lang={lang} />;
+      case 'about':
+        return <AboutView lang={lang} onBack={() => setActiveView(prevView)} />;
+      case 'help':
+        return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
         return (
           <div className={`container mx-auto px-4 py-8 lg:flex gap-8 ${isAppReversed ? 'flex-row-reverse' : ''}`}>
@@ -234,7 +247,11 @@ const App: React.FC = () => {
       <main className="flex-1 pt-16">{renderContent()}</main>
 
       {/* 网站页脚 */}
-      <Footer />
+      <Footer
+        lang={lang}
+        setView={changeView}
+        onNewDoc={(type) => startNewInvoice({ type })}
+      />
 
       <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
         <div ref={printAreaRef} style={{ width: '210mm' }}>

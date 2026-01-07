@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Invoice, IndustryTemplate, Language } from '../types';
 import { translations } from '../i18n';
 
@@ -9,161 +9,208 @@ interface HomeViewProps {
   lang: Language;
 }
 
-const INDUSTRIES = [
-  {
-    name: '自由职业',
-    nameKey: 'freelance',
-    color: 'bg-emerald-500',
-    icon: 'fa-user-ninja',
+const INDUSTRY_CONFIG = [
+  { 
+    id: 'freelance',
+    color: 'bg-emerald-500', 
+    icon: 'fa-user-ninja', 
     imageIds: [
-      '1497215728101-856f4ea42174', '1519389950473-47ba0277781c', '1522202176988-66273c2fd55f',
-      '1486312338219-ce68d2c6f3ad', '1517245386807-bb43f82c33c4', '1515378960530-7c0da6231fb1',
-      '1499750310107-5fef28a66643', '1504384308090-c894fdcc538d'
-    ]
+      '1499750310117-59e852c6f3ac', // Laptop on desk
+      '1498050108023-c5249f4df085', // Code on screen
+      '1519389950473-47ba0277781c', // Team working
+      '1522273400938-f27c90c40a72', // Desk setup
+      '1484867114623-ff5ef4c21801', // Typing
+      '1497030767101-fa0972d21231'  // Office
+    ] 
   },
-  {
-    name: '建筑装修',
-    nameKey: 'construction',
-    color: 'bg-orange-500',
-    icon: 'fa-hard-hat',
+  { 
+    id: 'construction',
+    color: 'bg-orange-500', 
+    icon: 'fa-hard-hat', 
     imageIds: [
-      '1504307651254-3b5b198c67d8', '1541888941259-79273a460011', '1503387762-592deb58ef4e',
-      '1581094794329-c8112a89af12', '1534237748181-6d473797656d', '1504917595217-d4dc5dba99bd',
-      '1590001158193-e2c2a5aabc5f', '1517646272422-50d48ff70c7c'
-    ]
+      '1503387762-592deb58ef4e', // Modern architecture
+      '1541888941259-79273a460011', // Construction site
+      '1504307651254-3b5b198c67d8', // Blueprints
+      '1504917595217-d4dc5f649e63', // Tools
+      '1581094771181-437754374a81', // Engineering
+      '1523413551-7890664e585f'  // Building materials
+    ] 
   },
-  {
-    name: '零售贸易',
-    nameKey: 'retail',
-    color: 'bg-pink-500',
-    icon: 'fa-shopping-bag',
+  { 
+    id: 'retail',
+    color: 'bg-pink-500', 
+    icon: 'fa-shopping-bag', 
     imageIds: [
-      '1441986300917-64674bd600d8', '1472851294608-062f824d28c5', '1528698827591-e19ccd7bc23d',
-      '1556742044-3c52d6e88c62', '1567401893414-76b7b1e5a7a5', '1495474472287-4d71bcdd2085',
-      '1533900298318-6b8da08a523e', '1491333078588-55b67d3c77fe'
-    ]
+      '1441986300917-64674bd600d8', // Store interior
+      '1472851294608-062f824d28c5', // Shop shelf
+      '1556742044-3c52d6e88c62', // Checkout
+      '1556740738-b6a63e27c4df', // Shopping bags
+      '1567401893414-76b7b1e5a7a5', // Clothing rack
+      '1441986233159-45d45ca44571'  // Retail display
+    ] 
   },
-  {
-    name: '咨询服务',
-    nameKey: 'consulting',
-    color: 'bg-blue-500',
-    icon: 'fa-briefcase',
+  { 
+    id: 'consulting',
+    color: 'bg-blue-500', 
+    icon: 'fa-briefcase', 
     imageIds: [
-      '1521737604893-d14cc237f11d', '1521791136364-798a7ad0d224', '1552664730-d307ca884978',
-      '1542744173-8e7e53415bb0', '1557804506-669a67965ba0', '1522071823990-95529124430e',
-      '1515378717757-69591459a047', '1573497019940-1c28c88b4f3e'
-    ]
+      '1552664730-d307ca884978', // Business meeting
+      '1431540015161-0bf868adb9e8', // Office people
+      '1521737604893-d14cc237f11d', // Collaboration
+      '1517048676734-d0129213ef5c', // Workshop
+      '1542744094-246d7ac42a7a', // Data charts
+      '1600881333744-4405814239b0'  // Professional portrait
+    ] 
   },
-  {
-    name: '创意设计',
-    nameKey: 'design',
-    color: 'bg-purple-500',
-    icon: 'fa-paint-brush',
+  { 
+    id: 'design',
+    color: 'bg-purple-500', 
+    icon: 'fa-paint-brush', 
     imageIds: [
-      '1558655146-d2ba2343260e', '1586717791821-3f44a563df92', '1550684848-fac1c5b4e853',
-      '1513542789411-b6a5d4f31634', '1561070791-2526d30994b5', '1633356122544-f134324a6cee',
-      '1502462041147-321704628bfd', '1572044162444-ad60f128b582'
-    ]
+      '1558655146-d2ba2343260e', // Designer workspace
+      '1586717791821-3f44a563df92', // Graphic design
+      '1550684848-fac1c5b4e853', // Color palettes
+      '1522549735008-8df926c04431', // Drawing tablet
+      '1618005182381-e23e03f191b4', // Abstract art
+      '1581299894628-3ad044748d1c'  // UI/UX design
+    ] 
   },
 ];
 
-const generateTemplates = (categoryName: string, count: number): IndustryTemplate[] => {
-  const industry = INDUSTRIES.find(ind => ind.name === categoryName)!;
+const TemplateImage: React.FC<{ 
+  src: string; 
+  alt: string; 
+  icon: string; 
+  color: string;
+}> = ({ src, alt, icon, color }) => {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const imgRef = useRef<HTMLImageElement>(null);
 
-  return Array.from({ length: count }).map((_, i) => {
-    const imageId = industry.imageIds[i % industry.imageIds.length];
-    const backgroundImage = `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
+  useEffect(() => {
+    // 檢查是否已經加載（針對緩存）
+    if (imgRef.current && imgRef.current.complete) {
+      setStatus('loaded');
+    }
+  }, []);
 
-    return {
-      id: `${categoryName}-${i}`,
-      category: categoryName,
-      title: `${categoryName} #${i + 1}`,
-      previewColor: industry.color,
-      backgroundImage,
-      defaultData: {
-        notes: `Generated via SmartBill Pro Template.`,
-        items: [{
-          id: `tpl-item-${i}`,
-          description: `${categoryName} Service Package`,
-          quantity: 1,
-          rate: (450 + (i * 180))
-        }]
-      }
-    };
-  });
+  return (
+    <div className="absolute inset-0 bg-slate-100 overflow-hidden">
+      {/* 骨架屏：在加載或錯誤時顯示 */}
+      {(status === 'loading' || status === 'error') && (
+        <div className={`absolute inset-0 flex flex-col items-center justify-center ${status === 'error' ? 'bg-slate-200' : 'animate-pulse bg-slate-100'}`}>
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center ${color} text-white text-2xl mb-4 shadow-lg opacity-30`}>
+            <i className={`fas ${icon}`}></i>
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
+            {status === 'error' ? 'Image Lost' : 'Loading...'}
+          </span>
+        </div>
+      )}
+
+      {/* 實際圖片：移除所有遮罩和濾鏡 */}
+      <img 
+        ref={imgRef}
+        src={src} 
+        alt={alt}
+        onLoad={() => setStatus('loaded')}
+        onError={() => setStatus('error')}
+        className={`w-full h-full object-cover transition-opacity duration-700 ${
+          status === 'loaded' ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </div>
+  );
 };
 
 const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, lang }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations['en'];
+  
+  const industries = useMemo(() => {
+    const labels = {
+      freelance: t.ind_freelance,
+      construction: t.ind_construction,
+      retail: t.ind_retail,
+      consulting: t.ind_consulting,
+      design: t.ind_design,
+    };
+    
+    return INDUSTRY_CONFIG.map(config => ({
+      ...config,
+      name: labels[config.id as keyof typeof labels] || config.id,
+      templates: Array.from({ length: 6 }).map((_, i) => {
+        const imageId = config.imageIds[i];
+        // 使用不帶 ixlib 的乾淨連結，提高兼容性
+        const backgroundImage = `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
+        return {
+          id: `${config.id}-${i}`,
+          category: labels[config.id as keyof typeof labels] || config.id,
+          title: `${labels[config.id as keyof typeof labels] || config.id} #${i + 1}`,
+          previewColor: config.color,
+          backgroundImage,
+          defaultData: {
+            items: [{ id: `tpl-${config.id}-${i}`, description: `${labels[config.id as keyof typeof labels]} Service Package`, quantity: 1, rate: (450 + (i * 120)) }]
+          }
+        };
+      })
+    }));
+  }, [t]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-16 overflow-hidden">
-      {/* Hero Section */}
-      <section className="text-center space-y-6 py-12 lg:py-20 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-100/30 blur-[120px] rounded-full -z-10"></div>
-        <h1 className="text-4xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.1]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 py-12 space-y-16 overflow-hidden">
+      <section className="text-center space-y-8 py-16 relative">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
+          Professional Invoice Generator
+        </div>
+        <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.05]">
           {t.heroTitle.split(' ')[0]} <span className="text-blue-600">{t.heroTitle.split(' ').slice(1).join(' ')}</span>
         </h1>
-        <p className="text-slate-500 max-w-2xl mx-auto text-lg sm:text-xl font-medium px-4">
-          {t.heroSub}
-        </p>
+        <p className="text-slate-500 max-w-2xl mx-auto text-xl font-medium px-4 leading-relaxed">{t.heroSub}</p>
         <div className="flex justify-center pt-8">
-          <button
-            onClick={onCreateEmpty}
-            className="bg-slate-900 hover:bg-black text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-black shadow-2xl flex items-center justify-center gap-3 transition-all active:scale-95 text-base sm:text-lg group mx-auto"
+          <button 
+            onClick={onCreateEmpty} 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-100 flex items-center gap-3 transition-all active:scale-95 text-lg group"
           >
-            <i className="fas fa-plus-circle group-hover:rotate-90 transition-transform duration-300"></i> {t.createEmpty}
+            <i className="fas fa-plus-circle group-hover:rotate-90 transition-transform"></i> {t.createEmpty}
           </button>
         </div>
       </section>
 
-      {/* Industry Templates Gallery */}
-      {INDUSTRIES.map((industry) => (
-        <section key={industry.name} className="space-y-8">
-          <div className="flex items-end justify-between px-2">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`${industry.color} w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-white shadow-xl`}>
-                  <i className={`fas ${industry.icon} text-base sm:text-lg`}></i>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter">{industry.name}</h2>
-              </div>
+      {industries.map((industry) => (
+        <section key={industry.id} className="space-y-8">
+          <div className="flex items-center gap-4 mb-2">
+            <div className={`${industry.color} w-11 h-11 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl`}>
+              <i className={`fas ${industry.icon} text-lg`}></i>
             </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tighter">{industry.name}</h2>
           </div>
-
-          <div className="flex overflow-x-auto gap-6 pb-6 px-2 scrollbar-hide snap-x">
-            {generateTemplates(industry.name, 10).map((tpl) => (
-              <div
-                key={tpl.id}
-                onClick={() => onSelectTemplate(tpl.defaultData)}
-                className="flex-shrink-0 w-64 sm:w-72 xl:w-[calc(20%-1.25rem)] h-[350px] sm:h-[400px] bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer group relative overflow-hidden snap-start"
+          
+          <div className="flex overflow-x-auto gap-8 pb-10 scrollbar-hide snap-x">
+            {industry.templates.map((tpl) => (
+              <div 
+                key={tpl.id} 
+                onClick={() => onSelectTemplate(tpl.defaultData)} 
+                className="flex-shrink-0 w-72 h-[420px] bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-blue-100 transition-all cursor-pointer group relative overflow-hidden snap-start"
               >
-                <div className={`h-1/2 sm:h-3/5 w-full relative overflow-hidden ${tpl.previewColor} bg-opacity-20 flex items-center justify-center`}>
-                  <div className="absolute inset-0 bg-slate-200 animate-pulse group-data-[loaded=true]:hidden"></div>
-                  <img
-                    src={tpl.backgroundImage}
-                    alt={tpl.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-0"
-                    onLoad={(e) => {
-                      const target = e.currentTarget as HTMLImageElement;
-                      target.style.opacity = '1';
-                    }}
-                    onError={(e) => {
-                      const target = e.currentTarget as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
+                {/* 圖片區域：佔比提高，移除所有漸變 */}
+                <div className={`h-[60%] w-full relative`}>
+                  <TemplateImage 
+                    src={tpl.backgroundImage} 
+                    alt={tpl.title} 
+                    icon={industry.icon} 
+                    color={industry.color}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent"></div>
-                  <i className={`fas ${industry.icon} text-4xl text-white opacity-40 absolute z-0`}></i>
                 </div>
-
-                <div className="p-6 sm:p-8 flex flex-col justify-between h-1/2 sm:h-2/5 bg-white relative z-10">
+                
+                {/* 內容區域 */}
+                <div className="p-8 flex flex-col justify-between h-[40%] bg-white relative z-10 border-t border-slate-50">
                   <div>
-                    <h3 className="font-black text-slate-900 text-base sm:text-lg mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">{tpl.title}</h3>
+                    <span className={`text-[10px] font-black ${industry.color.replace('bg-', 'text-')} uppercase tracking-widest mb-2 block`}>{industry.name}</span>
+                    <h3 className="font-black text-slate-900 text-xl group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">{tpl.title}</h3>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">READY</span>
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                  <div className="flex items-center justify-between pt-4">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">USE TEMPLATE</span>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                       <i className="fas fa-arrow-right text-xs"></i>
                     </div>
                   </div>

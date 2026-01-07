@@ -48,7 +48,7 @@ export interface Invoice {
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
-export type ViewType = 'home' | 'editor' | 'records' | 'profile';
+export type ViewType = 'home' | 'editor' | 'records' | 'profile' | 'about' | 'help';
 
 export interface IndustryTemplate {
   id: string;
