@@ -184,7 +184,7 @@ const App: React.FC = () => {
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
         return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} lang={lang} />;
       case 'about':
-        return <AboutView lang={lang} onBack={() => setActiveView(prevView)} />;
+        return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={startNewInvoice} />;
       case 'help':
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':

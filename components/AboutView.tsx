@@ -7,9 +7,10 @@ import { translations } from '../i18n';
 interface AboutViewProps {
   lang: Language;
   onBack: () => void;
+  onCreateInvoice: () => void;
 }
 
-const AboutView: React.FC<AboutViewProps> = ({ lang, onBack }) => {
+const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) => {
   const t = translations[lang] || translations['en'];
 
   // 追踪每张图片的加载状态
@@ -217,7 +218,7 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack }) => {
       <footer className="py-20 px-6 text-center bg-white border-t border-slate-100">
         <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.4em] mb-10">Crafted for Modern Entrepreneurs</h3>
         <button
-          onClick={onBack}
+          onClick={onCreateInvoice}
           className="bg-blue-600 text-white px-12 py-5 rounded-2xl font-black shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest text-sm"
         >
           {lang === 'zh-TW' ? '開啟您的專業計費之旅' : 'Launch Your Professional Billing'}
