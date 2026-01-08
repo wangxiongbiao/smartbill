@@ -13,7 +13,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-  
+
   const t = translations[lang] || translations['en'];
 
   const handleImageLoad = (key: string) => {
@@ -27,26 +27,26 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
   const faqData = [
     {
       q: lang === 'zh-TW' ? '我生成的數據安全嗎？' : 'Is my data secure?',
-      a: lang === 'zh-TW' 
-        ? '絕對安全。SmartBill Pro 優先採用本地存儲技術。您的發票數據存儲在您自己的瀏覽器中，除非您點擊“保存”或“導出”，否則敏感財務信息不會上傳至我們的服務器。' 
+      a: lang === 'zh-TW'
+        ? '絕對安全。SmartBill Pro 優先採用本地存儲技術。您的發票數據存儲在您自己的瀏覽器中，除非您點擊“保存”或“導出”，否則敏感財務信息不會上傳至我們的服務器。'
         : 'Absolutely. SmartBill Pro prioritizes local storage. Your invoice data stays in your browser and sensitive info is not uploaded to our servers unless you manually save it.'
     },
     {
       q: lang === 'zh-TW' ? '如何利用 AI 加速開票？' : 'How to use AI for faster billing?',
-      a: lang === 'zh-TW' 
-        ? '在編輯器側邊欄中找到“AI 智能填充”。您只需輸入：“我今天為客戶設計了3個Logo，每個500元”，AI 就會自動為您創建明細行、計算總價。' 
+      a: lang === 'zh-TW'
+        ? '在編輯器側邊欄中找到“AI 智能填充”。您只需輸入：“我今天為客戶設計了3個Logo，每個500元”，AI 就會自動為您創建明細行、計算總價。'
         : 'Find "AI Smart Fill" in the sidebar. Just type: "I designed 3 logos for my client at $500 each," and AI will automatically create the line items and totals.'
     },
     {
       q: lang === 'zh-TW' ? 'PDF 導出格式不正確怎麼辦？' : 'What if PDF format is incorrect?',
-      a: lang === 'zh-TW' 
-        ? '為獲得最佳效果，建議使用 Chrome 或 Safari 瀏覽器。導出前，請確保預覽窗口顯示正常。如果圖片加載失敗，請檢查您的網絡連接。' 
+      a: lang === 'zh-TW'
+        ? '為獲得最佳效果，建議使用 Chrome 或 Safari 瀏覽器。導出前，請確保預覽窗口顯示正常。如果圖片加載失敗，請檢查您的網絡連接。'
         : 'For best results, use Chrome or Safari. Ensure the preview looks correct before exporting.'
     },
     {
       q: lang === 'zh-TW' ? '可以自定義發票編號嗎？' : 'Can I customize invoice numbers?',
-      a: lang === 'zh-TW' 
-        ? '是的。在“發票信息”表單的第一行，您可以隨時修改發票編號。系統也會根據您的歷史記錄自動為新發票生成連續的編號。' 
+      a: lang === 'zh-TW'
+        ? '是的。在“發票信息”表單的第一行，您可以隨時修改發票編號。系統也會根據您的歷史記錄自動為新發票生成連續的編號。'
         : 'Yes. In the first row of the form, you can modify the number.'
     }
   ];
@@ -59,7 +59,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
       <div className="flex-1 relative group">
         <div className={`absolute -inset-4 ${gradient.replace('from-', 'bg-').split(' ')[0]}/20 rounded-[3rem] blur-2xl group-hover:blur-3xl transition-all`}></div>
         <div className={`relative rounded-[2.5rem] shadow-2xl border-[12px] border-white w-full h-[350px] overflow-hidden bg-slate-50 flex items-center justify-center`}>
-          
+
           {!isLoaded && !isFailed && (
             <div className="absolute inset-0 bg-slate-100 animate-pulse flex items-center justify-center">
               <i className="fas fa-circle-notch fa-spin text-slate-300 text-3xl"></i>
@@ -74,12 +74,12 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               <p className="text-[10px] opacity-60 uppercase tracking-tighter">SmartBill Pro Illustration</p>
             </div>
           ) : (
-            <img 
-              src={src} 
-              alt={alt} 
+            <img
+              src={src}
+              alt={alt}
               onLoad={() => handleImageLoad(id)}
               onError={() => handleImageError(id)}
-              className={`w-full h-full object-cover transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
+              className={`w-full h-full object-cover transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
           )}
         </div>
@@ -90,7 +90,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       <nav className="sticky top-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-        <button 
+        <button
           onClick={onBack}
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-90"
         >
@@ -115,15 +115,15 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <p className="text-slate-500 text-lg font-medium max-w-xl mx-auto">
             {lang === 'zh-TW' ? '從 AI 智能填充到專業 PDF 導出，這裏有您需要的一切教程與解答。' : 'From AI filling to pro PDF export, find all tutorials and answers here.'}
           </p>
-          
-          <div className="max-w-md mx-auto relative pt-4 z-20">
+
+          {/* <div className="max-w-md mx-auto relative pt-4 z-20">
             <input 
               type="text" 
               placeholder={lang === 'zh-TW' ? '搜索您的問題...' : 'Search for questions...'}
               className="w-full h-14 pl-14 pr-6 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
             />
             <i className="fas fa-search absolute left-5 top-[calc(50%+8px)] -translate-y-1/2 text-slate-400"></i>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -153,8 +153,8 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               {lang === 'zh-TW' ? '填寫基本業務信息' : 'Enter Basic Business Info'}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW' 
-                ? '在編輯器中，首先填寫您的公司名稱和地址。您可以點擊“上傳 Logo”來添加您的品牌標誌。隨後在“發送至”區域輸入客戶的詳細信息。' 
+              {lang === 'zh-TW'
+                ? '在編輯器中，首先填寫您的公司名稱和地址。您可以點擊“上傳 Logo”來添加您的品牌標誌。隨後在“發送至”區域輸入客戶的詳細信息。'
                 : 'In the editor, start by filling in your company name and address. Click "Upload Logo" to add your branding. Then enter the client details.'}
             </p>
             <div className="pt-4 flex gap-4">
@@ -162,10 +162,10 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               <span className="flex items-center gap-2 text-xs font-black text-slate-400"><i className="fas fa-check-circle text-emerald-500"></i> 多幣種切換</span>
             </div>
           </div>
-          <TutorialImage 
-            id="step1" 
-            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80" 
-            alt="Business Workspace" 
+          <TutorialImage
+            id="step1"
+            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80"
+            alt="Business Workspace"
             icon="fa-briefcase"
             gradient="from-slate-700 to-slate-900"
           />
@@ -179,19 +179,19 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               {lang === 'zh-TW' ? '使用 AI 助手一鍵生成' : 'Generate with AI Assistant'}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW' 
-                ? '不喜歡繁瑣的輸入？在側邊欄描述您的工作內容。我們強大的 AI 技術會自動提取單價、數量和描述，並瞬間填充到發票表格中。' 
+              {lang === 'zh-TW'
+                ? '不喜歡繁瑣的輸入？在側邊欄描述您的工作內容。我們強大的 AI 技術會自動提取單價、數量和描述，並瞬間填充到發票表格中。'
                 : 'Hate manual typing? Describe your work in the sidebar. Our powerful AI extracts rates, quantities, and descriptions into your form instantly.'}
             </p>
             <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
-               <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Try This Prompt</p>
-               <p className="text-sm font-medium italic text-slate-600">“我上週做了4天開發，每天2000元，以及一個價值500元的標誌設計。”</p>
+              <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Try This Prompt</p>
+              <p className="text-sm font-medium italic text-slate-600">“我上週做了4天開發，每天2000元，以及一個價值500元的標誌設計。”</p>
             </div>
           </div>
-          <TutorialImage 
-            id="step2" 
-            src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80" 
-            alt="AI Neural Tech" 
+          <TutorialImage
+            id="step2"
+            src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80"
+            alt="AI Neural Tech"
             icon="fa-brain"
             gradient="from-blue-500 to-indigo-700"
           />
@@ -205,8 +205,8 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               {lang === 'zh-TW' ? '預覽、簽名並導出' : 'Preview, Sign & Export'}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW' 
-                ? '在右側實時查看發票樣式。使用我們的電子簽名板手寫您的簽名。滿意後，點擊“導出 PDF”即可下載高清、專業的商務文件。' 
+              {lang === 'zh-TW'
+                ? '在右側實時查看發票樣式。使用我們的電子簽名板手寫您的簽名。滿意後，點擊“導出 PDF”即可下載高清、專業的商務文件。'
                 : 'Live preview your invoice. Use our electronic signature pad to handwrite your sign. Click "Export PDF" for a high-def business document.'}
             </p>
             <div className="pt-2">
@@ -215,10 +215,10 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
               </button>
             </div>
           </div>
-          <TutorialImage 
-            id="step3" 
-            src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80" 
-            alt="Successful Export" 
+          <TutorialImage
+            id="step3"
+            src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80"
+            alt="Successful Export"
             icon="fa-file-pdf"
             gradient="from-emerald-400 to-teal-600"
           />
@@ -230,11 +230,11 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-4">{lang === 'zh-TW' ? '常見問題 FAQ' : 'General FAQ'}</h2>
           <p className="text-slate-400 font-medium">快速找到您最關心的問題答案</p>
         </div>
-        
+
         <div className="space-y-4">
           {faqData.map((item, idx) => (
             <div key={idx} className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <button 
+              <button
                 onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
                 className="w-full px-8 py-7 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
               >

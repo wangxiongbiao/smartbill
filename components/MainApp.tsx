@@ -179,7 +179,7 @@ const App: React.FC = () => {
         return <HomeView onSelectTemplate={startNewInvoice} onCreateEmpty={() => startNewInvoice()} lang={lang} />;
       case 'records':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
-        return <RecordsView records={records} lang={lang} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} />;
+        return <RecordsView records={records} lang={lang} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} onNewDoc={startNewInvoice} />;
       case 'profile':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
         return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} lang={lang} />;

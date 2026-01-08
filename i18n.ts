@@ -77,7 +77,7 @@ export const translations: Record<Language, any> = {
     totalCount: 'Total {count} items',
     emptyTitle: 'No Records',
     emptySub: 'Start making invoices, they will show up here.',
-    goToHome: 'Browse Templates',
+    goToHome: 'Start Creating Invoice',
     amountTotal: 'Total Amount',
     // Footer
     footerDesc: 'SmartBill Pro is the premier billing platform designed for modern entrepreneurs and freelancers. We help global users improve billing efficiency through innovative AI technology.',
@@ -176,7 +176,7 @@ export const translations: Record<Language, any> = {
     totalCount: '共 {count} 份',
     emptyTitle: '暫無發票',
     emptySub: '開始製作發票，發票將顯示在這裡。',
-    goToHome: '去首頁看看模版',
+    goToHome: '开始创建发票',
     amountTotal: '賬單總額',
     // Footer
     footerDesc: 'SmartBill Pro 是專為現代企業家和自由職業者打造的頂級開票平台。我們通過創新的 AI 技術，幫助全球用戶提升計費效率。',

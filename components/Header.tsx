@@ -26,9 +26,9 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
   const languages: { id: Language; label: string }[] = [
     { id: 'zh-TW', label: '繁體中文' },
     { id: 'en', label: 'English' },
-    { id: 'fr', label: 'Français' },
-    { id: 'de', label: 'Deutsch' },
-    { id: 'ja', label: '日本語' },
+    // { id: 'fr', label: 'Français' },
+    // { id: 'de', label: 'Deutsch' },
+    // { id: 'ja', label: '日本語' },
   ];
 
   const currentLangLabel = languages.find(l => l.id === lang)?.label || 'Language';
@@ -37,10 +37,10 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
     <header className="bg-white/95 backdrop-blur-2xl border-b border-slate-100 sticky top-0 z-[100] no-print shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)]">
       {/* 核心對齊容器：統一 max-w 和 px 以確保與下方內容垂直對齊 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 h-20 flex items-center justify-between">
-        
+
         {/* 左側：品牌標識 */}
-        <div 
-          className="flex items-center gap-3 cursor-pointer group select-none" 
+        <div
+          className="flex items-center gap-3 cursor-pointer group select-none"
           onClick={() => setView('home')}
         >
           <div className="bg-blue-600 w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 transition-all group-hover:rotate-6 group-hover:scale-105">
@@ -64,11 +64,10 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
               <button
                 key={item.id}
                 onClick={() => setView(item.id)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${
-                  activeView === item.id 
-                    ? 'bg-white text-blue-600 shadow-sm border border-slate-100' 
+                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${activeView === item.id
+                    ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
                     : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 <i className={`${item.icon} text-[10px] ${activeView === item.id ? 'opacity-100' : 'opacity-60'}`}></i>
                 {item.label}
@@ -82,13 +81,12 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
           <div className="flex items-center gap-2 relative">
             {/* 增強版語言選擇按鈕：顯示當前語言名稱 */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className={`h-11 px-4 flex items-center gap-3 rounded-2xl border transition-all shadow-sm group ${
-                  showLangMenu 
-                    ? 'bg-blue-50 border-blue-200 text-blue-700' 
+                className={`h-11 px-4 flex items-center gap-3 rounded-2xl border transition-all shadow-sm group ${showLangMenu
+                    ? 'bg-blue-50 border-blue-200 text-blue-700'
                     : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <i className={`fas fa-globe text-sm transition-transform ${showLangMenu ? 'rotate-12' : 'group-hover:rotate-12'}`}></i>
                 <span className="text-[11px] font-black whitespace-nowrap uppercase tracking-tight hidden sm:inline">
@@ -96,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
                 </span>
                 <i className={`fas fa-chevron-down text-[9px] opacity-40 transition-transform duration-300 ${showLangMenu ? 'rotate-180' : ''}`}></i>
               </button>
-              
+
               {showLangMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowLangMenu(false)}></div>
@@ -110,9 +108,8 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
                             setLang(l.id);
                             setShowLangMenu(false);
                           }}
-                          className={`w-full px-5 py-3.5 text-left text-sm font-bold flex items-center justify-between transition-colors ${
-                            lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
-                          }`}
+                          className={`w-full px-5 py-3.5 text-left text-sm font-bold flex items-center justify-between transition-colors ${lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                            }`}
                         >
                           {l.label}
                           {lang === l.id && <i className="fas fa-check-circle text-blue-500"></i>}
@@ -126,7 +123,7 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
 
             {/* 導出按鈕 - 僅在編輯器視圖顯示 */}
             {activeView === 'editor' && (
-              <button 
+              <button
                 onClick={onPrint}
                 disabled={isExporting}
                 className={`bg-blue-600 hover:bg-blue-700 text-white h-11 px-6 rounded-2xl font-black shadow-lg shadow-blue-100 flex items-center gap-2.5 transition-all active:scale-95 text-xs uppercase tracking-widest ${isExporting ? 'opacity-70 cursor-wait' : ''}`}

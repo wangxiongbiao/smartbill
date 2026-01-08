@@ -10,77 +10,77 @@ interface HomeViewProps {
 }
 
 const INDUSTRY_CONFIG = [
-  { 
+  {
     id: 'freelance',
-    color: 'bg-emerald-500', 
-    icon: 'fa-user-ninja', 
+    color: 'bg-emerald-500',
+    icon: 'fa-user-ninja',
     imageIds: [
-      '1499750310117-59e852c6f3ac', // Laptop on desk
+      '/images/freelance-typing.png', // Laptop on desk (WAS INVALID #1)
       '1498050108023-c5249f4df085', // Code on screen
       '1519389950473-47ba0277781c', // Team working
-      '1522273400938-f27c90c40a72', // Desk setup
+      '/images/freelance-code.png',  // Desk setup (WAS INVALID #4)
       '1484867114623-ff5ef4c21801', // Typing
       '1497030767101-fa0972d21231'  // Office
-    ] 
+    ]
   },
-  { 
+  {
     id: 'construction',
-    color: 'bg-orange-500', 
-    icon: 'fa-hard-hat', 
+    color: 'bg-orange-500',
+    icon: 'fa-hard-hat',
     imageIds: [
       '1503387762-592deb58ef4e', // Modern architecture
-      '1541888941259-79273a460011', // Construction site
-      '1504307651254-3b5b198c67d8', // Blueprints
-      '1504917595217-d4dc5f649e63', // Tools
+      '/images/construction-engineering.png', // Construction site (WAS INVALID #2)
+      '/images/construction-blueprints.png', // Blueprints (LOCAL)
+      '/images/construction-tools.png', // Tools (LOCAL)
       '1581094771181-437754374a81', // Engineering
       '1523413551-7890664e585f'  // Building materials
-    ] 
+    ]
   },
-  { 
+  {
     id: 'retail',
-    color: 'bg-pink-500', 
-    icon: 'fa-shopping-bag', 
+    color: 'bg-pink-500',
+    icon: 'fa-shopping-bag',
     imageIds: [
       '1441986300917-64674bd600d8', // Store interior
-      '1472851294608-062f824d28c5', // Shop shelf
+      '/images/retail-checkout.png', // Shop shelf (WAS INVALID #2)
       '1556742044-3c52d6e88c62', // Checkout
       '1556740738-b6a63e27c4df', // Shopping bags
       '1567401893414-76b7b1e5a7a5', // Clothing rack
       '1441986233159-45d45ca44571'  // Retail display
-    ] 
+    ]
   },
-  { 
+  {
     id: 'consulting',
-    color: 'bg-blue-500', 
-    icon: 'fa-briefcase', 
+    color: 'bg-blue-500',
+    icon: 'fa-briefcase',
     imageIds: [
       '1552664730-d307ca884978', // Business meeting
-      '1431540015161-0bf868adb9e8', // Office people
+      '/images/consulting-collaboration.png', // Office people (WAS INVALID #2)
       '1521737604893-d14cc237f11d', // Collaboration
-      '1517048676734-d0129213ef5c', // Workshop
+      '/images/consulting-data-charts.png', // Workshop (WAS INVALID #4)
       '1542744094-246d7ac42a7a', // Data charts
       '1600881333744-4405814239b0'  // Professional portrait
-    ] 
+    ]
   },
-  { 
+  {
     id: 'design',
-    color: 'bg-purple-500', 
-    icon: 'fa-paint-brush', 
+    color: 'bg-purple-500',
+    icon: 'fa-paint-brush',
     imageIds: [
-      '1558655146-d2ba2343260e', // Designer workspace
-      '1586717791821-3f44a563df92', // Graphic design
+      '/images/design-workspace.png', // Designer workspace (LOCAL #1)
+      '/images/design-graphic.png', // Graphic design (LOCAL #2)
       '1550684848-fac1c5b4e853', // Color palettes
-      '1522549735008-8df926c04431', // Drawing tablet
+      '/images/design-tablet.png', // Drawing tablet (LOCAL #4)
       '1618005182381-e23e03f191b4', // Abstract art
       '1581299894628-3ad044748d1c'  // UI/UX design
-    ] 
+    ]
   },
 ];
 
-const TemplateImage: React.FC<{ 
-  src: string; 
-  alt: string; 
-  icon: string; 
+const TemplateImage: React.FC<{
+  src: string;
+  alt: string;
+  icon: string;
   color: string;
 }> = ({ src, alt, icon, color }) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
@@ -108,15 +108,14 @@ const TemplateImage: React.FC<{
       )}
 
       {/* 實際圖片：移除所有遮罩和濾鏡 */}
-      <img 
+      <img
         ref={imgRef}
-        src={src} 
+        src={src}
         alt={alt}
         onLoad={() => setStatus('loaded')}
         onError={() => setStatus('error')}
-        className={`w-full h-full object-cover transition-opacity duration-700 ${
-          status === 'loaded' ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`w-full h-full object-cover transition-opacity duration-700 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'
+          }`}
       />
     </div>
   );
@@ -124,7 +123,7 @@ const TemplateImage: React.FC<{
 
 const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, lang }) => {
   const t = translations[lang] || translations['en'];
-  
+
   const industries = useMemo(() => {
     const labels = {
       freelance: t.ind_freelance,
@@ -133,14 +132,17 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
       consulting: t.ind_consulting,
       design: t.ind_design,
     };
-    
+
     return INDUSTRY_CONFIG.map(config => ({
       ...config,
       name: labels[config.id as keyof typeof labels] || config.id,
       templates: Array.from({ length: 6 }).map((_, i) => {
         const imageId = config.imageIds[i];
-        // 使用不帶 ixlib 的乾淨連結，提高兼容性
-        const backgroundImage = `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
+        // Check if it's a local path or Unsplash ID
+        const backgroundImage = imageId.startsWith('/')
+          ? imageId  // Use local path directly
+          : `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
+
         return {
           id: `${config.id}-${i}`,
           category: labels[config.id as keyof typeof labels] || config.id,
@@ -156,7 +158,7 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
   }, [t]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 py-12 space-y-16 overflow-hidden">
+    <div className="max-w-7xl mx-auto py-12 space-y-16 overflow-hidden">
       <section className="text-center space-y-8 py-16 relative">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
           <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
@@ -167,8 +169,8 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
         </h1>
         <p className="text-slate-500 max-w-2xl mx-auto text-xl font-medium px-4 leading-relaxed">{t.heroSub}</p>
         <div className="flex justify-center pt-8">
-          <button 
-            onClick={onCreateEmpty} 
+          <button
+            onClick={onCreateEmpty}
             className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-100 flex items-center gap-3 transition-all active:scale-95 text-lg group"
           >
             <i className="fas fa-plus-circle group-hover:rotate-90 transition-transform"></i> {t.createEmpty}
@@ -184,24 +186,24 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tighter">{industry.name}</h2>
           </div>
-          
+
           <div className="flex overflow-x-auto gap-8 pb-10 scrollbar-hide snap-x">
             {industry.templates.map((tpl) => (
-              <div 
-                key={tpl.id} 
-                onClick={() => onSelectTemplate(tpl.defaultData)} 
+              <div
+                key={tpl.id}
+                onClick={() => onSelectTemplate(tpl.defaultData)}
                 className="flex-shrink-0 w-72 h-[420px] bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-blue-100 transition-all cursor-pointer group relative overflow-hidden snap-start"
               >
                 {/* 圖片區域：佔比提高，移除所有漸變 */}
                 <div className={`h-[60%] w-full relative`}>
-                  <TemplateImage 
-                    src={tpl.backgroundImage} 
-                    alt={tpl.title} 
-                    icon={industry.icon} 
+                  <TemplateImage
+                    src={tpl.backgroundImage}
+                    alt={tpl.title}
+                    icon={industry.icon}
                     color={industry.color}
                   />
                 </div>
-                
+
                 {/* 內容區域 */}
                 <div className="p-8 flex flex-col justify-between h-[40%] bg-white relative z-10 border-t border-slate-50">
                   <div>

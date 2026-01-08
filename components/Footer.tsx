@@ -72,7 +72,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setView, onNewDoc }) => {
             <ul className="space-y-4 text-sm font-bold text-slate-600">
               <li><button onClick={() => setView('about')} className="hover:text-blue-600 transition-colors">{t.aboutUs}</button></li>
               <li><button onClick={() => setView('help')} className="hover:text-blue-600 transition-colors">{t.helpCenter}</button></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">{t.privacy}</a></li>
+              {/* <li><a href="#" className="hover:text-blue-600 transition-colors">{t.privacy}</a></li> */}
             </ul>
           </div>
 
@@ -85,7 +85,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setView, onNewDoc }) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.supportEmail}</p>
-                  <p className="text-sm font-black text-slate-900">smartbill@gamil.com</p>
+                  <p className="text-sm font-black text-slate-900">smartbillpro@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
