@@ -25,7 +25,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
         <p className="text-slate-500 mt-3 text-lg font-medium">{t.emptySub}</p>
         <button
           className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95"
-          onClick={() => window.location.hash = ''}
+          onClick={onNewDoc}
         >
           {t.goToHome}
         </button>

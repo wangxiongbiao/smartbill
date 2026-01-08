@@ -15,10 +15,10 @@ interface SidebarProps {
   lang: Language;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  template, 
-  setTemplate, 
-  onSmartFill, 
+const Sidebar: React.FC<SidebarProps> = ({
+  template,
+  setTemplate,
+  onSmartFill,
   isAiLoading,
   isHeaderReversed,
   setIsHeaderReversed,
@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const templates: { id: TemplateType; label: string; color: string }[] = [
     { id: 'professional', label: 'Professional', color: 'bg-slate-800' },
     { id: 'modern', label: 'Modern Indigo', color: 'bg-indigo-600' },
-    { id: 'minimalist', label: 'Minimalist', color: 'bg-slate-900' },
+    { id: 'minimalist', label: 'Minimalist', color: 'bg-[#fff]' },
   ];
 
   const handleAiSubmit = () => {
@@ -44,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="flex flex-col gap-6">
       {onSave && (
-        <button 
+        <button
           onClick={onSave}
           className="w-full py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
         >
@@ -62,15 +62,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             <p className="text-xs opacity-80">{t.aiAssistantDesc}</p>
           </div>
         </div>
-        
+
         <div className="relative">
-          <textarea 
+          <textarea
             className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 resize-none h-20"
             placeholder={t.aiPlaceholder}
             value={aiInput}
             onChange={(e) => setAiInput(e.target.value)}
           />
-          <button 
+          <button
             disabled={isAiLoading}
             onClick={handleAiSubmit}
             className={`mt-2 w-full py-2 bg-white text-blue-600 font-bold rounded-lg text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2 ${isAiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -89,9 +89,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={tpl.id}
                 onClick={() => setTemplate(tpl.id)}
-                className={`flex-1 min-w-[120px] p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                  template === tpl.id ? 'border-blue-500 bg-blue-50 shadow-inner' : 'border-slate-100 bg-slate-50'
-                }`}
+                className={`flex-1 min-w-[120px] p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${template === tpl.id ? 'border-blue-500 bg-blue-50 shadow-inner' : 'border-slate-100 bg-slate-50'
+                  }`}
               >
                 <div className={`w-10 h-10 ${tpl.color} rounded-lg shadow-md`}></div>
                 <span className={`text-xs font-bold ${template === tpl.id ? 'text-blue-700' : 'text-slate-500'}`}>{tpl.label}</span>
