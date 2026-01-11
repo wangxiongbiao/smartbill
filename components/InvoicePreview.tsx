@@ -11,9 +11,9 @@ interface InvoicePreviewProps {
   lang: Language;
 }
 
-const InvoicePreview: React.FC<InvoicePreviewProps> = ({ 
-  invoice, 
-  template, 
+const InvoicePreview: React.FC<InvoicePreviewProps> = ({
+  invoice,
+  template,
   isHeaderReversed = false,
   isForPdf = false,
   lang
@@ -142,13 +142,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </div>
           </div>
         </div>
-
+        {/* 
         {invoice.notes && (
           <div className="mt-8 pt-4">
             <h3 className="text-xs font-bold text-slate-400 mb-1">{t.notes}</h3>
             <p className="text-xs text-slate-500 italic whitespace-pre-wrap">{invoice.notes}</p>
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">

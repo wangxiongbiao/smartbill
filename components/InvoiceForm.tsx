@@ -82,7 +82,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   };
 
   const updateItem = (id: string, updates: Partial<InvoiceItem>) => {
-    const newItems = invoice.items.map(item => 
+    const newItems = invoice.items.map(item =>
       item.id === id ? { ...item, ...updates } : item
     );
     onChange({ items: newItems });
@@ -110,9 +110,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           <button
             key={type}
             onClick={() => onChange({ type })}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-              invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             {type === 'invoice' ? t.invoiceMode : t.receiptMode}
           </button>
@@ -122,8 +121,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-semibold text-slate-700">{invoice.type === 'invoice' ? t.invNo : t.recNo}</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={invoice.invoiceNumber}
             onChange={(e) => onChange({ invoiceNumber: e.target.value })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -131,15 +130,35 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-semibold text-slate-700">{t.currency}</label>
-          <select 
+          <select
             value={invoice.currency}
             onChange={(e) => onChange({ currency: e.target.value })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           >
-            <option value="CNY">CNY (¥)</option>
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="JPY">JPY (¥)</option>
+            <optgroup label="🌏 亚洲 Asia">
+              <option value="CNY">🇨🇳 CNY ¥ 人民币</option>
+              <option value="JPY">🇯🇵 JPY ¥ 日元</option>
+              <option value="HKD">🇭🇰 HKD $ 港币</option>
+              <option value="TWD">🇹🇼 TWD $ 台币</option>
+              <option value="KRW">🇰🇷 KRW ₩ 韩元</option>
+              <option value="SGD">🇸🇬 SGD $ 新加坡元</option>
+              <option value="MYR">🇲🇾 MYR RM 马来西亚令吉</option>
+              <option value="THB">🇹🇭 THB ฿ 泰铢</option>
+              <option value="PHP">🇵🇭 PHP ₱ 菲律宾比索</option>
+              <option value="VND">🇻🇳 VND ₫ 越南盾</option>
+              <option value="IDR">🇮🇩 IDR Rp 印尼盾</option>
+            </optgroup>
+            <optgroup label="🌎 北美洲 North America">
+              <option value="USD">🇺🇸 USD $ 美元</option>
+            </optgroup>
+            <optgroup label="🌍 欧洲 Europe">
+              <option value="EUR">🇪🇺 EUR € 欧元</option>
+              <option value="GBP">🇬🇧 GBP £ 英镑</option>
+            </optgroup>
+            <optgroup label="🌏 大洋洲 Oceania">
+              <option value="AUD">🇦🇺 AUD $ 澳元</option>
+              <option value="NZD">🇳🇿 NZD $ 纽元</option>
+            </optgroup>
           </select>
         </div>
       </section>
@@ -151,13 +170,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" id="logo-up" />
             <label htmlFor="logo-up" className="text-xs text-blue-600 font-medium cursor-pointer">{t.logoUp}</label>
           </div>
-          <input 
+          <input
             placeholder={t.namePlaceholder}
             value={invoice.sender.name}
             onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
-          <textarea 
+          <textarea
             placeholder={t.addrPlaceholder}
             value={invoice.sender.address}
             onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
@@ -166,13 +185,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
         <div className="space-y-4">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billTo}</h3>
-          <input 
+          <input
             placeholder={t.clientName}
             value={invoice.client.name}
             onChange={(e) => onChange({ client: { ...invoice.client, name: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
-          <textarea 
+          <textarea
             placeholder={t.clientAddr}
             value={invoice.client.address}
             onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })}
