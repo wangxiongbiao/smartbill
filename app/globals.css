@@ -11,12 +11,12 @@ body {
   font-family: 'Inter', sans-serif;
   max-width: 100vw;
   overflow-x: hidden;
-  position: relative;
 }
 
 html {
   max-width: 100vw;
   overflow-x: hidden;
+  scroll-padding-top: 5rem; /* Match header height h-20 (80px) */
 }
 
 /* Hide scrollbar but keep functionality */

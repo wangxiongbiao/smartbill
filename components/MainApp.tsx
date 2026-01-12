@@ -375,6 +375,7 @@ const App: React.FC = () => {
       case 'help':
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" />;
         return (
           <div className="container mx-auto px-4 py-8 lg:flex gap-8">
             <div className="lg:w-1/2 flex flex-col gap-6">
@@ -447,7 +448,7 @@ const App: React.FC = () => {
         lang={lang}
         setLang={setLang}
       />
-      <main className="flex-1 pt-16">{renderContent()}</main>
+      <main className="flex-1 pt-20">{renderContent()}</main>
 
       {/* 网站页脚 */}
       <Footer
