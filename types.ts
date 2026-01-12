@@ -26,7 +26,26 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  provider: 'email' | 'facebook';
+  provider: 'email' | 'facebook' | 'google';
+  profile?: Profile;
+}
+
+// Supabase Database Types
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoiceRecord {
+  id: string;
+  user_id: string;
+  invoice_number: string;
+  invoice_data: Invoice;
+  created_at: string;
+  updated_at: string;
 }
 
 export type DocumentType = 'invoice' | 'receipt';

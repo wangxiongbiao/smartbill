@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Invoice, TemplateType, ViewType, Language, User } from '../types';
+import { createClient } from '@/lib/supabase/client';
+import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices } from '@/lib/supabase-db';
 import Header from './Header';
 import InvoiceForm from './InvoiceForm';
 import InvoicePreview from './InvoicePreview';
@@ -56,17 +58,134 @@ const App: React.FC = () => {
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [records, setRecords] = useState<Invoice[]>([]);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('sb_user_session');
-    if (savedUser) {
-      try { setUser(JSON.parse(savedUser)); } catch { }
-    }
+  const syncRef = useRef<string | null>(null);
 
+  // 初始化：从 localStorage 加载数据 & 同步 Supabase session
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = createClient();
+
+    // 加载本地数据（作为后备）
+    const savedUser = localStorage.getItem('sb_user_session');
     const savedRecords = localStorage.getItem('invoice_records_v2');
+
     if (savedRecords) {
       try { setRecords(JSON.parse(savedRecords)); } catch { }
     }
-    setIsInitialized(true);
+
+    // 同步用户 profile 和发票数据
+    const syncUserData = async (authUser: any) => {
+      if (!isMounted) return;
+
+      // 如果发现已经在同步同一个用户，只需确保初始化标记已打开，然后返回
+      if (syncRef.current === authUser.id) {
+        setIsInitialized(true);
+        return;
+      }
+
+      syncRef.current = authUser.id;
+
+      try {
+        console.log('[MainApp] 🔄 Syncing user data for:', authUser.email);
+
+        // 1. 立即构建并设置基本用户状态，这会让 UI 从 Loading 切换到应用界面，而不是 AuthView
+        const profile = await getUserProfile(authUser.id);
+        if (!isMounted) return;
+
+        const user: User = {
+          id: authUser.id,
+          email: authUser.email || '',
+          name: profile?.full_name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          avatar: profile?.avatar_url || authUser.user_metadata?.avatar_url,
+          provider: authUser.app_metadata?.provider || 'google',
+          profile
+        };
+        setUser(user);
+
+        // 2. 身份确定后，立即解除加载遮罩，提高响应速度
+        setIsInitialized(true);
+
+        // 3. 后续非阻塞同步：检测视图、同步发票数据
+        const params = new URLSearchParams(window.location.search);
+        const targetView = params.get('view') as ViewType;
+        if (targetView && ['home', 'records', 'profile', 'editor', 'about', 'help'].includes(targetView)) {
+          setActiveView(targetView);
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        }
+
+        let cloudInvoices: Invoice[] = [];
+        try {
+          cloudInvoices = await getUserInvoices(authUser.id);
+        } catch (fetchError) {
+          console.error('[MainApp] Error fetching invoices during sync:', fetchError);
+        }
+
+        if (!isMounted) return;
+
+        if (cloudInvoices.length > 0) {
+          setRecords(cloudInvoices);
+        } else {
+          const currentLocalRecords = localStorage.getItem('invoice_records_v2');
+          const localRecords = currentLocalRecords ? JSON.parse(currentLocalRecords) : [];
+          if (localRecords.length > 0) {
+            await batchSaveInvoices(authUser.id, localRecords);
+            const updatedCloud = await getUserInvoices(authUser.id);
+            if (isMounted) setRecords(updatedCloud);
+          }
+        }
+      } catch (error) {
+        console.error('[MainApp] Sync failed:', error);
+      } finally {
+        // 兜底：确保无论如何都会关闭加载动画
+        if (isMounted) setIsInitialized(true);
+      }
+    };
+
+    // 设置安全超时，防止任何未知的死锁
+    const safetyTimeout = setTimeout(() => {
+      if (!isInitialized && isMounted) {
+        console.warn('[MainApp] Initialization timeout hit, forcing UI display');
+        setIsInitialized(true);
+      }
+    }, 5000);
+
+    // 监听 Supabase 认证状态变化
+    // onAuthStateChange 在大多数情况下会立即触发 'INITIAL_SESSION' 或 'SIGNED_IN'
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return;
+
+        console.log('[MainApp] 🔑 Auth event:', event, {
+          user: session?.user?.email,
+          hasSession: !!session
+        });
+
+        if (session?.user) {
+          // 异步同步数据，不阻塞监听器
+          syncUserData(session.user);
+        } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+          // 处理登出或确认为空会话的状态
+          if (event === 'SIGNED_OUT') {
+            syncRef.current = null;
+            setUser(null);
+            setRecords([]);
+            localStorage.removeItem('invoice_records_v2');
+            localStorage.removeItem('sb_user_session');
+          }
+          setIsInitialized(true);
+        } else {
+          // 其他事件（可能是无 session 的初始状态）
+          setIsInitialized(true);
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const [template, setTemplate] = useState<TemplateType>('professional');
@@ -76,7 +195,7 @@ const App: React.FC = () => {
 
   const printAreaRef = useRef<HTMLDivElement>(null);
 
-  // 曡听用户状态变化并同步存储
+  // 曡听用户状态变化並同步存储
   useEffect(() => {
     if (!isInitialized) return;
     if (user) {
@@ -93,7 +212,6 @@ const App: React.FC = () => {
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
-    setActiveView('home');
   };
 
   const changeView = (newView: ViewType) => {
@@ -107,10 +225,20 @@ const App: React.FC = () => {
    * 1. 重置用户状态为 null
    * 2. 重置视图为 home（确保下次登录在首页）
    * 3. 清除 localStorage 会话
+   * 4. 如果是 Google 登录，调用 Supabase signOut
    */
-  const handleLogout = () => {
-    localStorage.removeItem('sb_user_session');
+  const handleLogout = async () => {
+    // 立即清除本地状态实现“简单直接”的退出
+    syncRef.current = null;
     setUser(null);
+    setRecords([]);
+    localStorage.removeItem('sb_user_session');
+    localStorage.removeItem('invoice_records_v2');
+
+    // 异步执行服务器端退出，不阻塞 UI 响应
+    const supabase = createClient();
+    supabase.auth.signOut().catch(console.error);
+
     changeView('home');
     window.scrollTo(0, 0);
   };
@@ -131,13 +259,32 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const saveInvoiceToRecords = () => {
-    setRecords(prev => {
-      const exists = prev.find(r => r.id === invoice.id);
-      if (exists) return prev.map(r => r.id === invoice.id ? invoice : r);
-      return [invoice, ...prev];
-    });
-    alert('账单已成功保存！');
+  const saveInvoiceToRecords = async () => {
+    if (user?.id && user.provider === 'google') {
+      // 已登录：保存到云端
+      try {
+        await saveInvoice(user.id, invoice);
+        // 重新加载发票列表
+        const updated = await getUserInvoices(user.id);
+        setRecords(updated);
+        localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
+        alert('发票已保存到云端！');
+      } catch (error) {
+        console.error('保存失败:', error);
+        alert('保存失败，请重试');
+      }
+    } else {
+      // 未登录：仅保存到本地
+      setRecords(prev => {
+        const exists = prev.find(r => r.id === invoice.id);
+        const newRecords = exists
+          ? prev.map(r => r.id === invoice.id ? invoice : r)
+          : [invoice, ...prev];
+        localStorage.setItem('invoice_records_v2', JSON.stringify(newRecords));
+        return newRecords;
+      });
+      alert('账单已本地保存（登录后可同步云端）');
+    }
   };
 
   const handleSmartFill = async (prompt: string) => {
@@ -178,11 +325,42 @@ const App: React.FC = () => {
       case 'home':
         return <HomeView onSelectTemplate={startNewInvoice} onCreateEmpty={() => startNewInvoice()} lang={lang} />;
       case 'records':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
-        return <RecordsView records={records} lang={lang} onEdit={(r) => { setInvoice(r); setActiveView('editor'); }} onDelete={(id) => setRecords(prev => prev.filter(r => r.id !== id))} onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }} onNewDoc={startNewInvoice} />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="records" />;
+        return <RecordsView
+          records={records}
+          lang={lang}
+          onEdit={(r) => { setInvoice(r); setActiveView('editor'); }}
+          onDelete={async (id) => {
+            if (user?.id && user.provider === 'google') {
+              // 云端删除
+              try {
+                await deleteInvoice(id);
+                const updated = await getUserInvoices(user.id);
+                setRecords(updated);
+                localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
+              } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请重试');
+              }
+            } else {
+              // 本地删除
+              const newRecords = records.filter(r => r.id !== id);
+              setRecords(newRecords);
+              localStorage.setItem('invoice_records_v2', JSON.stringify(newRecords));
+            }
+          }}
+          onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }}
+          onNewDoc={startNewInvoice}
+        />;
       case 'profile':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} />;
-        return <ProfileView recordsCount={records.length} user={user} onLogout={handleLogout} lang={lang} />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="profile" />;
+        return <ProfileView
+          recordsCount={records.length}
+          user={user}
+          onLogout={handleLogout}
+          onUpdateUser={(updatedUser) => setUser(updatedUser)}
+          lang={lang}
+        />;
       case 'about':
         return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={startNewInvoice} />;
       case 'help':
@@ -231,6 +409,24 @@ const App: React.FC = () => {
         );
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-blue-600 rounded-[1.5rem] flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-100 animate-bounce">
+            <i className="fas fa-file-invoice"></i>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+          </div>
+          <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">{translations[lang].welcomeSub || 'Loading SmartBill...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col pb-24 sm:pb-0 bg-slate-50">

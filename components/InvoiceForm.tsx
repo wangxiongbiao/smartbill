@@ -135,12 +135,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             onChange={(e) => onChange({ currency: e.target.value })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           >
-            <optgroup label="🌏 亚洲 Asia">
+            <optgroup label="🌏 东亚 East Asia">
               <option value="CNY">🇨🇳 CNY ¥ 人民币</option>
               <option value="JPY">🇯🇵 JPY ¥ 日元</option>
               <option value="HKD">🇭🇰 HKD $ 港币</option>
               <option value="TWD">🇹🇼 TWD $ 台币</option>
               <option value="KRW">🇰🇷 KRW ₩ 韩元</option>
+            </optgroup>
+            <optgroup label="🌴 东南亚 Southeast Asia">
               <option value="SGD">🇸🇬 SGD $ 新加坡元</option>
               <option value="MYR">🇲🇾 MYR RM 马来西亚令吉</option>
               <option value="THB">🇹🇭 THB ฿ 泰铢</option>

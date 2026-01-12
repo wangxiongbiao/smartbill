@@ -136,7 +136,7 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
     return INDUSTRY_CONFIG.map(config => ({
       ...config,
       name: labels[config.id as keyof typeof labels] || config.id,
-      templates: Array.from({ length: 6 }).map((_, i) => {
+      templates: Array.from({ length: 4 }).map((_, i) => {
         const imageId = config.imageIds[i];
         // Check if it's a local path or Unsplash ID
         const backgroundImage = imageId.startsWith('/')
