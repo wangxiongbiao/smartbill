@@ -1,7 +1,7 @@
 
 'use client';
 import React, { useState } from 'react';
-import { User, Language } from '../types';
+import { User, Language, ViewType } from '../types';
 import { translations } from '../i18n';
 import { createClient } from '@/lib/supabase/client';
 
