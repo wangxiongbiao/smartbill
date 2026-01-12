@@ -152,40 +152,49 @@ const App: React.FC = () => {
 
     // 监听 Supabase 认证状态变化
     // onAuthStateChange 在大多数情况下会立即触发 'INITIAL_SESSION' 或 'SIGNED_IN'
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
+    if (supabase.auth) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (!isMounted) return;
 
-        console.log('[MainApp] 🔑 Auth event:', event, {
-          user: session?.user?.email,
-          hasSession: !!session
-        });
+          console.log('[MainApp] 🔑 Auth event:', event, {
+            user: session?.user?.email,
+            hasSession: !!session
+          });
 
-        if (session?.user) {
-          // 异步同步数据，不阻塞监听器
-          syncUserData(session.user);
-        } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-          // 处理登出或确认为空会话的状态
-          if (event === 'SIGNED_OUT') {
-            syncRef.current = null;
-            setUser(null);
-            setRecords([]);
-            localStorage.removeItem('invoice_records_v2');
-            localStorage.removeItem('sb_user_session');
+          if (session?.user) {
+            // 异步同步数据，不阻塞监听器
+            syncUserData(session.user);
+          } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+            // 处理登出或确认为空会话的状态
+            if (event === 'SIGNED_OUT') {
+              syncRef.current = null;
+              setUser(null);
+              setRecords([]);
+              localStorage.removeItem('invoice_records_v2');
+              localStorage.removeItem('sb_user_session');
+            }
+            setIsInitialized(true);
+          } else {
+            // 其他事件（可能是无 session 的初始状态）
+            setIsInitialized(true);
           }
-          setIsInitialized(true);
-        } else {
-          // 其他事件（可能是无 session 的初始状态）
-          setIsInitialized(true);
         }
-      }
-    );
+      );
 
-    return () => {
-      isMounted = false;
-      clearTimeout(safetyTimeout);
-      subscription.unsubscribe();
-    };
+      return () => {
+        isMounted = false;
+        clearTimeout(safetyTimeout);
+        subscription.unsubscribe();
+      };
+    } else {
+      console.error('[MainApp] Supabase auth is not available');
+      setIsInitialized(true);
+      return () => {
+        isMounted = false;
+        clearTimeout(safetyTimeout);
+      };
+    }
   }, []);
 
   const [template, setTemplate] = useState<TemplateType>('professional');
