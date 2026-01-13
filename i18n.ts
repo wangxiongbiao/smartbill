@@ -137,7 +137,7 @@ export const translations: Record<Language, any> = {
     hasAccount: '已經有賬戶了？',
     // Sidebar & AI
     aiAssistant: 'AI 智能填充',
-    aiAssistantDesc: '描述您的工作，讓 Gemini 草擬明細。',
+    aiAssistantDesc: '描述您的工作，讓 ai 草擬明細。',
     aiPlaceholder: "例如：'我做了5小時的網頁開發和2個標誌設計...'",
     generateItems: '生成明细',
     thinking: '思考中...',

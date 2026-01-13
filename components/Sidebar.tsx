@@ -1,8 +1,9 @@
 
 'use client';
 import React, { useState } from 'react';
-import { TemplateType, Language } from '../types';
+import { TemplateType, Language, Invoice } from '../types';
 import { translations } from '../i18n';
+import AIChat from './AIChat';
 
 interface SidebarProps {
   template: TemplateType;
@@ -13,6 +14,8 @@ interface SidebarProps {
   setIsHeaderReversed: (v: boolean) => void;
   onSave?: () => void;
   lang: Language;
+  currentInvoice: Invoice;
+  onUpdateInvoice: (updates: Partial<Invoice>) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -23,7 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   isHeaderReversed,
   setIsHeaderReversed,
   onSave,
-  lang
+  lang,
+  currentInvoice,
+  onUpdateInvoice
 }) => {
   const [aiInput, setAiInput] = useState('');
   const t = translations[lang] || translations['en'];
@@ -52,33 +57,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       )}
 
-      <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-            <i className="fas fa-magic"></i>
-          </div>
-          <div>
-            <h3 className="font-bold">{t.aiAssistant}</h3>
-            <p className="text-xs opacity-80">{t.aiAssistantDesc}</p>
-          </div>
-        </div>
-
-        <div className="relative">
-          <textarea
-            className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 resize-none h-20"
-            placeholder={t.aiPlaceholder}
-            value={aiInput}
-            onChange={(e) => setAiInput(e.target.value)}
-          />
-          <button
-            disabled={isAiLoading}
-            onClick={handleAiSubmit}
-            className={`mt-2 w-full py-2 bg-white text-blue-600 font-bold rounded-lg text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2 ${isAiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isAiLoading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-bolt"></i>}
-            {isAiLoading ? t.thinking : t.generateItems}
-          </button>
-        </div>
+      <div className="mb-6">
+        <AIChat
+          currentInvoice={currentInvoice}
+          onUpdateInvoice={onUpdateInvoice}
+          lang={lang}
+        />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

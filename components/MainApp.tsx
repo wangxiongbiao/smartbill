@@ -388,6 +388,8 @@ const App: React.FC = () => {
                 setIsHeaderReversed={setIsHeaderReversed}
                 onSave={saveInvoiceToRecords}
                 lang={lang}
+                currentInvoice={invoice}
+                onUpdateInvoice={updateInvoice}
               />
               <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
               <div className="sm:hidden mt-10 mb-16 px-2">
