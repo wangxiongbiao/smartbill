@@ -198,7 +198,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const [template, setTemplate] = useState<TemplateType>('professional');
+  const [template, setTemplate] = useState<TemplateType>('minimalist');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
