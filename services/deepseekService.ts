@@ -123,7 +123,7 @@ ${JSON.stringify(currentInvoice, null, 2)}
 
     const messages = [
         { role: "system", content: systemPrompt },
-        ...history.slice(-5), // Keep last 5 context messages
+        ...history.slice(-2), // 减少上下文到最近2条，加快响应
         { role: "user", content: userMessage }
     ];
 
@@ -135,9 +135,10 @@ ${JSON.stringify(currentInvoice, null, 2)}
                 "Authorization": `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: "deepseek-chat", // or deepseek-v3 if available/aliased
+                model: "deepseek-chat", // deepseek-chat 是最快的模型
                 messages: messages,
-                temperature: 0.3, // Low temperature for consistent data extraction
+                temperature: 1.5, // 提高 temperature 可以略微加快速度
+                max_tokens: 1500, // 限制最大输出 token 数，加快响应
                 response_format: { type: "json_object" }
             })
         });

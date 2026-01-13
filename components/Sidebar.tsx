@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { TemplateType, Language, Invoice } from '../types';
 import { translations } from '../i18n';
-import AIChat from './AIChat';
 
 interface SidebarProps {
   template: TemplateType;
@@ -14,8 +13,6 @@ interface SidebarProps {
   setIsHeaderReversed: (v: boolean) => void;
   onSave?: () => void;
   lang: Language;
-  currentInvoice: Invoice;
-  onUpdateInvoice: (updates: Partial<Invoice>) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -26,9 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   isHeaderReversed,
   setIsHeaderReversed,
   onSave,
-  lang,
-  currentInvoice,
-  onUpdateInvoice
+  lang
 }) => {
   const [aiInput, setAiInput] = useState('');
   const t = translations[lang] || translations['en'];
@@ -56,14 +51,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           <i className="fas fa-save"></i> {t.saveToRecords}
         </button>
       )}
-
-      <div className="mb-6">
-        <AIChat
-          currentInvoice={currentInvoice}
-          onUpdateInvoice={onUpdateInvoice}
-          lang={lang}
-        />
-      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100">

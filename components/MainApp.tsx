@@ -16,6 +16,7 @@ import AuthView from './AuthView';
 import AboutView from './AboutView';
 import HelpView from './HelpView';
 import Footer from './Footer';
+import AIChat from './AIChat';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
 
@@ -377,42 +378,52 @@ const App: React.FC = () => {
       case 'editor':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" />;
         return (
-          <div className="container mx-auto px-4 py-8 lg:flex gap-8">
-            <div className="lg:w-1/2 flex flex-col gap-6">
-              <Sidebar
-                template={template}
-                setTemplate={setTemplate}
-                onSmartFill={handleSmartFill}
-                isAiLoading={isAiLoading}
-                isHeaderReversed={isHeaderReversed}
-                setIsHeaderReversed={setIsHeaderReversed}
-                onSave={saveInvoiceToRecords}
-                lang={lang}
+          <div className="container mx-auto px-4 py-8 flex flex-col gap-6">
+            {/* AI Chat - 顶部独立一行 */}
+            <div className="w-full">
+              <AIChat
                 currentInvoice={invoice}
                 onUpdateInvoice={updateInvoice}
+                lang={lang}
               />
-              <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
-              <div className="sm:hidden mt-10 mb-16 px-2">
-                <button
-                  onClick={handleExportPdf}
-                  disabled={isExporting}
-                  className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner"
-                >
-                  {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-cloud-download-alt text-xl"></i>}
-                  <span className="text-lg">{isExporting ? translations[lang].generating : translations[lang].exportPdf}</span>
-                </button>
-              </div>
             </div>
 
-            <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
-                  <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
-                  <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
+            {/* 表单和预览区 */}
+            <div className="lg:flex gap-8">
+              <div className="lg:w-1/2 flex flex-col gap-6">
+                <Sidebar
+                  template={template}
+                  setTemplate={setTemplate}
+                  onSmartFill={handleSmartFill}
+                  isAiLoading={isAiLoading}
+                  isHeaderReversed={isHeaderReversed}
+                  setIsHeaderReversed={setIsHeaderReversed}
+                  onSave={saveInvoiceToRecords}
+                  lang={lang}
+                />
+                <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
+                <div className="sm:hidden mt-10 mb-16 px-2">
+                  <button
+                    onClick={handleExportPdf}
+                    disabled={isExporting}
+                    className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner"
+                  >
+                    {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-cloud-download-alt text-xl"></i>}
+                    <span className="text-lg">{isExporting ? translations[lang].generating : translations[lang].exportPdf}</span>
+                  </button>
                 </div>
-                <div className="p-2 sm:p-8 bg-slate-100 min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
-                  <div className="transform origin-top transition-transform duration-500 scale-[0.38] xs:scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.6] xl:scale-[0.85] flex-shrink-0">
-                    <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
+              </div>
+
+              <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
+                <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                  <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
+                    <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
+                    <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
+                  </div>
+                  <div className="p-2 sm:p-8 bg-slate-100 min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
+                    <div className="transform origin-top transition-transform duration-500 scale-[0.38] xs:scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.6] xl:scale-[0.85] flex-shrink-0">
+                      <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -450,7 +461,7 @@ const App: React.FC = () => {
         lang={lang}
         setLang={setLang}
       />
-      <main className="flex-1 pt-20">{renderContent()}</main>
+      <main className="flex-1 ">{renderContent()}</main>
 
       {/* 网站页脚 */}
       <Footer
