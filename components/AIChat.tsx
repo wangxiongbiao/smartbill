@@ -23,11 +23,26 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
             id: 'welcome',
             role: 'assistant',
             content: lang === 'zh-TW'
-                ? '👋 一句话快速创建发票！\n例如：给苹果公司，网站开发 5 万元'
-                : '👋 Create invoice in one sentence!\ne.g., Invoice Apple Inc., web dev $5000',
+                ? (translations['zh-TW'].aiWelcome || '👋 一句話快速創建發票！\n例如：給蘋果公司，網站開發 5 萬元')
+                : (translations[lang]?.aiWelcome || translations['en'].aiWelcome),
             timestamp: Date.now()
         }
     ]);
+
+    // Update welcome message when language changes
+    useEffect(() => {
+        const welcomeMsg = translations[lang]?.aiWelcome || translations['en'].aiWelcome;
+        if (messages.length > 0 && messages[0].id === 'welcome') {
+            setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[0] = {
+                    ...newMessages[0],
+                    content: welcomeMsg
+                };
+                return newMessages;
+            });
+        }
+    }, [lang]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -87,7 +102,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
             const errorMsg: Message = {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: "Sorry, I encountered an error communicating with the server.",
+                content: t.aiError || "Sorry, I encountered an error communicating with the server.",
                 timestamp: Date.now()
             };
             setMessages(prev => [...prev, errorMsg]);
@@ -112,13 +127,13 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
                     </div>
                     <div>
-                        <h3 className="font-bold text-xs">AI 快速创建</h3>
-                        <p className="text-[9px] text-blue-100">一句话生成发票</p>
+                        <h3 className="font-bold text-xs">{t.aiHeaderTitle}</h3>
+                        <p className="text-[9px] text-blue-100">{t.aiHeaderSub}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                    <span className="text-[9px] text-blue-100">在线</span>
+                    <span className="text-[9px] text-blue-100">{t.aiStatusOnline}</span>
                 </div>
             </div>
 
@@ -159,7 +174,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        placeholder={lang === 'zh-TW' ? '例如：给苹果公司，网站开发 5 万元' : 'e.g., Invoice for Apple, web dev $5000'}
+                        placeholder={t.aiPlaceholderInput}
                         className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 text-slate-700 placeholder:text-slate-400"
                     />
                     <button

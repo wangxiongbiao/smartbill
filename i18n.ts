@@ -46,6 +46,13 @@ export const translations: Record<Language, any> = {
     layoutSettings: 'Layout Settings',
     swapLayout: 'Swap App Layout',
     flipHeader: 'Flip Invoice Header',
+    // AIChat
+    aiHeaderTitle: 'AI Quick Create',
+    aiHeaderSub: 'Create invoice in one sentence',
+    aiStatusOnline: 'Online',
+    aiWelcome: '👋 Create invoice in one sentence!\ne.g., Invoice Apple Inc., web dev $5000',
+    aiError: 'Sorry, I encountered an error communicating with the server.',
+    aiPlaceholderInput: 'e.g., Invoice for Apple, web dev $5000',
     // Form
     invoiceMode: 'Invoice Mode',
     receiptMode: 'Receipt Mode',
@@ -145,6 +152,13 @@ export const translations: Record<Language, any> = {
     layoutSettings: '佈局設置',
     swapLayout: '切換應用佈局',
     flipHeader: '反轉發票頁眉',
+    // AIChat
+    aiHeaderTitle: 'AI 快速創建',
+    aiHeaderSub: '一句話生成發票',
+    aiStatusOnline: '在線',
+    aiWelcome: '👋 一句話快速創建發票！\n例如：給蘋果公司，網站開發 5 萬元',
+    aiError: '抱歉，與服務器通信時發生錯誤。',
+    aiPlaceholderInput: '例如：給蘋果公司，網站開發 5 萬元',
     // Form
     invoiceMode: '發票模式',
     receiptMode: '收據模式',
@@ -224,7 +238,14 @@ export const translations: Record<Language, any> = {
     welcomeBack: 'Bienvenue',
     email: 'Email',
     password: 'Mot de passe',
-    helpCenter: 'Centre d\'aide'
+    helpCenter: 'Centre d\'aide',
+    // AIChat
+    aiHeaderTitle: 'Création rapide IA',
+    aiHeaderSub: 'Créez une facture en une phrase',
+    aiStatusOnline: 'En ligne',
+    aiWelcome: '👋 Créez une facture en une phrase !\np. ex. Facture Apple Inc., dév web 5000 $',
+    aiError: 'Désolé, une erreur s\'est produite lors de la communication avec le serveur.',
+    aiPlaceholderInput: 'p. ex. Facture pour Apple, dév web 5000 $',
   },
   'de': {
     home: 'Start',
@@ -250,7 +271,14 @@ export const translations: Record<Language, any> = {
     welcomeBack: 'Willkommen zurück',
     email: 'Email',
     password: 'Passwort',
-    helpCenter: 'Hilfe-Center'
+    helpCenter: 'Hilfe-Center',
+    // AIChat
+    aiHeaderTitle: 'KI-Schnellerstellung',
+    aiHeaderSub: 'Rechnung in einem Satz erstellen',
+    aiStatusOnline: 'Online',
+    aiWelcome: '👋 Erstellen Sie eine Rechnung in einem Satz!\nz. B. Rechnung Apple Inc., Webentwicklung 5000 €',
+    aiError: 'Entschuldigung, bei der Kommunikation mit dem Server ist ein Fehler aufgetreten.',
+    aiPlaceholderInput: 'z. B. Rechnung an Apple, Webentwicklung 5000 €',
   },
   'ja': {
     home: 'ホーム',
@@ -276,6 +304,13 @@ export const translations: Record<Language, any> = {
     welcomeBack: 'おかえりなさい',
     email: 'メールアドレス',
     password: 'Passwort',
-    helpCenter: 'ヘルプセンター'
+    helpCenter: 'ヘルプセンター',
+    // AIChat
+    aiHeaderTitle: 'AIクイック作成',
+    aiHeaderSub: '一文で請求書を作成',
+    aiStatusOnline: 'オンライン',
+    aiWelcome: '👋 一文で請求書を作成！\n例：Apple社への請求書、Web開発 50万円',
+    aiError: '申し訳ありません、サーバーとの通信中にエラーが発生しました。',
+    aiPlaceholderInput: '例：Appleへの請求書、Web開発 50万円',
   }
 };
