@@ -202,7 +202,7 @@ const App: React.FC = () => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
-  const [isAIChatOpen, setIsAIChatOpen] = useState(false); // New State for Chat Logic
+  const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
 
   const printAreaRef = useRef<HTMLDivElement>(null);
 
@@ -381,7 +381,7 @@ const App: React.FC = () => {
         return (
           <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
             {/* 表单和预览区 */}
-            <div className="lg:flex gap-8">
+            <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
               <div className="lg:w-1/2 flex flex-col gap-6">
                 <Sidebar
                   template={template}
