@@ -412,8 +412,8 @@ const App: React.FC = () => {
                     <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
                     <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
                   </div>
-                  <div className="p-2 sm:p-8 bg-slate-100 min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
-                    <div className="transform origin-top transition-transform duration-500 scale-[0.85] flex-shrink-0">
+                  <div className="p-2  bg-slate-100 min-h-[450px] sm:min-h-[500px] pt-8 flex justify-center items-start overflow-x-hidden overflow-y-auto">
+                    <div className="w-full transform origin-top transition-transform duration-500  flex-shrink-0">
                       <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                     </div>
                   </div>

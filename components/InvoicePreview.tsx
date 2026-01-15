@@ -57,7 +57,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   const docTitle = invoice.type === 'invoice' ? t.invoiceMode.split(' ')[0].toUpperCase() : t.receiptMode.split(' ')[0].toUpperCase();
 
   return (
-    <div className={`w-[210mm] ${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden`}>
+    <div className={` ${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden`}>
       <div className={styles.header}>
         <div className={`flex justify-between items-start ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
           <div>
