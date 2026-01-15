@@ -15,9 +15,10 @@ interface AIChatProps {
     currentInvoice: Invoice;
     onUpdateInvoice: (updates: Partial<Invoice>) => void;
     lang: Language;
+    onClose?: () => void;
 }
 
-const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }) => {
+const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, onClose }) => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: 'welcome',
@@ -119,9 +120,9 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
     };
 
     return (
-        <div className="flex flex-col bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+        <div className="flex flex-col bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 h-full">
             {/* Compact Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 flex items-center justify-between text-white shrink-0">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex items-center justify-between text-white shrink-0">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
@@ -131,14 +132,24 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang }
                         <p className="text-[9px] text-blue-100">{t.aiHeaderSub}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                    <span className="text-[9px] text-blue-100">{t.aiStatusOnline}</span>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        <span className="text-[9px] text-blue-100">{t.aiStatusOnline}</span>
+                    </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all text-white/90 hover:text-white"
+                        >
+                            <i className="fas fa-times text-xs"></i>
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* Compact Messages Area - 只显示最近3条 */}
-            <div className="max-h-[200px] overflow-y-auto p-3 space-y-2 bg-slate-50">
+            {/* Compact Messages Area - 自动填充剩余空间 */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50">
                 {messages.slice(-3).map((msg) => (
                     <div
                         key={msg.id}

@@ -55,7 +55,7 @@ const App: React.FC = () => {
 
   const [activeView, setActiveView] = useState<ViewType>('home');
   const [prevView, setPrevView] = useState<ViewType>('home');
-  const [lang, setLang] = useState<Language>('zh-TW');
+  const [lang, setLang] = useState<Language>('en');
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [records, setRecords] = useState<Invoice[]>([]);
 
@@ -202,6 +202,7 @@ const App: React.FC = () => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false); // New State for Chat Logic
 
   const printAreaRef = useRef<HTMLDivElement>(null);
 
@@ -378,16 +379,7 @@ const App: React.FC = () => {
       case 'editor':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" />;
         return (
-          <div className="container mx-auto px-4 py-8 flex flex-col gap-6">
-            {/* AI Chat - 顶部独立一行 */}
-            <div className="w-full">
-              <AIChat
-                currentInvoice={invoice}
-                onUpdateInvoice={updateInvoice}
-                lang={lang}
-              />
-            </div>
-
+          <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
             {/* 表单和预览区 */}
             <div className="lg:flex gap-8">
               <div className="lg:w-1/2 flex flex-col gap-6">
@@ -427,6 +419,42 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* AI Floating Action Button & Modal */}
+            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
+
+              {/* Chat Window Modal/Popover */}
+              <div
+                className={`pointer-events-auto transition-all duration-300 origin-bottom-right ${isAIChatOpen
+                  ? 'opacity-100 scale-100 translate-y-0'
+                  : 'opacity-0 scale-90 translate-y-4 pointer-events-none hidden'
+                  }`}
+              >
+                <div className="w-[90vw] sm:w-[380px] h-[500px] max-h-[70vh] shadow-2xl shadow-blue-900/20 rounded-2xl overflow-hidden">
+                  <AIChat
+                    currentInvoice={invoice}
+                    onUpdateInvoice={updateInvoice}
+                    lang={lang}
+                    onClose={() => setIsAIChatOpen(false)}
+                  />
+                </div>
+              </div>
+
+              {/* FAB Trigger */}
+              <button
+                onClick={() => setIsAIChatOpen(!isAIChatOpen)}
+                className={`pointer-events-auto w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${isAIChatOpen
+                  ? 'bg-slate-800 text-white rotate-90 shadow-slate-900/30'
+                  : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-blue-500/40 animate-pulse-slow'
+                  }`}
+              >
+                {isAIChatOpen ? (
+                  <i className="fas fa-times text-xl"></i>
+                ) : (
+                  <i className="fas fa-magic text-xl"></i>
+                )}
+              </button>
             </div>
           </div>
         );

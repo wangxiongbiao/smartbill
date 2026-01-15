@@ -1,7 +1,25 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Invoice, InvoiceItem, DocumentType, Language } from '../types';
 import { translations } from '../i18n';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  TouchSensor,
+  MouseSensor
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface InvoiceFormProps {
   invoice: Invoice;
@@ -9,11 +27,68 @@ interface InvoiceFormProps {
   lang: Language;
 }
 
+// Sortable Item Component
+const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.8 : 1,
+    position: 'relative' as 'relative', // Type assertion for consistent behavior
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+};
+
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const t = translations[lang] || translations['en'];
+
+  // Sensors for Drag and Drop
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = invoice.items.findIndex((item) => item.id === active.id);
+      const newIndex = invoice.items.findIndex((item) => item.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onChange({ items: arrayMove(invoice.items, oldIndex, newIndex) });
+      }
+    }
+  };
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -204,30 +279,60 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
       <section className="space-y-4 pt-4 border-t border-slate-100">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.items}</h3>
-        <div className="space-y-3">
-          {invoice.items.map((item) => (
-            <div key={item.id} className="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="flex justify-between gap-2">
-                <input placeholder={t.itemDesc} className="flex-1 bg-transparent font-medium" value={item.description} onChange={(e) => updateItem(item.id, { description: e.target.value })} />
-                <button onClick={() => removeItem(item.id)} className="text-slate-300 hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-slate-400">{t.quantity}</label>
-                  <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })} />
-                </div>
-                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-slate-400">{t.rate}</label>
-                  <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.rate} onChange={(e) => updateItem(item.id, { rate: Number(e.target.value) })} />
-                </div>
-                <div className="flex-1 text-right">
-                  <label className="text-[10px] font-bold text-slate-400">{t.amount}</label>
-                  <div className="font-bold py-1">{(item.quantity * item.rate).toFixed(2)}</div>
-                </div>
-              </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={invoice.items.map(item => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {invoice.items.map((item) => (
+                <SortableItem key={item.id} id={item.id}>
+                  <div className="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation">
+                    <div className="flex justify-between gap-2">
+                      {/* Prevent drag on input interaction by stopping propagation if needed, 
+                           but generally dnd-kit sensors handle this. 
+                           However, for mobile long-press, inputs might need to be careful.
+                           Adding `onPointerDown={(e) => e.stopPropagation()}` to inputs can prevent drag,
+                           BUT we want drag on the *container* long press.
+                           If we touch an input, we want to type. Long press on input should probably select text?
+                           Usually strictly separating handles is better, but "Long press list item" is the req.
+                       */}
+                      <input
+                        placeholder={t.itemDesc}
+                        className="flex-1 bg-transparent font-medium"
+                        value={item.description}
+                        onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                      />
+                      <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
+                        <i className="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="text-[10px] font-bold text-slate-400">{t.quantity}</label>
+                        <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })} />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[10px] font-bold text-slate-400">{t.rate}</label>
+                        <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.rate} onChange={(e) => updateItem(item.id, { rate: Number(e.target.value) })} />
+                      </div>
+                      <div className="flex-1 text-right">
+                        <label className="text-[10px] font-bold text-slate-400">{t.amount}</label>
+                        <div className="font-bold py-1">{(item.quantity * item.rate).toFixed(2)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </SortableItem>
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
+
         <button onClick={addItem} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-all font-bold text-sm">
           {t.addItems}
         </button>
