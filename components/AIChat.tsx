@@ -128,8 +128,8 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
                     </div>
                     <div>
-                        <h3 className="font-bold text-xs">{t.aiHeaderTitle}</h3>
-                        <p className="text-[9px] text-blue-100">{t.aiHeaderSub}</p>
+                        <h3 className="font-bold text-[14px]">{t.aiHeaderTitle}</h3>
+                        <p className="text-[12px] text-blue-100">{t.aiHeaderSub}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         <i className="fas fa-paper-plane text-xs"></i>
                     </button>
                 </div>
-                <p className="text-[9px] text-slate-400 text-center mt-1">Powered by DeepSeek V3</p>
+                {/* <p className="text-[9px] text-slate-400 text-center mt-1">Powered by DeepSeek V3</p> */}
             </div>
         </div>
     );
