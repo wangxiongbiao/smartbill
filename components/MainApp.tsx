@@ -413,7 +413,7 @@ const App: React.FC = () => {
                     <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
                   </div>
                   <div className="p-2 sm:p-8 bg-slate-100 min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
-                    <div className="transform origin-top transition-transform duration-500 scale-[0.38] xs:scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.6] xl:scale-[0.85] flex-shrink-0">
+                    <div className="transform origin-top transition-transform duration-500 scale-[0.85] flex-shrink-0">
                       <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                     </div>
                   </div>
