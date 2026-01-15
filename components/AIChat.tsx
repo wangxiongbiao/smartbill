@@ -179,19 +179,24 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
 
             {/* Single-line Input */}
             <div className="p-2 bg-white border-t border-slate-100 shrink-0">
-                <div className="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
-                    <input
-                        type="text"
+                <div className="flex items-end gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
+                    <textarea
                         value={input}
-                        onChange={(e) => setInput(e.target.value)}
+                        onChange={(e) => {
+                            setInput(e.target.value);
+                            e.target.style.height = 'auto';
+                            e.target.style.height = `${Math.min(e.target.scrollHeight, 100)}px`;
+                        }}
                         onKeyDown={handleKeyPress}
                         placeholder={t.aiPlaceholderInput}
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 text-slate-700 placeholder:text-slate-400"
+                        rows={1}
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 text-slate-700 placeholder:text-slate-400 resize-none max-h-[100px] scrollbar-hide"
+                        style={{ minHeight: '36px' }}
                     />
                     <button
                         onClick={handleSend}
                         disabled={!input.trim() || isTyping}
-                        className={`w-8 h-8 rounded-md flex items-center justify-center transition-all shrink-0 ${input.trim()
+                        className={`w-8 h-8 mb-0.5 rounded-md flex items-center justify-center transition-all shrink-0 ${input.trim()
                             ? 'bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700 active:scale-95'
                             : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                             }`}
