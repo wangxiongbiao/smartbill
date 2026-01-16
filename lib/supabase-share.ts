@@ -97,40 +97,27 @@ export async function revokeInvoiceShare(supabase: SupabaseClient, userId: strin
 
 /**
  * 通过Token获取分享的发票数据 (Public access)
+ * 使用 RPC 绕过 RLS 限制
  */
 export async function getShareByToken(supabase: SupabaseClient, token: string): Promise<{ share: InvoiceShare, invoice: Invoice } | null> {
-    // 1. Get share record
-    const { data: shareData, error: shareError } = await supabase
-        .from('invoice_shares')
-        .select('*')
-        .eq('share_token', token)
-        .single();
+    // 使用增强版 RPC 一次性获取所有数据
+    const { data, error } = await supabase
+        .rpc('get_share_date_by_token', { token_input: token });
 
-    if (shareError || !shareData) {
-        console.error('Error fetching share by token:', shareError);
+    if (error) {
+        console.error('Error fetching share data via RPC:', error);
         return null;
     }
 
-    // Check expiration
-    if (shareData.expires_at && new Date(shareData.expires_at) < new Date()) {
-        console.warn('Share token expired');
+    if (!data) {
         return null;
     }
 
-    // 2. Get invoice data via RPC
-    const { data: invoiceData, error: invoiceError } = await supabase
-        .rpc('get_invoice_by_share_token', { token_input: token });
-
-    if (invoiceError || !invoiceData) {
-        console.error('Error fetching invoice via RPC:', invoiceError);
-
-        // Fallback logic not needed here ideally, assume RPC works
-        return null;
-    }
-
+    // RPC 返回的是 JSONB，需要转型
+    // data 结构: { share: InvoiceShare, invoice: Invoice }
     return {
-        share: shareData as InvoiceShare,
-        invoice: invoiceData as Invoice
+        share: data.share as InvoiceShare,
+        invoice: data.invoice as Invoice
     };
 }
 
