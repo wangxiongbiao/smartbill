@@ -26,9 +26,9 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
   const languages: { id: Language; label: string }[] = [
     { id: 'zh-TW', label: '繁體中文' },
     { id: 'en', label: 'English' },
-    // { id: 'fr', label: 'Français' },
-    // { id: 'de', label: 'Deutsch' },
-    // { id: 'ja', label: '日本語' },
+    { id: 'fr', label: 'Français' },
+    { id: 'de', label: 'Deutsch' },
+    { id: 'ja', label: '日本語' },
   ];
 
   const currentLangLabel = languages.find(l => l.id === lang)?.label || 'Language';
@@ -65,8 +65,8 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
                 key={item.id}
                 onClick={() => setView(item.id)}
                 className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${activeView === item.id
-                    ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
-                    : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                  ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
+                  : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
                   }`}
               >
                 <i className={`${item.icon} text-[10px] ${activeView === item.id ? 'opacity-100' : 'opacity-60'}`}></i>
@@ -84,8 +84,8 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
               <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
                 className={`h-11 px-4 flex items-center gap-3 rounded-2xl border transition-all shadow-sm group ${showLangMenu
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
               >
                 <i className={`fas fa-globe text-sm transition-transform ${showLangMenu ? 'rotate-12' : 'group-hover:rotate-12'}`}></i>

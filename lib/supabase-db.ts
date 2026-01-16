@@ -42,24 +42,37 @@ export async function updateUserProfile(userId: string, updates: Partial<Pick<Pr
  * 保存或更新发票到数据库
  */
 export async function saveInvoice(userId: string, invoice: Invoice): Promise<void> {
+    console.log('[saveInvoice] 开始保存');
+    console.log('[saveInvoice] userId:', userId);
+    console.log('[saveInvoice] invoice.id:', invoice.id);
+    console.log('[saveInvoice] invoice.invoiceNumber:', invoice.invoiceNumber);
+
     const supabase = createClient();
 
-    const { error } = await supabase
+    const payload = {
+        id: invoice.id,
+        user_id: userId,
+        invoice_number: invoice.invoiceNumber,
+        invoice_data: invoice,
+        updated_at: new Date().toISOString()
+    };
+
+    console.log('[saveInvoice] 准备 upsert，payload:', payload);
+
+    const { data, error } = await supabase
         .from('invoices')
-        .upsert({
-            id: invoice.id,
-            user_id: userId,
-            invoice_number: invoice.invoiceNumber,
-            invoice_data: invoice,
-            updated_at: new Date().toISOString()
-        }, {
+        .upsert(payload, {
             onConflict: 'id'
-        });
+        })
+        .select();
 
     if (error) {
-        console.error('Error saving invoice:', error);
+        console.error('[saveInvoice] ❌ Supabase 错误:', error);
+        console.error('[saveInvoice] 错误详情:', JSON.stringify(error, null, 2));
         throw error;
     }
+
+    console.log('[saveInvoice] ✅ 保存成功，返回数据:', data);
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Invoice, TemplateType, ViewType, Language, User } from '../types';
 import { createClient } from '@/lib/supabase/client';
 import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices } from '@/lib/supabase-db';
@@ -17,6 +17,7 @@ import AboutView from './AboutView';
 import HelpView from './HelpView';
 import Footer from './Footer';
 import AIChat from './AIChat';
+import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
 
@@ -204,6 +205,11 @@ const App: React.FC = () => {
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
 
+  // Save status tracking
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [lastSavedTime, setLastSavedTime] = useState<Date | undefined>();
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const printAreaRef = useRef<HTMLDivElement>(null);
 
   // 曡听用户状态变化並同步存储
@@ -258,34 +264,96 @@ const App: React.FC = () => {
     setInvoice(prev => ({ ...prev, ...updates }));
   };
 
-  const startNewInvoice = (templateData?: Partial<Invoice>) => {
+  /**
+   * 创建新发票（含立即保存到数据库）
+   */
+  const handleStart = async (preset?: Partial<Invoice>) => {
+    console.log('[handleStart] 开始创建新发票');
+    console.log('[handleStart] preset:', preset);
+    console.log('[handleStart] user:', user);
+
     const newId = Date.now().toString();
-    setInvoice({
+    const newInvoice = {
       ...INITIAL_INVOICE,
-      ...templateData,
+      ...preset,
       id: newId,
-      invoiceNumber: `${templateData?.type === 'receipt' ? 'REC' : 'INV'}-${(records.length + 1).toString().padStart(3, '0')}`,
-    });
+      invoiceNumber: `INV-${newId.slice(-6)}`
+    };
+
+    console.log('[handleStart] 新发票对象:', newInvoice);
+
+    setInvoice(newInvoice);
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
-  const saveInvoiceToRecords = async () => {
-    if (user?.id && user.provider === 'google') {
-      // 已登录：保存到云端
+    // Immediately create record in database for logged-in users
+    if (user?.id) {
+      console.log('[handleStart] 用户已登录，准备保存到数据库');
+      console.log('[handleStart] user.id:', user.id);
+      console.log('[handleStart] user.provider:', user.provider);
+
       try {
-        await saveInvoice(user.id, invoice);
-        // 重新加载发票列表
+        setSaveStatus('saving');
+        console.log('[handleStart] 调用 saveInvoice...');
+
+        await saveInvoice(user.id, newInvoice);
+
+        console.log('[handleStart] ✅ saveInvoice 成功');
+        setSaveStatus('saved');
+        setLastSavedTime(new Date());
+
+        // Reload records
+        console.log('[handleStart] 重新加载发票列表...');
         const updated = await getUserInvoices(user.id);
+        console.log('[handleStart] 获取到的发票列表:', updated);
         setRecords(updated);
         localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
-        alert('发票已保存到云端！');
+        console.log('[handleStart] ✅ 完成');
       } catch (error) {
-        console.error('保存失败:', error);
-        alert('保存失败，请重试');
+        console.error('[handleStart] ❌ 保存失败:', error);
+        setSaveStatus('error');
       }
     } else {
-      // 未登录：仅保存到本地
+      console.warn('[handleStart] ⚠️ 用户未登录，跳过数据库保存');
+    }
+  };
+
+  // Auto-save helper function
+  const performSave = useCallback(async (isManual: boolean = false) => {
+    if (!user?.id || !invoice.id) return;
+
+    // Clear any pending auto-save
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
+    setSaveStatus('saving');
+
+    try {
+      await saveInvoice(user.id, invoice);
+      setSaveStatus('saved');
+      setLastSavedTime(new Date());
+
+      // Reload records list
+      const updated = await getUserInvoices(user.id);
+      setRecords(updated);
+      localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
+
+      // No alert needed - SaveStatusIndicator shows the status
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaveStatus('error');
+      // SaveStatusIndicator will show the error state
+    }
+  }, [user, invoice, lang]);
+
+  // Manual save (for button clicks)
+  const saveInvoiceToRecords = async () => {
+    if (user?.id && user.provider === 'google') {
+      await performSave(true);
+    } else {
+      // Guest users: save to localStorage only
       setRecords(prev => {
         const exists = prev.find(r => r.id === invoice.id);
         const newRecords = exists
@@ -297,6 +365,27 @@ const App: React.FC = () => {
       alert('账单已本地保存（登录后可同步云端）');
     }
   };
+
+  // Auto-save effect (3 second debounce)
+  useEffect(() => {
+    if (!user?.id || !invoice.id || activeView !== 'editor') return;
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new timer
+    autoSaveTimerRef.current = setTimeout(() => {
+      performSave(false);
+    }, 3000);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [invoice, user, activeView, performSave]);
 
   const handleSmartFill = async (prompt: string) => {
     setIsAiLoading(true);
@@ -334,7 +423,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeView) {
       case 'home':
-        return <HomeView onSelectTemplate={startNewInvoice} onCreateEmpty={() => startNewInvoice()} lang={lang} />;
+        return <HomeView onSelectTemplate={handleStart} onCreateEmpty={() => handleStart()} lang={lang} />;
       case 'records':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="records" />;
         return <RecordsView
@@ -361,7 +450,7 @@ const App: React.FC = () => {
             }
           }}
           onExport={(r) => { setInvoice(r); setTimeout(handleExportPdf, 200); }}
-          onNewDoc={startNewInvoice}
+          onNewDoc={handleStart}
         />;
       case 'profile':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="profile" />;
@@ -373,90 +462,93 @@ const App: React.FC = () => {
           lang={lang}
         />;
       case 'about':
-        return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={startNewInvoice} />;
+        return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={handleStart} />;
       case 'help':
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" />;
         return (
-          <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
-            {/* 表单和预览区 */}
-            <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
-              <div className="lg:w-1/2 flex flex-col gap-6">
-                <Sidebar
-                  template={template}
-                  setTemplate={setTemplate}
-                  onSmartFill={handleSmartFill}
-                  isAiLoading={isAiLoading}
-                  isHeaderReversed={isHeaderReversed}
-                  setIsHeaderReversed={setIsHeaderReversed}
-                  onSave={saveInvoiceToRecords}
-                  lang={lang}
-                />
-                <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
-                <div className="sm:hidden mt-10 mb-16 px-2">
-                  <button
-                    onClick={handleExportPdf}
-                    disabled={isExporting}
-                    className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner"
-                  >
-                    {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-cloud-download-alt text-xl"></i>}
-                    <span className="text-lg">{isExporting ? translations[lang].generating : translations[lang].exportPdf}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-                <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                  <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
-                    <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
-                    <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
+          <>
+            <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
+            <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
+              {/* 表单和预览区 */}
+              <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
+                <div className="lg:w-1/2 flex flex-col gap-6">
+                  <Sidebar
+                    template={template}
+                    setTemplate={setTemplate}
+                    onSmartFill={handleSmartFill}
+                    isAiLoading={isAiLoading}
+                    isHeaderReversed={isHeaderReversed}
+                    setIsHeaderReversed={setIsHeaderReversed}
+                    onSave={saveInvoiceToRecords}
+                    lang={lang}
+                  />
+                  <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
+                  <div className="sm:hidden mt-10 mb-16 px-2">
+                    <button
+                      onClick={handleExportPdf}
+                      disabled={isExporting}
+                      className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner"
+                    >
+                      {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-cloud-download-alt text-xl"></i>}
+                      <span className="text-lg">{isExporting ? translations[lang].generating : translations[lang].exportPdf}</span>
+                    </button>
                   </div>
-                  <div className="p-2  bg-slate-100 min-h-[450px] sm:min-h-[500px] pt-8 flex justify-center items-start overflow-x-hidden overflow-y-auto">
-                    <div className="w-full transform origin-top transition-transform duration-500  flex-shrink-0">
-                      <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
+                </div>
+
+                <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
+                  <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                    <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
+                      <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
+                      <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
+                    </div>
+                    <div className="p-2  bg-slate-100 min-h-[450px] sm:min-h-[500px] pt-8 flex justify-center items-start overflow-x-hidden overflow-y-auto">
+                      <div className="w-full transform origin-top transition-transform duration-500  flex-shrink-0">
+                        <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* AI Floating Action Button & Modal */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
+              {/* AI Floating Action Button & Modal */}
+              <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
 
-              {/* Chat Window Modal/Popover */}
-              <div
-                className={`pointer-events-auto transition-all duration-300 origin-bottom-right ${isAIChatOpen
-                  ? 'opacity-100 scale-100 translate-y-0'
-                  : 'opacity-0 scale-90 translate-y-4 pointer-events-none hidden'
-                  }`}
-              >
-                <div className="w-[90vw] sm:w-[380px] h-[500px] max-h-[70vh] shadow-2xl shadow-blue-900/20 rounded-2xl overflow-hidden">
-                  <AIChat
-                    currentInvoice={invoice}
-                    onUpdateInvoice={updateInvoice}
-                    lang={lang}
-                    onClose={() => setIsAIChatOpen(false)}
-                  />
+                {/* Chat Window Modal/Popover */}
+                <div
+                  className={`pointer-events-auto transition-all duration-300 origin-bottom-right ${isAIChatOpen
+                    ? 'opacity-100 scale-100 translate-y-0'
+                    : 'opacity-0 scale-90 translate-y-4 pointer-events-none hidden'
+                    }`}
+                >
+                  <div className="w-[90vw] sm:w-[380px] h-[500px] max-h-[70vh] shadow-2xl shadow-blue-900/20 rounded-2xl overflow-hidden">
+                    <AIChat
+                      currentInvoice={invoice}
+                      onUpdateInvoice={updateInvoice}
+                      lang={lang}
+                      onClose={() => setIsAIChatOpen(false)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* FAB Trigger */}
-              <button
-                onClick={() => setIsAIChatOpen(!isAIChatOpen)}
-                className={`pointer-events-auto w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${isAIChatOpen
-                  ? 'bg-slate-800 text-white rotate-90 shadow-slate-900/30'
-                  : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-blue-500/40 animate-pulse-slow'
-                  }`}
-              >
-                {isAIChatOpen ? (
-                  <i className="fas fa-times text-xl"></i>
-                ) : (
-                  <i className="fas fa-magic text-xl"></i>
-                )}
-              </button>
+                {/* FAB Trigger */}
+                <button
+                  onClick={() => setIsAIChatOpen(!isAIChatOpen)}
+                  className={`pointer-events-auto w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${isAIChatOpen
+                    ? 'bg-slate-800 text-white rotate-90 shadow-slate-900/30'
+                    : 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-blue-500/40 animate-pulse-slow'
+                    }`}
+                >
+                  {isAIChatOpen ? (
+                    <i className="fas fa-times text-xl"></i>
+                  ) : (
+                    <i className="fas fa-magic text-xl"></i>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         );
     }
   };
@@ -495,7 +587,7 @@ const App: React.FC = () => {
       <Footer
         lang={lang}
         setView={changeView}
-        onNewDoc={(type) => startNewInvoice({ type })}
+        onNewDoc={(type) => handleStart({ type })}
       />
 
       <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">

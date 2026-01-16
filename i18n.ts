@@ -85,6 +85,8 @@ export const translations: Record<Language, any> = {
     emptyTitle: 'No Records',
     emptySub: 'Start making invoices, they will show up here.',
     goToHome: 'Start Creating Invoice',
+    newInvoice: 'New Invoice',
+    newInvoiceShort: 'New',
     amountTotal: 'Total Amount',
     // Footer
     footerDesc: 'SmartBill Pro is the premier billing platform designed for modern entrepreneurs and freelancers. We help global users improve billing efficiency through innovative AI technology.',
@@ -106,7 +108,13 @@ export const translations: Record<Language, any> = {
     ind_construction: 'Construction',
     ind_retail: 'Retail',
     ind_consulting: 'Consulting',
-    ind_design: 'Creative Design'
+    ind_design: 'Creative Design',
+    // Save Status
+    saving: 'Saving...',
+    saved_status: 'Saved',
+    save_failed: 'Save failed',
+    just_now: 'just now',
+    mins_ago: '{mins} mins ago'
   },
   'zh-TW': {
     home: '首頁',
@@ -191,6 +199,8 @@ export const translations: Record<Language, any> = {
     emptyTitle: '暫無發票',
     emptySub: '開始製作發票，發票將顯示在這裡。',
     goToHome: '开始创建发票',
+    newInvoice: '新建發票',
+    newInvoiceShort: '新建',
     amountTotal: '賬單總額',
     // Footer
     footerDesc: 'SmartBill Pro 是專為現代企業家和自由職業者打造的頂級開票平台。我們通過創新的 AI 技術，幫助全球用戶提升計費效率。',
@@ -212,7 +222,13 @@ export const translations: Record<Language, any> = {
     ind_construction: '建築裝修',
     ind_retail: '零售貿易',
     ind_consulting: '諮詢服務',
-    ind_design: '創意設計'
+    ind_design: '創意設計',
+    // Save Status
+    saving: '保存中...',
+    saved_status: '已保存',
+    save_failed: '保存失敗',
+    just_now: '剛剛',
+    mins_ago: '{mins} 分鐘前'
   },
   'fr': {
     home: 'Accueil',
@@ -246,6 +262,14 @@ export const translations: Record<Language, any> = {
     aiWelcome: '👋 Créez une facture en une phrase !\np. ex. Facture Apple Inc., dév web 5000 $',
     aiError: 'Désolé, une erreur s\'est produite lors de la communication avec le serveur.',
     aiPlaceholderInput: 'p. ex. Facture pour Apple, dév web 5000 $',
+    newInvoice: 'Nouvelle facture',
+    newInvoiceShort: 'Nouveau',
+    // Save Status
+    saving: 'Enregistrement...',
+    saved_status: 'Enregistré',
+    save_failed: 'Échec de l\'enregistrement',
+    just_now: 'à l\'instant',
+    mins_ago: 'il y a {mins} min'
   },
   'de': {
     home: 'Start',
@@ -279,6 +303,14 @@ export const translations: Record<Language, any> = {
     aiWelcome: '👋 Erstellen Sie eine Rechnung in einem Satz!\nz. B. Rechnung Apple Inc., Webentwicklung 5000 €',
     aiError: 'Entschuldigung, bei der Kommunikation mit dem Server ist ein Fehler aufgetreten.',
     aiPlaceholderInput: 'z. B. Rechnung an Apple, Webentwicklung 5000 €',
+    newInvoice: 'Neue Rechnung',
+    newInvoiceShort: 'Neu',
+    // Save Status
+    saving: 'Speichern...',
+    saved_status: 'Gespeichert',
+    save_failed: 'Speichern fehlgeschlagen',
+    just_now: 'gerade eben',
+    mins_ago: 'vor {mins} Min.'
   },
   'ja': {
     home: 'ホーム',
@@ -312,5 +344,13 @@ export const translations: Record<Language, any> = {
     aiWelcome: '👋 一文で請求書を作成！\n例：Apple社への請求書、Web開発 50万円',
     aiError: '申し訳ありません、サーバーとの通信中にエラーが発生しました。',
     aiPlaceholderInput: '例：Appleへの請求書、Web開発 50万円',
+    newInvoice: '新規請求書',
+    newInvoiceShort: '新規',
+    // Save Status
+    saving: '保存中...',
+    saved_status: '保存済み',
+    save_failed: '保存に失敗しました',
+    just_now: 'たった今',
+    mins_ago: '{mins} 分前'
   }
 };
