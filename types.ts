@@ -2,8 +2,8 @@
 export interface InvoiceItem {
   id: string;
   description: string;
-  quantity: number;
-  rate: number;
+  quantity: number | string; // Allow string for easier form handling (empty inputs)
+  rate: number | string;
 }
 
 export interface Client {
@@ -64,6 +64,9 @@ export interface Invoice {
   currency: string;
   notes: string;
   status?: 'Draft' | 'Sent' | 'Paid';
+  // Template Configuration
+  template?: TemplateType;
+  isHeaderReversed?: boolean;
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';

@@ -17,6 +17,7 @@ import AboutView from './AboutView';
 import HelpView from './HelpView';
 import Footer from './Footer';
 import AIChat from './AIChat';
+import ShareDialog from './ShareDialog';
 import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
@@ -204,6 +205,7 @@ const App: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   // Save status tracking
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -263,6 +265,14 @@ const App: React.FC = () => {
   const updateInvoice = (updates: Partial<Invoice>) => {
     setInvoice(prev => ({ ...prev, ...updates }));
   };
+
+  // Sync template settings to invoice object
+  useEffect(() => {
+    setInvoice(prev => {
+      if (prev.template === template && prev.isHeaderReversed === isHeaderReversed) return prev;
+      return { ...prev, template, isHeaderReversed };
+    });
+  }, [template, isHeaderReversed]);
 
   /**
    * 创建新发票（含立即保存到数据库）
@@ -429,7 +439,12 @@ const App: React.FC = () => {
         return <RecordsView
           records={records}
           lang={lang}
-          onEdit={(r) => { setInvoice(r); setActiveView('editor'); }}
+          onEdit={(r) => {
+            setInvoice(r);
+            if (r.template) setTemplate(r.template);
+            if (r.isHeaderReversed !== undefined) setIsHeaderReversed(r.isHeaderReversed);
+            setActiveView('editor');
+          }}
           onDelete={async (id) => {
             if (user?.id && user.provider === 'google') {
               // 云端删除
@@ -482,6 +497,7 @@ const App: React.FC = () => {
                     isHeaderReversed={isHeaderReversed}
                     setIsHeaderReversed={setIsHeaderReversed}
                     onSave={saveInvoiceToRecords}
+                    onShare={() => setIsShareDialogOpen(true)}
                     lang={lang}
                   />
                   <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
@@ -500,8 +516,15 @@ const App: React.FC = () => {
                 <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
                   <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
                     <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
-                      <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> 实时预览</span>
-                      <button onClick={saveInvoiceToRecords} className="bg-blue-600 px-3 py-1 rounded text-xs font-bold">{translations[lang].save}</button>
+                      <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> {translations[lang].preview || 'Preview'}</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => setIsShareDialogOpen(true)} className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-xs font-bold transition-colors">
+                          <i className="fas fa-share-alt mr-1"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
+                        </button>
+                        <button onClick={saveInvoiceToRecords} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs font-bold transition-colors">
+                          <i className="fas fa-save mr-1"></i> {translations[lang].save}
+                        </button>
+                      </div>
                     </div>
                     <div className="p-2  bg-slate-100 min-h-[450px] sm:min-h-[500px] pt-8 flex justify-center items-start overflow-x-hidden overflow-y-auto">
                       <div className="w-full transform origin-top transition-transform duration-500  flex-shrink-0">
@@ -531,6 +554,14 @@ const App: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {/* Share Dialog */}
+                <ShareDialog
+                  isOpen={isShareDialogOpen}
+                  onClose={() => setIsShareDialogOpen(false)}
+                  invoice={invoice}
+                  lang={lang}
+                />
 
                 {/* FAB Trigger */}
                 <button

@@ -57,6 +57,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [focusItemId, setFocusItemId] = useState<string | null>(null);
   const t = translations[lang] || translations['en'];
 
   // Sensors for Drag and Drop
@@ -104,15 +105,23 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDrawing(true);
-    draw(e);
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
     const canvas = canvasRef.current;
-    if (canvas) {
-      onChange({ sender: { ...invoice.sender, signature: canvas.toDataURL() } });
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    if ('touches' in e) {
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
     }
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
   };
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
@@ -127,14 +136,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
     } else {
+      e.preventDefault(); // Prevent scrolling on desktop drag
       x = e.clientX - rect.left;
       y = e.clientY - rect.top;
     }
 
     ctx.lineTo(x, y);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      onChange({ sender: { ...invoice.sender, signature: canvas.toDataURL() } });
+    }
   };
 
   const clearSignature = () => {
@@ -147,13 +163,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   };
 
   const addItem = () => {
+    const id = `item-${Date.now()}`;
     const newItem: InvoiceItem = {
-      id: `item-${Date.now()}`,
+      id,
       description: '',
-      quantity: 1,
-      rate: 0
+      quantity: '',
+      rate: ''
     };
     onChange({ items: [...invoice.items, newItem] });
+    setFocusItemId(id);
   };
 
   const updateItem = (id: string, updates: Partial<InvoiceItem>) => {
@@ -306,6 +324,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                         placeholder={t.itemDesc}
                         className="flex-1 bg-transparent font-medium"
                         value={item.description}
+                        autoFocus={item.id === focusItemId}
                         onChange={(e) => updateItem(item.id, { description: e.target.value })}
                       />
                       <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
@@ -315,15 +334,25 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                     <div className="flex gap-4">
                       <div className="flex-1">
                         <label className="text-[10px] font-bold text-slate-400">{t.quantity}</label>
-                        <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })} />
+                        <input
+                          type="number"
+                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, { quantity: e.target.value === '' ? '' : Number(e.target.value) })}
+                        />
                       </div>
                       <div className="flex-1">
                         <label className="text-[10px] font-bold text-slate-400">{t.rate}</label>
-                        <input type="number" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.rate} onChange={(e) => updateItem(item.id, { rate: Number(e.target.value) })} />
+                        <input
+                          type="number"
+                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+                          value={item.rate}
+                          onChange={(e) => updateItem(item.id, { rate: e.target.value === '' ? '' : Number(e.target.value) })}
+                        />
                       </div>
                       <div className="flex-1 text-right">
                         <label className="text-[10px] font-bold text-slate-400">{t.amount}</label>
-                        <div className="font-bold py-1">{(item.quantity * item.rate).toFixed(2)}</div>
+                        <div className="font-bold py-1">{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}</div>
                       </div>
                     </div>
                   </div>
@@ -359,7 +388,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           <span className="font-bold uppercase text-xs">{t.payable}</span>
           <span className="text-2xl font-black">
             {new Intl.NumberFormat(lang, { style: 'currency', currency: invoice.currency }).format(
-              invoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + invoice.taxRate / 100)
+              invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
             )}
           </span>
         </div>

@@ -26,9 +26,9 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
   const languages: { id: Language; label: string }[] = [
     { id: 'zh-TW', label: '繁體中文' },
     { id: 'en', label: 'English' },
-    { id: 'fr', label: 'Français' },
-    { id: 'de', label: 'Deutsch' },
-    { id: 'ja', label: '日本語' },
+    // { id: 'fr', label: 'Français' },
+    // { id: 'de', label: 'Deutsch' },
+    // { id: 'ja', label: '日本語' },
   ];
 
   const currentLangLabel = languages.find(l => l.id === lang)?.label || 'Language';

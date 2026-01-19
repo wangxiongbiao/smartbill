@@ -62,9 +62,9 @@ export default async function SharePage({ params }: SharePageProps) {
     const t = translations[lang];
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-slate-50 print:bg-white">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 print:hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group">
                         <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
@@ -81,24 +81,19 @@ export default async function SharePage({ params }: SharePageProps) {
             </header>
 
             {/* Main Content */}
-            <main className="flex-grow py-8 sm:py-12 bg-slate-50">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <main className="flex-grow py-8 sm:py-12 px-4 sm:px-6 print:p-0 print:m-0">
+                <div className="max-w-5xl mx-auto print:max-w-none print:w-full">
 
                     {/* Download Button (Mobile/Desktop) */}
                     {share.allow_download && (
-                        <div className="flex justify-end mb-6">
-                            {/* This button should trigger PDF download. 
-                     Since we are on server, we need a client component to handle html2pdf 
-                     OR we can rely on browser print-to-pdf.
-                     For MVP, lets create a Client Component wrapper for the button that handles download logic 
-                     reusing the logic from MainApp.
-                 */}
+                        <div className="flex justify-end mb-6 print:hidden">
+                            {/* This button triggers native browser print */}
                             <ClientDownloadButton invoice={invoice} fileName={`${invoice.invoiceNumber}.pdf`} text={t.downloadPdf} />
                         </div>
                     )}
 
                     {/* Invoice View */}
-                    <div id="invoice-preview-container">
+                    <div id="invoice-preview-container" className="print:w-full">
                         <SharedInvoiceView data={invoice} lang={lang} />
                     </div>
 
@@ -106,7 +101,7 @@ export default async function SharePage({ params }: SharePageProps) {
             </main>
 
             {/* Footer CTA */}
-            <footer className="bg-white border-t border-slate-200 py-12">
+            <footer className="bg-white border-t border-slate-200 py-12 print:hidden">
                 <div className="max-w-2xl mx-auto px-4 text-center">
                     <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{t.createYourOwn}</h2>
                     <p className="text-slate-500 text-lg mb-8 font-medium">{t.heroSub}</p>
