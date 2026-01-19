@@ -91,7 +91,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                   <span className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] mb-1 block">{t.amountTotal}</span>
                   <p className="text-2xl font-black text-slate-900 tracking-tight">
                     {new Intl.NumberFormat(lang, { style: 'currency', currency: record.currency }).format(
-                      record.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + record.taxRate / 100)
+                      record.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.rate)), 0) * (1 + record.taxRate / 100)
                     )}
                   </p>
                 </div>

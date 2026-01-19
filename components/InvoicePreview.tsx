@@ -19,7 +19,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   lang
 }) => {
   const t = translations[lang] || translations['en'];
-  const subtotal = invoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+  const subtotal = invoice.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.rate)), 0);
   const tax = subtotal * (invoice.taxRate / 100);
   const total = subtotal + tax;
   const currencyFormatter = new Intl.NumberFormat(lang, {
@@ -107,8 +107,8 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <tr key={item.id}>
                 <td className="px-6 py-4 font-medium">{item.description || '...'}</td>
                 <td className="px-6 py-4 text-center">{item.quantity}</td>
-                <td className="px-6 py-4 text-center">{currencyFormatter.format(item.rate)}</td>
-                <td className="px-6 py-4 text-right font-bold">{currencyFormatter.format(item.quantity * item.rate)}</td>
+                <td className="px-6 py-4 text-center">{currencyFormatter.format(Number(item.rate))}</td>
+                <td className="px-6 py-4 text-right font-bold">{currencyFormatter.format(Number(item.quantity) * Number(item.rate))}</td>
               </tr>
             ))}
           </tbody>
