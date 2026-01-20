@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
         // Real Email Sending
         const data = await resend.emails.send({
-            from: 'SmartBill <noreply@smartbillpro.com>', // Verified domain sender
+            from: 'SmartBill <smartbillpro@gmail.com>', // Verified domain sender
             to: [email],
             subject: `Invoice ${invoiceNumber} from ${senderName || 'SmartBill User'}`,
             html: `
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                         View Invoice
                     </a>
                     <p style="color: #64748b; font-size: 14px; margin-top: 32px;">
-                        Powered by <a href="https://smartbill.pro" style="color: #64748b;">SmartBill</a>
+                        Powered by <a href="https://smartbillpro.com/" style="color: #64748b;">SmartBill</a>
                     </p>
                 </div>
             `,
