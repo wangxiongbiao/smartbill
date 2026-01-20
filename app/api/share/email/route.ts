@@ -25,20 +25,20 @@ export async function POST(req: Request) {
             console.log(` Subject: Invoice ${invoiceNumber} from ${senderName || 'SmartBill User'}`);
             console.log(` Link: ${shareUrl}`);
             console.log('------------------------------------------------');
-            
+
             // Simulate network delay
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            return NextResponse.json({ 
-                success: true, 
+
+            return NextResponse.json({
+                success: true,
                 message: 'Email queued (Mock Mode)',
-                mock: true 
+                mock: true
             });
         }
 
         // Real Email Sending
         const data = await resend.emails.send({
-            from: 'SmartBill <noreply@resend.dev>', // Default testing sender, needs domain verification for production
+            from: 'SmartBill <noreply@smartbillpro.com>', // Verified domain sender
             to: [email],
             subject: `Invoice ${invoiceNumber} from ${senderName || 'SmartBill User'}`,
             html: `

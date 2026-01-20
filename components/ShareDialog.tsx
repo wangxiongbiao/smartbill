@@ -101,7 +101,14 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ invoice, isOpen, onClose, lan
                 setEmailSent(true);
                 setTimeout(() => setEmailSent(false), 3000); // Reset after 3s
             } else {
-                console.error('Failed to send email');
+                const data = await response.json();
+                console.error('Failed to send email:', data);
+                // Check for Resend testing limitation (validation_error with 403-like message usually comes as 500 from our wrapper but carries message)
+                if (data.error && (data.error.includes('only send testing emails to your own email') || data.error.includes('validation_error'))) {
+                    alert(`${t.emailError || "Error"}: ${t.resendTestLimit || "Resend Test Mode: You can only send to your own email address."}`);
+                } else {
+                    alert(t.emailError || "Failed to send email. Please try again.");
+                }
             }
 
         } catch (error) {
