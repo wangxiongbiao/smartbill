@@ -283,8 +283,20 @@ const App: React.FC = () => {
     console.log('[handleStart] user:', user);
 
     const newId = Date.now().toString();
+
+    // Determine default currency based on current language
+    let defaultCurrency = 'USD';
+    switch (lang) {
+      case 'zh-TW': defaultCurrency = 'TWD'; break;
+      case 'ja': defaultCurrency = 'JPY'; break;
+      case 'fr':
+      case 'de': defaultCurrency = 'EUR'; break;
+      default: defaultCurrency = 'USD';
+    }
+
     const newInvoice = {
       ...INITIAL_INVOICE,
+      currency: defaultCurrency,
       ...preset,
       id: newId,
       invoiceNumber: `INV-${newId.slice(-6)}`
