@@ -514,20 +514,26 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-                  <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                    <div className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
-                      <span className="text-sm font-bold"><i className="fas fa-eye mr-2"></i> {translations[lang].preview || 'Preview'}</span>
-                      <div className="flex gap-2">
-                        <button onClick={() => setIsShareDialogOpen(true)} className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-xs font-bold transition-colors">
-                          <i className="fas fa-share-alt mr-1"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
-                        </button>
-                        <button onClick={saveInvoiceToRecords} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs font-bold transition-colors">
-                          <i className="fas fa-save mr-1"></i> {translations[lang].save}
-                        </button>
-                      </div>
+                  <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-4 sm:p-6 space-y-6">
+                    {/* Top Buttons (Matching InvoiceForm style) */}
+                    {/* Top Buttons (Matching Sidebar Action Buttons) */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setIsShareDialogOpen(true)}
+                        className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <i className="fas fa-share-alt"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
+                      </button>
+                      <button
+                        onClick={saveInvoiceToRecords}
+                        className="flex-1 py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <i className="fas fa-save"></i> {translations[lang].save}
+                      </button>
                     </div>
-                    <div className="p-2  bg-slate-100 min-h-[450px] sm:min-h-[500px] pt-8 flex justify-center items-start overflow-x-hidden overflow-y-auto">
-                      <div className="w-full transform origin-top transition-transform duration-500  flex-shrink-0">
+
+                    <div className="p-2 bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto border border-slate-100">
+                      <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
                         <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                       </div>
                     </div>

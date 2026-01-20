@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <i className="fas fa-save"></i> {t.saveToRecords}
           </button>
         )}
-        {onShare && (
+        {/* {onShare && (
           <button
             onClick={onShare}
             className="flex-1 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <i className="fas fa-share-alt"></i>
             <span className="hidden sm:inline">{t.shareLink?.split(' ')[0] || 'Share'}</span>
           </button>
-        )}
+        )} */}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
