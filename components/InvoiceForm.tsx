@@ -380,17 +380,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           <input type="number" className="w-20 px-3 py-1 bg-white border border-slate-200 rounded-lg text-right text-sm" value={invoice.taxRate} onChange={(e) => onChange({ taxRate: Number(e.target.value) })} />
         </div>
 
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.signature}</h3>
-            <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
-          </div>
-          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden relative">
-            <canvas ref={canvasRef} width={500} height={150} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing} className="w-full h-[120px] cursor-crosshair touch-none" />
-            {!invoice.sender.signature && <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">{t.signPlaceholder}</div>}
-          </div>
-        </div>
-
         <div className="bg-blue-600 p-4 rounded-xl text-white flex justify-between items-center">
           <span className="font-bold uppercase text-xs">{t.payable}</span>
           <span className="text-2xl font-black">
@@ -399,6 +388,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             )}
           </span>
         </div>
+
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.signature}</h3>
+            <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
+          </div>
+
+          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden relative">
+            <canvas ref={canvasRef} width={500} height={400} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing} className="w-full h-[120px] cursor-crosshair touch-none" />
+            {!invoice.sender.signature && <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">{t.signPlaceholder}</div>}
+          </div>
+        </div>
+
+
       </section>
     </div>
   );
