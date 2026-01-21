@@ -1,7 +1,7 @@
 
 "use server";
 
-import { Invoice } from "@/types";
+import { Invoice } from "@/shared/types";
 
 const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
 
