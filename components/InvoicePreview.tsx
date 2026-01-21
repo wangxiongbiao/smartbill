@@ -59,7 +59,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   return (
     <div className={` ${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden`}>
       <div className={styles.header}>
-        <div className={`flex justify-between items-start ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex justify-between items-start gap-6 ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
           <div>
             <h1 className="text-4xl font-black mb-1">{docTitle}</h1>
             <p className="opacity-80">#{invoice.invoiceNumber}</p>

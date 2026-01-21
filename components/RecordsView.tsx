@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Invoice, Language } from '../types';
 import { translations } from '../i18n';
 import ShareDialog from './ShareDialog';
+import EmailDialog from './EmailDialog';
 
 interface RecordsViewProps {
   records: Invoice[];
@@ -16,6 +17,7 @@ interface RecordsViewProps {
 const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, onExport, lang, onNewDoc }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
+  const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
 
   if (records.length === 0) {
     return (
@@ -105,6 +107,13 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                     <i className="fas fa-share-alt text-sm"></i>
                   </button>
                   <button
+                    onClick={() => setEmailInvoice(record)}
+                    className="w-12 h-12 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-500 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-90"
+                    title="Send Email"
+                  >
+                    <i className="fas fa-envelope text-sm"></i>
+                  </button>
+                  <button
                     onClick={() => onEdit(record)}
                     className="w-12 h-12 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-500 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-90"
                     title="Edit"
@@ -137,6 +146,15 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
           invoice={shareInvoice}
           isOpen={true}
           onClose={() => setShareInvoice(null)}
+          lang={lang}
+        />
+      )}
+
+      {emailInvoice && (
+        <EmailDialog
+          invoice={emailInvoice}
+          isOpen={true}
+          onClose={() => setEmailInvoice(null)}
           lang={lang}
         />
       )}

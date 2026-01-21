@@ -18,6 +18,7 @@ import HelpView from './HelpView';
 import Footer from './Footer';
 import AIChat from './AIChat';
 import ShareDialog from './ShareDialog';
+import EmailDialog from './EmailDialog';
 import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
@@ -206,6 +207,7 @@ const App: React.FC = () => {
   const [isHeaderReversed, setIsHeaderReversed] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
 
   // Save status tracking
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -532,9 +534,15 @@ const App: React.FC = () => {
                     <div className="flex gap-3">
                       <button
                         onClick={() => setIsShareDialogOpen(true)}
-                        className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
+                        className="flex-1 py-3 bg-indigo-50 text-indigo-600 font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
                       >
                         <i className="fas fa-share-alt"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
+                      </button>
+                      <button
+                        onClick={() => setIsEmailDialogOpen(true)}
+                        className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <i className="fas fa-envelope"></i> {translations[lang].sendEmail || 'Email'}
                       </button>
                       <button
                         onClick={saveInvoiceToRecords}
@@ -577,6 +585,14 @@ const App: React.FC = () => {
                 <ShareDialog
                   isOpen={isShareDialogOpen}
                   onClose={() => setIsShareDialogOpen(false)}
+                  invoice={invoice}
+                  lang={lang}
+                />
+
+                {/* Email Dialog */}
+                <EmailDialog
+                  isOpen={isEmailDialogOpen}
+                  onClose={() => setIsEmailDialogOpen(false)}
                   invoice={invoice}
                   lang={lang}
                 />

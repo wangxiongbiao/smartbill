@@ -137,7 +137,20 @@ export const translations: Record<Language, any> = {
     createYourOwn: 'Create Your Professional Invoice',
     startFree: 'Start Free',
     invalidLink: 'This link is invalid or expired',
-    createNow: 'Create Now'
+    createNow: 'Create Now',
+    // Email
+    sendEmail: 'Send Email',
+    emailError: 'Error sending email',
+    resendTestLimit: 'Resend Test Mode: You can only send to your own email address.',
+    shareEmail: 'Send by Email',
+    shareEmailDesc: 'Send this invoice directly to your client',
+    emailSentTitle: 'Email Sent!',
+    emailSentDesc: 'The invoice has been successfully sent to the recipient.',
+    sendAnother: 'Send Another',
+    recipientEmail: 'Recipient Email',
+    emailInfo: 'The client will receive an email with a secure link to view and download this invoice.',
+    linkWillBeCreated: 'A share link will be automatically created.',
+    sendInvoice: 'Send Invoice'
   },
   'zh-TW': {
     home: '首頁',
@@ -274,7 +287,20 @@ export const translations: Record<Language, any> = {
     createYourOwn: '創建您的專業發票',
     startFree: '免費開始',
     invalidLink: '此分享鏈接無效或已過期',
-    createNow: '立即創建'
+    createNow: '立即創建',
+    // Email
+    sendEmail: '發送郵件',
+    emailError: '發送郵件失敗',
+    resendTestLimit: '測試模式：您只能發送郵件到自己的郵箱地址。',
+    shareEmail: '通過郵件發送',
+    shareEmailDesc: '將此發票直接發送給您的客戶',
+    emailSentTitle: '郵件已發送！',
+    emailSentDesc: '發票已成功發送給收件人。',
+    sendAnother: '發送另一封',
+    recipientEmail: '收件人郵箱',
+    emailInfo: '客戶將收到一封包含安全鏈接的郵件，用於查看和下載此發票。',
+    linkWillBeCreated: '將自動生成分享鏈接。',
+    sendInvoice: '發送發票'
   },
   'fr': {
     home: 'Accueil',
@@ -338,7 +364,20 @@ export const translations: Record<Language, any> = {
     createYourOwn: 'Créez votre facture professionnelle',
     startFree: 'Commencer gratuitement',
     invalidLink: 'Ce lien est invalide ou expiré',
-    createNow: 'Créer maintenant'
+    createNow: 'Créer maintenant',
+    // Email
+    sendEmail: 'Envoyer Email',
+    emailError: "Erreur lors de l'envoi de l'email",
+    resendTestLimit: "Mode Test : Vous ne pouvez envoyer qu'à votre propre adresse email.",
+    shareEmail: 'Envoyer par Email',
+    shareEmailDesc: 'Envoyez cette facture directement à votre client',
+    emailSentTitle: 'Email Envoyé !',
+    emailSentDesc: 'La facture a été envoyée avec succès au destinataire.',
+    sendAnother: 'Envoyer un autre',
+    recipientEmail: 'Email du destinataire',
+    emailInfo: 'Le client recevra un email avec un lien sécurisé pour voir et télécharger cette facture.',
+    linkWillBeCreated: 'Un lien de partage sera créé automatiquement.',
+    sendInvoice: 'Envoyer Facture'
   },
   'de': {
     home: 'Start',
@@ -402,7 +441,20 @@ export const translations: Record<Language, any> = {
     createYourOwn: 'Erstellen Sie Ihre professionelle Rechnung',
     startFree: 'Kostenlos starten',
     invalidLink: 'Dieser Link ist ungültig oder abgelaufen',
-    createNow: 'Jetzt erstellen'
+    createNow: 'Jetzt erstellen',
+    // Email
+    sendEmail: 'Email Senden',
+    emailError: 'Fehler beim Senden der Email',
+    resendTestLimit: 'Testmodus: Sie können nur an Ihre eigene Email-Adresse senden.',
+    shareEmail: 'Per Email senden',
+    shareEmailDesc: 'Senden Sie diese Rechnung direkt an Ihren Kunden',
+    emailSentTitle: 'Email Gesendet!',
+    emailSentDesc: 'Die Rechnung wurde erfolgreich an den Empfänger gesendet.',
+    sendAnother: 'Noch eine senden',
+    recipientEmail: 'Empfänger Email',
+    emailInfo: 'Der Kunde erhält eine Email mit einem sicheren Link zum Anzeigen und Herunterladen dieser Rechnung.',
+    linkWillBeCreated: 'Ein Teilen-Link wird automatisch erstellt.',
+    sendInvoice: 'Rechnung Senden'
   },
   'ja': {
     home: 'ホーム',
@@ -466,6 +518,19 @@ export const translations: Record<Language, any> = {
     createYourOwn: 'プロの請求書を作成',
     startFree: '無料で開始',
     invalidLink: 'このリンクは無効か期限切れです',
-    createNow: '今すぐ作成'
+    createNow: '今すぐ作成',
+    // Email
+    sendEmail: 'メール送信',
+    emailError: 'メール送信エラー',
+    resendTestLimit: 'テストモード：自分のメールアドレスにのみ送信できます。',
+    shareEmail: 'メールで送信',
+    shareEmailDesc: 'この請求書をクライアントに直接送信します',
+    emailSentTitle: '送信しました！',
+    emailSentDesc: '請求書が受信者に正常に送信されました。',
+    sendAnother: 'もう一度送る',
+    recipientEmail: '受信者メール',
+    emailInfo: 'クライアントは、この請求書を表示およびダウンロードするための安全なリンクを含むメールを受け取ります。',
+    linkWillBeCreated: '共有リンクが自動的に作成されます。',
+    sendInvoice: '請求書を送信'
   }
 };
