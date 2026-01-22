@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         )} */}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      {/* <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">{t.selectTemplate}</h3>
           <div className="flex flex-wrap gap-3">
@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

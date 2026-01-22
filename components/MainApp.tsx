@@ -204,7 +204,7 @@ const App: React.FC = () => {
   const [template, setTemplate] = useState<TemplateType>('minimalist');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [isHeaderReversed, setIsHeaderReversed] = useState(false);
+  const [isHeaderReversed, setIsHeaderReversed] = useState(true);
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
@@ -509,7 +509,7 @@ const App: React.FC = () => {
                     onSmartFill={handleSmartFill}
                     isAiLoading={isAiLoading}
                     isHeaderReversed={isHeaderReversed}
-                    setIsHeaderReversed={setIsHeaderReversed}
+                    // setIsHeaderReversed={setIsHeaderReversed}
                     onSave={saveInvoiceToRecords}
                     onShare={() => setIsShareDialogOpen(true)}
                     lang={lang}

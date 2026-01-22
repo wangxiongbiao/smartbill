@@ -62,12 +62,19 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         <div className={`flex justify-between items-start gap-6 ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
           <div>
             <h1 className="text-4xl font-black mb-1">{docTitle}</h1>
-            <p className="opacity-80">#{invoice.invoiceNumber}</p>
+            {invoice.visibility?.invoiceNumber !== false && (
+              <p className="opacity-80">#{invoice.invoiceNumber}</p>
+            )}
           </div>
           <div className={`flex flex-col ${isHeaderReversed ? 'items-start text-left' : 'items-end text-right'}`}>
             {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-16 mb-4 object-contain" />}
             <h2 className="text-xl font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
             <p className="text-sm opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
+            {invoice.sender.customFields?.map(field => (
+              <p key={field.id} className="text-sm opacity-80 mt-1">
+                <span className="font-semibold">{field.label}:</span> {field.value}
+              </p>
+            ))}
           </div>
         </div>
       </div>
@@ -79,12 +86,21 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             <div className="border-l-4 border-slate-200 pl-4">
               <p className="font-bold text-lg">{invoice.client.name || t.clientName}</p>
               <p className="text-sm text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
+              {invoice.client.customFields?.map(field => (
+                <p key={field.id} className="text-sm text-slate-500 mt-1">
+                  <span className="font-semibold">{field.label}:</span> {field.value}
+                </p>
+              ))}
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs font-bold text-slate-400 mb-1">{lang === 'ja' ? '発行日' : (lang === 'en' ? 'Date' : '開具日期')}</p>
-            <p className="font-medium mb-4">{invoice.date}</p>
-            {invoice.type === 'invoice' && (
+            {invoice.visibility?.date !== false && (
+              <>
+                <p className="text-xs font-bold text-slate-400 mb-1">{lang === 'ja' ? '発行日' : (lang === 'en' ? 'Date' : '開具日期')}</p>
+                <p className="font-medium mb-4">{invoice.date}</p>
+              </>
+            )}
+            {(invoice.type === 'invoice' || (invoice.type === 'custom' && invoice.visibility?.dueDate !== false)) && (
               <>
                 <p className="text-xs font-bold text-slate-400 mb-1">{lang === 'ja' ? '期限' : (lang === 'en' ? 'Due Date' : '截止日期')}</p>
                 <p className={`font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>

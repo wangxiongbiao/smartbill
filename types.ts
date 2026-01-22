@@ -6,11 +6,19 @@ export interface InvoiceItem {
   rate: number | string;
 }
 
+export interface CustomField {
+  id: string;
+  label: string;
+  value: string;
+}
+
+
 export interface Client {
   name: string;
   email: string;
   address: string;
   phone?: string;
+  customFields?: CustomField[];
 }
 
 export interface Sender {
@@ -19,6 +27,7 @@ export interface Sender {
   address: string;
   logo?: string;
   signature?: string;
+  customFields?: CustomField[];
 }
 
 export interface User {
@@ -48,7 +57,7 @@ export interface InvoiceRecord {
   updated_at: string;
 }
 
-export type DocumentType = 'invoice' | 'receipt';
+export type DocumentType = 'invoice' | 'receipt' | 'custom';
 export type Language = 'zh-TW' | 'en' | 'fr' | 'de' | 'ja';
 
 export interface Invoice {
@@ -67,6 +76,7 @@ export interface Invoice {
   // Template Configuration
   template?: TemplateType;
   isHeaderReversed?: boolean;
+  visibility?: Record<string, boolean>;
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
