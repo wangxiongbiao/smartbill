@@ -10,7 +10,7 @@ interface SidebarProps {
   onSmartFill: (prompt: string) => void;
   isAiLoading: boolean;
   isHeaderReversed: boolean;
-  setIsHeaderReversed: (v: boolean) => void;
+  setIsHeaderReversed?: (v: boolean) => void;
   onSave?: () => void;
   onShare?: () => void;
   lang: Language;
