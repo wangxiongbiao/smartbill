@@ -66,15 +66,17 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <p className="opacity-80">#{invoice.invoiceNumber}</p>
             )}
           </div>
-          <div className={`flex flex-col ${isHeaderReversed ? 'items-start text-left' : 'items-end text-right'}`}>
-            {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-16 mb-4 object-contain" />}
-            <h2 className="text-xl font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
-            <p className="text-sm opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
-            {invoice.sender.customFields?.map(field => (
-              <p key={field.id} className="text-sm opacity-80 mt-1">
-                <span className="font-semibold">{field.label}:</span> {field.value}
-              </p>
-            ))}
+          <div className={`flex gap-2 ${isHeaderReversed ? 'flex-row text-left' : 'flex-row-reverse text-right'}`}>
+            {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-16 object-contain" />}
+            <div>
+              <h2 className="text-xl font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
+              <p className="text-sm opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
+              {invoice.sender.customFields?.map(field => (
+                <p key={field.id} className="text-sm opacity-80 mt-1">
+                  <span className="font-semibold">{field.label}</span> {field.value}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -88,7 +90,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <p className="text-sm text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
               {invoice.client.customFields?.map(field => (
                 <p key={field.id} className="text-sm text-slate-500 mt-1">
-                  <span className="font-semibold">{field.label}:</span> {field.value}
+                  <span className="font-semibold">{field.label}</span> {field.value}
                 </p>
               ))}
             </div>

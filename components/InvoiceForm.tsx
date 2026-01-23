@@ -209,7 +209,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         {(['invoice', 'receipt', 'custom'] as DocumentType[]).map((type) => (
           <button
             key={type}
-            onClick={() => onChange({ type })}
+            onClick={() => {
+              if (type === 'custom') {
+                onChange({
+                  type,
+                  visibility: {
+                    ...invoice.visibility,
+                    dueDate: false
+                  }
+                });
+              } else {
+                onChange({ type });
+              }
+            }}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
           >
