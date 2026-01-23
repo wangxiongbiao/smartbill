@@ -17,6 +17,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  horizontalListSortingStrategy,
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -200,6 +201,64 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         onChange({ sender: { ...invoice.sender, logo: reader.result as string } });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Initialize Default Columns
+  useEffect(() => {
+    if (!invoice.columns || invoice.columns.length === 0) {
+      onChange({
+        columns: [
+          { id: 'description', label: t.itemDesc, dataIndex: 'description', type: 'text' },
+          { id: 'quantity', label: t.quantity, dataIndex: 'quantity', type: 'number' },
+          { id: 'rate', label: t.rate, dataIndex: 'rate', type: 'amount' },
+          { id: 'amount', label: t.amount, dataIndex: 'amount', type: 'amount', isCustom: false } // 'amount' is calculated, but kept for header structure
+        ]
+      });
+    }
+  }, [invoice.columns, t]);
+
+  const updateColumn = (id: string, updates: Partial<any>) => {
+    const newColumns = invoice.columns?.map(col =>
+      col.id === id ? { ...col, ...updates } : col
+    ) || [];
+    onChange({ columns: newColumns });
+  };
+
+  const addColumn = () => {
+    const id = `col-${Date.now()}`;
+    const newColumn: any = {
+      id,
+      label: 'New Field',
+      dataIndex: id,
+      type: 'text',
+      isCustom: true
+    };
+    // Add before Amount column usually, or at end. Let's add before Amount if it exists?
+    // Simplified: Just add to end, let user reorder.
+    // Actually, Amount is usually last. Let's insert before the last one if it is 'amount'.
+    const cols = [...(invoice.columns || [])];
+    const amountIndex = cols.findIndex(c => c.id === 'amount');
+    if (amountIndex !== -1) {
+      cols.splice(amountIndex, 0, newColumn);
+    } else {
+      cols.push(newColumn);
+    }
+    onChange({ columns: cols });
+  };
+
+  const removeColumn = (id: string) => {
+    onChange({ columns: invoice.columns?.filter(c => c.id !== id) });
+  };
+
+  const handleColumnDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id && invoice.columns) {
+      const oldIndex = invoice.columns.findIndex((col) => col.id === active.id);
+      const newIndex = invoice.columns.findIndex((col) => col.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onChange({ columns: arrayMove(invoice.columns, oldIndex, newIndex) });
+      }
     }
   };
 
@@ -468,52 +527,71 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             <div className="space-y-3">
               {invoice.items.map((item) => (
                 <SortableItem key={item.id} id={item.id}>
-                  <div className="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation">
-                    <div className="flex justify-between gap-2">
-                      {/* Prevent drag on input interaction by stopping propagation if needed, 
-                           but generally dnd-kit sensors handle this. 
-                           However, for mobile long-press, inputs might need to be careful.
-                           Adding `onPointerDown={(e) => e.stopPropagation()}` to inputs can prevent drag,
-                           BUT we want drag on the *container* long press.
-                           If we touch an input, we want to type. Long press on input should probably select text?
-                           Usually strictly separating handles is better, but "Long press list item" is the req.
-                       */}
-                      <input
-                        placeholder={t.itemDesc}
-                        className="flex-1 bg-transparent font-medium"
-                        value={item.description}
-                        autoFocus={item.id === focusItemId}
-                        onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                      />
-                      <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">{t.quantity}</label>
-                        <input
-                          type="number"
-                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, { quantity: e.target.value === '' ? '' : Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">{t.rate}</label>
-                        <input
-                          type="number"
-                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
-                          value={item.rate}
-                          onChange={(e) => updateItem(item.id, { rate: e.target.value === '' ? '' : Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="flex-1 text-right">
-                        <label className="text-[10px] font-bold text-slate-400">{t.amount}</label>
-                        <div className="font-bold py-1">{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}</div>
-                      </div>
-                    </div>
+                  {/* Dynamic Columns Header Sorting - Only visible in custom mode or if we want it always editable? 
+                        The prompt implies "Item Description Qty Rate Amount 列表的这四个字段中都可以修改表头名称。都可以拖动修改排序。并且还可以新增自定义字段".
+                        This suggests a column editor interface. We can put it above the list or integrated.
+                        Let's integrate it: Render a Sortable Header Row above the list items.
+                     */}
+
+                  <div className="flex gap-4">
+                    {invoice.columns?.map(col => {
+                      if (col.id === 'description') return (
+                        <div key={col.id} className="flex-1">
+                          <input
+                            placeholder={t.itemDesc}
+                            className="bg-transparent font-bold text-xs text-slate-400 mb-1 w-full border-b border-transparent hover:border-slate-300 focus:border-blue-500 transition-colors"
+                            value={col.label}
+                            onChange={(e) => updateColumn(col.id, { label: e.target.value })}
+                          />
+                          <input
+                            placeholder={t.itemDesc}
+                            className="flex-1 bg-transparent font-medium w-full"
+                            value={item.description}
+                            autoFocus={item.id === focusItemId}
+                            onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                          />
+                        </div>
+                      );
+
+                      // Amount is typically read-only calculation
+                      if (col.id === 'amount') return (
+                        <div key={col.id} className="flex-1 text-right">
+                          <input
+                            className="text-[10px] font-bold text-slate-400 bg-transparent text-right w-full border-b border-transparent hover:border-slate-300 focus:border-blue-500 transition-colors"
+                            value={col.label}
+                            onChange={(e) => updateColumn(col.id, { label: e.target.value })}
+                          />
+                          <div className="font-bold py-1">{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}</div>
+                        </div>
+                      );
+
+                      return (
+                        <div key={col.id} className="flex-1">
+                          <div className="flex justify-between items-center group/label">
+                            <input
+                              className="text-[10px] font-bold text-slate-400 w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 transition-colors"
+                              value={col.label}
+                              onChange={(e) => updateColumn(col.id, { label: e.target.value })}
+                            />
+                            {col.isCustom && (
+                              <button onClick={() => removeColumn(col.id)} className="text-red-400 opacity-0 group-hover/label:opacity-100 px-1">×</button>
+                            )}
+                          </div>
+                          <input
+                            type={col.type === 'number' ? "number" : "text"}
+                            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+                            value={item[col.dataIndex] || ''}
+                            onChange={(e) => updateItem(item.id, { [col.dataIndex]: e.target.value })}
+                          />
+                        </div>
+                      );
+                    })}
+
+                    <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1 self-center">
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
                   </div>
+
                 </SortableItem>
               ))}
             </div>
@@ -554,7 +632,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
 
       </section>
-    </div>
+    </div >
   );
 };
 

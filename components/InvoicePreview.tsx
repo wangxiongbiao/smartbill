@@ -61,7 +61,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
       <div className={styles.header}>
         <div className={`flex justify-between items-start gap-6 ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
           <div>
-            <h1 className="text-4xl font-black mb-1">{docTitle}</h1>
+            <h1 className="text-2xl font-black mb-1">{docTitle}</h1>
             {invoice.visibility?.invoiceNumber !== false && (
               <p className="opacity-80">#{invoice.invoiceNumber}</p>
             )}
@@ -69,10 +69,10 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className={`flex gap-2 ${isHeaderReversed ? 'flex-row text-left' : 'flex-row-reverse text-right'}`}>
             {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-16 object-contain" />}
             <div>
-              <h2 className="text-xl font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
-              <p className="text-sm opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
+              <h2 className="text-base font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
+              <p className="text-xs opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
               {invoice.sender.customFields?.map(field => (
-                <p key={field.id} className="text-sm opacity-80 mt-1">
+                <p key={field.id} className="text-xs opacity-80 mt-1">
                   <span className="font-semibold">{field.label}</span> {field.value}
                 </p>
               ))}
@@ -84,12 +84,12 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
       <div className="px-12 py-10 flex-1 flex flex-col">
         <div className="grid grid-cols-2 gap-12 mb-10">
           <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase mb-2">{t.billTo}</h3>
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase mb-2">{t.billTo}</h3>
             <div className="border-l-4 border-slate-200 pl-4">
-              <p className="font-bold text-lg">{invoice.client.name || t.clientName}</p>
-              <p className="text-sm text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
+              <p className="font-bold text-base">{invoice.client.name || t.clientName}</p>
+              <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
               {invoice.client.customFields?.map(field => (
-                <p key={field.id} className="text-sm text-slate-500 mt-1">
+                <p key={field.id} className="text-xs text-slate-500 mt-1">
                   <span className="font-semibold">{field.label}</span> {field.value}
                 </p>
               ))}
@@ -98,14 +98,14 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className="text-right">
             {invoice.visibility?.date !== false && (
               <>
-                <p className="text-xs font-bold text-slate-400 mb-1">{lang === 'ja' ? '発行日' : (lang === 'en' ? 'Date' : '開具日期')}</p>
-                <p className="font-medium mb-4">{invoice.date}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'ja' ? '発行日' : (lang === 'en' ? 'Date' : '開具日期')}</p>
+                <p className="text-sm font-medium mb-4">{invoice.date}</p>
               </>
             )}
             {(invoice.type === 'invoice' || (invoice.type === 'custom' && invoice.visibility?.dueDate !== false)) && (
               <>
-                <p className="text-xs font-bold text-slate-400 mb-1">{lang === 'ja' ? '期限' : (lang === 'en' ? 'Due Date' : '截止日期')}</p>
-                <p className={`font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'ja' ? '期限' : (lang === 'en' ? 'Due Date' : '截止日期')}</p>
+                <p className={`text-sm font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>
               </>
             )}
           </div>
@@ -113,20 +113,59 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
         <table className="w-full text-left mb-8">
           <thead>
-            <tr className={`${styles.tableHeader} text-xs font-bold uppercase`}>
-              <th className="px-6 py-4">{t.itemDesc}</th>
-              <th className="px-6 py-4 text-center">{t.quantity}</th>
-              <th className="px-6 py-4 text-center">{t.rate}</th>
-              <th className="px-6 py-4 text-right">{t.amount}</th>
+            <tr className={`${styles.tableHeader} text-[10px] font-bold uppercase`}>
+              {(invoice.columns && invoice.columns.length > 0 ? invoice.columns : [
+                { id: 'description', label: t.itemDesc, dataIndex: 'description', type: 'text' },
+                { id: 'quantity', label: t.quantity, dataIndex: 'quantity', type: 'number' },
+                { id: 'rate', label: t.rate, dataIndex: 'rate', type: 'amount' },
+                { id: 'amount', label: t.amount, dataIndex: 'amount', type: 'amount' }
+              ]).map((col: any) => (
+                <th
+                  key={col.id}
+                  className={`px-6 py-4 ${col.id === 'amount' ? 'text-right' :
+                      (col.id === 'rate' || col.id === 'quantity' || col.type === 'number') ? 'text-center' :
+                        (col.type === 'amount' ? 'text-right' : 'text-left')
+                    }`}
+                >
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {invoice.items.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 font-medium">{item.description || '...'}</td>
-                <td className="px-6 py-4 text-center">{item.quantity}</td>
-                <td className="px-6 py-4 text-center">{currencyFormatter.format(Number(item.rate))}</td>
-                <td className="px-6 py-4 text-right font-bold">{currencyFormatter.format(Number(item.quantity) * Number(item.rate))}</td>
+              <tr key={item.id} className="text-xs">
+                {(invoice.columns && invoice.columns.length > 0 ? invoice.columns : [
+                  { id: 'description', label: t.itemDesc, dataIndex: 'description', type: 'text' },
+                  { id: 'quantity', label: t.quantity, dataIndex: 'quantity', type: 'number' },
+                  { id: 'rate', label: t.rate, dataIndex: 'rate', type: 'amount' },
+                  { id: 'amount', label: t.amount, dataIndex: 'amount', type: 'amount' }
+                ]).map((col: any) => {
+                  const alignment = col.id === 'amount' ? 'text-right' :
+                    (col.id === 'rate' || col.id === 'quantity' || col.type === 'number') ? 'text-center' :
+                      (col.type === 'amount' ? 'text-right' : 'text-left');
+
+                  if (col.id === 'amount') {
+                    return (
+                      <td key={col.id} className={`px-6 py-4 font-bold ${alignment}`}>
+                        {currencyFormatter.format(Number(item.quantity || 0) * Number(item.rate || 0))}
+                      </td>
+                    );
+                  }
+                  if (col.id === 'rate') {
+                    return (
+                      <td key={col.id} className={`px-6 py-4 ${alignment}`}>
+                        {currencyFormatter.format(Number(item.rate || 0))}
+                      </td>
+                    );
+                  }
+
+                  return (
+                    <td key={col.id} className={`px-6 py-4 ${alignment} ${col.id === 'description' ? 'font-medium' : ''}`}>
+                      {item[col.dataIndex] || (col.id === 'description' ? '...' : '')}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -141,12 +180,12 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             )}
             <div className={`border-t ${styles.signatureBorder} pt-2 min-w-[180px]`}>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authorized Signature</p>
-              <p className="text-sm font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
+              <p className="text-xs font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
             </div>
           </div>
 
           <div className="w-64 space-y-2">
-            <div className="flex justify-between text-slate-500">
+            <div className="flex justify-between text-slate-500 text-xs">
               <span>{lang === 'zh-TW' ? '小計' : 'Subtotal'}</span>
               <span>{currencyFormatter.format(subtotal)}</span>
             </div>
@@ -154,7 +193,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <span>{t.taxRate} ({invoice.taxRate}%)</span>
               <span>{currencyFormatter.format(tax)}</span>
             </div>
-            <div className="flex justify-between text-xl font-black text-slate-900 pt-2 border-t border-slate-200">
+            <div className="flex justify-between text-lg font-black text-slate-900 pt-2 border-t border-slate-200">
               <span>{t.total}</span>
               <span>{currencyFormatter.format(total)}</span>
             </div>

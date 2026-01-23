@@ -4,6 +4,7 @@ export interface InvoiceItem {
   description: string;
   quantity: number | string; // Allow string for easier form handling (empty inputs)
   rate: number | string;
+  [key: string]: any;
 }
 
 export interface CustomField {
@@ -76,8 +77,26 @@ export interface Invoice {
   // Template Configuration
   template?: TemplateType;
   isHeaderReversed?: boolean;
+  isHeaderReversed?: boolean;
   visibility?: Record<string, boolean>;
+  columns?: InvoiceColumn[];
 }
+
+export interface InvoiceColumn {
+  id: string;
+  label: string;
+  dataIndex: string;
+  type: 'text' | 'number' | 'amount';
+  isCustom?: boolean;
+}
+
+// Allow dynamic properties effectively by indexing, although strict interface is cleaner.
+// We keep core props strictly typed and allow extras if needed, or just rely on 'any' casting in UI loops
+// typically modifying InvoiceItem to have an index signature is most flexible:
+// export interface InvoiceItem { [key: string]: any; id: string; ... }
+// But for now, let's keep it clean and maybe just assume additional props are managed via casting or updates.
+// Actually, let's add the index signature to InvoiceItem:
+
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
 export type ViewType = 'home' | 'editor' | 'records' | 'profile' | 'about' | 'help';
