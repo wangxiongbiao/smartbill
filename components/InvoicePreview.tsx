@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Invoice, TemplateType, Language } from '../types';
+import { Invoice, TemplateType, Language, InvoiceColumn, InvoiceItem } from '../types';
 import { translations } from '../i18n';
 
 interface InvoicePreviewProps {
@@ -10,6 +9,13 @@ interface InvoicePreviewProps {
   isForPdf?: boolean;
   lang: Language;
 }
+
+const defaultColumns: InvoiceColumn[] = [
+  { id: 'desc', field: 'description', label: 'Description', type: 'system-text', order: 0, visible: true, required: true },
+  { id: 'qty', field: 'quantity', label: 'Quantity', type: 'system-quantity', order: 1, visible: true, required: true },
+  { id: 'rate', field: 'rate', label: 'Rate', type: 'system-rate', order: 2, visible: true, required: true },
+  { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
+];
 
 const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   invoice,
@@ -55,6 +61,27 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
   const styles = getTemplateStyles();
   const docTitle = invoice.type === 'invoice' ? t.invoiceMode.split(' ')[0].toUpperCase() : t.receiptMode.split(' ')[0].toUpperCase();
+
+  const columns = invoice.columnConfig || defaultColumns;
+  const visibleColumns = columns.filter(col => col.visible).sort((a, b) => a.order - b.order);
+
+  const renderCell = (item: InvoiceItem, column: InvoiceColumn) => {
+    switch (column.type) {
+      case 'system-text':
+        return item.description || '...';
+      case 'system-quantity':
+        return item.quantity;
+      case 'system-rate':
+        return currencyFormatter.format(Number(item.rate));
+      case 'system-amount':
+        return currencyFormatter.format(Number(item.quantity) * Number(item.rate));
+      case 'custom-text':
+      case 'custom-number':
+        return item.customValues?.[column.id] || '';
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={` ${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden`}>
@@ -114,19 +141,21 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         <table className="w-full text-left mb-8">
           <thead>
             <tr className={`${styles.tableHeader} text-[10px] font-bold uppercase`}>
-              <th className="px-6 py-4">{t.itemDesc}</th>
-              <th className="px-6 py-4 text-center">{t.quantity}</th>
-              <th className="px-6 py-4 text-center">{t.rate}</th>
-              <th className="px-6 py-4 text-right">{t.amount}</th>
+              {visibleColumns.map(col => (
+                <th key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : '')}`}>
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {invoice.items.map((item) => (
               <tr key={item.id} className="text-xs">
-                <td className="px-6 py-4 font-medium">{item.description || '...'}</td>
-                <td className="px-6 py-4 text-center">{item.quantity}</td>
-                <td className="px-6 py-4 text-center">{currencyFormatter.format(Number(item.rate))}</td>
-                <td className="px-6 py-4 text-right font-bold">{currencyFormatter.format(Number(item.quantity) * Number(item.rate))}</td>
+                {visibleColumns.map(col => (
+                  <td key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-bold' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium')}`}>
+                    {renderCell(item, col)}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
@@ -160,13 +189,6 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </div>
           </div>
         </div>
-        {/* 
-        {invoice.notes && (
-          <div className="mt-8 pt-4">
-            <h3 className="text-xs font-bold text-slate-400 mb-1">{t.notes}</h3>
-            <p className="text-xs text-slate-500 italic whitespace-pre-wrap">{invoice.notes}</p>
-          </div>
-        )} */}
       </div>
 
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">

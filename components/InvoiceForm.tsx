@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Invoice, InvoiceItem, DocumentType, Language, CustomField } from '../types';
+import { Invoice, InvoiceItem, DocumentType, Language, CustomField, InvoiceColumn } from '../types';
 import { translations } from '../i18n';
 import {
   DndContext,
@@ -20,6 +20,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import ColumnConfigurator from './ColumnConfigurator';
 
 interface InvoiceFormProps {
   invoice: Invoice;
@@ -53,12 +54,30 @@ const SortableItem = ({ id, children }: { id: string; children: React.ReactNode 
   );
 };
 
+const defaultColumns: InvoiceColumn[] = [
+  { id: 'desc', field: 'description', label: 'Description', type: 'system-text', order: 0, visible: true, required: true },
+  { id: 'qty', field: 'quantity', label: 'Quantity', type: 'system-quantity', order: 1, visible: true, required: true },
+  { id: 'rate', field: 'rate', label: 'Rate', type: 'system-rate', order: 2, visible: true, required: true },
+  { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
+];
+
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
+  const [showColumnConfig, setShowColumnConfig] = useState(false);
   const t = translations[lang] || translations['en'];
+
+  // Initialize columns if not present
+  useEffect(() => {
+    if (!invoice.columnConfig) {
+      onChange({ columnConfig: defaultColumns });
+    }
+  }, [invoice.columnConfig, onChange]);
+
+  const columns = invoice.columnConfig || defaultColumns;
+  const visibleColumns = columns.filter(col => col.visible).sort((a, b) => a.order - b.order);
 
   // Sensors for Drag and Drop
   const sensors = useSensors(
@@ -188,6 +207,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
     onChange({ items: newItems });
   };
 
+  const updateCustomValue = (itemId: string, columnId: string, value: string) => {
+    const item = invoice.items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const newCustomValues = { ...(item.customValues || {}), [columnId]: value };
+    updateItem(itemId, { customValues: newCustomValues });
+  };
+
   const removeItem = (id: string) => {
     onChange({ items: invoice.items.filter(item => item.id !== id) });
   };
@@ -200,6 +227,62 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         onChange({ sender: { ...invoice.sender, logo: reader.result as string } });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const renderCell = (item: InvoiceItem, column: InvoiceColumn) => {
+    switch (column.type) {
+      case 'system-text': // Description
+        return (
+          <div className="flex justify-between gap-2 w-full">
+            <input
+              placeholder={column.label}
+              className="flex-1 bg-transparent font-medium w-full"
+              value={item.description}
+              autoFocus={item.id === focusItemId}
+              onChange={(e) => updateItem(item.id, { description: e.target.value })}
+            />
+            <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
+              <i className="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        );
+      case 'system-quantity':
+        return (
+          <input
+            type="number"
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+            value={item.quantity}
+            onChange={(e) => updateItem(item.id, { quantity: e.target.value === '' ? '' : Number(e.target.value) })}
+          />
+        );
+      case 'system-rate':
+        return (
+          <input
+            type="number"
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+            value={item.rate}
+            onChange={(e) => updateItem(item.id, { rate: e.target.value === '' ? '' : Number(e.target.value) })}
+          />
+        );
+      case 'system-amount':
+        return (
+          <div className="font-bold py-1 text-right">
+            {(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
+          </div>
+        );
+      case 'custom-text':
+      case 'custom-number':
+        return (
+          <input
+            type={column.type === 'custom-number' ? 'number' : 'text'}
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
+            value={item.customValues?.[column.id] || ''}
+            onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)}
+          />
+        );
+      default:
+        return null;
     }
   };
 
@@ -454,7 +537,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       </section>
 
       <section className="space-y-4 pt-4 border-t border-slate-100">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.items}</h3>
+        <div className="flex justify-between items-center relative">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.items}</h3>
+          <button
+            onClick={() => setShowColumnConfig(!showColumnConfig)}
+            className="text-slate-400 hover:text-blue-600 transition-colors"
+            title="Customize Columns"
+          >
+            <i className="fas fa-cog"></i>
+          </button>
+
+          {showColumnConfig && (
+            <ColumnConfigurator
+              columns={columns}
+              onChange={(newCols) => onChange({ columnConfig: newCols })}
+              onClose={() => setShowColumnConfig(false)}
+            />
+          )}
+        </div>
 
         <DndContext
           sensors={sensors}
@@ -466,53 +566,26 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-3">
+              {/* Header Row */}
+              <div className="flex gap-4 px-3 py-1">
+                {visibleColumns.map(col => (
+                  <div
+                    key={col.id}
+                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold text-slate-400 uppercase tracking-wider ${col.type === 'system-amount' ? 'text-right' : ''}`}
+                  >
+                    {col.label}
+                  </div>
+                ))}
+              </div>
+
               {invoice.items.map((item) => (
                 <SortableItem key={item.id} id={item.id}>
-                  <div className="flex flex-col gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation">
-                    <div className="flex justify-between gap-2">
-                      {/* Prevent drag on input interaction by stopping propagation if needed, 
-                           but generally dnd-kit sensors handle this. 
-                           However, for mobile long-press, inputs might need to be careful.
-                           Adding `onPointerDown={(e) => e.stopPropagation()}` to inputs can prevent drag,
-                           BUT we want drag on the *container* long press.
-                           If we touch an input, we want to type. Long press on input should probably select text?
-                           Usually strictly separating handles is better, but "Long press list item" is the req.
-                       */}
-                      <input
-                        placeholder={t.itemDesc}
-                        className="flex-1 bg-transparent font-medium"
-                        value={item.description}
-                        autoFocus={item.id === focusItemId}
-                        onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                      />
-                      <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">{t.quantity}</label>
-                        <input
-                          type="number"
-                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, { quantity: e.target.value === '' ? '' : Number(e.target.value) })}
-                        />
+                  <div className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation items-center">
+                    {visibleColumns.map(col => (
+                      <div key={col.id} className={col.type === 'system-text' ? 'flex-1' : 'w-24'}>
+                        {renderCell(item, col)}
                       </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">{t.rate}</label>
-                        <input
-                          type="number"
-                          className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
-                          value={item.rate}
-                          onChange={(e) => updateItem(item.id, { rate: e.target.value === '' ? '' : Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="flex-1 text-right">
-                        <label className="text-[10px] font-bold text-slate-400">{t.amount}</label>
-                        <div className="font-bold py-1">{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}</div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </SortableItem>
               ))}

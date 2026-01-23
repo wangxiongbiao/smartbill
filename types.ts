@@ -1,9 +1,22 @@
 
+export type ColumnType = 'system-quantity' | 'system-rate' | 'system-amount' | 'system-text' | 'custom-text' | 'custom-number';
+
+export interface InvoiceColumn {
+  id: string;
+  field: string;
+  label: string;
+  type: ColumnType;
+  order: number;
+  visible: boolean;
+  required: boolean;
+}
+
 export interface InvoiceItem {
   id: string;
   description: string;
   quantity: number | string; // Allow string for easier form handling (empty inputs)
   rate: number | string;
+  customValues?: Record<string, string | number>;
 }
 
 export interface CustomField {
@@ -77,6 +90,7 @@ export interface Invoice {
   template?: TemplateType;
   isHeaderReversed?: boolean;
   visibility?: Record<string, boolean>;
+  columnConfig?: InvoiceColumn[];
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
