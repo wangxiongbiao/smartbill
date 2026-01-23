@@ -163,15 +163,19 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
         <div className="flex justify-between pt-6 border-t border-slate-100 mt-auto">
           <div className="flex flex-col items-start">
-            {invoice.sender.signature && (
-              <div className="mb-2">
-                <img src={invoice.sender.signature} alt="Signature" className="h-16 object-contain" />
-              </div>
+            {invoice.visibility?.signature === true && (
+              <>
+                {invoice.sender.signature && (
+                  <div className="mb-2">
+                    <img src={invoice.sender.signature} alt="Signature" className="h-16 object-contain" />
+                  </div>
+                )}
+                <div className={`border-t ${styles.signatureBorder} pt-2 min-w-[180px]`}>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authorized Signature</p>
+                  <p className="text-xs font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
+                </div>
+              </>
             )}
-            <div className={`border-t ${styles.signatureBorder} pt-2 min-w-[180px]`}>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authorized Signature</p>
-              <p className="text-xs font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
-            </div>
           </div>
 
           <div className="w-64 space-y-2">
@@ -189,6 +193,45 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Payment Info */}
+        {(invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
+          <div className="mt-8 pt-4 border-t border-slate-100">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
+            <div className="space-y-1 text-xs text-slate-600">
+              {invoice.paymentInfo?.bankName && (
+                <div className="flex justify-between sm:justify-start sm:gap-4">
+                  <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
+                  <span className="font-bold text-slate-800">{invoice.paymentInfo.bankName}</span>
+                </div>
+              )}
+              {invoice.paymentInfo?.accountName && (
+                <div className="flex justify-between sm:justify-start sm:gap-4">
+                  <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
+                  <span className="font-bold text-slate-800">{invoice.paymentInfo.accountName}</span>
+                </div>
+              )}
+              {invoice.paymentInfo?.accountNumber && (
+                <div className="flex justify-between sm:justify-start sm:gap-4">
+                  <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
+                  <span className="font-bold text-slate-800 font-mono">{invoice.paymentInfo.accountNumber}</span>
+                </div>
+              )}
+              {invoice.paymentInfo?.extraInfo && (
+                <div className="flex justify-between sm:justify-start sm:gap-4">
+                  <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
+                  <span className="text-slate-600 whitespace-pre-wrap">{invoice.paymentInfo.extraInfo}</span>
+                </div>
+              )}
+              {invoice.paymentInfo?.customFields?.map(field => (
+                <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
+                  <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
+                  <span className="font-bold text-slate-800">{field.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">

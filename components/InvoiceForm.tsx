@@ -77,7 +77,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   }, [invoice.columnConfig, onChange]);
 
   const columns = invoice.columnConfig || defaultColumns;
-  const visibleColumns = columns.filter(col => col.visible).sort((a, b) => a.order - b.order);
+  // CHANGED: Show all columns, sorted by order
+  const sortedColumns = columns.slice().sort((a, b) => a.order - b.order);
 
   // Sensors for Drag and Drop
   const sensors = useSensors(
@@ -425,7 +426,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           {invoice.type === 'custom' && (
             <div className="space-y-2 mt-2">
               {invoice.sender.customFields?.map((field, index) => (
-                <div key={field.id} className="flex gap-2 items-start">
+                <div key={field.id} className="flex gap-4 items-start">
                   <input
                     placeholder={t.fieldName}
                     value={field.label}
@@ -490,7 +491,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           {invoice.type === 'custom' && (
             <div className="space-y-2 mt-2">
               {invoice.client.customFields?.map((field, index) => (
-                <div key={field.id} className="flex gap-2 items-start">
+                <div key={field.id} className="flex gap-4 items-start">
                   <input
                     placeholder={t.fieldName}
                     value={field.label}
@@ -534,6 +535,84 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             </div>
           )}
         </div>
+
+        {/* Payment Info */}
+        <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input
+              placeholder={t.bankName}
+              value={invoice.paymentInfo?.bankName || ''}
+              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, bankName: e.target.value } as any })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+            />
+            <input
+              placeholder={t.accountName}
+              value={invoice.paymentInfo?.accountName || ''}
+              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountName: e.target.value } as any })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+            />
+            <input
+              placeholder={t.accountNumber}
+              value={invoice.paymentInfo?.accountNumber || ''}
+              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountNumber: e.target.value } as any })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono"
+            />
+            <input
+              placeholder={t.extraInfo}
+              value={invoice.paymentInfo?.extraInfo || ''}
+              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, extraInfo: e.target.value } as any })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+            />
+          </div>
+
+          {/* Custom Fields for Payment Info */}
+          <div className="space-y-2 mt-2">
+            {invoice.paymentInfo?.customFields?.map((field, index) => (
+              <div key={field.id} className="flex gap-4 items-start">
+                <input
+                  placeholder={t.fieldName}
+                  value={field.label}
+                  onChange={(e) => {
+                    const newFields = [...(invoice.paymentInfo?.customFields || [])];
+                    newFields[index] = { ...field, label: e.target.value };
+                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
+                  }}
+                  className="w-1/3 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                />
+                <input
+                  placeholder={t.fieldValue}
+                  value={field.value}
+                  onChange={(e) => {
+                    const newFields = [...(invoice.paymentInfo?.customFields || [])];
+                    newFields[index] = { ...field, value: e.target.value };
+                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
+                  }}
+                  className="flex-1 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                />
+                <button
+                  onClick={() => {
+                    const newFields = invoice.paymentInfo?.customFields?.filter(f => f.id !== field.id);
+                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
+                  }}
+                  className="text-slate-400 hover:text-red-500"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => {
+                const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
+                const currentFields = invoice.paymentInfo?.customFields || [];
+                onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: [...currentFields, newField] } as any });
+              }}
+              className="text-xs text-blue-600 font-medium hover:underline"
+            >
+              + {t.addCustomField}
+            </button>
+          </div>
+        </div>
       </section>
 
       <section className="space-y-4 pt-4 border-t border-slate-100">
@@ -568,11 +647,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             <div className="space-y-3">
               {/* Header Row */}
               <div className="flex gap-4 px-3 py-1">
-                {visibleColumns.map(col => (
+                {sortedColumns.map(col => (
                   <div
                     key={col.id}
-                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold text-slate-400 uppercase tracking-wider ${col.type === 'system-amount' ? 'text-right' : ''}`}
+                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${col.type === 'system-amount' ? 'justify-end' : ''} ${col.visible ? 'text-slate-400' : 'text-slate-300'}`}
                   >
+                    {!col.visible && <i className="fas fa-eye-slash text-[10px]"></i>}
                     {col.label}
                   </div>
                 ))}
@@ -581,8 +661,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
               {invoice.items.map((item) => (
                 <SortableItem key={item.id} id={item.id}>
                   <div className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation items-center">
-                    {visibleColumns.map(col => (
-                      <div key={col.id} className={col.type === 'system-text' ? 'flex-1' : 'w-24'}>
+                    {sortedColumns.map(col => (
+                      <div key={col.id} className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} ${!col.visible ? 'opacity-40 grayscale' : ''}`}>
                         {renderCell(item, col)}
                       </div>
                     ))}
@@ -615,14 +695,27 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.signature}</h3>
-            <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.signature}</h3>
+              <button
+                onClick={() => onChange({ visibility: { ...invoice.visibility, signature: !invoice.visibility?.signature } })}
+                className={`text-xs ${invoice.visibility?.signature === true ? 'text-blue-600' : 'text-slate-300'}`}
+                title={t.visibility}
+              >
+                <i className={`fas fa-toggle-${invoice.visibility?.signature === true ? 'on' : 'off'} text-lg`}></i>
+              </button>
+            </div>
+            {invoice.visibility?.signature === true && (
+              <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
+            )}
           </div>
 
-          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden relative">
-            <canvas ref={canvasRef} width={1000} height={400} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing} className="w-full h-[200px] cursor-crosshair touch-none" />
-            {!invoice.sender.signature && <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">{t.signPlaceholder}</div>}
-          </div>
+          {invoice.visibility?.signature === true && (
+            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden relative animate-in slide-in-from-top-2 duration-200">
+              <canvas ref={canvasRef} width={1000} height={400} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing} className="w-full h-[200px] cursor-crosshair touch-none" />
+              {!invoice.sender.signature && <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">{t.signPlaceholder}</div>}
+            </div>
+          )}
         </div>
 
 

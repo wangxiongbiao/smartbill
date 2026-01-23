@@ -155,7 +155,13 @@ export const translations: Record<Language, any> = {
     recipientEmail: 'Recipient Email',
     emailInfo: 'The client will receive an email with a secure link to view and download this invoice.',
     linkWillBeCreated: 'A share link will be automatically created.',
-    sendInvoice: 'Send Invoice'
+    sendInvoice: 'Send Invoice',
+    // Payment Info
+    paymentInfo: 'Payment Info',
+    bankName: 'Bank Name',
+    accountName: 'Account Name',
+    accountNumber: 'Account Number',
+    extraInfo: 'Additional Info (SWIFT/IBAN)',
   },
   'zh-TW': {
     home: '首頁',
@@ -310,7 +316,13 @@ export const translations: Record<Language, any> = {
     recipientEmail: '收件人郵箱',
     emailInfo: '客戶將收到一封包含安全鏈接的郵件，用於查看和下載此發票。',
     linkWillBeCreated: '將自動生成分享鏈接。',
-    sendInvoice: '發送發票'
+    sendInvoice: '發送發票',
+    // Payment Info
+    paymentInfo: '收款信息',
+    bankName: '銀行名稱',
+    accountName: '賬戶名稱',
+    accountNumber: '銀行賬號',
+    extraInfo: '附加信息 (SWIFT/IBAN)',
   },
   'fr': {
     home: 'Accueil',
@@ -392,7 +404,13 @@ export const translations: Record<Language, any> = {
     recipientEmail: 'Email du destinataire',
     emailInfo: 'Le client recevra un email avec un lien sécurisé pour voir et télécharger cette facture.',
     linkWillBeCreated: 'Un lien de partage sera créé automatiquement.',
-    sendInvoice: 'Envoyer Facture'
+    sendInvoice: 'Envoyer Facture',
+    // Payment Info
+    paymentInfo: 'Informations de paiement',
+    bankName: 'Nom de la banque',
+    accountName: 'Nom du compte',
+    accountNumber: 'Numéro de compte',
+    extraInfo: 'Infos supplémentaires (SWIFT/IBAN)',
   },
   'de': {
     home: 'Start',
@@ -474,7 +492,13 @@ export const translations: Record<Language, any> = {
     recipientEmail: 'Empfänger Email',
     emailInfo: 'Der Kunde erhält eine Email mit einem sicheren Link zum Anzeigen und Herunterladen dieser Rechnung.',
     linkWillBeCreated: 'Ein Teilen-Link wird automatisch erstellt.',
-    sendInvoice: 'Rechnung Senden'
+    sendInvoice: 'Rechnung Senden',
+    // Payment Info
+    paymentInfo: 'Zahlungsinformationen',
+    bankName: 'Bankname',
+    accountName: 'Kontoinhaber',
+    accountNumber: 'Kontonummer',
+    extraInfo: 'Zusatzinfo (SWIFT/IBAN)',
   },
   'ja': {
     home: 'ホーム',
@@ -556,6 +580,12 @@ export const translations: Record<Language, any> = {
     recipientEmail: '受信者メール',
     emailInfo: 'クライアントは、この請求書を表示およびダウンロードするための安全なリンクを含むメールを受け取ります。',
     linkWillBeCreated: '共有リンクが自動的に作成されます。',
-    sendInvoice: '請求書を送信'
+    sendInvoice: '請求書を送信',
+    // Payment Info
+    paymentInfo: '振込先情報',
+    bankName: '銀行名',
+    accountName: '口座名義',
+    accountNumber: '口座番号',
+    extraInfo: '追加情報 (SWIFT/IBAN)',
   }
 };

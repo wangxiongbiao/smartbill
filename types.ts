@@ -73,6 +73,14 @@ export interface InvoiceRecord {
 export type DocumentType = 'invoice' | 'receipt' | 'custom';
 export type Language = 'zh-TW' | 'en' | 'fr' | 'de' | 'ja';
 
+export interface PaymentInfo {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  extraInfo?: string;
+  customFields?: CustomField[];
+}
+
 export interface Invoice {
   id: string;
   type: DocumentType;
@@ -81,6 +89,7 @@ export interface Invoice {
   dueDate: string;
   sender: Sender;
   client: Client;
+  paymentInfo?: PaymentInfo;
   items: InvoiceItem[];
   taxRate: number;
   currency: string;
