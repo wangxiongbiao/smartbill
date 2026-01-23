@@ -114,58 +114,19 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         <table className="w-full text-left mb-8">
           <thead>
             <tr className={`${styles.tableHeader} text-[10px] font-bold uppercase`}>
-              {(invoice.columns && invoice.columns.length > 0 ? invoice.columns : [
-                { id: 'description', label: t.itemDesc, dataIndex: 'description', type: 'text' },
-                { id: 'quantity', label: t.quantity, dataIndex: 'quantity', type: 'number' },
-                { id: 'rate', label: t.rate, dataIndex: 'rate', type: 'amount' },
-                { id: 'amount', label: t.amount, dataIndex: 'amount', type: 'amount' }
-              ]).map((col: any) => (
-                <th
-                  key={col.id}
-                  className={`px-6 py-4 ${col.id === 'amount' ? 'text-right' :
-                      (col.id === 'rate' || col.id === 'quantity' || col.type === 'number') ? 'text-center' :
-                        (col.type === 'amount' ? 'text-right' : 'text-left')
-                    }`}
-                >
-                  {col.label}
-                </th>
-              ))}
+              <th className="px-6 py-4">{t.itemDesc}</th>
+              <th className="px-6 py-4 text-center">{t.quantity}</th>
+              <th className="px-6 py-4 text-center">{t.rate}</th>
+              <th className="px-6 py-4 text-right">{t.amount}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {invoice.items.map((item) => (
               <tr key={item.id} className="text-xs">
-                {(invoice.columns && invoice.columns.length > 0 ? invoice.columns : [
-                  { id: 'description', label: t.itemDesc, dataIndex: 'description', type: 'text' },
-                  { id: 'quantity', label: t.quantity, dataIndex: 'quantity', type: 'number' },
-                  { id: 'rate', label: t.rate, dataIndex: 'rate', type: 'amount' },
-                  { id: 'amount', label: t.amount, dataIndex: 'amount', type: 'amount' }
-                ]).map((col: any) => {
-                  const alignment = col.id === 'amount' ? 'text-right' :
-                    (col.id === 'rate' || col.id === 'quantity' || col.type === 'number') ? 'text-center' :
-                      (col.type === 'amount' ? 'text-right' : 'text-left');
-
-                  if (col.id === 'amount') {
-                    return (
-                      <td key={col.id} className={`px-6 py-4 font-bold ${alignment}`}>
-                        {currencyFormatter.format(Number(item.quantity || 0) * Number(item.rate || 0))}
-                      </td>
-                    );
-                  }
-                  if (col.id === 'rate') {
-                    return (
-                      <td key={col.id} className={`px-6 py-4 ${alignment}`}>
-                        {currencyFormatter.format(Number(item.rate || 0))}
-                      </td>
-                    );
-                  }
-
-                  return (
-                    <td key={col.id} className={`px-6 py-4 ${alignment} ${col.id === 'description' ? 'font-medium' : ''}`}>
-                      {item[col.dataIndex] || (col.id === 'description' ? '...' : '')}
-                    </td>
-                  );
-                })}
+                <td className="px-6 py-4 font-medium">{item.description || '...'}</td>
+                <td className="px-6 py-4 text-center">{item.quantity}</td>
+                <td className="px-6 py-4 text-center">{currencyFormatter.format(Number(item.rate))}</td>
+                <td className="px-6 py-4 text-right font-bold">{currencyFormatter.format(Number(item.quantity) * Number(item.rate))}</td>
               </tr>
             ))}
           </tbody>
