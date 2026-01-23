@@ -67,12 +67,18 @@ const SortableColumnItem = ({
                 <i className={`fas fa-eye${column.visible ? '' : '-slash'}`}></i>
             </button>
 
-            <input
-                value={column.label}
-                onChange={(e) => onRename(column.id, e.target.value)}
-                className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                placeholder="Column Name"
-            />
+            {column.required ? (
+                <span className="flex-1 text-sm font-medium text-slate-700 px-3 py-2">
+                    {column.label}
+                </span>
+            ) : (
+                <input
+                    value={column.label}
+                    onChange={(e) => onRename(column.id, e.target.value)}
+                    className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
+                    placeholder="Column Name"
+                />
+            )}
 
             {!column.required && (
                 <button
@@ -157,7 +163,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
     };
 
     return (
-        <div className="absolute right-0 top-10 z-50 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right">
+        <div className="absolute right-0 top-10 z-50 w-120 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-slate-700">Customize Columns</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">

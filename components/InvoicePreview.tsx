@@ -140,7 +140,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
         <table className="w-full text-left mb-8">
           <thead>
-            <tr className={`${styles.tableHeader} text-[10px] font-bold uppercase`}>
+            <tr className={`${styles.tableHeader} text-[10px] font-bold`}>
               {visibleColumns.map(col => (
                 <th key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : '')}`}>
                   {col.label}
