@@ -643,18 +643,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
           />
 
-          {/* Disclaimer Text */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-700">
-              {t.disclaimerText || 'Disclaimer / Notice'}
-            </label>
-            <textarea
-              placeholder="e.g., This is a computer generated document and no signature is required."
-              value={invoice.sender.disclaimerText || ''}
-              onChange={(e) => onChange({ sender: { ...invoice.sender, disclaimerText: e.target.value } })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
-            />
-          </div>
+
 
           {/* Custom Fields for Sender - Available for all modes */}
           <div className="space-y-2 mt-2">
@@ -1014,6 +1003,31 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
               <canvas ref={canvasRef} width={1000} height={400} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing} className="w-full h-[200px] cursor-crosshair touch-none" />
               {!invoice.sender.signature && <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">{t.signPlaceholder}</div>}
             </div>
+          )}
+        </div>
+
+        {/* Disclaimer Text */}
+        <div className="space-y-3 pt-2">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.disclaimerText || 'Disclaimer / Notice'}</h3>
+              <button
+                onClick={() => onChange({ visibility: { ...invoice.visibility, disclaimer: invoice.visibility?.disclaimer === false } })}
+                className={`text-xs ${invoice.visibility?.disclaimer !== false ? 'text-blue-600' : 'text-slate-300'}`}
+                title={t.visibility}
+              >
+                <i className={`fas fa-toggle-${invoice.visibility?.disclaimer !== false ? 'on' : 'off'} text-lg`}></i>
+              </button>
+            </div>
+          </div>
+
+          {invoice.visibility?.disclaimer !== false && (
+            <textarea
+              placeholder="e.g., This is a computer generated document and no signature is required."
+              value={invoice.sender.disclaimerText || ''}
+              onChange={(e) => onChange({ sender: { ...invoice.sender, disclaimerText: e.target.value } })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+            />
           )}
         </div>
 
