@@ -95,6 +95,27 @@ export async function getUserInvoices(userId: string): Promise<Invoice[]> {
 }
 
 /**
+ * 获取用户最新的一张发票
+ */
+export async function getLatestInvoice(userId: string): Promise<Invoice | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('invoices')
+        .select('invoice_data')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error || !data) {
+        console.log('[getLatestInvoice] No invoice found or error:', error?.message);
+        return null;
+    }
+
+    return data.invoice_data as Invoice;
+}
+
+/**
  * 删除发票
  */
 export async function deleteInvoice(invoiceId: string): Promise<void> {

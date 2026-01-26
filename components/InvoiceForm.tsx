@@ -556,30 +556,30 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           >
             <optgroup label="🌏 东亚 East Asia">
-              <option value="CNY">🇨🇳 CNY ¥ 人民币</option>
-              <option value="JPY">🇯🇵 JPY ¥ 日元</option>
-              <option value="HKD">🇭🇰 HKD $ 港币</option>
-              <option value="TWD">🇹🇼 TWD $ 台币</option>
-              <option value="KRW">🇰🇷 KRW ₩ 韩元</option>
+              <option value="CNY">🇨🇳 CNY ¥ 中国</option>
+              <option value="JPY">🇯🇵 JPY ¥ 日本</option>
+              <option value="HKD">🇭🇰 HKD $ 香港</option>
+              <option value="TWD">🇹🇼 TWD $ 台灣</option>
+              <option value="KRW">🇰🇷 KRW ₩ 한국</option>
             </optgroup>
             <optgroup label="🌴 东南亚 Southeast Asia">
-              <option value="SGD">🇸🇬 SGD $ 新加坡元</option>
-              <option value="MYR">🇲🇾 MYR RM 马来西亚令吉</option>
-              <option value="THB">🇹🇭 THB ฿ 泰铢</option>
-              <option value="PHP">🇵🇭 PHP ₱ 菲律宾比索</option>
-              <option value="VND">🇻🇳 VND ₫ 越南盾</option>
-              <option value="IDR">🇮🇩 IDR Rp 印尼盾</option>
+              <option value="SGD">🇸🇬 SGD $ Singapore</option>
+              <option value="MYR">🇲🇾 MYR RM Malaysia</option>
+              <option value="THB">🇹🇭 THB ฿ ประเทศไทย</option>
+              <option value="PHP">🇵🇭 PHP ₱ Pilipinas</option>
+              <option value="VND">🇻🇳 VND ₫ Việt Nam</option>
+              <option value="IDR">🇮🇩 IDR Rp Indonesia</option>
             </optgroup>
             <optgroup label="🌎 北美洲 North America">
-              <option value="USD">🇺🇸 USD $ 美元</option>
+              <option value="USD">🇺🇸 USD $ United States</option>
             </optgroup>
             <optgroup label="🌍 欧洲 Europe">
-              <option value="EUR">🇪🇺 EUR € 欧元</option>
-              <option value="GBP">🇬🇧 GBP £ 英镑</option>
+              <option value="EUR">🇪🇺 EUR € Europe</option>
+              <option value="GBP">🇬🇧 GBP £ United Kingdom</option>
             </optgroup>
             <optgroup label="🌏 大洋洲 Oceania">
-              <option value="AUD">🇦🇺 AUD $ 澳元</option>
-              <option value="NZD">🇳🇿 NZD $ 纽元</option>
+              <option value="AUD">🇦🇺 AUD $ Australia</option>
+              <option value="NZD">🇳🇿 NZD $ New Zealand</option>
             </optgroup>
           </select>
         </div>
