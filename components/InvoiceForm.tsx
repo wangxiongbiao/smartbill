@@ -236,12 +236,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       case 'system-text': // Description
         return (
           <div className="flex justify-between gap-2 w-full">
-            <input
+            <textarea
               placeholder={column.label}
-              className="flex-1 bg-transparent font-medium w-full"
+              className="flex-1 bg-transparent font-medium w-full resize-none overflow-hidden text-sm"
               value={item.description}
               autoFocus={item.id === focusItemId}
               onChange={(e) => updateItem(item.id, { description: e.target.value })}
+              rows={1}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
             />
             <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
               <i className="fas fa-trash-alt"></i>
@@ -273,10 +278,22 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           </div>
         );
       case 'custom-text':
+        return (
+          <textarea
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden"
+            value={item.customValues?.[column.id] || ''}
+            onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)}
+            rows={1}
+            onInput={(e) => {
+              e.currentTarget.style.height = 'auto';
+              e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+            }}
+          />
+        );
       case 'custom-number':
         return (
           <input
-            type={column.type === 'custom-number' ? 'number' : 'text'}
+            type="number"
             className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
             value={item.customValues?.[column.id] || ''}
             onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)}
@@ -426,18 +443,29 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           {invoice.type === 'custom' && (
             <div className="space-y-2 mt-2">
               {invoice.sender.customFields?.map((field, index) => (
-                <div key={field.id} className="flex gap-4 items-start">
-                  <input
-                    placeholder={t.fieldName}
-                    value={field.label}
-                    onChange={(e) => {
-                      const newFields = [...(invoice.sender.customFields || [])];
-                      newFields[index] = { ...field, label: e.target.value };
-                      onChange({ sender: { ...invoice.sender, customFields: newFields } });
-                    }}
-                    className="w-1/3 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
-                  />
-                  <input
+                <div key={field.id} className="space-y-2 relative">
+                  <div className="flex gap-2 items-center">
+                    <input
+                      placeholder={t.fieldName}
+                      value={field.label}
+                      onChange={(e) => {
+                        const newFields = [...(invoice.sender.customFields || [])];
+                        newFields[index] = { ...field, label: e.target.value };
+                        onChange({ sender: { ...invoice.sender, customFields: newFields } });
+                      }}
+                      className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+                    />
+                    <button
+                      onClick={() => {
+                        const newFields = invoice.sender.customFields?.filter(f => f.id !== field.id);
+                        onChange({ sender: { ...invoice.sender, customFields: newFields } });
+                      }}
+                      className="text-slate-400 hover:text-red-500"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <textarea
                     placeholder={t.fieldValue}
                     value={field.value}
                     onChange={(e) => {
@@ -445,17 +473,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                       newFields[index] = { ...field, value: e.target.value };
                       onChange({ sender: { ...invoice.sender, customFields: newFields } });
                     }}
-                    className="flex-1 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
                   />
-                  <button
-                    onClick={() => {
-                      const newFields = invoice.sender.customFields?.filter(f => f.id !== field.id);
-                      onChange({ sender: { ...invoice.sender, customFields: newFields } });
-                    }}
-                    className="text-slate-400 hover:text-red-500"
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
                 </div>
               ))}
               <button
@@ -491,18 +510,29 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           {invoice.type === 'custom' && (
             <div className="space-y-2 mt-2">
               {invoice.client.customFields?.map((field, index) => (
-                <div key={field.id} className="flex gap-4 items-start">
-                  <input
-                    placeholder={t.fieldName}
-                    value={field.label}
-                    onChange={(e) => {
-                      const newFields = [...(invoice.client.customFields || [])];
-                      newFields[index] = { ...field, label: e.target.value };
-                      onChange({ client: { ...invoice.client, customFields: newFields } });
-                    }}
-                    className="w-1/3 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
-                  />
-                  <input
+                <div key={field.id} className="space-y-2 relative">
+                  <div className="flex gap-2 items-center">
+                    <input
+                      placeholder={t.fieldName}
+                      value={field.label}
+                      onChange={(e) => {
+                        const newFields = [...(invoice.client.customFields || [])];
+                        newFields[index] = { ...field, label: e.target.value };
+                        onChange({ client: { ...invoice.client, customFields: newFields } });
+                      }}
+                      className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+                    />
+                    <button
+                      onClick={() => {
+                        const newFields = invoice.client.customFields?.filter(f => f.id !== field.id);
+                        onChange({ client: { ...invoice.client, customFields: newFields } });
+                      }}
+                      className="text-slate-400 hover:text-red-500"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <textarea
                     placeholder={t.fieldValue}
                     value={field.value}
                     onChange={(e) => {
@@ -510,17 +540,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                       newFields[index] = { ...field, value: e.target.value };
                       onChange({ client: { ...invoice.client, customFields: newFields } });
                     }}
-                    className="flex-1 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
                   />
-                  <button
-                    onClick={() => {
-                      const newFields = invoice.client.customFields?.filter(f => f.id !== field.id);
-                      onChange({ client: { ...invoice.client, customFields: newFields } });
-                    }}
-                    className="text-slate-400 hover:text-red-500"
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
                 </div>
               ))}
               <button
@@ -625,29 +646,49 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
+            <textarea
               placeholder={t.bankName}
               value={invoice.paymentInfo?.bankName || ''}
               onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, bankName: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+              rows={1}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
             />
-            <input
+            <textarea
               placeholder={t.accountName}
               value={invoice.paymentInfo?.accountName || ''}
               onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountName: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+              rows={1}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
             />
-            <input
+            <textarea
               placeholder={t.accountNumber}
               value={invoice.paymentInfo?.accountNumber || ''}
               onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountNumber: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono resize-none overflow-hidden text-sm"
+              rows={1}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
             />
-            <input
+            <textarea
               placeholder={t.extraInfo}
               value={invoice.paymentInfo?.extraInfo || ''}
               onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, extraInfo: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+              rows={1}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
             />
           </div>
 
@@ -663,9 +704,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                     newFields[index] = { ...field, label: e.target.value };
                     onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
                   }}
-                  className="w-1/3 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                  className="w-1/3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
                 />
-                <input
+                <textarea
                   placeholder={t.fieldValue}
                   value={field.value}
                   onChange={(e) => {
@@ -673,7 +714,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                     newFields[index] = { ...field, value: e.target.value };
                     onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
                   }}
-                  className="flex-1 px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded"
+                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+                  rows={1}
+                  onInput={(e) => {
+                    e.currentTarget.style.height = 'auto';
+                    e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+                  }}
                 />
                 <button
                   onClick={() => {
