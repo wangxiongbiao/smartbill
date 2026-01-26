@@ -72,7 +72,7 @@ export interface InvoiceRecord {
 }
 
 export type DocumentType = 'invoice' | 'receipt' | 'custom';
-export type Language = 'zh-TW' | 'en' | 'fr' | 'de' | 'ja';
+export type Language = 'zh-TW' | 'en';
 
 
 export type PaymentFieldType = 'text' | 'textarea';
