@@ -263,6 +263,16 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         )}
       </div>
 
+      {/* Disclaimer Text - Above Copyright */}
+      {invoice.sender.disclaimerText && (
+        <div className="px-8 py-4 border-t border-slate-50 text-center">
+          <div className="flex items-start justify-center gap-2 text-[10px] text-slate-400 leading-relaxed">
+            <i className="fas fa-graduation-cap mt-0.5 flex-shrink-0"></i>
+            <span className="whitespace-pre-wrap">{invoice.sender.disclaimerText}</span>
+          </div>
+        </div>
+      )}
+
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">
         {t.poweredBy}
       </div>

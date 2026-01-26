@@ -34,7 +34,8 @@ const INITIAL_INVOICE: Invoice = {
   sender: {
     name: '',
     email: '',
-    address: ''
+    address: '',
+    disclaimerText: 'This is a computer generated document and no signature is required.\n此为电脑生成文件，无需签名。'
   },
   client: {
     name: '',

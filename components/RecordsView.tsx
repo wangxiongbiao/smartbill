@@ -128,7 +128,15 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                     <i className="fas fa-download text-sm"></i>
                   </button>
                   <button
-                    onClick={() => onDelete(record.id)}
+                    onClick={() => {
+                      if (window.confirm(
+                        lang === 'zh-TW'
+                          ? `確定要刪除發票 ${record.invoiceNumber} 嗎？此操作無法復原。`
+                          : `Are you sure you want to delete invoice ${record.invoiceNumber}? This action cannot be undone.`
+                      )) {
+                        onDelete(record.id);
+                      }
+                    }}
                     className="w-12 h-12 bg-red-50 hover:bg-red-600 hover:text-white text-red-500 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-90"
                     title="Delete"
                   >

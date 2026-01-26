@@ -243,7 +243,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
     const newItem: InvoiceItem = {
       id,
       description: '',
-      quantity: '',
+      quantity: 1,
       rate: '',
       amount: ''
     };
@@ -641,6 +641,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
           />
 
+          {/* Disclaimer Text */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-700">
+              {t.disclaimerText || 'Disclaimer / Notice'}
+            </label>
+            <textarea
+              placeholder="e.g., This is a computer generated document and no signature is required."
+              value={invoice.sender.disclaimerText || ''}
+              onChange={(e) => onChange({ sender: { ...invoice.sender, disclaimerText: e.target.value } })}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+            />
+          </div>
+
           {/* Custom Fields for Sender */}
           {invoice.type === 'custom' && (
             <div className="space-y-2 mt-2">
@@ -816,14 +829,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                           {/* Content Area */}
                           <div className="flex-1 space-y-3">
                             {/* System Fields Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {systemColumns.map(col => {
-                                let colSpan = 'md:col-span-3';
-                                if (col.type === 'system-text') colSpan = 'md:col-span-6';
-                                if (col.type === 'system-amount') colSpan = 'md:col-span-3';
-
                                 return (
-                                  <div key={col.id} className={colSpan}>
+                                  <div key={col.id}>
                                     <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block flex items-center gap-1">
                                       {col.label}
                                       {!col.visible && (

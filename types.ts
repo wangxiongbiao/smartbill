@@ -41,6 +41,7 @@ export interface Sender {
   address: string;
   logo?: string;
   signature?: string;
+  disclaimerText?: string;
   customFields?: CustomField[];
 }
 

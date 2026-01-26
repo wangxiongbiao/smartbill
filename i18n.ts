@@ -182,6 +182,7 @@ export const translations: Record<Language, any> = {
     systemField: 'System Field',
     // Preview
     authorizedSignature: 'Authorized Signature',
+    disclaimerText: 'Disclaimer / Notice',
     poweredBy: 'Powered by SmartBill Pro',
   },
   'zh-TW': {
@@ -364,6 +365,7 @@ export const translations: Record<Language, any> = {
     systemField: '系統字段',
     // Preview
     authorizedSignature: '授權簽名',
+    disclaimerText: '免責聲明 / 通知',
     poweredBy: 'SmartBill Pro 提供技術支持',
   },
 };
