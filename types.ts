@@ -16,6 +16,7 @@ export interface InvoiceItem {
   description: string;
   quantity: number | string; // Allow string for easier form handling (empty inputs)
   rate: number | string;
+  amount?: number | string; // Allow direct amount input for bidirectional calculation
   customValues?: Record<string, string | number>;
 }
 
@@ -78,6 +79,7 @@ export interface PaymentInfo {
   accountName: string;
   accountNumber: string;
   extraInfo?: string;
+  qrCode?: string; // Payment QR code image
   customFields?: CustomField[];
 }
 

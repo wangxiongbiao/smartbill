@@ -29,7 +29,7 @@ interface InvoiceFormProps {
 }
 
 // Sortable Item Component
-const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+const SortableItem = ({ id, children }: { id: string; children: (props: { listeners: any; attributes: any }) => React.ReactNode }) => {
   const {
     attributes,
     listeners,
@@ -48,8 +48,8 @@ const SortableItem = ({ id, children }: { id: string; children: React.ReactNode 
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {children({ listeners, attributes })}
     </div>
   );
 };
@@ -63,6 +63,7 @@ const defaultColumns: InvoiceColumn[] = [
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const qrInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
@@ -195,16 +196,37 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       id,
       description: '',
       quantity: '',
-      rate: ''
+      rate: '',
+      amount: ''
     };
     onChange({ items: [...invoice.items, newItem] });
     setFocusItemId(id);
   };
 
   const updateItem = (id: string, updates: Partial<InvoiceItem>) => {
-    const newItems = invoice.items.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    );
+    const newItems = invoice.items.map(item => {
+      if (item.id !== id) return item;
+
+      const updated = { ...item, ...updates };
+
+      // Auto-calculate amount if qty or rate changed (and amount not explicitly set in updates)
+      if (('quantity' in updates || 'rate' in updates) && !('amount' in updates)) {
+        if (!String(updated.quantity ?? '') || !String(updated.rate ?? '')) {
+
+          updated.amount = undefined
+          return updated;
+        }
+
+
+
+
+        const qty = Number(updated.quantity || 0);
+        const rate = Number(updated.rate || 0);
+        updated.amount = qty * rate;
+      }
+
+      return updated;
+    });
     onChange({ items: newItems });
   };
 
@@ -214,6 +236,55 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
     const newCustomValues = { ...(item.customValues || {}), [columnId]: value };
     updateItem(itemId, { customValues: newCustomValues });
+  };
+
+  // Bidirectional amount calculation handler
+  const updateItemAmount = (id: string, newAmount: number | string) => {
+    const item = invoice.items.find(i => i.id === id);
+    if (!item) return;
+
+    // Allow clearing the amount field - also clear rate
+    if (newAmount === '') {
+      updateItem(id, { amount: '', rate: '' });
+      return;
+    }
+
+    const amount = Number(newAmount);
+    const qty = item.quantity;
+    const rate = item.rate;
+
+    // Scenario 1: Both qty and rate are empty - default qty to 1
+    if ((!qty || qty === '') && (!rate || rate === '')) {
+      updateItem(id, { quantity: 1, rate: amount, amount });
+      return;
+    }
+
+    // Scenario 2: Qty filled, rate empty - calculate rate
+    if (qty && qty !== '' && (!rate || rate === '')) {
+      const numQty = Number(qty);
+      const calculatedRate = numQty !== 0 ? amount / numQty : amount;
+      updateItem(id, { rate: calculatedRate, amount });
+      return;
+    }
+
+    // Scenario 3: Rate filled, qty empty - calculate qty
+    if ((!qty || qty === '') && rate && rate !== '') {
+      const numRate = Number(rate);
+      const calculatedQty = numRate !== 0 ? amount / numRate : 1;
+      updateItem(id, { quantity: calculatedQty, amount });
+      return;
+    }
+
+    // Scenario 4: Both filled - recalculate rate
+    if (qty && qty !== '' && rate && rate !== '') {
+      const numQty = Number(qty);
+      const calculatedRate = numQty !== 0 ? amount / numQty : amount;
+      updateItem(id, { rate: calculatedRate, amount });
+      return;
+    }
+
+    // Default: just update amount
+    updateItem(id, { amount });
   };
 
   const removeItem = (id: string) => {
@@ -231,55 +302,125 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
     }
   };
 
+  const handleLogoRemove = () => {
+    onChange({ sender: { ...invoice.sender, logo: undefined } });
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleQRCodeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: reader.result as string } as any });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleQRCodeRemove = () => {
+    onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } as any });
+    // Reset file input
+    if (qrInputRef.current) {
+      qrInputRef.current.value = '';
+    }
+  };
+
+  // Helper function to handle number input with regex validation
+  const handleNumberInput = (value: string, callback: (val: string | number) => void) => {
+    // Allow empty string
+    if (value === '' || !value) {
+      callback('');
+      return;
+    }
+
+    // Allow only numbers, decimal point, and negative sign at start
+    // Pattern: optional negative, digits, optional decimal and more digits
+    const numberRegex = /^-?\d*\.?\d*$/;
+
+    if (numberRegex.test(value)) {
+      // If it's a valid partial number (like "5." or "-." or "-"), keep as string
+      // Otherwise convert to number
+      if (value === '-' || value === '.' || value === '-.' || value.endsWith('.')) {
+        callback(value);
+      } else {
+        callback(Number(value));
+      }
+    }
+    // If invalid, don't update (silently reject invalid input)
+  };
+
+  // Helper function to auto-resize textarea on mount and input
+  const autoResizeTextarea = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  };
+
   const renderCell = (item: InvoiceItem, column: InvoiceColumn) => {
     switch (column.type) {
       case 'system-text': // Description
         return (
-          <div className="flex justify-between gap-2 w-full">
-            <textarea
-              placeholder={column.label}
-              className="flex-1 bg-transparent font-medium w-full resize-none overflow-hidden text-sm"
-              value={item.description}
-              autoFocus={item.id === focusItemId}
-              onChange={(e) => updateItem(item.id, { description: e.target.value })}
-              rows={1}
-              onInput={(e) => {
-                e.currentTarget.style.height = 'auto';
-                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-              }}
-            />
-            <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-slate-300 hover:text-red-500 p-1">
-              <i className="fas fa-trash-alt"></i>
-            </button>
-          </div>
+          <textarea
+            ref={autoResizeTextarea}
+            placeholder={column.label}
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden"
+            value={item.description}
+            autoFocus={item.id === focusItemId}
+            onChange={(e) => updateItem(item.id, { description: e.target.value })}
+            rows={1}
+            onInput={(e) => {
+              e.currentTarget.style.height = 'auto';
+              e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+            }}
+          />
         );
       case 'system-quantity':
         return (
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
             value={item.quantity}
-            onChange={(e) => updateItem(item.id, { quantity: e.target.value === '' ? '' : Number(e.target.value) })}
+            onChange={(e) => handleNumberInput(e.target.value, (val) => updateItem(item.id, { quantity: val }))}
+            placeholder="0"
           />
         );
       case 'system-rate':
         return (
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
             value={item.rate}
-            onChange={(e) => updateItem(item.id, { rate: e.target.value === '' ? '' : Number(e.target.value) })}
+            onChange={(e) => handleNumberInput(e.target.value, (val) => updateItem(item.id, { rate: val }))}
+            placeholder="0.00"
           />
         );
       case 'system-amount':
+        // Display the amount field value, or empty string if not set
+        const displayAmount = item.amount !== undefined && item.amount !== ''
+          ? item.amount
+          : '';
+
         return (
-          <div className="font-bold py-1 text-right">
-            {(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
-          </div>
+          <input
+            type="text"
+            inputMode="decimal"
+            className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm font-bold "
+            value={displayAmount}
+            onChange={(e) => handleNumberInput(e.target.value, (val) => updateItemAmount(item.id, val))}
+            placeholder="0.00"
+          />
         );
       case 'custom-text':
         return (
           <textarea
+            ref={autoResizeTextarea}
             className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden"
             value={item.customValues?.[column.id] || ''}
             onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)}
@@ -293,10 +434,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       case 'custom-number':
         return (
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm"
             value={item.customValues?.[column.id] || ''}
-            onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)}
+            onChange={(e) => handleNumberInput(e.target.value, (val) => updateCustomValue(item.id, column.id, String(val)))}
+            placeholder="0"
           />
         );
       default:
@@ -423,8 +566,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
-            <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" id="logo-up" />
-            <label htmlFor="logo-up" className="text-xs text-blue-600 font-medium cursor-pointer">{t.logoUp}</label>
+            <div className="flex gap-2 items-center">
+              <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" id="logo-up" />
+              <label htmlFor="logo-up" className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">{t.logoUp}</label>
+              {invoice.sender.logo && (
+                <button
+                  onClick={handleLogoRemove}
+                  className="text-xs text-red-600 font-medium hover:underline"
+                  title={t.removeLogo || 'Remove Logo'}
+                >
+                  {t.removeLogo || '✕ Remove'}
+                </button>
+              )}
+            </div>
           </div>
           <input
             placeholder={t.namePlaceholder}
@@ -591,31 +745,75 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             items={invoice.items.map(item => item.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-3">
-              {/* Header Row */}
-              <div className="flex gap-4 px-3 py-1">
-                {sortedColumns.map(col => (
-                  <div
-                    key={col.id}
-                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${col.type === 'system-amount' ? 'justify-end' : ''} ${col.visible ? 'text-slate-400' : 'text-slate-300'}`}
-                  >
-                    {!col.visible && <i className="fas fa-eye-slash text-[10px]"></i>}
-                    {col.label}
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-4">
+              {invoice.items.map((item) => {
+                const visibleColumns = sortedColumns.filter(col => col.visible);
+                const systemColumns = visibleColumns.filter(col => col.type.startsWith('system-'));
+                const customColumns = visibleColumns.filter(col => col.type.startsWith('custom-'));
 
-              {invoice.items.map((item) => (
-                <SortableItem key={item.id} id={item.id}>
-                  <div className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation items-center">
-                    {sortedColumns.map(col => (
-                      <div key={col.id} className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} ${!col.visible ? 'opacity-40 grayscale' : ''}`}>
-                        {renderCell(item, col)}
+                return (
+                  <SortableItem key={item.id} id={item.id}>
+                    {({ listeners }) => (
+                      <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 select-none touch-manipulation">
+                        <div className="flex items-start gap-3">
+                          {/* Drag Handle */}
+                          <div
+                            {...listeners}
+                            className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-400 pt-2"
+                          >
+                            <i className="fas fa-grip-vertical"></i>
+                          </div>
+
+                          {/* Content Area */}
+                          <div className="flex-1 space-y-3">
+                            {/* System Fields Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                              {systemColumns.map(col => {
+                                let colSpan = 'md:col-span-3';
+                                if (col.type === 'system-text') colSpan = 'md:col-span-6';
+                                if (col.type === 'system-amount') colSpan = 'md:col-span-3';
+
+                                return (
+                                  <div key={col.id} className={colSpan}>
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">
+                                      {col.label}
+                                    </label>
+                                    {renderCell(item, col)}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Custom Fields Grid */}
+                            {customColumns.length > 0 && (
+                              <div className="pt-3 border-t border-slate-200">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  {customColumns.map(col => (
+                                    <div key={col.id}>
+                                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">
+                                        {col.label}
+                                      </label>
+                                      {renderCell(item, col)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Delete Button */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
+                            className="text-slate-300 hover:text-red-500 p-2 transition-colors"
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </SortableItem>
-              ))}
+                    )}
+                  </SortableItem>
+                );
+              })}
             </div>
           </SortableContext>
         </DndContext>
@@ -644,7 +842,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
 
         <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
+          <div className="flex justify-between items-start">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
+            <div className="flex gap-2 items-center">
+              <input type="file" ref={qrInputRef} onChange={handleQRCodeUpload} accept="image/*" className="hidden" id="qr-upload" />
+              <label htmlFor="qr-upload" className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">
+                {t.uploadQR || 'Upload QR Code'}
+              </label>
+              {invoice.paymentInfo?.qrCode && (
+                <button
+                  onClick={handleQRCodeRemove}
+                  className="text-xs text-red-600 font-medium hover:underline"
+                  title={t.removeQR || 'Remove QR Code'}
+                >
+                  {t.removeQR || '✕ Remove'}
+                </button>
+              )}
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <textarea
               placeholder={t.bankName}

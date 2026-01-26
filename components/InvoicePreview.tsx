@@ -195,10 +195,22 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </div>
 
         {/* Payment Info */}
-        {(invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
-          <div className="mt-8 pt-4 border-t border-slate-100">
+        {(invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
+          <div className="mt-8 pt-4 border-t border-slate-100 relative">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
-            <div className="space-y-1 text-xs text-slate-600">
+
+            {/* QR Code Display - Absolutely positioned on the right */}
+            {invoice.paymentInfo?.qrCode && (
+              <div className="absolute top-0 right-0 w-32 h-32 border-2 border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                <img
+                  src={invoice.paymentInfo.qrCode}
+                  alt="Payment QR Code"
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
+            )}
+
+            <div className="space-y-1 text-xs text-slate-600 pr-36">
               {invoice.paymentInfo?.bankName && (
                 <div className="flex justify-between sm:justify-start sm:gap-4">
                   <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>

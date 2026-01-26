@@ -168,7 +168,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
     };
 
     return (
-        <div className="absolute right-0 top-10 z-50 w-120 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right">
+        <div className="absolute right-0 top-10 z-[100] w-120 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-slate-700">{t.customizeColumns}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
