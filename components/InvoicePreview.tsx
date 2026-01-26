@@ -220,7 +220,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               {invoice.paymentInfo?.extraInfo && (
                 <div className="flex justify-between sm:justify-start sm:gap-4">
                   <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
-                  <span className="text-slate-600 whitespace-pre-wrap">{invoice.paymentInfo.extraInfo}</span>
+                  <span className="font-bold text-slate-800 font-mono">{invoice.paymentInfo.extraInfo}</span>
                 </div>
               )}
               {invoice.paymentInfo?.customFields?.map(field => (

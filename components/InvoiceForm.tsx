@@ -463,7 +463,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                   const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
                   onChange({ sender: { ...invoice.sender, customFields: [...(invoice.sender.customFields || []), newField] } });
                 }}
-                className="text-xs text-blue-600 font-medium hover:underline"
+                className="text-sm text-blue-600 font-medium hover:underline"
               >
                 + {t.addCustomField}
               </button>
@@ -528,7 +528,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                   const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
                   onChange({ client: { ...invoice.client, customFields: [...(invoice.client.customFields || []), newField] } });
                 }}
-                className="text-xs text-blue-600 font-medium hover:underline"
+                className="text-sm text-blue-600 font-medium hover:underline"
               >
                 + {t.addCustomField}
               </button>
@@ -537,6 +537,91 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
 
         {/* Payment Info */}
+
+      </section>
+
+      <section className="space-y-4 pt-4 border-t border-slate-100">
+        <div className="flex justify-between items-center relative">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.items}</h3>
+          <button
+            onClick={() => setShowColumnConfig(!showColumnConfig)}
+            className="text-slate-400 hover:text-blue-600 transition-colors"
+            title={t.customizeColumns}
+          >
+            <i className="fas fa-cog"></i>
+          </button>
+
+          {showColumnConfig && (
+            <ColumnConfigurator
+              columns={columns}
+              onChange={(newCols) => onChange({ columnConfig: newCols })}
+              onClose={() => setShowColumnConfig(false)}
+              lang={lang}
+            />
+          )}
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={invoice.items.map(item => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {/* Header Row */}
+              <div className="flex gap-4 px-3 py-1">
+                {sortedColumns.map(col => (
+                  <div
+                    key={col.id}
+                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${col.type === 'system-amount' ? 'justify-end' : ''} ${col.visible ? 'text-slate-400' : 'text-slate-300'}`}
+                  >
+                    {!col.visible && <i className="fas fa-eye-slash text-[10px]"></i>}
+                    {col.label}
+                  </div>
+                ))}
+              </div>
+
+              {invoice.items.map((item) => (
+                <SortableItem key={item.id} id={item.id}>
+                  <div className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation items-center">
+                    {sortedColumns.map(col => (
+                      <div key={col.id} className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} ${!col.visible ? 'opacity-40 grayscale' : ''}`}>
+                        {renderCell(item, col)}
+                      </div>
+                    ))}
+                  </div>
+                </SortableItem>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        <button onClick={addItem} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-all font-bold text-sm">
+          {t.addItems}
+        </button>
+      </section>
+
+
+
+
+      <section className="pt-4 border-t border-slate-100 space-y-6">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-semibold text-slate-700">{t.taxRate}</span>
+          <input type="number" className="w-20 px-3 py-1 bg-white border border-slate-200 rounded-lg text-right text-sm" value={invoice.taxRate} onChange={(e) => onChange({ taxRate: Number(e.target.value) })} />
+        </div>
+
+        <div className="bg-blue-600 p-4 rounded-xl text-white flex justify-between items-center">
+          <span className="font-bold uppercase text-xs">{t.payable}</span>
+          <span className="text-2xl font-black">
+            {new Intl.NumberFormat(lang, { style: 'currency', currency: invoice.currency }).format(
+              invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
+            )}
+          </span>
+        </div>
+
         <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -607,91 +692,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                 const currentFields = invoice.paymentInfo?.customFields || [];
                 onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: [...currentFields, newField] } as any });
               }}
-              className="text-xs text-blue-600 font-medium hover:underline"
+              className="text-sm text-blue-600 font-medium hover:underline"
             >
               + {t.addCustomField}
             </button>
           </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 pt-4 border-t border-slate-100">
-        <div className="flex justify-between items-center relative">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.items}</h3>
-          <button
-            onClick={() => setShowColumnConfig(!showColumnConfig)}
-            className="text-slate-400 hover:text-blue-600 transition-colors"
-            title={t.customizeColumns}
-          >
-            <i className="fas fa-cog"></i>
-          </button>
-
-          {showColumnConfig && (
-            <ColumnConfigurator
-              columns={columns}
-              onChange={(newCols) => onChange({ columnConfig: newCols })}
-              onClose={() => setShowColumnConfig(false)}
-              lang={lang}
-            />
-          )}
-        </div>
-
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={invoice.items.map(item => item.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {/* Header Row */}
-              <div className="flex gap-4 px-3 py-1">
-                {sortedColumns.map(col => (
-                  <div
-                    key={col.id}
-                    className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${col.type === 'system-amount' ? 'justify-end' : ''} ${col.visible ? 'text-slate-400' : 'text-slate-300'}`}
-                  >
-                    {!col.visible && <i className="fas fa-eye-slash text-[10px]"></i>}
-                    {col.label}
-                  </div>
-                ))}
-              </div>
-
-              {invoice.items.map((item) => (
-                <SortableItem key={item.id} id={item.id}>
-                  <div className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 select-none touch-manipulation items-center">
-                    {sortedColumns.map(col => (
-                      <div key={col.id} className={`${col.type === 'system-text' ? 'flex-1' : 'w-24'} ${!col.visible ? 'opacity-40 grayscale' : ''}`}>
-                        {renderCell(item, col)}
-                      </div>
-                    ))}
-                  </div>
-                </SortableItem>
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-
-        <button onClick={addItem} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-all font-bold text-sm">
-          {t.addItems}
-        </button>
-      </section>
-
-      <section className="pt-4 border-t border-slate-100 space-y-6">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-semibold text-slate-700">{t.taxRate}</span>
-          <input type="number" className="w-20 px-3 py-1 bg-white border border-slate-200 rounded-lg text-right text-sm" value={invoice.taxRate} onChange={(e) => onChange({ taxRate: Number(e.target.value) })} />
-        </div>
-
-        <div className="bg-blue-600 p-4 rounded-xl text-white flex justify-between items-center">
-          <span className="font-bold uppercase text-xs">{t.payable}</span>
-          <span className="text-2xl font-black">
-            {new Intl.NumberFormat(lang, { style: 'currency', currency: invoice.currency }).format(
-              invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
-            )}
-          </span>
         </div>
 
         <div className="space-y-3">
@@ -721,6 +726,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
 
       </section>
+
+
     </div>
   );
 };
