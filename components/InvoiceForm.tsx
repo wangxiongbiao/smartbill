@@ -621,7 +621,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           <button
             onClick={() => setShowColumnConfig(!showColumnConfig)}
             className="text-slate-400 hover:text-blue-600 transition-colors"
-            title="Customize Columns"
+            title={t.customizeColumns}
           >
             <i className="fas fa-cog"></i>
           </button>
@@ -631,6 +631,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
               columns={columns}
               onChange={(newCols) => onChange({ columnConfig: newCols })}
               onClose={() => setShowColumnConfig(false)}
+              lang={lang}
             />
           )}
         </div>

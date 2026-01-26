@@ -171,7 +171,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                   </div>
                 )}
                 <div className={`border-t ${styles.signatureBorder} pt-2 min-w-[180px]`}>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authorized Signature</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.authorizedSignature}</p>
                   <p className="text-xs font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
                 </div>
               </>
@@ -235,7 +235,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
       </div>
 
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">
-        Powered by SmartBill Pro
+        {t.poweredBy}
       </div>
     </div>
   );

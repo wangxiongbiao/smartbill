@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { InvoiceColumn, ColumnType } from '../types';
+import { InvoiceColumn, ColumnType, Language } from '../types';
+import { translations } from '../i18n';
 import {
     DndContext,
     closestCenter,
@@ -23,18 +24,21 @@ interface ColumnConfiguratorProps {
     columns: InvoiceColumn[];
     onChange: (columns: InvoiceColumn[]) => void;
     onClose: () => void;
+    lang: Language;
 }
 
 const SortableColumnItem = ({
     column,
     onToggleVisibility,
     onRename,
-    onDelete
+    onDelete,
+    t
 }: {
     column: InvoiceColumn;
     onToggleVisibility: (id: string) => void;
     onRename: (id: string, newLabel: string) => void;
     onDelete: (id: string) => void;
+    t: any;
 }) => {
     const {
         attributes,
@@ -62,7 +66,7 @@ const SortableColumnItem = ({
             <button
                 onClick={() => onToggleVisibility(column.id)}
                 className={`p-1 rounded ${column.visible ? 'text-blue-600' : 'text-slate-300'}`}
-                title={column.visible ? "Visible" : "Hidden"}
+                title={column.visible ? t.visible : t.hidden}
             >
                 <i className={`fas fa-eye${column.visible ? '' : '-slash'}`}></i>
             </button>
@@ -76,7 +80,7 @@ const SortableColumnItem = ({
                     value={column.label}
                     onChange={(e) => onRename(column.id, e.target.value)}
                     className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                    placeholder="Column Name"
+                    placeholder={t.columnName}
                 />
             )}
 
@@ -84,14 +88,14 @@ const SortableColumnItem = ({
                 <button
                     onClick={() => onDelete(column.id)}
                     className="text-slate-300 hover:text-red-500 p-1"
-                    title="Delete Column"
+                    title={t.deleteColumn}
                 >
                     <i className="fas fa-trash-alt"></i>
                 </button>
             )}
 
             {column.required && (
-                <span className="text-xs text-slate-300 px-1 select-none" title="System Column">
+                <span className="text-xs text-slate-300 px-1 select-none" title={t.systemColumn}>
                     <i className="fas fa-lock"></i>
                 </span>
             )}
@@ -99,8 +103,9 @@ const SortableColumnItem = ({
     );
 };
 
-const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChange, onClose }) => {
+const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChange, onClose, lang }) => {
     const [newColumnName, setNewColumnName] = useState('');
+    const t = translations[lang] || translations['en'];
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -165,7 +170,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
     return (
         <div className="absolute right-0 top-10 z-50 w-120 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right">
             <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-700">Customize Columns</h3>
+                <h3 className="font-bold text-slate-700">{t.customizeColumns}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
                     <i className="fas fa-times"></i>
                 </button>
@@ -188,6 +193,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                                 onToggleVisibility={toggleVisibility}
                                 onRename={renameColumn}
                                 onDelete={deleteColumn}
+                                t={t}
                             />
                         ))}
                     </SortableContext>
@@ -198,7 +204,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                 <input
                     value={newColumnName}
                     onChange={(e) => setNewColumnName(e.target.value)}
-                    placeholder="New column name..."
+                    placeholder={t.newColumnName}
                     className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
                     onKeyDown={(e) => e.key === 'Enter' && addColumn()}
                 />
@@ -207,7 +213,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                     disabled={!newColumnName.trim()}
                     className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Add
+                    {t.add}
                 </button>
             </div>
         </div>

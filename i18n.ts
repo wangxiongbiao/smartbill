@@ -162,6 +162,18 @@ export const translations: Record<Language, any> = {
     accountName: 'Account Name',
     accountNumber: 'Account Number',
     extraInfo: 'Additional Info (SWIFT/IBAN)',
+    // Column Configurator
+    customizeColumns: 'Customize Columns',
+    columnName: 'Column Name',
+    newColumnName: 'New column name...',
+    add: 'Add',
+    visible: 'Visible',
+    hidden: 'Hidden',
+    deleteColumn: 'Delete Column',
+    systemColumn: 'System Column',
+    // Preview
+    authorizedSignature: 'Authorized Signature',
+    poweredBy: 'Powered by SmartBill Pro',
   },
   'zh-TW': {
     home: '首頁',
@@ -323,6 +335,18 @@ export const translations: Record<Language, any> = {
     accountName: '賬戶名稱',
     accountNumber: '銀行賬號',
     extraInfo: '附加信息 (SWIFT/IBAN)',
+    // Column Configurator
+    customizeColumns: '自定義列',
+    columnName: '列名稱',
+    newColumnName: '新列名稱...',
+    add: '添加',
+    visible: '可見',
+    hidden: '隱藏',
+    deleteColumn: '刪除列',
+    systemColumn: '系統列',
+    // Preview
+    authorizedSignature: '授權簽名',
+    poweredBy: 'SmartBill Pro 提供技術支持',
   },
   'fr': {
     home: 'Accueil',
@@ -411,6 +435,18 @@ export const translations: Record<Language, any> = {
     accountName: 'Nom du compte',
     accountNumber: 'Numéro de compte',
     extraInfo: 'Infos supplémentaires (SWIFT/IBAN)',
+    // Column Configurator
+    customizeColumns: 'Personnaliser les colonnes',
+    columnName: 'Nom de la colonne',
+    newColumnName: 'Nouvelle colonne...',
+    add: 'Ajouter',
+    visible: 'Visible',
+    hidden: 'Masqué',
+    deleteColumn: 'Supprimer',
+    systemColumn: 'Colonne système',
+    // Preview
+    authorizedSignature: 'Signature autorisée',
+    poweredBy: 'Propulsé par SmartBill Pro',
   },
   'de': {
     home: 'Start',
@@ -499,6 +535,18 @@ export const translations: Record<Language, any> = {
     accountName: 'Kontoinhaber',
     accountNumber: 'Kontonummer',
     extraInfo: 'Zusatzinfo (SWIFT/IBAN)',
+    // Column Configurator
+    customizeColumns: 'Spalten anpassen',
+    columnName: 'Spaltenname',
+    newColumnName: 'Neue Spalte...',
+    add: 'Hinzufügen',
+    visible: 'Sichtbar',
+    hidden: 'Versteckt',
+    deleteColumn: 'Löschen',
+    systemColumn: 'Systemspalte',
+    // Preview
+    authorizedSignature: 'Autorisierte Unterschrift',
+    poweredBy: 'Bereitgestellt von SmartBill Pro',
   },
   'ja': {
     home: 'ホーム',
@@ -587,5 +635,17 @@ export const translations: Record<Language, any> = {
     accountName: '口座名義',
     accountNumber: '口座番号',
     extraInfo: '追加情報 (SWIFT/IBAN)',
+    // Column Configurator
+    customizeColumns: '列のカスタマイズ',
+    columnName: '列名',
+    newColumnName: '新しい列名...',
+    add: '追加',
+    visible: '表示',
+    hidden: '非表示',
+    deleteColumn: '削除',
+    systemColumn: 'システム列',
+    // Preview
+    authorizedSignature: '承認された署名',
+    poweredBy: 'Powered by SmartBill Pro',
   }
 };
