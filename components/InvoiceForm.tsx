@@ -74,6 +74,7 @@ const defaultColumns: InvoiceColumn[] = [
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
+  const signatureInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
@@ -377,6 +378,23 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
     }
   };
 
+  const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onChange({ sender: { ...invoice.sender, signature: reader.result as string } });
+        // Clear canvas if there was hand-drawn signature
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Helper function to handle number input with regex validation
   const handleNumberInput = (value: string, callback: (val: string | number) => void) => {
     // Allow empty string
@@ -498,26 +516,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 space-y-6">
       <div className="flex bg-slate-100 p-1 rounded-xl">
-        {(['invoice', 'receipt', 'custom'] as DocumentType[]).map((type) => (
+        {(['invoice', 'receipt'] as DocumentType[]).map((type) => (
           <button
             key={type}
-            onClick={() => {
-              if (type === 'custom') {
-                onChange({
-                  type,
-                  visibility: {
-                    ...invoice.visibility,
-                    dueDate: false
-                  }
-                });
-              } else {
-                onChange({ type });
-              }
-            }}
+            onClick={() => onChange({ type })}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
           >
-            {type === 'invoice' ? t.invoiceMode : (type === 'receipt' ? t.receiptMode : t.customMode)}
+            {type === 'invoice' ? t.invoiceMode : t.receiptMode}
           </button>
         ))}
       </div>
@@ -527,23 +533,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         <div className="space-y-2 relative group">
           <div className="flex justify-between items-center">
             <label className="text-sm font-semibold text-slate-700">
-              {invoice.type === 'invoice' ? t.invNo : (invoice.type === 'receipt' ? t.recNo : `${t.invNo}/${t.recNo}`)}
+              {invoice.type === 'invoice' ? t.invNo : t.recNo}
             </label>
-            {invoice.type === 'custom' && (
-              <button
-                onClick={() => onChange({ visibility: { ...invoice.visibility, invoiceNumber: !invoice.visibility?.invoiceNumber } })}
-                className={`text-xs ${invoice.visibility?.invoiceNumber === false ? 'text-red-400' : 'text-slate-400 hover:text-blue-500'}`}
-                title={t.visibility}
-              >
-                <i className={`fas fa-eye${invoice.visibility?.invoiceNumber === false ? '-slash' : ''}`}></i>
-              </button>
-            )}
+            <button
+              onClick={() => onChange({ visibility: { ...invoice.visibility, invoiceNumber: !invoice.visibility?.invoiceNumber } })}
+              className={`text-xs ${invoice.visibility?.invoiceNumber === false ? 'text-red-400' : 'text-slate-400 hover:text-blue-500'}`}
+              title={t.visibility}
+            >
+              <i className={`fas fa-eye${invoice.visibility?.invoiceNumber === false ? '-slash' : ''}`}></i>
+            </button>
           </div>
           <input
             type="text"
             value={invoice.invoiceNumber}
             onChange={(e) => onChange({ invoiceNumber: e.target.value })}
-            className={`w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${invoice.type === 'custom' && invoice.visibility?.invoiceNumber === false ? 'opacity-50' : ''}`}
+            className={`w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${invoice.visibility?.invoiceNumber === false ? 'opacity-50' : ''}`}
           />
         </div>
 
@@ -584,29 +588,27 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           </select>
         </div>
 
-        {/* Custom Mode: Date Visibility */}
-        {invoice.type === 'custom' && (
-          <div className="col-span-full flex gap-4 p-2 bg-slate-50 rounded-lg border border-slate-100">
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={invoice.visibility?.date !== false}
-                onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
-                className="rounded text-blue-600 focus:ring-blue-500"
-              />
-              {t.fieldName || 'Date'} {t.visibility}
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={invoice.visibility?.dueDate !== false}
-                onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
-                className="rounded text-blue-600 focus:ring-blue-500"
-              />
-              {t.fieldName || 'Due Date'} {t.visibility}
-            </label>
-          </div>
-        )}
+        {/* Date Visibility Controls - Available for all modes */}
+        <div className="col-span-full flex gap-4 p-2 bg-slate-50 rounded-lg border border-slate-100">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={invoice.visibility?.date !== false}
+              onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
+              className="rounded text-blue-600 focus:ring-blue-500"
+            />
+            {t.fieldName || 'Date'} {t.visibility}
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={invoice.visibility?.dueDate !== false}
+              onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
+              className="rounded text-blue-600 focus:ring-blue-500"
+            />
+            {t.fieldName || 'Due Date'} {t.visibility}
+          </label>
+        </div>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 border-t border-slate-100">
@@ -654,55 +656,53 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             />
           </div>
 
-          {/* Custom Fields for Sender */}
-          {invoice.type === 'custom' && (
-            <div className="space-y-2 mt-2">
-              {invoice.sender.customFields?.map((field, index) => (
-                <div key={field.id} className="space-y-2 relative">
-                  <div className="flex gap-2 items-center">
-                    <input
-                      placeholder={t.fieldName}
-                      value={field.label}
-                      onChange={(e) => {
-                        const newFields = [...(invoice.sender.customFields || [])];
-                        newFields[index] = { ...field, label: e.target.value };
-                        onChange({ sender: { ...invoice.sender, customFields: newFields } });
-                      }}
-                      className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
-                    />
-                    <button
-                      onClick={() => {
-                        const newFields = invoice.sender.customFields?.filter(f => f.id !== field.id);
-                        onChange({ sender: { ...invoice.sender, customFields: newFields } });
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <textarea
-                    placeholder={t.fieldValue}
-                    value={field.value}
+          {/* Custom Fields for Sender - Available for all modes */}
+          <div className="space-y-2 mt-2">
+            {invoice.sender.customFields?.map((field, index) => (
+              <div key={field.id} className="space-y-2 relative">
+                <div className="flex gap-2 items-center">
+                  <input
+                    placeholder={t.fieldName}
+                    value={field.label}
                     onChange={(e) => {
                       const newFields = [...(invoice.sender.customFields || [])];
-                      newFields[index] = { ...field, value: e.target.value };
+                      newFields[index] = { ...field, label: e.target.value };
                       onChange({ sender: { ...invoice.sender, customFields: newFields } });
                     }}
-                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+                    className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
+                  <button
+                    onClick={() => {
+                      const newFields = invoice.sender.customFields?.filter(f => f.id !== field.id);
+                      onChange({ sender: { ...invoice.sender, customFields: newFields } });
+                    }}
+                    className="text-slate-400 hover:text-red-500"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-              ))}
-              <button
-                onClick={() => {
-                  const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
-                  onChange({ sender: { ...invoice.sender, customFields: [...(invoice.sender.customFields || []), newField] } });
-                }}
-                className="text-sm text-blue-600 font-medium hover:underline"
-              >
-                + {t.addCustomField}
-              </button>
-            </div>
-          )}
+                <textarea
+                  placeholder={t.fieldValue}
+                  value={field.value}
+                  onChange={(e) => {
+                    const newFields = [...(invoice.sender.customFields || [])];
+                    newFields[index] = { ...field, value: e.target.value };
+                    onChange({ sender: { ...invoice.sender, customFields: newFields } });
+                  }}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+                />
+              </div>
+            ))}
+            <button
+              onClick={() => {
+                const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
+                onChange({ sender: { ...invoice.sender, customFields: [...(invoice.sender.customFields || []), newField] } });
+              }}
+              className="text-sm text-blue-600 font-medium hover:underline"
+            >
+              + {t.addCustomField}
+            </button>
+          </div>
         </div>
 
         {/* Bill To */}
@@ -721,55 +721,53 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
           />
 
-          {/* Custom Fields for Client */}
-          {invoice.type === 'custom' && (
-            <div className="space-y-2 mt-2">
-              {invoice.client.customFields?.map((field, index) => (
-                <div key={field.id} className="space-y-2 relative">
-                  <div className="flex gap-2 items-center">
-                    <input
-                      placeholder={t.fieldName}
-                      value={field.label}
-                      onChange={(e) => {
-                        const newFields = [...(invoice.client.customFields || [])];
-                        newFields[index] = { ...field, label: e.target.value };
-                        onChange({ client: { ...invoice.client, customFields: newFields } });
-                      }}
-                      className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
-                    />
-                    <button
-                      onClick={() => {
-                        const newFields = invoice.client.customFields?.filter(f => f.id !== field.id);
-                        onChange({ client: { ...invoice.client, customFields: newFields } });
-                      }}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <textarea
-                    placeholder={t.fieldValue}
-                    value={field.value}
+          {/* Custom Fields for Client - Available for all modes */}
+          <div className="space-y-2 mt-2">
+            {invoice.client.customFields?.map((field, index) => (
+              <div key={field.id} className="space-y-2 relative">
+                <div className="flex gap-2 items-center">
+                  <input
+                    placeholder={t.fieldName}
+                    value={field.label}
                     onChange={(e) => {
                       const newFields = [...(invoice.client.customFields || [])];
-                      newFields[index] = { ...field, value: e.target.value };
+                      newFields[index] = { ...field, label: e.target.value };
                       onChange({ client: { ...invoice.client, customFields: newFields } });
                     }}
-                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+                    className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
+                  <button
+                    onClick={() => {
+                      const newFields = invoice.client.customFields?.filter(f => f.id !== field.id);
+                      onChange({ client: { ...invoice.client, customFields: newFields } });
+                    }}
+                    className="text-slate-400 hover:text-red-500"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-              ))}
-              <button
-                onClick={() => {
-                  const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
-                  onChange({ client: { ...invoice.client, customFields: [...(invoice.client.customFields || []), newField] } });
-                }}
-                className="text-sm text-blue-600 font-medium hover:underline"
-              >
-                + {t.addCustomField}
-              </button>
-            </div>
-          )}
+                <textarea
+                  placeholder={t.fieldValue}
+                  value={field.value}
+                  onChange={(e) => {
+                    const newFields = [...(invoice.client.customFields || [])];
+                    newFields[index] = { ...field, value: e.target.value };
+                    onChange({ client: { ...invoice.client, customFields: newFields } });
+                  }}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+                />
+              </div>
+            ))}
+            <button
+              onClick={() => {
+                const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
+                onChange({ client: { ...invoice.client, customFields: [...(invoice.client.customFields || []), newField] } });
+              }}
+              className="text-sm text-blue-600 font-medium hover:underline"
+            >
+              + {t.addCustomField}
+            </button>
+          </div>
         </div>
 
         {/* Payment Info */}
@@ -1003,7 +1001,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
               </button>
             </div>
             {invoice.visibility?.signature === true && (
-              <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
+              <div className="flex gap-2 items-center">
+                <input type="file" ref={signatureInputRef} onChange={handleSignatureUpload} accept="image/*" className="hidden" id="signature-upload" />
+                <label htmlFor="signature-upload" className="text-[10px] font-bold text-indigo-600 uppercase hover:underline cursor-pointer">📤 Upload</label>
+                <button onClick={clearSignature} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">{t.signClear}</button>
+              </div>
             )}
           </div>
 

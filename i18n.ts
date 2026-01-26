@@ -56,7 +56,6 @@ export const translations: Record<Language, any> = {
     // Form
     invoiceMode: 'Invoice Mode',
     receiptMode: 'Receipt Mode',
-    customMode: 'Custom Mode',
     addCustomField: 'Add Field',
     fieldName: 'Label',
     fieldValue: 'Value',
@@ -239,7 +238,6 @@ export const translations: Record<Language, any> = {
     // Form
     invoiceMode: '發票模式',
     receiptMode: '收據模式',
-    customMode: '自定義模式',
     addCustomField: '添加字段',
     fieldName: '字段名',
     fieldValue: '內容',

@@ -291,9 +291,6 @@ const App: React.FC = () => {
     let defaultCurrency = 'USD';
     switch (lang) {
       case 'zh-TW': defaultCurrency = 'TWD'; break;
-      case 'ja': defaultCurrency = 'JPY'; break;
-      case 'fr':
-      case 'de': defaultCurrency = 'EUR'; break;
       default: defaultCurrency = 'USD';
     }
 

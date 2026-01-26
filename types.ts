@@ -72,7 +72,8 @@ export interface InvoiceRecord {
   updated_at: string;
 }
 
-export type DocumentType = 'invoice' | 'receipt' | 'custom';
+
+export type DocumentType = 'invoice' | 'receipt';
 export type Language = 'zh-TW' | 'en';
 
 

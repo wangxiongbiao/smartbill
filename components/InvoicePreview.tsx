@@ -125,13 +125,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className="text-right">
             {invoice.visibility?.date !== false && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'ja' ? '発行日' : (lang === 'en' ? 'Date' : '開具日期')}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'en' ? 'Date' : '開具日期'}</p>
                 <p className="text-sm font-medium mb-4">{invoice.date}</p>
               </>
             )}
-            {(invoice.type === 'invoice' || (invoice.type === 'custom' && invoice.visibility?.dueDate !== false)) && (
+            {(invoice.type === 'invoice' && invoice.visibility?.dueDate !== false) && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'ja' ? '期限' : (lang === 'en' ? 'Due Date' : '截止日期')}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{lang === 'en' ? 'Due Date' : '截止日期'}</p>
                 <p className={`text-sm font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>
               </>
             )}
