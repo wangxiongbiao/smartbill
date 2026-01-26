@@ -176,7 +176,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                 </button>
             </div>
 
-            <div className="max-h-[300px] overflow-y-auto mb-4 pr-1">
+            <div className="max-h-[600px] overflow-y-auto mb-4 pr-1">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}

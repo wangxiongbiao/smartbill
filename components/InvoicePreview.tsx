@@ -201,7 +201,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
             {/* QR Code Display - Absolutely positioned on the right */}
             {invoice.paymentInfo?.qrCode && (
-              <div className="absolute top-0 right-0 w-32 h-32 border-2 border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
+              <div className="absolute top-4 right-0 w-32 h-32 border-2 border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
                 <img
                   src={invoice.paymentInfo.qrCode}
                   alt="Payment QR Code"
@@ -210,7 +210,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               </div>
             )}
 
-            <div className="space-y-1 text-xs text-slate-600 pr-36">
+            <div className={`space-y-1 text-xs text-slate-600 ${invoice.paymentInfo?.qrCode ? 'pr-36' : ''}`}>
               {invoice.paymentInfo?.bankName && (
                 <div className="flex justify-between sm:justify-start sm:gap-4">
                   <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
