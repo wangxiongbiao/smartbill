@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Invoice, InvoiceItem, DocumentType, Language, CustomField, InvoiceColumn } from '../types';
+import { Invoice, InvoiceItem, DocumentType, Language, CustomField, InvoiceColumn, PaymentInfoField, PaymentInfo } from '../types';
 import { translations } from '../i18n';
 import {
   DndContext,
@@ -21,12 +21,22 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ColumnConfigurator from './ColumnConfigurator';
+import PaymentFieldConfigurator from './PaymentFieldConfigurator';
 
 interface InvoiceFormProps {
   invoice: Invoice;
   onChange: (updates: Partial<Invoice>) => void;
   lang: Language;
 }
+
+// Default payment fields
+const defaultPaymentFields: PaymentInfoField[] = [
+  { id: 'bankName', label: 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: '' },
+  { id: 'accountName', label: 'Account Name', type: 'text', order: 1, visible: true, required: true, value: '' },
+  { id: 'accountNumber', label: 'Account Number', type: 'text', order: 2, visible: true, required: true, value: '' },
+  { id: 'address', label: 'Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+  { id: 'extraInfo', label: 'Extra Info', type: 'textarea', order: 4, visible: true, required: false, value: '' },
+];
 
 // Sortable Item Component
 const SortableItem = ({ id, children }: { id: string; children: (props: { listeners: any; attributes: any }) => React.ReactNode }) => {
@@ -68,6 +78,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   const [isDrawing, setIsDrawing] = useState(false);
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
   const [showColumnConfig, setShowColumnConfig] = useState(false);
+  const [showPaymentFieldConfig, setShowPaymentFieldConfig] = useState(false);
   const t = translations[lang] || translations['en'];
 
   // Initialize columns if not present
@@ -76,6 +87,43 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       onChange({ columnConfig: defaultColumns });
     }
   }, [invoice.columnConfig, onChange]);
+
+  // Migrate and initialize payment fields
+  useEffect(() => {
+    if (!invoice.paymentInfo?.fields) {
+      // Migrate from old structure to new field-based structure
+      const oldInfo = invoice.paymentInfo;
+      const migratedFields: PaymentInfoField[] = [
+        { id: 'bankName', label: 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
+        { id: 'accountName', label: 'Account Name', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
+        { id: 'accountNumber', label: 'Account Number', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
+        { id: 'address', label: 'Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+        { id: 'extraInfo', label: 'Extra Info', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
+      ];
+
+      // Migrate old custom fields
+      if (oldInfo?.customFields) {
+        oldInfo.customFields.forEach((cf, idx) => {
+          migratedFields.push({
+            id: cf.id,
+            label: cf.label,
+            type: 'text',
+            order: 5 + idx,
+            visible: true,
+            required: false,
+            value: cf.value
+          });
+        });
+      }
+
+      onChange({
+        paymentInfo: {
+          fields: migratedFields,
+          qrCode: oldInfo?.qrCode
+        }
+      });
+    }
+  }, [invoice.paymentInfo, onChange]);
 
   const columns = invoice.columnConfig || defaultColumns;
   // CHANGED: Show all columns, sorted by order
@@ -842,9 +890,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
 
         <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start relative">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
             <div className="flex gap-2 items-center">
+              <button
+                onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)}
+                className="text-slate-400 hover:text-blue-600 transition-colors"
+                title={t.configurePaymentFields || 'Configure Payment Fields'}
+              >
+                <i className="fas fa-cog"></i>
+              </button>
               <input type="file" ref={qrInputRef} onChange={handleQRCodeUpload} accept="image/*" className="hidden" id="qr-upload" />
               <label htmlFor="qr-upload" className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">
                 {t.uploadQR || 'Upload QR Code'}
@@ -859,104 +914,63 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                 </button>
               )}
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <textarea
-              placeholder={t.bankName}
-              value={invoice.paymentInfo?.bankName || ''}
-              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, bankName: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
-              rows={1}
-              onInput={(e) => {
-                e.currentTarget.style.height = 'auto';
-                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-              }}
-            />
-            <textarea
-              placeholder={t.accountName}
-              value={invoice.paymentInfo?.accountName || ''}
-              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountName: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
-              rows={1}
-              onInput={(e) => {
-                e.currentTarget.style.height = 'auto';
-                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-              }}
-            />
-            <textarea
-              placeholder={t.accountNumber}
-              value={invoice.paymentInfo?.accountNumber || ''}
-              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, accountNumber: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono resize-none overflow-hidden text-sm"
-              rows={1}
-              onInput={(e) => {
-                e.currentTarget.style.height = 'auto';
-                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-              }}
-            />
-            <textarea
-              placeholder={t.extraInfo}
-              value={invoice.paymentInfo?.extraInfo || ''}
-              onChange={(e) => onChange({ paymentInfo: { ...invoice.paymentInfo, extraInfo: e.target.value } as any })}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
-              rows={1}
-              onInput={(e) => {
-                e.currentTarget.style.height = 'auto';
-                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-              }}
-            />
+
+            {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
+              <PaymentFieldConfigurator
+                fields={invoice.paymentInfo.fields}
+                onChange={(newFields) => {
+                  onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
+                }}
+                onClose={() => setShowPaymentFieldConfig(false)}
+                lang={lang}
+              />
+            )}
           </div>
 
-          {/* Custom Fields for Payment Info */}
-          <div className="space-y-2 mt-2">
-            {invoice.paymentInfo?.customFields?.map((field, index) => (
-              <div key={field.id} className="flex gap-4 items-start">
-                <input
-                  placeholder={t.fieldName}
-                  value={field.label}
-                  onChange={(e) => {
-                    const newFields = [...(invoice.paymentInfo?.customFields || [])];
-                    newFields[index] = { ...field, label: e.target.value };
-                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
-                  }}
-                  className="w-1/3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
-                />
-                <textarea
-                  placeholder={t.fieldValue}
-                  value={field.value}
-                  onChange={(e) => {
-                    const newFields = [...(invoice.paymentInfo?.customFields || [])];
-                    newFields[index] = { ...field, value: e.target.value };
-                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
-                  }}
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
-                  rows={1}
-                  onInput={(e) => {
-                    e.currentTarget.style.height = 'auto';
-                    e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                  }}
-                />
-                <button
-                  onClick={() => {
-                    const newFields = invoice.paymentInfo?.customFields?.filter(f => f.id !== field.id);
-                    onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: newFields } as any });
-                  }}
-                  className="text-slate-400 hover:text-red-500"
-                >
-                  <i className="fas fa-times"></i>
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => {
-                const newField: CustomField = { id: `field-${Date.now()}`, label: '', value: '' };
-                const currentFields = invoice.paymentInfo?.customFields || [];
-                onChange({ paymentInfo: { ...invoice.paymentInfo, customFields: [...currentFields, newField] } as any });
-              }}
-              className="text-sm text-blue-600 font-medium hover:underline"
-            >
-              + {t.addCustomField}
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {invoice.paymentInfo?.fields
+              ?.filter(f => f.visible)
+              ?.sort((a, b) => a.order - b.order)
+              ?.map((field) => {
+                const updateFieldValue = (value: string) => {
+                  const newFields = invoice.paymentInfo?.fields?.map(f =>
+                    f.id === field.id ? { ...f, value } : f
+                  ) || [];
+                  onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
+                };
+
+                return (
+                  <div key={field.id}>
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        ref={autoResizeTextarea}
+                        placeholder={field.label}
+                        value={field.value}
+                        onChange={(e) => updateFieldValue(e.target.value)}
+                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+                        rows={1}
+                        onInput={(e) => {
+                          e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+                        }}
+                      />
+                    ) : (
+                      <textarea
+                        ref={autoResizeTextarea}
+                        placeholder={field.label}
+                        value={field.value}
+                        onChange={(e) => updateFieldValue(e.target.value)}
+                        className={`w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
+                        rows={1}
+                        onInput={(e) => {
+                          e.currentTarget.style.height = 'auto';
+                          e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })
+            }
           </div>
         </div>
 

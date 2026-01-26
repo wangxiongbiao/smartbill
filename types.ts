@@ -74,12 +74,27 @@ export interface InvoiceRecord {
 export type DocumentType = 'invoice' | 'receipt' | 'custom';
 export type Language = 'zh-TW' | 'en' | 'fr' | 'de' | 'ja';
 
+
+export type PaymentFieldType = 'text' | 'textarea';
+
+export interface PaymentInfoField {
+  id: string;
+  label: string;
+  type: PaymentFieldType;
+  order: number;
+  visible: boolean;
+  required: boolean; // System fields cannot be deleted
+  value: string;
+}
+
 export interface PaymentInfo {
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  extraInfo?: string;
+  fields?: PaymentInfoField[]; // Optional for backward compatibility
   qrCode?: string; // Payment QR code image
+  // Legacy fields for backward compatibility
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  extraInfo?: string;
   customFields?: CustomField[];
 }
 

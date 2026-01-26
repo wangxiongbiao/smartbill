@@ -100,7 +100,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <p className="text-xs opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
               {invoice.sender.customFields?.map(field => (
                 <p key={field.id} className="text-xs opacity-80 mt-1">
-                  <span className="font-semibold">{field.label}</span> {field.value}
+                  <span className="font-semibold">{field.label}</span> <span className="whitespace-pre-wrap">{field.value}</span>
                 </p>
               ))}
             </div>
@@ -117,7 +117,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
               {invoice.client.customFields?.map(field => (
                 <p key={field.id} className="text-xs text-slate-500 mt-1">
-                  <span className="font-semibold">{field.label}</span> {field.value}
+                  <span className="font-semibold">{field.label}</span> <span className="whitespace-pre-wrap">{field.value}</span>
                 </p>
               ))}
             </div>
@@ -152,7 +152,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             {invoice.items.map((item) => (
               <tr key={item.id} className="text-xs">
                 {visibleColumns.map(col => (
-                  <td key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-bold' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium')}`}>
+                  <td key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-bold' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium')} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap' : ''}`}>
                     {renderCell(item, col)}
                   </td>
                 ))}
@@ -195,7 +195,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </div>
 
         {/* Payment Info */}
-        {(invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
+        {(invoice.paymentInfo?.fields || invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
           <div className="mt-8 pt-4 border-t border-slate-100 relative">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
 
@@ -211,36 +211,53 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             )}
 
             <div className={`space-y-1 text-xs text-slate-600 ${invoice.paymentInfo?.qrCode ? 'pr-36' : ''}`}>
-              {invoice.paymentInfo?.bankName && (
-                <div className="flex justify-between sm:justify-start sm:gap-4">
-                  <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
-                  <span className="font-bold text-slate-800">{invoice.paymentInfo.bankName}</span>
-                </div>
+              {/* New field-based system */}
+              {invoice.paymentInfo?.fields
+                ?.filter(field => field.visible && field.value)
+                ?.sort((a, b) => a.order - b.order)
+                ?.map(field => (
+                  <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
+                    <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
+                    <span className={`font-bold text-slate-800 whitespace-pre-wrap ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>{field.value}</span>
+                  </div>
+                ))
+              }
+
+              {/* Legacy field rendering for backward compatibility */}
+              {!invoice.paymentInfo?.fields && (
+                <>
+                  {invoice.paymentInfo?.bankName && (
+                    <div className="flex justify-between sm:justify-start sm:gap-4">
+                      <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
+                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{invoice.paymentInfo.bankName}</span>
+                    </div>
+                  )}
+                  {invoice.paymentInfo?.accountName && (
+                    <div className="flex justify-between sm:justify-start sm:gap-4">
+                      <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
+                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{invoice.paymentInfo.accountName}</span>
+                    </div>
+                  )}
+                  {invoice.paymentInfo?.accountNumber && (
+                    <div className="flex justify-between sm:justify-start sm:gap-4">
+                      <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
+                      <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap">{invoice.paymentInfo.accountNumber}</span>
+                    </div>
+                  )}
+                  {invoice.paymentInfo?.extraInfo && (
+                    <div className="flex justify-between sm:justify-start sm:gap-4">
+                      <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
+                      <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap">{invoice.paymentInfo.extraInfo}</span>
+                    </div>
+                  )}
+                  {invoice.paymentInfo?.customFields?.map(field => (
+                    <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
+                      <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
+                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{field.value}</span>
+                    </div>
+                  ))}
+                </>
               )}
-              {invoice.paymentInfo?.accountName && (
-                <div className="flex justify-between sm:justify-start sm:gap-4">
-                  <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
-                  <span className="font-bold text-slate-800">{invoice.paymentInfo.accountName}</span>
-                </div>
-              )}
-              {invoice.paymentInfo?.accountNumber && (
-                <div className="flex justify-between sm:justify-start sm:gap-4">
-                  <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
-                  <span className="font-bold text-slate-800 font-mono">{invoice.paymentInfo.accountNumber}</span>
-                </div>
-              )}
-              {invoice.paymentInfo?.extraInfo && (
-                <div className="flex justify-between sm:justify-start sm:gap-4">
-                  <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
-                  <span className="font-bold text-slate-800 font-mono">{invoice.paymentInfo.extraInfo}</span>
-                </div>
-              )}
-              {invoice.paymentInfo?.customFields?.map(field => (
-                <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
-                  <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
-                  <span className="font-bold text-slate-800">{field.value}</span>
-                </div>
-              ))}
             </div>
           </div>
         )}
