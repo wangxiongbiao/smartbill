@@ -71,18 +71,12 @@ const SortableColumnItem = ({
                 <i className={`fas fa-eye${column.visible ? '' : '-slash'}`}></i>
             </button>
 
-            {column.required ? (
-                <span className="flex-1 text-sm font-medium text-slate-700 px-3 py-2">
-                    {column.label}
-                </span>
-            ) : (
-                <input
-                    value={column.label}
-                    onChange={(e) => onRename(column.id, e.target.value)}
-                    className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                    placeholder={t.columnName}
-                />
-            )}
+            <input
+                value={column.label}
+                onChange={(e) => onRename(column.id, e.target.value)}
+                className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
+                placeholder={t.columnName}
+            />
 
             {!column.required && (
                 <button

@@ -795,9 +795,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           >
             <div className="space-y-4">
               {invoice.items.map((item) => {
-                const visibleColumns = sortedColumns.filter(col => col.visible);
-                const systemColumns = visibleColumns.filter(col => col.type.startsWith('system-'));
-                const customColumns = visibleColumns.filter(col => col.type.startsWith('custom-'));
+                // In form area, show ALL columns regardless of visibility
+                // Visibility only affects the preview
+                const systemColumns = sortedColumns.filter(col => col.type.startsWith('system-'));
+                const customColumns = sortedColumns.filter(col => col.type.startsWith('custom-'));
 
                 return (
                   <SortableItem key={item.id} id={item.id}>
@@ -823,8 +824,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
 
                                 return (
                                   <div key={col.id} className={colSpan}>
-                                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block flex items-center gap-1">
                                       {col.label}
+                                      {!col.visible && (
+                                        <i className="fas fa-eye-slash text-[8px] opacity-50" title="Hidden in preview"></i>
+                                      )}
                                     </label>
                                     {renderCell(item, col)}
                                   </div>
@@ -838,8 +842,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                   {customColumns.map(col => (
                                     <div key={col.id}>
-                                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">
+                                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block flex items-center gap-1">
                                         {col.label}
+                                        {!col.visible && (
+                                          <i className="fas fa-eye-slash text-[8px] opacity-50" title="Hidden in preview"></i>
+                                        )}
                                       </label>
                                       {renderCell(item, col)}
                                     </div>
