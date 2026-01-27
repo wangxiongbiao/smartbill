@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Invoice, TemplateType, ViewType, Language, User } from '../types';
 import { createClient } from '@/lib/supabase/client';
-import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices, getLatestInvoice } from '@/lib/supabase-db';
+import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices } from '@/lib/supabase-db';
 import Header from './Header';
 import InvoiceForm from './InvoiceForm';
 import InvoicePreview from './InvoicePreview';
@@ -299,40 +299,10 @@ const App: React.FC = () => {
       default: defaultCurrency = 'USD';
     }
 
-    // Fetch latest invoice for auto-fill (if user is logged in and no preset is provided)
-    let latestInvoiceData: Partial<Invoice> = {};
-    if (user?.id && !preset) {
-      try {
-        console.log('[handleStart] Fetching latest invoice for auto-fill...');
-        const latestInvoice = await getLatestInvoice(user.id);
-        if (latestInvoice) {
-          // Extract fields EXCLUDING client and items
-          latestInvoiceData = {
-            sender: latestInvoice.sender,
-            paymentInfo: latestInvoice.paymentInfo,
-            taxRate: latestInvoice.taxRate,
-            currency: latestInvoice.currency,
-            notes: latestInvoice.notes,
-            template: latestInvoice.template,
-            isHeaderReversed: latestInvoice.isHeaderReversed,
-            visibility: latestInvoice.visibility,
-            columnConfig: latestInvoice.columnConfig,
-          };
-          console.log('[handleStart] ✅ Auto-filled from latest invoice');
-        } else {
-          console.log('[handleStart] No previous invoice found, using defaults');
-        }
-      } catch (error) {
-        console.error('[handleStart] ⚠️ Failed to fetch latest invoice:', error);
-        // Continue with empty data if fetch fails
-      }
-    }
-
     const newInvoice = {
       ...INITIAL_INVOICE,
       currency: defaultCurrency,
-      ...latestInvoiceData, // Apply auto-filled data from latest invoice
-      ...preset, // Preset overrides auto-fill
+      ...preset, // Preset overrides defaults
       id: newId,
       invoiceNumber: `INV-${newId.slice(-6)}`
     };
