@@ -4,6 +4,7 @@ import { Invoice, Language } from '../types';
 import { translations } from '../i18n';
 import ShareDialog from './ShareDialog';
 import EmailDialog from './EmailDialog';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
 
 interface RecordsViewProps {
   records: Invoice[];
@@ -19,6 +20,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
+  const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
 
   if (records.length === 0) {
     return (
@@ -130,19 +132,13 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                   </button>
                   <button
                     onClick={() => {
-                      if (isDeletingId === record.id) return; // 正在删除时不响应点击
-                      if (window.confirm(
-                        lang === 'zh-TW'
-                          ? `確定要刪除發票 ${record.invoiceNumber} 嗎？此操作無法復原。`
-                          : `Are you sure you want to delete invoice ${record.invoiceNumber}? This action cannot be undone.`
-                      )) {
-                        onDelete(record.id);
-                      }
+                      if (isDeletingId === record.id) return; // Prevent clicking while deleting
+                      setDeleteInvoice(record); // Open delete confirmation dialog
                     }}
                     disabled={isDeletingId === record.id}
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm ${isDeletingId === record.id
-                        ? 'bg-red-100 text-red-400 cursor-not-allowed'
-                        : 'bg-red-50 hover:bg-red-600 hover:text-white text-red-500 active:scale-90'
+                      ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                      : 'bg-red-50 hover:bg-red-600 hover:text-white text-red-500 active:scale-90'
                       }`}
                     title={isDeletingId === record.id ? t.deleting : 'Delete'}
                   >
@@ -170,6 +166,23 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
           isOpen={true}
           onClose={() => setEmailInvoice(null)}
           lang={lang}
+        />
+      )}
+
+      {deleteInvoice && (
+        <DeleteConfirmDialog
+          isOpen={true}
+          onClose={() => setDeleteInvoice(null)}
+          onConfirm={() => {
+            onDelete(deleteInvoice.id);
+            setDeleteInvoice(null);
+          }}
+          title={t.deleteDialogTitle}
+          description={t.deleteDialogDescription}
+          confirmText={t.deleteDialogConfirm}
+          cancelText={t.deleteDialogCancel}
+          isDeleting={isDeletingId === deleteInvoice.id}
+          itemName={deleteInvoice.invoiceNumber}
         />
       )}
     </>

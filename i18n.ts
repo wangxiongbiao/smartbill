@@ -201,6 +201,11 @@ export const translations: Record<Language, any> = {
     deleting: 'Deleting...',
     deleteSuccess: 'Deleted successfully',
     deleteFailed: 'Delete failed, please retry',
+    // Delete Dialog
+    deleteDialogTitle: 'Delete Invoice?',
+    deleteDialogDescription: 'Are you sure you want to delete invoice {item}? This action cannot be undone.',
+    deleteDialogConfirm: 'Delete',
+    deleteDialogCancel: 'Cancel',
   },
   'zh-TW': {
     home: '首頁',
@@ -401,6 +406,11 @@ export const translations: Record<Language, any> = {
     deleting: '刪除中...',
     deleteSuccess: '刪除成功',
     deleteFailed: '刪除失敗，請重試',
+    // Delete Dialog
+    deleteDialogTitle: '確定刪除發票？',
+    deleteDialogDescription: '確定要刪除發票 {item} 嗎？此操作無法復原。',
+    deleteDialogConfirm: '刪除',
+    deleteDialogCancel: '取消',
   },
 };
 
