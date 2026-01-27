@@ -85,6 +85,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   const [showPaymentFieldConfig, setShowPaymentFieldConfig] = useState(false);
   const [showLogoPickerDialog, setShowLogoPickerDialog] = useState(false);
   const [showQRCodePickerDialog, setShowQRCodePickerDialog] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingQRCode, setIsUploadingQRCode] = useState(false);
   const t = translations[lang] || translations['en'];
 
   // Initialize columns if not present
@@ -346,15 +348,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   };
 
   const handleLogoSelect = async (imageData: string) => {
-    onChange({ sender: { ...invoice.sender, logo: imageData } });
+    setIsUploadingLogo(true);
+    try {
+      onChange({ sender: { ...invoice.sender, logo: imageData } });
 
-    // Save to history if userId is available
-    if (userId) {
-      try {
-        await saveImageUpload(userId, 'logo', imageData);
-      } catch (error) {
-        console.error('Failed to save logo to history:', error);
-      }
+      // Note: ImagePickerDialog already saves new uploads to database
+      // No need to save again here - just update the form state
+    } finally {
+      setIsUploadingLogo(false);
     }
   };
 
@@ -363,15 +364,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   };
 
   const handleQRCodeSelect = async (imageData: string) => {
-    onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: imageData } as any });
+    setIsUploadingQRCode(true);
+    try {
+      onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: imageData } as any });
 
-    // Save to history if userId is available
-    if (userId) {
-      try {
-        await saveImageUpload(userId, 'qrcode', imageData);
-      } catch (error) {
-        console.error('Failed to save QR code to history:', error);
-      }
+      // Note: ImagePickerDialog already saves new uploads to database
+      // No need to save again here - just update the form state
+    } finally {
+      setIsUploadingQRCode(false);
     }
   };
 
@@ -618,7 +618,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
 
           {/* Logo Upload Area */}
-          {!invoice.sender.logo ? (
+          {isUploadingLogo ? (
+            <div className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
+              <div className="flex flex-col items-center gap-2 text-blue-600">
+                <i className="fas fa-circle-notch fa-spin text-2xl"></i>
+                <span className="text-xs font-medium">{t.uploadingImage}</span>
+              </div>
+            </div>
+          ) : !invoice.sender.logo ? (
             <button
               onClick={() => setShowLogoPickerDialog(true)}
               className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
@@ -630,7 +637,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             </button>
           ) : (
             <div className="relative group">
-              <div className="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50">
+              <div className="w-full flex justify-center items-center border-2 border-slate-200 h-[140px] rounded-lg bg-slate-50">
                 <img
                   src={invoice.sender.logo}
                   alt="Logo"
@@ -931,7 +938,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             </button>
           </div>
 
-          {!invoice.paymentInfo?.qrCode ? (
+
+          {isUploadingQRCode ? (
+            <div className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 mb-4">
+              <div className="flex flex-col items-center gap-2 text-blue-600">
+                <i className="fas fa-circle-notch fa-spin text-2xl"></i>
+                <span className="text-xs font-medium">{t.uploadingImage}</span>
+              </div>
+            </div>
+          ) : !invoice.paymentInfo?.qrCode ? (
             <button
               onClick={() => setShowQRCodePickerDialog(true)}
               className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group mb-4"

@@ -12,9 +12,10 @@ interface RecordsViewProps {
   onExport: (record: Invoice) => void;
   lang: Language;
   onNewDoc: () => void;
+  isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, onExport, lang, onNewDoc }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
@@ -129,6 +130,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                   </button>
                   <button
                     onClick={() => {
+                      if (isDeletingId === record.id) return; // 正在删除时不响应点击
                       if (window.confirm(
                         lang === 'zh-TW'
                           ? `確定要刪除發票 ${record.invoiceNumber} 嗎？此操作無法復原。`
@@ -137,10 +139,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                         onDelete(record.id);
                       }
                     }}
-                    className="w-12 h-12 bg-red-50 hover:bg-red-600 hover:text-white text-red-500 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-90"
-                    title="Delete"
+                    disabled={isDeletingId === record.id}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm ${isDeletingId === record.id
+                        ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                        : 'bg-red-50 hover:bg-red-600 hover:text-white text-red-500 active:scale-90'
+                      }`}
+                    title={isDeletingId === record.id ? t.deleting : 'Delete'}
                   >
-                    <i className="fas fa-trash-alt text-sm"></i>
+                    <i className={`fas ${isDeletingId === record.id ? 'fa-circle-notch fa-spin' : 'fa-trash-alt'} text-sm`}></i>
                   </button>
                 </div>
               </div>

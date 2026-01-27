@@ -13,6 +13,23 @@ export async function saveImageUpload(
 ): Promise<ImageUpload> {
     const supabase = createClient();
 
+    // Check if an image with the same filename already exists
+    if (fileName) {
+        const { data: existingImage, error: checkError } = await supabase
+            .from('image_uploads')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('image_type', imageType)
+            .eq('file_name', fileName)
+            .single();
+
+        // If found, return existing image instead of creating duplicate
+        if (existingImage && !checkError) {
+            console.log(`Image with filename "${fileName}" already exists, skipping save`);
+            return existingImage as ImageUpload;
+        }
+    }
+
     const payload = {
         user_id: userId,
         image_type: imageType,

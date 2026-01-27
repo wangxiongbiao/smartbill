@@ -51,9 +51,10 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
         if (!file) return;
 
         setIsUploading(true);
-        try {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            try {
                 const imageData = reader.result as string;
 
                 // Save to database
@@ -73,17 +74,27 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
                 // Close dialog
                 onClose();
-            };
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Failed to upload image');
-        } finally {
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Failed to upload image');
+            } finally {
+                setIsUploading(false);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            }
+        };
+
+        reader.onerror = () => {
+            console.error('Error reading file');
+            alert('Failed to read file');
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
-        }
+        };
+
+        reader.readAsDataURL(file);
     };
 
     const handleSelectImage = (imageData: string) => {

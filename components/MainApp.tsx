@@ -48,7 +48,11 @@ const INITIAL_INVOICE: Invoice = {
   taxRate: 0,
   currency: 'CNY',
   notes: '感谢您的支持！',
-  status: 'Draft'
+  status: 'Draft',
+  visibility: {
+    date: true,      // Date默认勾选（显示）
+    dueDate: false   // Due Date默认不勾选（隐藏）
+  }
 };
 
 const App: React.FC = () => {
@@ -209,6 +213,7 @@ const App: React.FC = () => {
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null); // Track which record is being deleted
 
   // Save status tracking
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -481,6 +486,7 @@ const App: React.FC = () => {
         return <RecordsView
           records={records}
           lang={lang}
+          isDeletingId={isDeletingId}
           onEdit={(r) => {
             setInvoice(r);
             if (r.template) setTemplate(r.template);
@@ -490,6 +496,7 @@ const App: React.FC = () => {
           onDelete={async (id) => {
             if (user?.id && user.provider === 'google') {
               // 云端删除
+              setIsDeletingId(id); // 设置删除中状态
               try {
                 await deleteInvoice(id);
                 const updated = await getUserInvoices(user.id);
@@ -497,7 +504,9 @@ const App: React.FC = () => {
                 localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
               } catch (error) {
                 console.error('删除失败:', error);
-                alert('删除失败，请重试');
+                alert(translations[lang].deleteFailed || '删除失败，请重试');
+              } finally {
+                setIsDeletingId(null); // 清除删除中状态
               }
             } else {
               // 本地删除

@@ -181,7 +181,7 @@ export const translations: Record<Language, any> = {
     systemField: 'System Field',
     // Preview
     authorizedSignature: 'Authorized Signature',
-    disclaimerText: 'Disclaimer / Notice',
+    disclaimerText: 'Disclaimer',
     poweredBy: 'Powered by SmartBill Pro',
     // Image Picker
     imagePickerTitle: 'Select Image',
@@ -197,6 +197,10 @@ export const translations: Record<Language, any> = {
     uploadingImage: 'Uploading...',
     deletingImage: 'Deleting...',
     loadingHistory: 'Loading history...',
+    // Delete
+    deleting: 'Deleting...',
+    deleteSuccess: 'Deleted successfully',
+    deleteFailed: 'Delete failed, please retry',
   },
   'zh-TW': {
     home: '首頁',
@@ -377,7 +381,7 @@ export const translations: Record<Language, any> = {
     systemField: '系統字段',
     // Preview
     authorizedSignature: '授權簽名',
-    disclaimerText: '免責聲明 / 通知',
+    disclaimerText: '免責聲明',
     poweredBy: 'SmartBill Pro 提供技術支持',
     // Image Picker
     imagePickerTitle: '選擇圖片',
@@ -393,6 +397,10 @@ export const translations: Record<Language, any> = {
     uploadingImage: '上傳中...',
     deletingImage: '刪除中...',
     loadingHistory: '加載中...',
+    // Delete
+    deleting: '刪除中...',
+    deleteSuccess: '刪除成功',
+    deleteFailed: '刪除失敗，請重試',
   },
 };
 
