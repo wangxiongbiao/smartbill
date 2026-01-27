@@ -91,6 +91,7 @@ export const translations: Record<Language, any> = {
     goToHome: 'Start Creating Invoice',
     newInvoice: 'New Invoice',
     newInvoiceShort: 'New',
+    newInvoiceConfirm: 'Start a new invoice? Unsaved changes will be lost.',
     amountTotal: 'Total Amount',
     // Footer
     footerDesc: 'SmartBill Pro is the premier billing platform designed for modern entrepreneurs and freelancers. We help global users improve billing efficiency through innovative AI technology.',
@@ -296,6 +297,7 @@ export const translations: Record<Language, any> = {
     goToHome: '开始创建发票',
     newInvoice: '新建發票',
     newInvoiceShort: '新建',
+    newInvoiceConfirm: '確定要創建新發票嗎？未保存的更改將會遺失。',
     amountTotal: '賬單總額',
     // Footer
     footerDesc: 'SmartBill Pro 是專為現代企業家和自由職業者打造的頂級開票平台。我們通過創新的 AI 技術，幫助全球用戶提升計費效率。',

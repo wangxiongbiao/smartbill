@@ -540,6 +540,16 @@ const App: React.FC = () => {
                     {/* Top Buttons (Matching Sidebar Action Buttons) */}
                     <div className="flex gap-3">
                       <button
+                        onClick={() => {
+                          if (window.confirm(translations[lang].newInvoiceConfirm)) {
+                            handleStart();
+                          }
+                        }}
+                        className="flex-1 py-3 bg-emerald-50 text-emerald-600 font-black uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <i className="fas fa-plus"></i> {translations[lang].newInvoiceShort || 'New'}
+                      </button>
+                      <button
                         onClick={() => setIsShareDialogOpen(true)}
                         className="flex-1 py-3 bg-indigo-50 text-indigo-600 font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
                       >
