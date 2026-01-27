@@ -123,6 +123,7 @@ export interface Invoice {
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
 export type ViewType = 'home' | 'editor' | 'records' | 'profile' | 'about' | 'help';
+export type ImageType = 'logo' | 'qrcode';
 
 export interface IndustryTemplate {
   id: string;
@@ -131,4 +132,15 @@ export interface IndustryTemplate {
   previewColor: string;
   backgroundImage: string;
   defaultData: Partial<Invoice>;
+}
+
+export interface ImageUpload {
+  id: string;
+  user_id: string;
+  image_type: ImageType;
+  image_data: string; // base64
+  file_name?: string;
+  file_size?: number;
+  created_at: string;
+  updated_at: string;
 }

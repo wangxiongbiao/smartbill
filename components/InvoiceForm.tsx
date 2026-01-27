@@ -22,11 +22,14 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import ColumnConfigurator from './ColumnConfigurator';
 import PaymentFieldConfigurator from './PaymentFieldConfigurator';
+import ImagePickerDialog from './ImagePickerDialog';
+import { saveImageUpload } from '../lib/supabase-images';
 
 interface InvoiceFormProps {
   invoice: Invoice;
   onChange: (updates: Partial<Invoice>) => void;
   lang: Language;
+  userId?: string;
 }
 
 // Default payment fields
@@ -34,8 +37,8 @@ const defaultPaymentFields: PaymentInfoField[] = [
   { id: 'bankName', label: 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: '' },
   { id: 'accountName', label: 'Account Name', type: 'text', order: 1, visible: true, required: true, value: '' },
   { id: 'accountNumber', label: 'Account Number', type: 'text', order: 2, visible: true, required: true, value: '' },
-  { id: 'address', label: 'Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
-  { id: 'extraInfo', label: 'Extra Info', type: 'textarea', order: 4, visible: true, required: false, value: '' },
+  { id: 'Additional Info (SWIFT/IBAN)', label: 'Additional Info (SWIFT/IBAN)', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+  { id: 'BankAddress', label: 'Bank Address', type: 'textarea', order: 4, visible: true, required: false, value: '' },
 ];
 
 // Sortable Item Component
@@ -71,7 +74,7 @@ const defaultColumns: InvoiceColumn[] = [
   { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
 ];
 
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, userId }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +83,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
   const [showColumnConfig, setShowColumnConfig] = useState(false);
   const [showPaymentFieldConfig, setShowPaymentFieldConfig] = useState(false);
+  const [showLogoPickerDialog, setShowLogoPickerDialog] = useState(false);
+  const [showQRCodePickerDialog, setShowQRCodePickerDialog] = useState(false);
   const t = translations[lang] || translations['en'];
 
   // Initialize columns if not present
@@ -95,11 +100,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       // Migrate from old structure to new field-based structure
       const oldInfo = invoice.paymentInfo;
       const migratedFields: PaymentInfoField[] = [
-        { id: 'bankName', label: 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
-        { id: 'accountName', label: 'Account Name', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
-        { id: 'accountNumber', label: 'Account Number', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
-        { id: 'address', label: 'Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
-        { id: 'extraInfo', label: 'Extra Info', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
+        { id: 'bankName', label: t.bankName || 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
+        { id: 'accountName', label: t.accountName || 'Account Name', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
+        { id: 'accountNumber', label: t.accountNumber || 'Account Number', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
+        { id: 'address', label: lang === 'zh-TW' ? '詳細地址' : 'Bank Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+        { id: 'extraInfo', label: t.extraInfo || 'Additional Info (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
       ];
 
       // Migrate old custom fields
@@ -340,42 +345,38 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
     onChange({ items: invoice.items.filter(item => item.id !== id) });
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ sender: { ...invoice.sender, logo: reader.result as string } });
-      };
-      reader.readAsDataURL(file);
+  const handleLogoSelect = async (imageData: string) => {
+    onChange({ sender: { ...invoice.sender, logo: imageData } });
+
+    // Save to history if userId is available
+    if (userId) {
+      try {
+        await saveImageUpload(userId, 'logo', imageData);
+      } catch (error) {
+        console.error('Failed to save logo to history:', error);
+      }
     }
   };
 
   const handleLogoRemove = () => {
     onChange({ sender: { ...invoice.sender, logo: undefined } });
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
-  const handleQRCodeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: reader.result as string } as any });
-      };
-      reader.readAsDataURL(file);
+  const handleQRCodeSelect = async (imageData: string) => {
+    onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: imageData } as any });
+
+    // Save to history if userId is available
+    if (userId) {
+      try {
+        await saveImageUpload(userId, 'qrcode', imageData);
+      } catch (error) {
+        console.error('Failed to save QR code to history:', error);
+      }
     }
   };
 
   const handleQRCodeRemove = () => {
     onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } as any });
-    // Reset file input
-    if (qrInputRef.current) {
-      qrInputRef.current.value = '';
-    }
   };
 
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -559,14 +560,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
             onChange={(e) => onChange({ currency: e.target.value })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           >
-            <optgroup label="🌏 东亚 East Asia">
+            <optgroup label="亚洲 Asia">
               <option value="CNY">🇨🇳 CNY ¥ 中国</option>
               <option value="JPY">🇯🇵 JPY ¥ 日本</option>
               <option value="HKD">🇭🇰 HKD $ 香港</option>
               <option value="TWD">🇹🇼 TWD $ 台灣</option>
               <option value="KRW">🇰🇷 KRW ₩ 한국</option>
             </optgroup>
-            <optgroup label="🌴 东南亚 Southeast Asia">
+            <optgroup label="东南亚 Southeast Asia">
               <option value="SGD">🇸🇬 SGD $ Singapore</option>
               <option value="MYR">🇲🇾 MYR RM Malaysia</option>
               <option value="THB">🇹🇭 THB ฿ ประเทศไทย</option>
@@ -574,14 +575,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
               <option value="VND">🇻🇳 VND ₫ Việt Nam</option>
               <option value="IDR">🇮🇩 IDR Rp Indonesia</option>
             </optgroup>
-            <optgroup label="🌎 北美洲 North America">
+            <optgroup label="北美洲 North America">
               <option value="USD">🇺🇸 USD $ United States</option>
             </optgroup>
-            <optgroup label="🌍 欧洲 Europe">
+            <optgroup label="欧洲 Europe">
               <option value="EUR">🇪🇺 EUR € Europe</option>
               <option value="GBP">🇬🇧 GBP £ United Kingdom</option>
             </optgroup>
-            <optgroup label="🌏 大洋洲 Oceania">
+            <optgroup label="大洋洲 Oceania">
               <option value="AUD">🇦🇺 AUD $ Australia</option>
               <option value="NZD">🇳🇿 NZD $ New Zealand</option>
             </optgroup>
@@ -614,22 +615,47 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 border-t border-slate-100">
         {/* Bill From */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
-            <div className="flex gap-2 items-center">
-              <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" id="logo-up" />
-              <label htmlFor="logo-up" className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">{t.logoUp}</label>
-              {invoice.sender.logo && (
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
+
+          {/* Logo Upload Area */}
+          {!invoice.sender.logo ? (
+            <button
+              onClick={() => setShowLogoPickerDialog(true)}
+              className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
+            >
+              <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-600">
+                <i className="fas fa-image text-2xl"></i>
+                <span className="text-xs font-medium">{t.logoUp}</span>
+              </div>
+            </button>
+          ) : (
+            <div className="relative group">
+              <div className="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50">
+                <img
+                  src={invoice.sender.logo}
+                  alt="Logo"
+                  className="w-full h-24 object-contain"
+                />
+              </div>
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => setShowLogoPickerDialog(true)}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <i className="fas fa-sync-alt mr-1"></i>
+                  {t.logoUp?.replace('上傳', '更換').replace('Upload', 'Change') || 'Change'}
+                </button>
                 <button
                   onClick={handleLogoRemove}
-                  className="text-xs text-red-600 font-medium hover:underline"
-                  title={t.removeLogo || 'Remove Logo'}
+                  className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  {t.removeLogo || '✕ Remove'}
+                  <i className="fas fa-trash mr-1"></i>
+                  {t.removeLogo?.split(' ')[0] || 'Remove'}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
+
           <input
             placeholder={t.namePlaceholder}
             value={invoice.sender.name}
@@ -892,43 +918,67 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
           </span>
         </div>
 
-        <div className="space-y-4 col-span-full pt-4 border-t border-slate-100">
-          <div className="flex justify-between items-start relative">
+        {/* QR Code Upload Area */}
+        <div className="col-span-full">
+          <div className="flex justify-between items-center mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
-            <div className="flex gap-2 items-center">
-              <button
-                onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)}
-                className="text-slate-400 hover:text-blue-600 transition-colors"
-                title={t.configurePaymentFields || 'Configure Payment Fields'}
-              >
-                <i className="fas fa-cog"></i>
-              </button>
-              <input type="file" ref={qrInputRef} onChange={handleQRCodeUpload} accept="image/*" className="hidden" id="qr-upload" />
-              <label htmlFor="qr-upload" className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">
-                {t.uploadQR || 'Upload QR Code'}
-              </label>
-              {invoice.paymentInfo?.qrCode && (
+            <button
+              onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)}
+              className="text-slate-400 hover:text-blue-600 transition-colors"
+              title={t.configurePaymentFields || 'Configure Payment Fields'}
+            >
+              <i className="fas fa-cog"></i>
+            </button>
+          </div>
+
+          {!invoice.paymentInfo?.qrCode ? (
+            <button
+              onClick={() => setShowQRCodePickerDialog(true)}
+              className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group mb-4"
+            >
+              <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-600">
+                <i className="fas fa-qrcode text-2xl"></i>
+                <span className="text-xs font-medium">{t.uploadQR || 'Upload QR Code'}</span>
+              </div>
+            </button>
+          ) : (
+            <div className="relative group mb-4">
+              <div className="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50">
+                <img
+                  src={invoice.paymentInfo.qrCode}
+                  alt="QR Code"
+                  className="w-full h-40 object-contain"
+                />
+              </div>
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => setShowQRCodePickerDialog(true)}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <i className="fas fa-sync-alt mr-1"></i>
+                  {t.uploadQR?.replace('上傳', '更換').replace('Upload', 'Change') || 'Change'}
+                </button>
                 <button
                   onClick={handleQRCodeRemove}
-                  className="text-xs text-red-600 font-medium hover:underline"
-                  title={t.removeQR || 'Remove QR Code'}
+                  className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  {t.removeQR || '✕ Remove'}
+                  <i className="fas fa-trash mr-1"></i>
+                  {t.removeQR?.split(' ')[0] || 'Remove'}
                 </button>
-              )}
+              </div>
             </div>
+          )}
 
-            {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
-              <PaymentFieldConfigurator
-                fields={invoice.paymentInfo.fields}
-                onChange={(newFields) => {
-                  onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
-                }}
-                onClose={() => setShowPaymentFieldConfig(false)}
-                lang={lang}
-              />
-            )}
-          </div>
+          {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
+            <PaymentFieldConfigurator
+              fields={invoice.paymentInfo.fields}
+              onChange={(newFields) => {
+                onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
+              }}
+              onClose={() => setShowPaymentFieldConfig(false)}
+              lang={lang}
+            />
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {invoice.paymentInfo?.fields
@@ -1032,10 +1082,36 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang }) =>
         </div>
 
 
-      </section>
+      </section >
 
+      {/* Image Picker Dialogs */}
+      {
+        userId && showLogoPickerDialog && (
+          <ImagePickerDialog
+            isOpen={showLogoPickerDialog}
+            onClose={() => setShowLogoPickerDialog(false)}
+            imageType="logo"
+            onSelect={handleLogoSelect}
+            currentUserId={userId}
+            lang={lang}
+          />
+        )
+      }
 
-    </div>
+      {
+        userId && showQRCodePickerDialog && (
+          <ImagePickerDialog
+            isOpen={showQRCodePickerDialog}
+            onClose={() => setShowQRCodePickerDialog(false)}
+            imageType="qrcode"
+            onSelect={handleQRCodeSelect}
+            currentUserId={userId}
+            lang={lang}
+          />
+        )
+      }
+
+    </div >
   );
 };
 

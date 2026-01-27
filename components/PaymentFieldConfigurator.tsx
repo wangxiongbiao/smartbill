@@ -71,18 +71,12 @@ const SortableFieldItem = ({
                 <i className={`fas fa-eye${field.visible ? '' : '-slash'}`}></i>
             </button>
 
-            {field.required ? (
-                <span className="flex-1 text-sm font-medium text-slate-700 px-3 py-2">
-                    {field.label}
-                </span>
-            ) : (
-                <input
-                    value={field.label}
-                    onChange={(e) => onRename(field.id, e.target.value)}
-                    className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                    placeholder={t.fieldName || 'Field Name'}
-                />
-            )}
+            <input
+                value={field.label}
+                onChange={(e) => onRename(field.id, e.target.value)}
+                className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
+                placeholder={t.fieldName || 'Field Name'}
+            />
 
             {!field.required && (
                 <button
@@ -96,7 +90,7 @@ const SortableFieldItem = ({
 
             {field.required && (
                 <span className="text-xs text-slate-300 px-1 select-none" title={t.systemField || 'System Field'}>
-                    <i className="fas fa-lock"></i>
+                    <i className="fas fa-lock text-[10px] opacity-70"></i>
                 </span>
             )}
         </div>

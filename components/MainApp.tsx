@@ -542,7 +542,7 @@ const App: React.FC = () => {
                     onShare={() => setIsShareDialogOpen(true)}
                     lang={lang}
                   />
-                  <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} />
+                  <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} userId={user?.id} />
                   <div className="sm:hidden mt-10 mb-16 px-2">
                     <button
                       onClick={handleExportPdf}
