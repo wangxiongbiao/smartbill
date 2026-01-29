@@ -32,8 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const templates: { id: TemplateType; label: string; color: string }[] = [
     { id: 'minimalist', label: 'Minimalist', color: 'bg-[#fff]' },
-    { id: 'professional', label: 'Professional', color: 'bg-slate-800' },
-    { id: 'modern', label: 'Modern Indigo', color: 'bg-indigo-600' },
+    { id: 'minimalist', label: 'Minimalist', color: 'bg-[#fff]' },
 
   ];
 
