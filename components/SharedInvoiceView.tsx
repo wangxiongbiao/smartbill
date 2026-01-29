@@ -9,6 +9,8 @@ interface SharedInvoiceViewProps {
 }
 
 import InvoicePreview from './InvoicePreview';
+import ScalableInvoiceContainer from './ScalableInvoiceContainer';
+
 interface SharedInvoiceViewProps {
     data: Invoice;
     lang: Language;
@@ -19,17 +21,17 @@ const SharedInvoiceView = React.forwardRef(({ data, lang }: SharedInvoiceViewPro
 
     return (
         <div ref={ref} className="bg-white shadow-xl rounded-none sm:rounded-[2.5rem] overflow-hidden print:shadow-none print:rounded-none min-h-[800px] relative">
-
-
-            {/* Reuse the exact same preview component for 1:1 match */}
-            <InvoicePreview
-                invoice={data}
-                template={data.template || 'minimalist'}
-                isHeaderReversed={data.isHeaderReversed || false}
-                lang={lang}
-                isForPdf={false} // Ensure it looks like the web preview
-            />
-
+            {/* Scalable Container to handle mobile viewports */}
+            <ScalableInvoiceContainer>
+                {/* Reuse the exact same preview component for 1:1 match */}
+                <InvoicePreview
+                    invoice={data}
+                    template={data.template || 'minimalist'}
+                    isHeaderReversed={data.isHeaderReversed || false}
+                    lang={lang}
+                    isForPdf={false} // Ensure it looks like the web preview
+                />
+            </ScalableInvoiceContainer>
         </div>
     );
 });

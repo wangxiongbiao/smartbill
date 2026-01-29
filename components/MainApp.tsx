@@ -28,6 +28,7 @@ import ConfirmDialog from './ConfirmDialog';
 import Toast from './Toast';
 import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
+import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 import { translations } from '../i18n';
 import { useToast } from '../hooks/useToast';
 
@@ -699,9 +700,9 @@ const App: React.FC = () => {
 
                 <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
                   <div className="bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
-                    <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
+                    <ScalableInvoiceContainer>
                       <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
-                    </div>
+                    </ScalableInvoiceContainer>
                   </div>
                 </div>
               </div>
