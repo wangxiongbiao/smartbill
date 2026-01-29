@@ -6,13 +6,14 @@ import { updateUserProfile } from '@/lib/supabase-db';
 
 interface ProfileViewProps {
   recordsCount: number;
-  user: User;
+  user: User | null;
   onLogout: () => void;
-  onUpdateUser?: (user: User) => void;
+  onUpdateUser: (user: User) => void;
   lang: Language;
+  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ recordsCount, user, onLogout, onUpdateUser, lang }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ recordsCount, user, onLogout, onUpdateUser, lang, showToast }) => {
   const t = translations[lang] || translations['en'];
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(user.name);
@@ -32,10 +33,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({ recordsCount, user, onLogout,
       if (onUpdateUser) onUpdateUser(updatedUser);
       localStorage.setItem('sb_user_session', JSON.stringify(updatedUser));
       setIsEditing(false);
-      alert('个人信息已更新！');
+      showToast?.('个人信息已更新！', 'success');
     } catch (error) {
       console.error('更新失败:', error);
-      alert('更新失败，请重试');
+      showToast?.('更新失败，请重试', 'error');
     } finally {
       setIsSaving(false);
     }

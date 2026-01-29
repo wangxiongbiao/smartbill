@@ -20,6 +20,7 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
   const navItems: { id: ViewType; label: string; icon: string }[] = [
     { id: 'home', label: t.home, icon: 'fas fa-home' },
     { id: 'records', label: t.records, icon: 'fas fa-file-invoice' },
+    { id: 'templates', label: t.myTemplates, icon: 'fas fa-file-contract' },
     { id: 'profile', label: t.profile, icon: 'fas fa-user' },
   ];
 

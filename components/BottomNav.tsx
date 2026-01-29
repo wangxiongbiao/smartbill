@@ -16,7 +16,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
     { id: 'home', label: t.home, icon: 'fa-home', activeIcon: 'fa-home' },
     { id: 'editor', label: t.make, icon: 'fa-plus-circle', activeIcon: 'fa-plus-circle' },
     { id: 'records', label: t.records, icon: 'fa-file-invoice', activeIcon: 'fa-file-invoice' },
-    { id: 'about', label: t.aboutUs, icon: 'fa-info-circle', activeIcon: 'fa-info-circle' },
+    { id: 'templates', label: t.myTemplates || 'Templates', icon: 'fa-file-contract', activeIcon: 'fa-file-contract' },
     { id: 'profile', label: t.profile, icon: 'fa-user', activeIcon: 'fa-user' },
   ];
 
@@ -33,12 +33,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
               className="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300"
             >
               <div className="flex flex-col items-center gap-1">
-                <i className={`fas ${isActive ? tab.activeIcon : tab.icon} text-lg transition-all duration-300 ${
-                  isActive ? 'text-blue-500 scale-110' : 'text-slate-500'
-                }`}></i>
-                <span className={`text-[8px] font-black tracking-tighter uppercase transition-colors duration-300 ${
-                  isActive ? 'text-white' : 'text-slate-500'
-                }`}>
+                <i className={`fas ${isActive ? tab.activeIcon : tab.icon} text-lg transition-all duration-300 ${isActive ? 'text-blue-500 scale-110' : 'text-slate-500'
+                  }`}></i>
+                <span className={`text-[8px] font-black tracking-tighter uppercase transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'
+                  }`}>
                   {tab.label}
                 </span>
                 {isActive && (

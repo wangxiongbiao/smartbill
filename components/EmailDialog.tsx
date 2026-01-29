@@ -9,9 +9,10 @@ interface EmailDialogProps {
     isOpen: boolean;
     onClose: () => void;
     lang: Language;
+    showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const EmailDialog: React.FC<EmailDialogProps> = ({ invoice, isOpen, onClose, lang }) => {
+const EmailDialog: React.FC<EmailDialogProps> = ({ invoice, isOpen, onClose, lang, showToast }) => {
     const t = translations[lang] || translations['en'];
 
     const [email, setEmail] = useState('');
@@ -96,16 +97,19 @@ const EmailDialog: React.FC<EmailDialogProps> = ({ invoice, isOpen, onClose, lan
             } else {
                 const data = await response.json();
                 console.error('Failed to send email:', data);
-                if (data.error && (data.error.includes('only send testing emails to your own email') || data.error.includes('validation_error'))) {
-                    alert(`${t.emailError || "Error"}: ${t.resendTestLimit || "Resend Test Mode: You can only send to your own email address."}`);
+                if (data.success) {
+                    onClose();
                 } else {
-                    alert(t.emailError || "Failed to send email. Please try again.");
+                    if (data.isTestMode) {
+                        showToast?.(`${t.emailError || "Error"}: ${t.resendTestLimit || "Resend Test Mode: You can only send to your own email address."}`, 'warning');
+                    } else {
+                        showToast?.(t.emailError || "Failed to send email. Please try again.", 'error');
+                    }
                 }
             }
-
         } catch (error) {
             console.error('Error sending email:', error);
-            alert(t.emailError || "Failed to send email. Please try again.");
+            showToast?.(t.emailError || "Failed to send email. Please try again.", 'error');
         } finally {
             setSendingEmail(false);
         }

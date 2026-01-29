@@ -30,6 +30,7 @@ interface InvoiceFormProps {
   onChange: (updates: Partial<Invoice>) => void;
   lang: Language;
   userId?: string;
+  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 // Default payment fields
@@ -74,7 +75,7 @@ const defaultColumns: InvoiceColumn[] = [
   { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
 ];
 
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, userId }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, userId, showToast }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
@@ -1107,8 +1108,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             onClose={() => setShowLogoPickerDialog(false)}
             imageType="logo"
             onSelect={handleLogoSelect}
-            currentUserId={userId}
+            currentUserId={userId || ''}
             lang={lang}
+            showToast={showToast}
           />
         )
       }
@@ -1118,10 +1120,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
           <ImagePickerDialog
             isOpen={showQRCodePickerDialog}
             onClose={() => setShowQRCodePickerDialog(false)}
-            imageType="qrcode"
+            imageType="qrCode"
             onSelect={handleQRCodeSelect}
-            currentUserId={userId}
+            currentUserId={userId || ''}
             lang={lang}
+            showToast={showToast}
           />
         )
       }

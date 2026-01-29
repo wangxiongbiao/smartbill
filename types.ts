@@ -122,8 +122,21 @@ export interface Invoice {
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
-export type ViewType = 'home' | 'editor' | 'records' | 'profile' | 'about' | 'help';
+export type ViewType = 'home' | 'editor' | 'records' | 'templates' | 'template-detail' | 'profile' | 'about' | 'help';
 export type ImageType = 'logo' | 'qrcode';
+
+// Invoice Template Types
+export interface InvoiceTemplate {
+  id: string;                    // 模板唯一ID
+  user_id: string;               // 所属用户ID
+  name: string;                  // 模板名称
+  description?: string;          // 模板描述
+  template_data: Partial<Invoice>; // 模板数据（基于现有Invoice类型）
+  thumbnail?: string;            // 预览缩略图（可选，后期优化）
+  created_at: string;            // 创建时间
+  updated_at: string;            // 更新时间
+  usage_count?: number;          // 使用次数统计（可选）
+}
 
 export interface IndustryTemplate {
   id: string;

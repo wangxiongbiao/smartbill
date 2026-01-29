@@ -10,6 +10,7 @@ interface ImagePickerDialogProps {
     onSelect: (imageData: string) => void;
     currentUserId: string;
     lang: Language;
+    showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
@@ -18,7 +19,8 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     imageType,
     onSelect,
     currentUserId,
-    lang
+    lang,
+    showToast
 }) => {
     const [historyImages, setHistoryImages] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +78,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                 onClose();
             } catch (error) {
                 console.error('Error uploading image:', error);
-                alert('Failed to upload image');
+                showToast?.('Failed to upload image', 'error');
             } finally {
                 setIsUploading(false);
                 if (fileInputRef.current) {
@@ -87,7 +89,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
         reader.onerror = () => {
             console.error('Error reading file');
-            alert('Failed to read file');
+            showToast?.('Failed to read file', 'error');
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -113,7 +115,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
             await loadHistoryImages();
         } catch (error) {
             console.error('Error deleting image:', error);
-            alert('Failed to delete image');
+            showToast?.('Failed to delete image', 'error');
         } finally {
             setDeletingId(null);
         }

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Invoice, TemplateType, ViewType, Language, User } from '../types';
 import { createClient } from '@/lib/supabase/client';
 import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices } from '@/lib/supabase-db';
+import { saveTemplate } from '@/lib/supabase-templates';
 import Header from './Header';
 import InvoiceForm from './InvoiceForm';
 import InvoicePreview from './InvoicePreview';
@@ -19,9 +20,15 @@ import Footer from './Footer';
 import AIChat from './AIChat';
 import ShareDialog from './ShareDialog';
 import EmailDialog from './EmailDialog';
+import SaveTemplateDialog from './SaveTemplateDialog';
+import TemplatesView from './TemplatesView';
+import TemplateDetailView from './TemplateDetailView';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
+import Toast from './Toast';
 import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
 import { translations } from '../i18n';
+import { useToast } from '../hooks/useToast';
 
 declare var html2pdf: any;
 
@@ -61,13 +68,22 @@ const App: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  const [activeView, setActiveView] = useState<ViewType>('home');
+  // Get initial view - default to 'records' if user was previously logged in
+  const getInitialView = (): ViewType => {
+    if (typeof window === 'undefined') return 'home';
+    const savedUser = localStorage.getItem('sb_user_session');
+    return savedUser ? 'records' : 'home';
+  };
+
+  const [activeView, setActiveView] = useState<ViewType>(getInitialView());
   const [prevView, setPrevView] = useState<ViewType>('home');
   const [lang, setLang] = useState<Language>('en');
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [records, setRecords] = useState<Invoice[]>([]);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
 
   const syncRef = useRef<string | null>(null);
+  const { toast, showToast, hideToast } = useToast();
 
   // 初始化：从 localStorage 加载数据 & 同步 Supabase session
   useEffect(() => {
@@ -121,6 +137,9 @@ const App: React.FC = () => {
           setActiveView(targetView);
           const newUrl = window.location.pathname;
           window.history.replaceState({}, '', newUrl);
+        } else {
+          // Default to records after login if no specific view is requested
+          setActiveView('records');
         }
 
         let cloudInvoices: Invoice[] = [];
@@ -213,6 +232,7 @@ const App: React.FC = () => {
   const [isAIChatOpen, setIsAIChatOpen] = useState(true); // New State for Chat Logic
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isSaveTemplateDialogOpen, setIsSaveTemplateDialogOpen] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null); // Track which record is being deleted
 
   // Save status tracking
@@ -239,6 +259,7 @@ const App: React.FC = () => {
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
+    setActiveView('records');
   };
 
   const changeView = (newView: ViewType) => {
@@ -389,7 +410,63 @@ const App: React.FC = () => {
         localStorage.setItem('invoice_records_v2', JSON.stringify(newRecords));
         return newRecords;
       });
-      alert('账单已本地保存（登录后可同步云端）');
+      showToast('账单已本地保存（登录后可同步云端）', 'success');
+    }
+  };
+
+  // Save invoice as template
+  const handleSaveAsTemplate = async (name: string, description: string) => {
+    if (!user?.id) {
+      showToast('Please login to save templates', 'warning');
+      return;
+    }
+
+    try {
+      await saveTemplate(user.id, name, description, invoice);
+      showToast(translations[lang].templateSaved || 'Template saved successfully!', 'success');
+    } catch (error) {
+      console.error('Error saving template:', error);
+      showToast('Failed to save template. Please try again.', 'error');
+      throw error;
+    }
+  };
+
+  // Create invoice from template
+  const handleUseTemplate = async (template: any) => {
+    if (!user?.id) return;
+
+    const newId = Date.now().toString();
+    const newInvoice = {
+      ...INITIAL_INVOICE,
+      ...template.template_data,
+      id: newId,
+      invoiceNumber: `INV-${newId.slice(-6)}`,
+      date: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      client: {
+        name: '',
+        email: '',
+        address: ''
+      },
+      status: 'Draft' as const
+    };
+
+    setInvoice(newInvoice);
+    setActiveView('editor');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Immediately save the new invoice
+    try {
+      setSaveStatus('saving');
+      await saveInvoice(user.id, newInvoice);
+      setSaveStatus('saved');
+      setLastSavedTime(new Date());
+      const updated = await getUserInvoices(user.id);
+      setRecords(updated);
+      localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
+    } catch (error) {
+      console.error('Error saving invoice from template:', error);
+      setSaveStatus('error');
     }
   };
 
@@ -452,7 +529,7 @@ const App: React.FC = () => {
       case 'home':
         return <HomeView onSelectTemplate={handleStart} onCreateEmpty={() => handleStart()} lang={lang} />;
       case 'records':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="records" />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="records" showToast={showToast} />;
         return <RecordsView
           records={records}
           lang={lang}
@@ -474,7 +551,7 @@ const App: React.FC = () => {
                 localStorage.setItem('invoice_records_v2', JSON.stringify(updated));
               } catch (error) {
                 console.error('删除失败:', error);
-                alert(translations[lang].deleteFailed || '删除失败，请重试');
+                showToast(translations[lang].deleteFailed || '删除失败，请重试', 'error');
               } finally {
                 setIsDeletingId(null); // 清除删除中状态
               }
@@ -489,20 +566,49 @@ const App: React.FC = () => {
           onNewDoc={handleStart}
         />;
       case 'profile':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="profile" />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="profile" showToast={showToast} />;
         return <ProfileView
           recordsCount={records.length}
           user={user}
           onLogout={handleLogout}
           onUpdateUser={(updatedUser) => setUser(updatedUser)}
           lang={lang}
+          showToast={showToast}
+        />;
+      case 'templates':
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="templates" showToast={showToast} />;
+        return <TemplatesView
+          lang={lang}
+          userId={user.id}
+          onUseTemplate={handleUseTemplate}
+          onViewDetail={(template) => {
+            setActiveTemplateId(template.id);
+            setActiveView('template-detail');
+          }}
+          onNewDoc={handleStart}
+        />;
+      case 'template-detail':
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="templates" showToast={showToast} />;
+        if (!activeTemplateId) {
+          setActiveView('templates');
+          return null;
+        }
+        return <TemplateDetailViewWrapper
+          templateId={activeTemplateId}
+          lang={lang}
+          user={user}
+          onUseTemplate={handleUseTemplate}
+          onBack={() => {
+            setActiveView('templates');
+            setActiveTemplateId(null);
+          }}
         />;
       case 'about':
         return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={handleStart} />;
       case 'help':
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" />;
+        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" showToast={showToast} />;
         return (
           <>
             <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
@@ -535,44 +641,46 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-                  <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-4 sm:p-6 space-y-6">
-                    {/* Top Buttons (Matching InvoiceForm style) */}
-                    {/* Top Buttons (Matching Sidebar Action Buttons) */}
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          if (window.confirm(translations[lang].newInvoiceConfirm)) {
-                            handleStart();
-                          }
-                        }}
-                        className="flex-1 py-3 bg-emerald-50 text-emerald-600 font-black uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <i className="fas fa-plus"></i> {translations[lang].newInvoiceShort || 'New'}
-                      </button>
-                      <button
-                        onClick={() => setIsShareDialogOpen(true)}
-                        className="flex-1 py-3 bg-indigo-50 text-indigo-600 font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <i className="fas fa-share-alt"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
-                      </button>
-                      <button
-                        onClick={() => setIsEmailDialogOpen(true)}
-                        className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <i className="fas fa-envelope"></i> {translations[lang].sendEmail || 'Email'}
-                      </button>
-                      <button
-                        onClick={saveInvoiceToRecords}
-                        className="flex-1 py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <i className="fas fa-save"></i> {translations[lang].save}
-                      </button>
-                    </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        if (window.confirm(translations[lang].newInvoiceConfirm)) {
+                          handleStart();
+                        }
+                      }}
+                      className="flex-1 py-4 bg-emerald-50 text-emerald-600 font-black uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-plus"></i> {translations[lang].newInvoiceShort || 'New'}
+                    </button>
+                    <button
+                      onClick={() => setIsShareDialogOpen(true)}
+                      className="flex-1 py-3 bg-indigo-50 text-indigo-600 font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-share-alt"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
+                    </button>
+                    <button
+                      onClick={() => setIsEmailDialogOpen(true)}
+                      className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-envelope"></i> {translations[lang].sendEmail || 'Email'}
+                    </button>
+                    <button
+                      onClick={saveInvoiceToRecords}
+                      className="flex-1 py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-save"></i> {translations[lang].save}
+                    </button>
+                    <button
+                      onClick={() => setIsSaveTemplateDialogOpen(true)}
+                      className="flex-1 py-3 bg-emerald-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-file-contract"></i> {translations[lang].saveAsTemplate || 'Template'}
+                    </button>
+                  </div>
 
-                    <div className="p-2 bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto border border-slate-100">
-                      <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
-                        <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
-                      </div>
+                  <div className=" bg-slate-50 mt-6 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
+                    <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
+                      <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                     </div>
                   </div>
                 </div>
@@ -611,6 +719,15 @@ const App: React.FC = () => {
                   isOpen={isEmailDialogOpen}
                   onClose={() => setIsEmailDialogOpen(false)}
                   invoice={invoice}
+                  lang={lang}
+                  showToast={showToast}
+                />
+
+                {/* Save Template Dialog */}
+                <SaveTemplateDialog
+                  isOpen={isSaveTemplateDialogOpen}
+                  onClose={() => setIsSaveTemplateDialogOpen(false)}
+                  onSave={handleSaveAsTemplate}
                   lang={lang}
                 />
 
@@ -678,8 +795,143 @@ const App: React.FC = () => {
         </div>
       </div>
       <BottomNav activeView={activeView} setView={setActiveView} lang={lang} />
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 };
 
+// Wrapper component to fetch template data
+const TemplateDetailViewWrapper: React.FC<{
+  templateId: string;
+  lang: Language;
+  user: User;
+  onUseTemplate: (template: any) => void;
+  onBack: () => void;
+}> = ({ templateId, lang, user, onUseTemplate, onBack }) => {
+  const [template, setTemplate] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const t = translations[lang] || translations['en'];
+
+  React.useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        const { getTemplate } = await import('@/lib/supabase-templates');
+        const data = await getTemplate(templateId);
+        setTemplate(data);
+      } catch (error) {
+        console.error('Error loading template:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTemplate();
+  }, [templateId]);
+
+  const handleEdit = (template: any) => {
+    // This would require passing more handlers from parent
+    console.log('Edit template:', template);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      const { deleteTemplate } = await import('@/lib/supabase-templates');
+      await deleteTemplate(templateId);
+      onBack();
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      showToast('Failed to delete template', 'error');
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-400 font-medium">Loading template...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!template) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-600 mb-4">Template not found</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
+          >
+            Back to Templates
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <TemplateDetailView
+        template={template}
+        lang={lang}
+        onUseTemplate={() => onUseTemplate(template)}
+        onEdit={() => handleEdit(template)}
+        onDelete={() => setDeleteConfirmOpen(true)}
+        onBack={onBack}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t.deleteDialogTitle?.replace('Invoice', 'Template') || 'Delete Template?'}
+        description={t.deleteDialogDescription?.replace('invoice', 'template') || 'Are you sure you want to delete template {item}? This action cannot be undone.'}
+        confirmText={t.deleteDialogConfirm || 'Delete'}
+        cancelText={t.deleteDialogCancel || 'Cancel'}
+        isDeleting={isDeleting}
+        itemName={template.name}
+      />
+
+      {/* Full-page Deletion Loading Overlay */}
+      {isDeleting && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-6 animate-in zoom-in slide-in-from-bottom-8 duration-500">
+            <div className="relative">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-600 text-3xl">
+                <i className="fas fa-trash-alt animate-bounce"></i>
+              </div>
+              <div className="absolute inset-0 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t.deleting}</h3>
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce"></div>
+              </div>
+            </div>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">Processing...</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 export default App;
+

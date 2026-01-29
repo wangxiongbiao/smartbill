@@ -9,9 +9,10 @@ interface AuthViewProps {
   onLogin: (user: User) => void;
   lang: Language;
   targetView?: ViewType;
+  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView, showToast }) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const t = translations[lang] || translations['en'];
 
@@ -52,21 +53,22 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView }) => {
       console.log('[AuthView] signInWithOAuth response:', { data, error });
 
       if (error) {
-        console.error('[AuthView] ❌ Google login failed:', error);
-        alert(`Google login failed: ${error.message || 'Unknown error'}`);
+        console.error('Google login error:', error);
+        showToast?.(`Google login failed: ${error.message || 'Unknown error'}`, 'error');
         setIsGoogleLoading(false);
+        return;
       } else if (data?.url) {
         console.log('[AuthView] ✅ OAuth URL received, redirecting to:', data.url);
         // CRITICAL: Supabase doesn't auto-redirect, we must manually navigate
         window.location.href = data.url;
       } else {
         console.error('[AuthView] ❌ No OAuth URL returned');
-        alert('Failed to get Google login URL');
+        showToast?.('Failed to get Google login URL', 'error');
         setIsGoogleLoading(false);
       }
     } catch (error: any) {
       console.error('[AuthView] ❌ Google login exception:', error);
-      alert(`Google login error: ${error.message || 'Unknown error'}`);
+      showToast?.(`Google login error: ${error.message || 'Unknown error'}`, 'error');
       setIsGoogleLoading(false);
     }
   };

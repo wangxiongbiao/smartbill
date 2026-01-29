@@ -185,6 +185,29 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
           itemName={deleteInvoice.invoiceNumber}
         />
       )}
+
+      {/* Full-page Deletion Loading Overlay */}
+      {isDeletingId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-6 animate-in zoom-in slide-in-from-bottom-8 duration-500">
+            <div className="relative">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-600 text-3xl">
+                <i className="fas fa-trash-alt animate-bounce"></i>
+              </div>
+              <div className="absolute inset-0 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t.deleting}</h3>
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce"></div>
+              </div>
+            </div>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">{t.deleteSuccess ? 'Processing...' : 'Syncing with cloud...'}</p>
+          </div>
+        </div>
+      )}
     </>
   );
 };
