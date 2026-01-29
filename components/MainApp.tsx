@@ -640,7 +640,7 @@ const App: React.FC = () => {
 
                     <button
                       onClick={() => setIsSaveTemplateDialogOpen(true)}
-                      className="flex-1 group relative px-6 py-3.5 bg-white hover:bg-emerald-50 text-emerald-700 font-bold rounded-xl transition-all duration-200 cursor-pointer border-2 border-emerald-600 hover:border-emerald-700"
+                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

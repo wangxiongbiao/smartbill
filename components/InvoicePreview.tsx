@@ -107,6 +107,16 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             <div className="border-l-4 border-slate-200 pl-4">
               <p className="font-bold text-base">{invoice.client.name || t.clientName}</p>
               <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
+              {invoice.client.phone && (
+                <p className="text-xs text-slate-500 mt-1">
+                  <i className="fas fa-phone mr-1 opacity-60"></i> {invoice.client.phone}
+                </p>
+              )}
+              {invoice.client.email && (
+                <p className="text-xs text-slate-500 mt-1">
+                  <i className="fas fa-envelope mr-1 opacity-60"></i> {invoice.client.email}
+                </p>
+              )}
               {invoice.client.customFields?.map(field => (
                 <p key={field.id} className="text-xs text-slate-500 mt-1">
                   <span className="font-semibold">{field.label}</span> <span className="whitespace-pre-wrap">{field.value}</span>

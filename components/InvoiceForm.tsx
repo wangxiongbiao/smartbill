@@ -755,6 +755,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
           />
+          <input
+            placeholder="Phone (Optional)"
+            value={invoice.client.phone || ''}
+            onChange={(e) => onChange({ client: { ...invoice.client, phone: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+          />
+          <input
+            placeholder="Email (Optional)"
+            value={invoice.client.email || ''}
+            onChange={(e) => onChange({ client: { ...invoice.client, email: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+          />
 
           {/* Custom Fields for Client - Available for all modes */}
           <div className="space-y-2 mt-2">
