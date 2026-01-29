@@ -51,7 +51,7 @@ const INITIAL_INVOICE: Invoice = {
     address: ''
   },
   items: [
-    { id: 'item-1', description: '示例服务项目', quantity: 1, rate: 0 }
+    { id: 'item-1', description: 'Example Service Item', quantity: 1, rate: 0 }
   ],
   taxRate: 0,
   currency: 'CNY',
@@ -326,6 +326,9 @@ const App: React.FC = () => {
     const newInvoice = {
       ...INITIAL_INVOICE,
       currency: defaultCurrency,
+      items: [
+        { id: 'item-1', description: translations[lang].itemDescriptionExample || 'Example Service Item', quantity: 1, rate: 0 }
+      ],
       ...preset, // Preset overrides defaults
       id: newId,
       invoiceNumber: `INV-${newId.slice(-6)}`
@@ -512,7 +515,7 @@ const App: React.FC = () => {
     setIsExporting(true);
     const opt = {
       margin: 0,
-      filename: `${invoice.type === 'invoice' ? 'Invoice' : 'Receipt'}_${invoice.invoiceNumber}.pdf`,
+      filename: `${invoice.client.name ? invoice.client.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5\s_-]/g, '') : 'Client'}_${invoice.invoiceNumber}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }

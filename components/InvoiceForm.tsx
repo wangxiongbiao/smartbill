@@ -564,8 +564,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             <optgroup label="亚洲 Asia">
               <option value="CNY">🇨🇳 CNY ¥ 中国</option>
               <option value="JPY">🇯🇵 JPY ¥ 日本</option>
-              <option value="HKD">🇭🇰 HKD $ 香港</option>
-              <option value="TWD">🇹🇼 TWD $ 台灣</option>
+              <option value="HKD">🇭🇰 HKD $ 中国香港</option>
+              <option value="TWD">🇹🇼 TWD $ 中国台灣</option>
               <option value="KRW">🇰🇷 KRW ₩ 한국</option>
             </optgroup>
             <optgroup label="东南亚 Southeast Asia">
@@ -670,11 +670,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
-          <input
-            placeholder="Email (Optional)"
-            value={invoice.sender.email || ''}
-            onChange={(e) => onChange({ sender: { ...invoice.sender, email: e.target.value } })}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+          <textarea
+            placeholder={t.addrPlaceholder}
+            value={invoice.sender.address}
+            onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
           />
           <input
             placeholder="Phone (Optional)"
@@ -682,11 +682,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             onChange={(e) => onChange({ sender: { ...invoice.sender, phone: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
-          <textarea
-            placeholder={t.addrPlaceholder}
-            value={invoice.sender.address}
-            onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none"
+          <input
+            placeholder="Email (Optional)"
+            value={invoice.sender.email || ''}
+            onChange={(e) => onChange({ sender: { ...invoice.sender, email: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
 
 

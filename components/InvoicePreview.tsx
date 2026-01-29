@@ -97,7 +97,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-20 object-contain" />}
             <div>
               <h2 className="text-base font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
-              <p className="text-xs opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
+              <p className="text-xs opacity-80 whitespace-pre-wrap mt-2">{invoice.sender.address}</p>
               {invoice.sender.phone && (
                 <p className="text-xs opacity-80 mt-1">
                   <i className="fas fa-phone mr-1"></i> {invoice.sender.phone}
@@ -206,87 +206,92 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
         {/* Payment Info */}
         {(invoice.paymentInfo?.fields || invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && invoice.visibility?.paymentInfo === true && (
-          <div className="mt-8 pt-4 border-t border-slate-100 relative">
+          <div className="mt-8 pt-4 border-t border-slate-100">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
 
-            {/* QR Code Display - Absolutely positioned on the right */}
-            {invoice.paymentInfo?.qrCode && (
-              <div className="absolute top-4 right-0 w-32 h-32 border-2 border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
-                <img
-                  src={invoice.paymentInfo.qrCode}
-                  alt="Payment QR Code"
-                  className="w-full h-full object-contain p-2"
-                />
-              </div>
-            )}
-
-            <div className={`space-y-1 text-xs text-slate-600 ${invoice.paymentInfo?.qrCode ? 'pr-36' : ''}`}>
-              {/* New field-based system */}
-              {invoice.paymentInfo?.fields
-                ?.filter(field => field.visible && field.value)
-                ?.sort((a, b) => a.order - b.order)
-                ?.map(field => (
-                  <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
-                    <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
-                    <span className={`font-bold text-slate-800 whitespace-pre-wrap ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>{field.value}</span>
-                  </div>
-                ))
-              }
-
-              {/* Legacy field rendering for backward compatibility */}
-              {!invoice.paymentInfo?.fields && (
-                <>
-                  {invoice.paymentInfo?.bankName && (
-                    <div className="flex justify-between sm:justify-start sm:gap-4">
-                      <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
-                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{invoice.paymentInfo.bankName}</span>
-                    </div>
-                  )}
-                  {invoice.paymentInfo?.accountName && (
-                    <div className="flex justify-between sm:justify-start sm:gap-4">
-                      <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
-                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{invoice.paymentInfo.accountName}</span>
-                    </div>
-                  )}
-                  {invoice.paymentInfo?.accountNumber && (
-                    <div className="flex justify-between sm:justify-start sm:gap-4">
-                      <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
-                      <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap">{invoice.paymentInfo.accountNumber}</span>
-                    </div>
-                  )}
-                  {invoice.paymentInfo?.extraInfo && (
-                    <div className="flex justify-between sm:justify-start sm:gap-4">
-                      <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
-                      <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap">{invoice.paymentInfo.extraInfo}</span>
-                    </div>
-                  )}
-                  {invoice.paymentInfo?.customFields?.map(field => (
-                    <div key={field.id} className="flex justify-between sm:justify-start sm:gap-4">
+            <div className="flex justify-between w-full  items-start gap-8">
+              <div className="space-y-1 text-xs text-slate-600 flex-1 overflow-hidden">
+                {/* New field-based system */}
+                {invoice.paymentInfo?.fields
+                  ?.filter(field => field.visible && field.value)
+                  ?.sort((a, b) => a.order - b.order)
+                  ?.map(field => (
+                    <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
                       <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
-                      <span className="font-bold text-slate-800 whitespace-pre-wrap">{field.value}</span>
+                      <span className={`font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>{field.value}</span>
                     </div>
-                  ))}
-                </>
+                  ))
+                }
+
+                {/* Legacy field rendering for backward compatibility */}
+                {!invoice.paymentInfo?.fields && (
+                  <>
+                    {invoice.paymentInfo?.bankName && (
+                      <div className="flex justify-between sm:justify-start gap-4 items-baseline">
+                        <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
+                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.bankName}</span>
+                      </div>
+                    )}
+                    {invoice.paymentInfo?.accountName && (
+                      <div className="flex justify-between sm:justify-start gap-4 items-baseline">
+                        <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
+                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountName}</span>
+                      </div>
+                    )}
+                    {invoice.paymentInfo?.accountNumber && (
+                      <div className="flex justify-between sm:justify-start gap-4 items-baseline">
+                        <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
+                        <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountNumber}</span>
+                      </div>
+                    )}
+                    {invoice.paymentInfo?.extraInfo && (
+                      <div className="flex justify-between sm:justify-start gap-4 items-baseline">
+                        <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
+                        <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.extraInfo}</span>
+                      </div>
+                    )}
+                    {invoice.paymentInfo?.customFields?.map(field => (
+                      <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
+                        <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
+                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{field.value}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+
+              {/* QR Code Display */}
+              {invoice.paymentInfo?.qrCode && (
+                <div className="w-32 flex-shrink-0 h-auto max-h-50 border-2 border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm flex-shrink-0">
+                  <img
+                    src={invoice.paymentInfo.qrCode}
+                    alt="Payment QR Code"
+                    className="w-full h-auto object-contain p-2"
+                  />
+                </div>
               )}
             </div>
           </div>
         )}
-      </div>
+
+      </div >
 
       {/* Disclaimer Text - Above Copyright */}
-      {invoice.sender.disclaimerText && invoice.visibility?.disclaimer !== false && (
-        <div className="px-8 py-4 border-t border-slate-50 text-center">
-          <div className="flex items-start justify-center gap-2 text-[10px] text-slate-400 leading-relaxed">
-            <i className="fas fa-graduation-cap mt-0.5 flex-shrink-0"></i>
-            <span className="whitespace-pre-wrap">{invoice.sender.disclaimerText}</span>
+      {
+        invoice.sender.disclaimerText && invoice.visibility?.disclaimer !== false && (
+          <div className="px-8 py-4 border-t border-slate-50 text-center">
+            <div className="flex items-start justify-center gap-2 text-[10px] text-slate-400 leading-relaxed">
+              <i className="fas fa-graduation-cap mt-0.5 flex-shrink-0"></i>
+              <span className="whitespace-pre-wrap">{invoice.sender.disclaimerText}</span>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <div className="p-8 border-t border-slate-50 text-center text-[10px] text-slate-300 uppercase tracking-widest">
         {t.poweredBy}
       </div>
-    </div>
+    </div >
   );
 };
 
