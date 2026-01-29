@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { InvoiceTemplate, Invoice } from '../types';
+import { safeDeepClean } from './utils';
 
 const supabase = createClient();
 
@@ -12,9 +13,12 @@ export async function saveTemplate(
     description: string,
     templateData: Partial<Invoice>
 ): Promise<InvoiceTemplate> {
+    // Use safeDeepClean for robust sanitization of template data
+    const cleanTemplateData = safeDeepClean(templateData);
+
     // 清理模板数据，移除不应保存的字段
     const cleanedData = {
-        ...templateData,
+        ...cleanTemplateData,
         id: undefined,
         invoiceNumber: undefined,
         date: undefined,

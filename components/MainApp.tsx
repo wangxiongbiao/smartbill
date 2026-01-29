@@ -24,6 +24,7 @@ import SaveTemplateDialog from './SaveTemplateDialog';
 import TemplatesView from './TemplatesView';
 import TemplateDetailView from './TemplateDetailView';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import ConfirmDialog from './ConfirmDialog';
 import Toast from './Toast';
 import SaveStatusIndicator from './SaveStatusIndicator';
 import { smartGenerateLineItems } from '../services/geminiService';
@@ -233,6 +234,8 @@ const App: React.FC = () => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [isSaveTemplateDialogOpen, setIsSaveTemplateDialogOpen] = useState(false);
+  const [isNewInvoiceConfirmOpen, setIsNewInvoiceConfirmOpen] = useState(false);
+  const [isCreatingNewInvoice, setIsCreatingNewInvoice] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null); // Track which record is being deleted
 
   // Save status tracking
@@ -613,20 +616,70 @@ const App: React.FC = () => {
           <>
             <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
             <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
+              {/* Action Toolbar */}
+              <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-sm p-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Primary Actions Group */}
+                  <div className="flex gap-3 flex-1">
+                    <button
+                      onClick={() => setIsNewInvoiceConfirmOpen(true)}
+                      className="flex-1 group relative overflow-hidden px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-900 hover:border-slate-700"
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span className="text-sm tracking-wide">{translations[lang].newInvoiceShort || 'New Invoice'}</span>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setIsSaveTemplateDialogOpen(true)}
+                      className="flex-1 group relative px-6 py-3.5 bg-white hover:bg-emerald-50 text-emerald-700 font-bold rounded-xl transition-all duration-200 cursor-pointer border-2 border-emerald-600 hover:border-emerald-700"
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                        <span className="text-sm tracking-wide hidden sm:inline">{translations[lang].saveAsTemplate || 'Save Template'}</span>
+                        <span className="text-sm tracking-wide sm:hidden">Template</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Secondary Actions Group */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setIsShareDialogOpen(true)}
+                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
+                    >
+                      <div className="flex items-center justify-center gap-2.5">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        <span className="text-sm hidden sm:inline">{translations[lang].shareLink?.split(' ')[0] || 'Share'}</span>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setIsEmailDialogOpen(true)}
+                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-center gap-2.5">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm hidden sm:inline">{translations[lang].sendEmail || 'Send'}</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* 表单和预览区 */}
               <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
                 <div className="lg:w-1/2 flex flex-col gap-6">
-                  <Sidebar
-                    template={template}
-                    setTemplate={setTemplate}
-                    onSmartFill={handleSmartFill}
-                    isAiLoading={isAiLoading}
-                    isHeaderReversed={isHeaderReversed}
-                    // setIsHeaderReversed={setIsHeaderReversed}
-                    onSave={saveInvoiceToRecords}
-                    onShare={() => setIsShareDialogOpen(true)}
-                    lang={lang}
-                  />
+
                   <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} userId={user?.id} />
                   <div className="sm:hidden mt-10 mb-16 px-2">
                     <button
@@ -641,44 +694,7 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        if (window.confirm(translations[lang].newInvoiceConfirm)) {
-                          handleStart();
-                        }
-                      }}
-                      className="flex-1 py-4 bg-emerald-50 text-emerald-600 font-black uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <i className="fas fa-plus"></i> {translations[lang].newInvoiceShort || 'New'}
-                    </button>
-                    <button
-                      onClick={() => setIsShareDialogOpen(true)}
-                      className="flex-1 py-3 bg-indigo-50 text-indigo-600 font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <i className="fas fa-share-alt"></i> {translations[lang].shareLink?.split(' ')[0] || 'Share'}
-                    </button>
-                    <button
-                      onClick={() => setIsEmailDialogOpen(true)}
-                      className="flex-1 py-3 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <i className="fas fa-envelope"></i> {translations[lang].sendEmail || 'Email'}
-                    </button>
-                    <button
-                      onClick={saveInvoiceToRecords}
-                      className="flex-1 py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <i className="fas fa-save"></i> {translations[lang].save}
-                    </button>
-                    <button
-                      onClick={() => setIsSaveTemplateDialogOpen(true)}
-                      className="flex-1 py-3 bg-emerald-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <i className="fas fa-file-contract"></i> {translations[lang].saveAsTemplate || 'Template'}
-                    </button>
-                  </div>
-
-                  <div className=" bg-slate-50 mt-6 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
+                  <div className="bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
                     <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
                       <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} lang={lang} />
                     </div>
@@ -729,6 +745,41 @@ const App: React.FC = () => {
                   onClose={() => setIsSaveTemplateDialogOpen(false)}
                   onSave={handleSaveAsTemplate}
                   lang={lang}
+                />
+
+                {/* New Invoice Confirmation Dialog */}
+                <ConfirmDialog
+                  isOpen={isNewInvoiceConfirmOpen}
+                  onClose={() => setIsNewInvoiceConfirmOpen(false)}
+                  onConfirm={async () => {
+                    setIsCreatingNewInvoice(true);
+
+                    try {
+                      // Step 1: Save current invoice if user is logged in
+                      if (user?.id && invoice.id) {
+                        showToast(translations[lang].savingCurrentInvoice || '正在保存当前发票...', 'info');
+                        await saveInvoice(user.id, invoice);
+                      }
+
+                      // Step 2: Create new invoice
+                      await handleStart();
+
+                      // Step 3: Show success message
+                      setIsNewInvoiceConfirmOpen(false);
+                      showToast(translations[lang].newInvoiceCreated || '新发票创建成功！', 'success');
+                    } catch (error) {
+                      console.error('Error creating new invoice:', error);
+                      showToast(translations[lang].createInvoiceFailed || '创建发票失败，请重试', 'error');
+                    } finally {
+                      setIsCreatingNewInvoice(false);
+                    }
+                  }}
+                  title={translations[lang].newInvoiceConfirm || '创建新发票？'}
+                  description={translations[lang].newInvoiceConfirmDesc || '当前发票将自动保存，然后创建新发票。确定继续吗？'}
+                  confirmText={translations[lang].confirm || '确认'}
+                  cancelText={translations[lang].cancel || '取消'}
+                  variant="info"
+                  isProcessing={isCreatingNewInvoice}
                 />
 
                 {/* FAB Trigger */}

@@ -1,5 +1,6 @@
 import { createClient } from './supabase/client';
 import { Invoice, Profile } from '../types';
+import { safeDeepClean } from './utils';
 
 /**
  * 获取用户 profile
@@ -13,7 +14,12 @@ export async function getUserProfile(userId: string): Promise<Profile | null> {
         .single();
 
     if (error) {
-        console.error('Error fetching profile:', error);
+        // PGRST116 means no rows found, which is normal for first-time users
+        if (error.code === 'PGRST116') {
+            console.log('[getUserProfile] Profile not found for user:', userId, '(first-time user)');
+            return null;
+        }
+        console.error('[getUserProfile] Error fetching profile:', error);
         return null;
     }
     return data;
@@ -49,15 +55,23 @@ export async function saveInvoice(userId: string, invoice: Invoice): Promise<voi
 
     const supabase = createClient();
 
+    // Use safeDeepClean to remove circular references and DOM nodes
+    const cleanInvoiceData = safeDeepClean(invoice);
+
+    if (!cleanInvoiceData || !cleanInvoiceData.id) {
+        console.error('[saveInvoice] ❌ Error: Cleaned invoice data is invalid');
+        throw new Error('Failed to sanitize invoice data');
+    }
+
     const payload = {
-        id: invoice.id,
+        id: cleanInvoiceData.id,
         user_id: userId,
-        invoice_number: invoice.invoiceNumber,
-        invoice_data: invoice,
+        invoice_number: cleanInvoiceData.invoiceNumber,
+        invoice_data: cleanInvoiceData,
         updated_at: new Date().toISOString()
     };
 
-    console.log('[saveInvoice] 准备 upsert，payload:', payload);
+    console.log('[saveInvoice] 准备 upsert，payload已清理');
 
     const { data, error } = await supabase
         .from('invoices')
@@ -137,7 +151,10 @@ export async function deleteInvoice(invoiceId: string): Promise<void> {
 export async function batchSaveInvoices(userId: string, invoices: Invoice[]): Promise<void> {
     const supabase = createClient();
 
-    const records = invoices.map(invoice => ({
+    // Use safeDeepClean for robust sanitization of all invoices
+    const cleanInvoices = invoices.map(invoice => safeDeepClean(invoice)).filter(i => i && i.id);
+
+    const records = cleanInvoices.map(invoice => ({
         id: invoice.id,
         user_id: userId,
         invoice_number: invoice.invoiceNumber,

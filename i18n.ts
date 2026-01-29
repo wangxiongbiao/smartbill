@@ -75,7 +75,7 @@ export const translations: Record<Language, any> = {
     rate: 'Rate',
     amount: 'Amount',
     addItems: '+ Add Item',
-    taxRate: 'Tax Rate (%)',
+    taxRate: 'Tax Rate / VAT (%)',
     signature: 'E-Signature',
     signPlaceholder: 'Handwrite your signature here',
     signClear: 'Clear and Resign',
@@ -91,7 +91,13 @@ export const translations: Record<Language, any> = {
     goToHome: 'Start Creating Invoice',
     newInvoice: 'New Invoice',
     newInvoiceShort: 'New',
-    newInvoiceConfirm: 'Start a new invoice? Unsaved changes will be lost.',
+    newInvoiceConfirm: 'Start a new invoice?',
+    newInvoiceConfirmDesc: 'Any unsaved changes will be lost. Are you sure you want to create a new invoice?',
+    savingCurrentInvoice: 'Saving current invoice...',
+    newInvoiceCreated: 'New invoice created successfully!',
+    createInvoiceFailed: 'Failed to create invoice, please try again',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
     amountTotal: 'Total Amount',
     // Footer
     footerDesc: 'SmartBill Pro is the premier billing platform designed for modern entrepreneurs and freelancers. We help global users improve billing efficiency through innovative AI technology.',
@@ -182,7 +188,7 @@ export const translations: Record<Language, any> = {
     systemField: 'System Field',
     // Preview
     authorizedSignature: 'Authorized Signature',
-    disclaimerText: 'Disclaimer',
+    disclaimerText: 'Notes',
     poweredBy: 'Powered by SmartBill Pro',
     // Image Picker
     imagePickerTitle: 'Select Image',
@@ -324,7 +330,13 @@ export const translations: Record<Language, any> = {
     goToHome: '开始创建发票',
     newInvoice: '新建發票',
     newInvoiceShort: '新建',
-    newInvoiceConfirm: '確定要創建新發票嗎？未保存的更改將會遺失。',
+    newInvoiceConfirm: '確定要創建新發票嗎？',
+    newInvoiceConfirmDesc: '當前發票將自動保存，然後創建新發票。確定繼續嗎？',
+    savingCurrentInvoice: '正在保存當前發票...',
+    newInvoiceCreated: '新發票創建成功！',
+    createInvoiceFailed: '創建發票失敗，請重試',
+    confirm: '確認',
+    cancel: '取消',
     amountTotal: '賬單總額',
     // Footer
     footerDesc: 'SmartBill Pro 是專為現代企業家和自由職業者打造的頂級開票平台。我們通過創新的 AI 技術，幫助全球用戶提升計費效率。',
@@ -415,7 +427,7 @@ export const translations: Record<Language, any> = {
     systemField: '系統字段',
     // Preview
     authorizedSignature: '授權簽名',
-    disclaimerText: '免責聲明',
+    disclaimerText: '備註',
     poweredBy: 'SmartBill Pro 提供技術支持',
     // Image Picker
     imagePickerTitle: '選擇圖片',
