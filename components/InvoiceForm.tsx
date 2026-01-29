@@ -670,6 +670,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
             onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
           />
+          <input
+            placeholder="Email (Optional)"
+            value={invoice.sender.email || ''}
+            onChange={(e) => onChange({ sender: { ...invoice.sender, email: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+          />
+          <input
+            placeholder="Phone (Optional)"
+            value={invoice.sender.phone || ''}
+            onChange={(e) => onChange({ sender: { ...invoice.sender, phone: e.target.value } })}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+          />
           <textarea
             placeholder={t.addrPlaceholder}
             value={invoice.sender.address}
@@ -928,119 +940,134 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
 
         {/* QR Code Upload Area */}
         <div className="col-span-full">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
-            <button
-              onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)}
-              className="text-slate-400 hover:text-blue-600 transition-colors"
-              title={t.configurePaymentFields || 'Configure Payment Fields'}
-            >
-              <i className="fas fa-cog"></i>
-            </button>
+          <div className="flex justify-between items-center mb-3 relative">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.paymentInfo}</h3>
+              <button
+                onClick={() => onChange({ visibility: { ...invoice.visibility, paymentInfo: !invoice.visibility?.paymentInfo } })}
+                className={`text-xs ${invoice.visibility?.paymentInfo === true ? 'text-blue-600' : 'text-slate-300'}`}
+                title={t.visibility}
+              >
+                <i className={`fas fa-toggle-${invoice.visibility?.paymentInfo === true ? 'on' : 'off'} text-lg`}></i>
+              </button>
+            </div>
+
+            {invoice.visibility?.paymentInfo === true && (
+              <button
+                onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)}
+                className="text-slate-400 hover:text-blue-600 transition-colors"
+                title={t.configurePaymentFields || 'Configure Payment Fields'}
+              >
+                <i className="fas fa-cog"></i>
+              </button>
+            )}
+
+            {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
+              <PaymentFieldConfigurator
+                fields={invoice.paymentInfo.fields}
+                onChange={(newFields) => {
+                  onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
+                }}
+                onClose={() => setShowPaymentFieldConfig(false)}
+                lang={lang}
+              />
+            )}
           </div>
 
-
-          {isUploadingQRCode ? (
-            <div className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 mb-4">
-              <div className="flex flex-col items-center gap-2 text-blue-600">
-                <i className="fas fa-circle-notch fa-spin text-2xl"></i>
-                <span className="text-xs font-medium">{t.uploadingImage}</span>
-              </div>
-            </div>
-          ) : !invoice.paymentInfo?.qrCode ? (
-            <button
-              onClick={() => setShowQRCodePickerDialog(true)}
-              className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group mb-4"
-            >
-              <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-600">
-                <i className="fas fa-qrcode text-2xl"></i>
-                <span className="text-xs font-medium">{t.uploadQR || 'Upload QR Code'}</span>
-              </div>
-            </button>
-          ) : (
-            <div className="relative group mb-4">
-              <div className="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50">
-                <img
-                  src={invoice.paymentInfo.qrCode}
-                  alt="QR Code"
-                  className="w-full h-40 object-contain"
-                />
-              </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+          {invoice.visibility?.paymentInfo === true && (
+            <>
+              {isUploadingQRCode ? (
+                <div className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 mb-4">
+                  <div className="flex flex-col items-center gap-2 text-blue-600">
+                    <i className="fas fa-circle-notch fa-spin text-2xl"></i>
+                    <span className="text-xs font-medium">{t.uploadingImage}</span>
+                  </div>
+                </div>
+              ) : !invoice.paymentInfo?.qrCode ? (
                 <button
                   onClick={() => setShowQRCodePickerDialog(true)}
-                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group mb-4"
                 >
-                  <i className="fas fa-sync-alt mr-1"></i>
-                  {t.uploadQR?.replace('上傳', '更換').replace('Upload', 'Change') || 'Change'}
-                </button>
-                <button
-                  onClick={handleQRCodeRemove}
-                  className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <i className="fas fa-trash mr-1"></i>
-                  {t.removeQR?.split(' ')[0] || 'Remove'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
-            <PaymentFieldConfigurator
-              fields={invoice.paymentInfo.fields}
-              onChange={(newFields) => {
-                onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
-              }}
-              onClose={() => setShowPaymentFieldConfig(false)}
-              lang={lang}
-            />
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {invoice.paymentInfo?.fields
-              ?.filter(f => f.visible)
-              ?.sort((a, b) => a.order - b.order)
-              ?.map((field) => {
-                const updateFieldValue = (value: string) => {
-                  const newFields = invoice.paymentInfo?.fields?.map(f =>
-                    f.id === field.id ? { ...f, value } : f
-                  ) || [];
-                  onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
-                };
-
-                return (
-                  <div key={field.id}>
-                    {field.type === 'textarea' ? (
-                      <textarea
-                        ref={autoResizeTextarea}
-                        placeholder={field.label}
-                        value={field.value}
-                        onChange={(e) => updateFieldValue(e.target.value)}
-                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
-                        rows={1}
-                        onInput={(e) => {
-                          e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                        }}
-                      />
-                    ) : (
-                      <textarea
-                        ref={autoResizeTextarea}
-                        placeholder={field.label}
-                        value={field.value}
-                        onChange={(e) => updateFieldValue(e.target.value)}
-                        className={`w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
-                        rows={1}
-                        onInput={(e) => {
-                          e.currentTarget.style.height = 'auto';
-                          e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                        }}
-                      />
-                    )}
+                  <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-600">
+                    <i className="fas fa-qrcode text-2xl"></i>
+                    <span className="text-xs font-medium">{t.uploadQR || 'Upload QR Code'}</span>
                   </div>
-                );
-              })
-            }
-          </div>
+                </button>
+              ) : (
+                <div className="relative group mb-4">
+                  <div className="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50">
+                    <img
+                      src={invoice.paymentInfo.qrCode}
+                      alt="QR Code"
+                      className="w-full h-40 object-contain"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() => setShowQRCodePickerDialog(true)}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <i className="fas fa-sync-alt mr-1"></i>
+                      {t.uploadQR?.replace('上傳', '更換').replace('Upload', 'Change') || 'Change'}
+                    </button>
+                    <button
+                      onClick={handleQRCodeRemove}
+                      className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      <i className="fas fa-trash mr-1"></i>
+                      {t.removeQR?.split(' ')[0] || 'Remove'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {invoice.paymentInfo?.fields
+                  ?.filter(f => f.visible)
+                  ?.sort((a, b) => a.order - b.order)
+                  ?.map((field) => {
+                    const updateFieldValue = (value: string) => {
+                      const newFields = invoice.paymentInfo?.fields?.map(f =>
+                        f.id === field.id ? { ...f, value } : f
+                      ) || [];
+                      onChange({ paymentInfo: { ...invoice.paymentInfo, fields: newFields } });
+                    };
+
+                    return (
+                      <div key={field.id}>
+                        {field.type === 'textarea' ? (
+                          <textarea
+                            ref={autoResizeTextarea}
+                            placeholder={field.label}
+                            value={field.value}
+                            onChange={(e) => updateFieldValue(e.target.value)}
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm"
+                            rows={1}
+                            onInput={(e) => {
+                              e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+                            }}
+                          />
+                        ) : (
+                          <textarea
+                            ref={autoResizeTextarea}
+                            placeholder={field.label}
+                            value={field.value}
+                            onChange={(e) => updateFieldValue(e.target.value)}
+                            className={`w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none overflow-hidden text-sm ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
+                            rows={1}
+                            onInput={(e) => {
+                              e.currentTarget.style.height = 'auto';
+                              e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })
+                }
+              </div>
+            </>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -1120,7 +1147,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
           <ImagePickerDialog
             isOpen={showQRCodePickerDialog}
             onClose={() => setShowQRCodePickerDialog(false)}
-            imageType="qrCode"
+            imageType="qrcode"
             onSelect={handleQRCodeSelect}
             currentUserId={userId || ''}
             lang={lang}

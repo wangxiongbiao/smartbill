@@ -38,6 +38,7 @@ export interface Client {
 export interface Sender {
   name: string;
   email: string;
+  phone?: string;
   address: string;
   logo?: string;
   signature?: string;

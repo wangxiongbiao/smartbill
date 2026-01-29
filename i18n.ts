@@ -55,7 +55,7 @@ export const translations: Record<Language, any> = {
     aiPlaceholderInput: 'Press Enter to send, Shift + Enter for new line',
     // Form
     invoiceMode: 'Invoice Mode',
-    receiptMode: 'Receipt Mode',
+    receiptMode: 'Estimates Mode',
     addCustomField: 'Add Field',
     fieldName: 'Label',
     fieldValue: 'Value',
@@ -240,6 +240,124 @@ export const translations: Record<Language, any> = {
     createFromTemplate: 'Create from Template',
     templatePreview: 'Template Preview',
     backToTemplates: 'Back to Templates',
+    // SEO Content
+    faqTitle: 'Frequently Asked Questions',
+    faqs: [
+      {
+        q: 'How do I create a professional invoice for free?',
+        a: 'With SmartBill Pro, you can create a professional invoice in seconds. Simply select a template, fill in your business details, client information, and line items, then export as a PDF. No registration is required for basic use.'
+      },
+      {
+        q: 'What should be included in an invoice?',
+        a: 'A professional invoice should include your business name and contact info, client info, a unique invoice number, date, due date, a clear description of services/products, quantities, rates, tax information, and payment instructions.'
+      },
+      {
+        q: 'Can I use SmartBill Pro on my mobile device?',
+        a: 'Yes! SmartBill Pro is fully responsive and works perfectly on smartphones and tablets. You can create, manage, and send invoices on the go.'
+      },
+      {
+        q: 'Is my data secure?',
+        a: 'We take data privacy seriously. If you create an account, your data is securely stored in our cloud. If you use it as a guest, your data remains in your local browser storage.'
+      }
+    ],
+    whySmartBill: 'Why Choose SmartBill Pro?',
+    features: [
+      {
+        title: 'AI-Powered Efficiency',
+        desc: 'Our AI Smart Fill helps you draft invoice items from simple descriptions, saving you time and effort.'
+      },
+      {
+        title: 'Professional Templates',
+        desc: 'Choose from a variety of designer-made templates tailored for different industries like freelancing, consulting, and retail.'
+      },
+      {
+        title: 'Zero Friction',
+        desc: 'Start billing immediately without mandatory registration. We believe in getting you paid faster.'
+      }
+    ],
+    // New SEO Content: Use Cases & Testimonials
+    industriesTitle: 'Tailored for Every Industry',
+    industriesList: [
+      {
+        title: 'Freelancers',
+        desc: 'Get paid faster with professional templates designed for writers, designers, and developers.',
+        icon: 'fa-laptop-code'
+      },
+      {
+        title: 'Contractors',
+        desc: 'Detailed breakdown of materials and labor for construction and renovation projects.',
+        icon: 'fa-hard-hat'
+      },
+      {
+        title: 'Small Business',
+        desc: 'Streamline your billing process with tax-compliant invoices for retail and services.',
+        icon: 'fa-store'
+      },
+      {
+        title: 'Consultants',
+        desc: 'Bill for your time and expertise with hourly rate templates and clear service descriptions.',
+        icon: 'fa-briefcase'
+      },
+      {
+        title: 'Legal Services',
+        desc: 'Professional billing formats for law firms and attorneys with retainer management.',
+        icon: 'fa-gavel'
+      },
+      {
+        title: 'Medical',
+        desc: 'HIPAA-compliant invoice templates for private practices, therapists, and dental clinics.',
+        icon: 'fa-stethoscope'
+      },
+      {
+        title: 'Automotive',
+        desc: 'Clear parts and labor separation for auto repair shops and mechanics.',
+        icon: 'fa-wrench'
+      },
+      {
+        title: 'Photography',
+        desc: 'Beautiful invoice designs for photographers, videographers, and creative studios.',
+        icon: 'fa-camera'
+      }
+    ],
+    testimonialsTitle: 'Trusted by 10,000+ Users',
+    testimonialsList: [
+      {
+        name: 'Sarah Jenkins',
+        role: 'Graphic Designer',
+        content: 'This **free invoice generator** is a lifesaver! I used to spend hours on billing, now it takes seconds.',
+        rating: 5
+      },
+      {
+        name: 'Mike Ross',
+        role: 'Construction Contractor',
+        content: 'Finally, a simple **bill maker** that works perfectly on my phone while I am on the job site.',
+        rating: 5
+      },
+      {
+        name: 'Emily Chen',
+        role: 'Marketing Consultant',
+        content: 'The **professional invoice templates** help me look great in front of my clients. Highly recommended!',
+        rating: 5
+      },
+      {
+        name: 'David Miller',
+        role: 'Small Business Owner',
+        content: 'I love that there is **no signup required**. Just open the page, fill it out, and download the PDF. Best tool ever.',
+        rating: 5
+      },
+      {
+        name: 'Jessica Lee',
+        role: 'Freelance Writer',
+        content: 'SmartBill Pro is the **best invoice app** I have found. The templates are clean, modern, and easy to customize.',
+        rating: 5
+      },
+      {
+        name: 'Robert Taylor',
+        role: 'Auto Mechanic',
+        content: 'Great for separating parts and labor. My customers appreciate the clear and professional invoices.',
+        rating: 5
+      }
+    ]
   },
   'zh-TW': {
     home: '首頁',
@@ -479,6 +597,124 @@ export const translations: Record<Language, any> = {
     createFromTemplate: '從模板創建',
     templatePreview: '模板預覽',
     backToTemplates: '返回模板列表',
+    // SEO Content
+    faqTitle: '常見問題解答',
+    faqs: [
+      {
+        q: '如何免費創建專業發票？',
+        a: '使用 SmartBill Pro，您可以在幾秒鐘內創建專業發票。只需選擇一個模板，填寫您的企業詳情、客戶信息和項目明細，然後導出為 PDF。基本使用無需註冊。'
+      },
+      {
+        q: '發票中應該包含哪些內容？',
+        a: '專業發票應包括您的企業名稱和聯繫信息、客戶信息、唯一的發票編號、日期、截止日期、服務/產品的清晰描述、數量、單價、稅務信息和付款說明。'
+      },
+      {
+        q: '我可以在移動設備上使用 SmartBill Pro 嗎？',
+        a: '可以！SmartBill Pro 完全採用響應式設計，在智慧型手機和平板電腦上運行良好。您可以隨時隨地創建、管理和發送發票。'
+      },
+      {
+        q: '我的數據安全嗎？',
+        a: '我們非常重視數據隱私。如果您創建賬戶，您的數據將安全地存儲在我們的雲端。如果您以訪客身份使用，您的數據將保留在您的本地瀏覽器存儲中。'
+      }
+    ],
+    whySmartBill: '為什麼選擇 SmartBill Pro？',
+    features: [
+      {
+        title: 'AI 驅動效率',
+        desc: '我們的 AI 智能填充可幫助您根據簡單的描述草擬發票項目，為您節省時間和精力。'
+      },
+      {
+        title: '專業模板',
+        desc: '針對自由職業、諮詢和零售等不同行業，選擇各種由設計師製作的模板。'
+      },
+      {
+        title: '零門檻使用',
+        desc: '無需強制註冊即可立即開始開票。我們致力於讓您更快地收到款項。'
+      }
+    ],
+    // New SEO Content: Use Cases & Testimonials
+    industriesTitle: '專為各行各業量身定制',
+    industriesList: [
+      {
+        title: '自由職業者',
+        desc: '為作家、設計師和開發者設計的專業模板，助您更快獲得報酬。',
+        icon: 'fa-laptop-code'
+      },
+      {
+        title: '工程承包商',
+        desc: '適用於建築和裝修項目的材料與人工詳細清單。',
+        icon: 'fa-hard-hat'
+      },
+      {
+        title: '小型企業',
+        desc: '適用於零售和服務業的稅務合規發票，簡化您的計費流程。',
+        icon: 'fa-store'
+      },
+      {
+        title: '諮詢顧問',
+        desc: '通過時薪模板和清晰的服務描述，為您的時間和專業知識計費。',
+        icon: 'fa-briefcase'
+      },
+      {
+        title: '法律服務',
+        desc: '律師事務所和律師的專業計費格式，支持預付金管理。',
+        icon: 'fa-gavel'
+      },
+      {
+        title: '醫療保健',
+        desc: '適用於私人診所、治療師和牙科診所的符合 HIPAA 標準的發票模板。',
+        icon: 'fa-stethoscope'
+      },
+      {
+        title: '汽車維修',
+        desc: '清晰區分汽車維修店和機械師的零件和人工費用。',
+        icon: 'fa-wrench'
+      },
+      {
+        title: '攝影工作室',
+        desc: '適用於攝影師、錄像師和創意工作室的精美發票設計。',
+        icon: 'fa-camera'
+      }
+    ],
+    testimonialsTitle: '超過 10,000 名用戶信賴',
+    testimonialsList: [
+      {
+        name: 'Sarah Jenkins',
+        role: '多媒體設計師',
+        content: '這個**免費發票生成器**真是救星！我以前花幾個小時做賬單，現在只需幾秒鐘。',
+        rating: 5
+      },
+      {
+        name: 'Mike Ross',
+        role: '建築承包商',
+        content: '終於找到了一個簡單的**賬單製作工具**，在工地上用手機就能完美操作。',
+        rating: 5
+      },
+      {
+        name: 'Emily Chen',
+        role: '營銷顧問',
+        content: '這些**專業發票模板**讓我在客戶面前看起來非常專業。強烈推薦！',
+        rating: 5
+      },
+      {
+        name: 'David Miller',
+        role: '小企業主',
+        content: '我喜歡它**無需註冊**。只需打開頁面，填寫並下載 PDF。這是有史以來最好的工具。',
+        rating: 5
+      },
+      {
+        name: 'Jessica Lee',
+        role: '自由撰稿人',
+        content: 'SmartBill Pro 是我發現的**最好的發票應用程序**。模板乾淨、現代且易於自定義。',
+        rating: 5
+      },
+      {
+        name: 'Robert Taylor',
+        role: '汽車修理工',
+        content: '非常適合分開零件和人工。我的客戶非常欣賞清晰專業的發票。',
+        rating: 5
+      }
+    ]
   },
 };
 

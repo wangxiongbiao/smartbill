@@ -605,6 +605,7 @@ const App: React.FC = () => {
             setActiveView('templates');
             setActiveTemplateId(null);
           }}
+          showToast={showToast}
         />;
       case 'about':
         return <AboutView lang={lang} onBack={() => setActiveView(prevView)} onCreateInvoice={handleStart} />;
@@ -865,7 +866,8 @@ const TemplateDetailViewWrapper: React.FC<{
   user: User;
   onUseTemplate: (template: any) => void;
   onBack: () => void;
-}> = ({ templateId, lang, user, onUseTemplate, onBack }) => {
+  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+}> = ({ templateId, lang, user, onUseTemplate, onBack, showToast }) => {
   const [template, setTemplate] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);

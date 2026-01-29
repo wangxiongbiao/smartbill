@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Invoice, IndustryTemplate, Language } from '../types';
 import { translations } from '../i18n';
+import SEOContent from './SEOContent';
 
 interface HomeViewProps {
   onSelectTemplate: (data: Partial<Invoice>) => void;
@@ -146,7 +147,9 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
         return {
           id: `${config.id}-${i}`,
           category: labels[config.id as keyof typeof labels] || config.id,
-          title: `${labels[config.id as keyof typeof labels] || config.id} #${i + 1}`,
+          title: lang === 'en'
+            ? `Professional ${labels[config.id as keyof typeof labels] || config.id} Invoice Template #${i + 1}`
+            : `專業 ${labels[config.id as keyof typeof labels] || config.id} 發票模板 #${i + 1}`,
           previewColor: config.color,
           backgroundImage,
           defaultData: {
@@ -178,50 +181,9 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, la
         </div>
       </section>
 
-      {industries.map((industry) => (
-        <section key={industry.id} className="space-y-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className={`${industry.color} w-11 h-11 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl`}>
-              <i className={`fas ${industry.icon} text-lg`}></i>
-            </div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tighter">{industry.name}</h2>
-          </div>
+      {/* Legacy Template List Removed - Keeping page clean as per SEO Plan A */}
 
-          <div className="flex overflow-x-auto gap-8 pb-10 scrollbar-hide snap-x">
-            {industry.templates.map((tpl) => (
-              <div
-                key={tpl.id}
-                onClick={() => onSelectTemplate(tpl.defaultData)}
-                className="flex-shrink-0 w-72 h-[420px] bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-blue-100 transition-all cursor-pointer group relative overflow-hidden snap-start"
-              >
-                {/* 圖片區域：佔比提高，移除所有漸變 */}
-                <div className={`h-[60%] w-full relative`}>
-                  <TemplateImage
-                    src={tpl.backgroundImage}
-                    alt={tpl.title}
-                    icon={industry.icon}
-                    color={industry.color}
-                  />
-                </div>
-
-                {/* 內容區域 */}
-                <div className="p-8 flex flex-col justify-between h-[40%] bg-white relative z-10 border-t border-slate-50">
-                  <div>
-                    <span className={`text-[10px] font-black ${industry.color.replace('bg-', 'text-')} uppercase tracking-widest mb-2 block`}>{industry.name}</span>
-                    <h3 className="font-black text-slate-900 text-xl group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">{tpl.title}</h3>
-                  </div>
-                  <div className="flex items-center justify-between pt-4">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">USE TEMPLATE</span>
-                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                      <i className="fas fa-arrow-right text-xs"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+      <SEOContent lang={lang} />
     </div>
   );
 };

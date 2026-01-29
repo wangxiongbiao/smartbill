@@ -94,10 +94,20 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             )}
           </div>
           <div className={`flex gap-2 ${isHeaderReversed ? 'flex-row text-left' : 'flex-row-reverse text-right'}`}>
-            {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-16 object-contain" />}
+            {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-20 object-contain" />}
             <div>
               <h2 className="text-base font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
               <p className="text-xs opacity-80 whitespace-pre-wrap">{invoice.sender.address}</p>
+              {invoice.sender.phone && (
+                <p className="text-xs opacity-80 mt-1">
+                  <i className="fas fa-phone mr-1"></i> {invoice.sender.phone}
+                </p>
+              )}
+              {invoice.sender.email && (
+                <p className="text-xs opacity-80 mt-1">
+                  <i className="fas fa-envelope mr-1"></i> {invoice.sender.email}
+                </p>
+              )}
               {invoice.sender.customFields?.map(field => (
                 <p key={field.id} className="text-xs opacity-80 mt-1">
                   <span className="font-semibold">{field.label}</span> <span className="whitespace-pre-wrap">{field.value}</span>
@@ -195,7 +205,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </div>
 
         {/* Payment Info */}
-        {(invoice.paymentInfo?.fields || invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && (
+        {(invoice.paymentInfo?.fields || invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && invoice.visibility?.paymentInfo === true && (
           <div className="mt-8 pt-4 border-t border-slate-100 relative">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
 
