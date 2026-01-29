@@ -33,33 +33,15 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
     currency: invoice.currency,
   });
 
-  const getTemplateStyles = () => {
-    switch (template) {
-      case 'minimalist':
-        return {
-          header: "border-b-4 border-slate-900 px-12 pb-10 pt-10",
-          tableHeader: "bg-slate-50 text-slate-900 border-b border-slate-200",
-          accentColor: "slate-900",
-          signatureBorder: "border-slate-900"
-        };
-      case 'modern':
-        return {
-          header: "bg-indigo-600 text-white px-12 py-10 rounded-t-xl",
-          tableHeader: "bg-indigo-50 text-indigo-700",
-          accentColor: "indigo-600",
-          signatureBorder: "border-indigo-600"
-        };
-      default:
-        return {
-          header: "bg-slate-800 text-white px-12 py-10",
-          tableHeader: "bg-slate-100 text-slate-700",
-          accentColor: "blue-600",
-          signatureBorder: "border-slate-300"
-        };
-    }
+  // Enforce Minimalist Style
+  const styles = {
+    header: "border-b-4 border-slate-900 px-12 pb-10 pt-10",
+    tableHeader: "bg-slate-50 text-slate-900 border-b border-slate-200",
+    accentColor: "slate-900",
+    signatureBorder: "border-slate-900"
   };
 
-  const styles = getTemplateStyles();
+
   const docTitle = invoice.type === 'invoice' ? t.invoiceMode.split(' ')[0].toUpperCase() : t.receiptMode.split(' ')[0].toUpperCase();
 
   const columns = invoice.columnConfig || defaultColumns;

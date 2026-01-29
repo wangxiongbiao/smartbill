@@ -122,7 +122,7 @@ export interface Invoice {
   columnConfig?: InvoiceColumn[];
 }
 
-export type TemplateType = 'professional' | 'minimalist' | 'modern';
+export type TemplateType = 'minimalist';
 export type ViewType = 'home' | 'editor' | 'records' | 'templates' | 'template-detail' | 'profile' | 'about' | 'help';
 export type ImageType = 'logo' | 'qrcode';
 

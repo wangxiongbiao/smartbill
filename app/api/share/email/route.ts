@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
         // Real Email Sending
         const data = await resend.emails.send({
-            from: 'SmartBill <smartbillpro@gmail.com>', // Verified domain sender
+            from: 'SmartBill <noreply@smartbillpro.com>', // Verified domain sender
             to: [email],
             subject: `Invoice ${invoiceNumber} from ${senderName || 'SmartBill User'}`,
             html: `

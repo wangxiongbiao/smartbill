@@ -24,7 +24,7 @@ const SharedInvoiceView = React.forwardRef(({ data, lang }: SharedInvoiceViewPro
             {/* Reuse the exact same preview component for 1:1 match */}
             <InvoicePreview
                 invoice={data}
-                template={data.template || 'professional'}
+                template={data.template || 'minimalist'}
                 isHeaderReversed={data.isHeaderReversed || false}
                 lang={lang}
                 isForPdf={false} // Ensure it looks like the web preview
