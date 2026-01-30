@@ -628,7 +628,7 @@ const App: React.FC = () => {
                   <div className="flex gap-3 flex-1">
                     <button
                       onClick={() => setIsNewInvoiceConfirmOpen(true)}
-                      className="flex-1 group relative overflow-hidden px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-900 hover:border-slate-700"
+                      c className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -640,7 +640,7 @@ const App: React.FC = () => {
 
                     <button
                       onClick={() => setIsSaveTemplateDialogOpen(true)}
-                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
+                      className="flex-1 group relative px-6 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -668,7 +668,7 @@ const App: React.FC = () => {
 
                     <button
                       onClick={() => setIsEmailDialogOpen(true)}
-                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
+                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
                     >
                       <div className="flex items-center justify-center gap-2.5">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

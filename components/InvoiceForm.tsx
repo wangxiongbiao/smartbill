@@ -79,6 +79,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   const fileInputRef = useRef<HTMLInputElement>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const dueDateInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
@@ -591,25 +593,65 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
         </div>
 
         {/* Date Visibility Controls - Available for all modes */}
-        <div className="col-span-full flex gap-4 p-2 bg-slate-50 rounded-lg border border-slate-100">
-          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={invoice.visibility?.date !== false}
-              onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
-              className="rounded text-blue-600 focus:ring-blue-500"
-            />
-            {t.fieldName || 'Date'} {t.visibility}
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={invoice.visibility?.dueDate !== false}
-              onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
-              className="rounded text-blue-600 focus:ring-blue-500"
-            />
-            {t.fieldName || 'Due Date'} {t.visibility}
-          </label>
+        {/* Date Visibility Controls - Available for all modes */}
+        <div className="col-span-full flex flex-wrap gap-6 p-3 bg-slate-50 rounded-lg border border-slate-100">
+          {/* Invoice Date */}
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={invoice.visibility?.date !== false}
+                onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium">开票日期</span>
+            </label>
+            <div className="relative flex items-center">
+              <button
+                onClick={() => dateInputRef.current?.showPicker()}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-md text-sm hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
+              >
+                <i className="fas fa-calendar-alt text-slate-400"></i>
+                <span>{invoice.date}</span>
+              </button>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={invoice.date}
+                onChange={(e) => onChange({ date: e.target.value })}
+                className="absolute inset-0 opacity-0 pointer-events-none w-0 h-0"
+              />
+            </div>
+          </div>
+
+          {/* Due Date */}
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={invoice.visibility?.dueDate !== false}
+                onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium">截止日期</span>
+            </label>
+            <div className="relative flex items-center">
+              <button
+                onClick={() => dueDateInputRef.current?.showPicker()}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-md text-sm hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
+              >
+                <i className="fas fa-calendar-alt text-slate-400"></i>
+                <span>{invoice.dueDate}</span>
+              </button>
+              <input
+                ref={dueDateInputRef}
+                type="date"
+                value={invoice.dueDate}
+                onChange={(e) => onChange({ dueDate: e.target.value })}
+                className="absolute inset-0 opacity-0 pointer-events-none w-0 h-0"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
