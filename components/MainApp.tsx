@@ -628,7 +628,7 @@ const App: React.FC = () => {
                   <div className="flex gap-3 flex-1">
                     <button
                       onClick={() => setIsNewInvoiceConfirmOpen(true)}
-                      c className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
+                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
