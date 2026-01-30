@@ -604,7 +604,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
                 className="rounded text-blue-600 focus:ring-blue-500"
               />
-              <span className="font-medium">开票日期</span>
+              <span className="font-medium">{t.invoiceDate}</span>
             </label>
             <div className="relative flex items-center">
               <button
@@ -633,7 +633,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
                 className="rounded text-blue-600 focus:ring-blue-500"
               />
-              <span className="font-medium">截止日期</span>
+              <span className="font-medium">{t.dueDate}</span>
             </label>
             <div className="relative flex items-center">
               <button

@@ -61,19 +61,24 @@ const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setVi
         <div className="flex items-center gap-3 sm:gap-6">
           {/* 桌面端主導航 */}
           <nav className="hidden md:flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-[1.25rem] border border-slate-100">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setView(item.id)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${activeView === item.id
-                  ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
-                  : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
-                  }`}
-              >
-                <i className={`${item.icon} text-[10px] ${activeView === item.id ? 'opacity-100' : 'opacity-60'}`}></i>
-                {item.label}
-              </button>
-            ))}
+            {navItems.map((item) => {
+              const isActive = activeView === item.id ||
+                (item.id === 'records' && activeView === 'editor') ||
+                (item.id === 'templates' && activeView === 'template-detail');
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setView(item.id)}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${isActive
+                    ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
+                    : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                    }`}
+                >
+                  <i className={`${item.icon} text-[10px] ${isActive ? 'opacity-100' : 'opacity-60'}`}></i>
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
 
           <div className="hidden lg:block w-px h-6 bg-slate-200"></div>

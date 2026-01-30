@@ -2,6 +2,7 @@ import React from 'react';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import InvoicePreview from './InvoicePreview';
+import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 
 interface TemplateDetailViewProps {
     template: InvoiceTemplate;
@@ -157,14 +158,14 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                 {/* Right Panel - Preview */}
                 <div className="lg:w-3/5">
                     <div className=" bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
-                        <div className="w-full transform origin-top transition-transform duration-500 flex-shrink-0">
+                        <ScalableInvoiceContainer>
                             <InvoicePreview
                                 invoice={previewInvoice as any}
                                 template={template.template_data.template || 'minimalist'}
-                                isHeaderReversed={template.template_data.isHeaderReversed}
+                                isHeaderReversed={template.template_data.isHeaderReversed ?? true}
                                 lang={lang}
                             />
-                        </div>
+                        </ScalableInvoiceContainer>
                     </div>
 
                 </div>
