@@ -138,7 +138,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 <p className="text-sm font-medium mb-4">{invoice.date}</p>
               </>
             )}
-            {(invoice.type === 'invoice' && invoice.visibility?.dueDate !== false) && (
+            {invoice.visibility?.dueDate !== false && (
               <>
                 <p className="text-[10px] font-bold text-slate-400 mb-1">{t.dueDate}</p>
                 <p className={`text-sm font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>
@@ -206,7 +206,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         {/* Payment Info */}
         {(invoice.paymentInfo?.fields || invoice.paymentInfo?.bankName || invoice.paymentInfo?.accountName || invoice.paymentInfo?.accountNumber || invoice.paymentInfo?.extraInfo || invoice.paymentInfo?.qrCode || (invoice.paymentInfo?.customFields && invoice.paymentInfo.customFields.length > 0)) && invoice.visibility?.paymentInfo === true && (
           <div className="mt-8 pt-4 border-t border-slate-100">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t.paymentInfo}</h3>
+
 
             <div className="flex justify-between w-full  items-start gap-8">
               <div className="space-y-1 text-xs text-slate-600 flex-1 overflow-hidden">
