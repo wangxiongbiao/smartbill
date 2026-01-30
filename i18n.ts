@@ -78,7 +78,7 @@ export const translations: Record<Language, any> = {
     rate: 'Rate',
     amount: 'Amount',
     addItems: '+ Add Item',
-    taxRate: 'Tax Rate / VAT (%)',
+    taxRate: 'Tax Rate / VAT',
     signature: 'E-Signature',
     signPlaceholder: 'Handwrite your signature here',
     signClear: 'Clear and Resign',

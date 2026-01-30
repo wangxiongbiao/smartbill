@@ -78,8 +78,12 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className={`flex gap-2 ${isHeaderReversed ? 'flex-row text-left' : 'flex-row-reverse text-right'}`}>
             {invoice.sender.logo && <img src={invoice.sender.logo} alt="Logo" className="max-h-20 object-contain" />}
             <div>
+
               <h2 className="text-base font-bold">{invoice.sender.name || t.namePlaceholder}</h2>
-              <p className="text-xs opacity-80 whitespace-pre-wrap mt-2">{invoice.sender.address}</p>
+              <p className="text-xs opacity-80 whitespace-pre-wrap mt-2">
+                <i className="fas fa-map-marker-alt mr-1"></i>
+                {invoice.sender.address}
+              </p>
               {invoice.sender.phone && (
                 <p className="text-xs opacity-80 mt-1">
                   <i className="fas fa-phone mr-1"></i> {invoice.sender.phone}
@@ -103,10 +107,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
       <div className="px-12 py-10 flex-1 flex flex-col">
         <div className="grid grid-cols-2 gap-12 mb-10">
           <div>
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase mb-2">{t.billTo}</h3>
+
             <div className="border-l-4 border-slate-200 pl-4">
               <p className="font-bold text-base">{invoice.client.name || t.clientName}</p>
-              <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">{invoice.client.address}</p>
+              <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">
+                <i className="fas fa-map-marker-alt mr-1 opacity-60"></i>
+                {invoice.client.address}
+              </p>
               {invoice.client.phone && (
                 <p className="text-xs text-slate-500 mt-1">
                   <i className="fas fa-phone mr-1 opacity-60"></i> {invoice.client.phone}
@@ -180,7 +187,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             )}
           </div>
 
-          <div className="w-64 space-y-2">
+          <div className="w-80 space-y-2">
             <div className="flex justify-between text-slate-500 text-xs">
               <span>{lang === 'zh-TW' ? '小計' : 'Subtotal'}</span>
               <span>{currencyFormatter.format(subtotal)}</span>

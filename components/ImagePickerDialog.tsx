@@ -107,8 +107,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     const handleDeleteImage = async (uploadId: string, e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (!confirm(t.deleteImageConfirm)) return;
-
         setDeletingId(uploadId);
         try {
             await deleteImageUpload(uploadId);
