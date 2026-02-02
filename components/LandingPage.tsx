@@ -3,11 +3,20 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { translations } from '../i18n';
 import SEOContent from './SEOContent';
+import { Language } from '../types';
 
 const LandingPage: React.FC = () => {
-    const lang = 'en'; // Default to English for Landing Page initially
+    const [lang, setLang] = useState<Language>('en');
+    const [showLangMenu, setShowLangMenu] = useState(false);
     const t = translations[lang];
     const router = useRouter();
+
+    const languages: { id: Language; label: string }[] = [
+        { id: 'en', label: 'English' },
+        { id: 'zh-TW', label: '繁体中文' },
+    ];
+
+    const currentLangLabel = languages.find(l => l.id === lang)?.label || 'English';
 
     return (
         <div className="min-h-screen bg-white">
@@ -21,15 +30,51 @@ const LandingPage: React.FC = () => {
                         <span className="text-xl font-black text-slate-900 tracking-tight">SmartBill</span>
                     </div>
 
-                    <a
-                        href="/dashboard"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50"
-                    >
-                        <span>Login</span>
-                        <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </a>
+                    <div className="flex items-center gap-4">
+                        {/* Language Selector */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowLangMenu(!showLangMenu)}
+                                className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors"
+                            >
+                                <i className="fas fa-globe"></i>
+                                <span>{currentLangLabel}</span>
+                                <i className={`fas fa-chevron-down text-xs transition-transform ${showLangMenu ? 'rotate-180' : ''}`}></i>
+                            </button>
+
+                            {showLangMenu && (
+                                <>
+                                    <div className="fixed inset-0 z-0" onClick={() => setShowLangMenu(false)}></div>
+                                    <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-20">
+                                        {languages.map((l) => (
+                                            <button
+                                                key={l.id}
+                                                onClick={() => {
+                                                    setLang(l.id);
+                                                    setShowLangMenu(false);
+                                                }}
+                                                className={`w-full px-4 py-3 text-left text-xs font-bold flex items-center justify-between transition-colors ${lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                                                    }`}
+                                            >
+                                                {l.label}
+                                                {lang === l.id && <i className="fas fa-check text-blue-600"></i>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <a
+                            href="/dashboard"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50"
+                        >
+                            <span>Login</span>
+                            <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
                 </div>
             </header>
 
