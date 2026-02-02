@@ -5,10 +5,17 @@ import { Invoice, TemplateType, ViewType, Language, User } from '../types';
 import { createClient } from '@/lib/supabase/client';
 import { getUserProfile, getUserInvoices, saveInvoice, deleteInvoice, batchSaveInvoices } from '@/lib/supabase-db';
 import { saveTemplate } from '@/lib/supabase-templates';
-import Header from './Header';
+import DashboardSidebar from './DashboardSidebar';
 import InvoiceForm from './InvoiceForm';
 import InvoicePreview from './InvoicePreview';
-import Sidebar from './Sidebar';
+import Sidebar from './Sidebar'; // This is the right-side/inner sidebar, kept as is or renamed? (It was "Sidebar" in original imports, seemingly unused or small)
+// Actually, looking at original code, Sidebar was imported. 
+// Check line 11: import Sidebar from './Sidebar';
+// And usage in MainApp.tsx... I need to see where Sidebar was used. 
+// It was passed to the editor view?
+// Wait, in previous `Sidebar.tsx` view it was empty/commented out.
+// Let's just focus on adding DashboardSidebar.
+
 import HomeView from './HomeView';
 import RecordsView from './RecordsView';
 import ProfileView from './ProfileView';
@@ -16,7 +23,7 @@ import BottomNav from './BottomNav';
 import AuthView from './AuthView';
 import AboutView from './AboutView';
 import HelpView from './HelpView';
-import Footer from './Footer';
+
 import AIChat from './AIChat';
 import ShareDialog from './ShareDialog';
 import EmailDialog from './EmailDialog';
@@ -70,15 +77,15 @@ const App: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  // Get initial view - default to 'records' if user was previously logged in
+  // Get initial view - default to 'records'
   const getInitialView = (): ViewType => {
-    if (typeof window === 'undefined') return 'home';
+    if (typeof window === 'undefined') return 'records';
     const savedUser = localStorage.getItem('sb_user_session');
-    return savedUser ? 'records' : 'home';
+    return savedUser ? 'records' : 'records';
   };
 
   const [activeView, setActiveView] = useState<ViewType>(getInitialView());
-  const [prevView, setPrevView] = useState<ViewType>('home');
+  const [prevView, setPrevView] = useState<ViewType>('records');
   const [lang, setLang] = useState<Language>('en');
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [records, setRecords] = useState<Invoice[]>([]);
@@ -135,7 +142,7 @@ const App: React.FC = () => {
         // 3. 后续非阻塞同步：检测视图、同步发票数据
         const params = new URLSearchParams(window.location.search);
         const targetView = params.get('view') as ViewType;
-        if (targetView && ['home', 'records', 'profile', 'editor', 'about', 'help'].includes(targetView)) {
+        if (targetView && ['records', 'profile', 'editor', 'about', 'help'].includes(targetView)) {
           setActiveView(targetView);
           const newUrl = window.location.pathname;
           window.history.replaceState({}, '', newUrl);
@@ -291,7 +298,7 @@ const App: React.FC = () => {
     const supabase = createClient();
     supabase.auth.signOut().catch(console.error);
 
-    changeView('home');
+    changeView('records');
     window.scrollTo(0, 0);
   };
 
@@ -479,6 +486,7 @@ const App: React.FC = () => {
 
   // Auto-save effect (3 second debounce)
   useEffect(() => {
+    // Only auto-save if logged in
     if (!user?.id || !invoice.id || activeView !== 'editor') return;
 
     // Clear existing timer
@@ -534,6 +542,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeView) {
       case 'home':
+        // If we end up here (shouldn't with getInitialView fix), show create new option
         return <HomeView onSelectTemplate={handleStart} onCreateEmpty={() => handleStart()} lang={lang} />;
       case 'records':
         if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="records" showToast={showToast} />;
@@ -616,7 +625,7 @@ const App: React.FC = () => {
       case 'help':
         return <HelpView lang={lang} onBack={() => setActiveView(prevView)} />;
       case 'editor':
-        if (!user) return <AuthView onLogin={handleLogin} lang={lang} targetView="editor" showToast={showToast} />;
+        // Editor is now open to guests
         return (
           <>
             <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
@@ -827,38 +836,45 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-24 sm:pb-0 bg-slate-50">
-      <Header
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Sidebar Navigation */}
+      <DashboardSidebar
+        user={user}
         activeView={activeView}
-        setView={setActiveView}
-        onPrint={handleExportPdf}
-        isExporting={isExporting}
+        setView={changeView}
         lang={lang}
         setLang={setLang}
-      />
-      <main className="flex-1 ">{renderContent()}</main>
-
-      {/* 网站页脚 */}
-      <Footer
-        lang={lang}
-        setView={changeView}
-        onNewDoc={(type) => handleStart({ type })}
+        onLogout={handleLogout}
+        onNewInvoice={() => handleStart()}
       />
 
-      <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
-        <div ref={printAreaRef} style={{ width: '210mm' }}>
-          <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} isForPdf={true} lang={lang} />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 relative h-screen overflow-y-auto">
+        {/* Render content */}
+        <main className="flex-1 p-4 lg:p-8">{renderContent()}</main>
+
+
+
+        {/* Hidden Print Area */}
+        <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
+          <div ref={printAreaRef} style={{ width: '210mm' }}>
+            <InvoicePreview invoice={invoice} template={template} isHeaderReversed={isHeaderReversed} isForPdf={true} lang={lang} />
+          </div>
         </div>
-      </div>
-      <BottomNav activeView={activeView} setView={setActiveView} lang={lang} />
 
-      {/* Toast Notification */}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
+        {/* Mobile Bottom Navigation - Only show on small screens if needed, otherwise rely on responsive sidebar */}
+        <div className="md:hidden">
+          <BottomNav activeView={activeView} setView={setActiveView} lang={lang} />
+        </div>
+
+        {/* Toast Notification */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={hideToast}
+        />
+      </div>
     </div>
   );
 };
