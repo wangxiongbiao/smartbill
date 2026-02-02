@@ -81,7 +81,8 @@ const App: React.FC = () => {
   const getInitialView = (): ViewType => {
     if (typeof window === 'undefined') return 'records';
     const savedUser = localStorage.getItem('sb_user_session');
-    return savedUser ? 'records' : 'records';
+    // Default to 'login' if no sessions, but allow 'records' if session exists (to be verified by async sync)
+    return savedUser ? 'records' : 'login';
   };
 
   const [activeView, setActiveView] = useState<ViewType>(getInitialView());
@@ -142,13 +143,13 @@ const App: React.FC = () => {
         // 3. 后续非阻塞同步：检测视图、同步发票数据
         const params = new URLSearchParams(window.location.search);
         const targetView = params.get('view') as ViewType;
-        if (targetView && ['records', 'profile', 'editor', 'about', 'help'].includes(targetView)) {
+        if (targetView && ['records', 'profile', 'editor', 'about', 'help', 'login'].includes(targetView)) {
           setActiveView(targetView);
           const newUrl = window.location.pathname;
           window.history.replaceState({}, '', newUrl);
         } else {
-          // Default to records after login if no specific view is requested
-          setActiveView('records');
+          // Default to records if logged in, otherwise login screen
+          setActiveView(user ? 'records' : 'login');
         }
 
         let cloudInvoices: Invoice[] = [];
@@ -835,6 +836,35 @@ const App: React.FC = () => {
     );
   }
 
+  if (activeView === 'login') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-full max-w-md p-4">
+          {/* Simple Header for Login Page */}
+          <div className="mb-8 text-center flex flex-col items-center">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 mb-4">
+              <i className="fas fa-file-invoice text-xl"></i>
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
+            <p className="text-slate-500 font-medium mt-2">Sign in to access your dashboard</p>
+          </div>
+
+          <AuthView onLogin={handleLogin} lang={lang} targetView="records" showToast={showToast} />
+
+          <div className="mt-8 text-center">
+            <a
+              href="/"
+              className="text-slate-400 hover:text-slate-600 text-sm font-bold transition-colors inline-flex items-center"
+            >
+              <i className="fas fa-arrow-left mr-2"></i>
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* Sidebar Navigation */}
@@ -852,8 +882,6 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 relative h-screen overflow-y-auto">
         {/* Render content */}
         <main className="flex-1 p-4 lg:p-8">{renderContent()}</main>
-
-
 
         {/* Hidden Print Area */}
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">

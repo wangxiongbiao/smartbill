@@ -123,7 +123,7 @@ export interface Invoice {
 }
 
 export type TemplateType = 'minimalist';
-export type ViewType = 'home' | 'editor' | 'records' | 'templates' | 'template-detail' | 'profile' | 'about' | 'help';
+export type ViewType = 'home' | 'editor' | 'records' | 'templates' | 'template-detail' | 'profile' | 'about' | 'help' | 'login';
 export type ImageType = 'logo' | 'qrcode';
 
 // Invoice Template Types

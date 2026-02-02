@@ -66,7 +66,7 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <a
-                            href="/dashboard"
+                            href="/dashboard?view=login"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50"
