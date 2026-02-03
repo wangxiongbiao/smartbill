@@ -8,6 +8,7 @@ import { saveTemplate } from '@/lib/supabase-templates';
 import DashboardSidebar from './DashboardSidebar';
 import InvoiceForm from './InvoiceForm';
 import InvoicePreview from './InvoicePreview';
+import DashboardHeader from './DashboardHeader';
 import Sidebar from './Sidebar'; // This is the right-side/inner sidebar, kept as is or renamed? (It was "Sidebar" in original imports, seemingly unused or small)
 // Actually, looking at original code, Sidebar was imported. 
 // Check line 11: import Sidebar from './Sidebar';
@@ -38,7 +39,6 @@ import { smartGenerateLineItems } from '../services/geminiService';
 import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 import { translations } from '../i18n';
 import { useToast } from '../hooks/useToast';
-import Breadcrumbs from './Breadcrumbs';
 
 declare var html2pdf: any;
 
@@ -638,68 +638,7 @@ const App: React.FC = () => {
           <>
             <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
             <div className="container mx-auto flex flex-col gap-6 relative">
-              {/* Action Toolbar */}
-              <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-sm p-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {/* Primary Actions Group */}
-                  <div className="flex gap-3 flex-1">
-                    <button
-                      onClick={handleExportPdf}
-                      disabled={isExporting}
-                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                      <div className="flex items-center justify-center gap-3">
-                        {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                        )}
-                        <span className="text-sm tracking-wide">{isExporting ? (translations[lang].generating || 'Generating...') : (translations[lang].exportPdf || 'Export PDF')}</span>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setIsSaveTemplateDialogOpen(true)}
-                      className="flex-1 group relative px-6 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
-                    >
-                      <div className="flex items-center justify-center gap-3">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                        <span className="text-sm tracking-wide hidden sm:inline">{translations[lang].saveAsTemplate || 'Save Template'}</span>
-                        <span className="text-sm tracking-wide sm:hidden">Template</span>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Secondary Actions Group */}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsShareDialogOpen(true)}
-                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
-                    >
-                      <div className="flex items-center justify-center gap-2.5">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
-                        <span className="text-sm hidden sm:inline">{translations[lang].shareLink?.split(' ')[0] || 'Share'}</span>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setIsEmailDialogOpen(true)}
-                      className="flex-1 sm:flex-initial group relative px-5 py-3.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-blue-400"
-                    >
-                      <div className="flex items-center justify-center gap-2.5">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-sm hidden sm:inline">{translations[lang].sendEmail || 'Send'}</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* Action Toolbar Removed - Moved to DashboardHeader */}
 
               {/* 表单和预览区 */}
               <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
@@ -910,11 +849,22 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 relative h-screen overflow-y-auto">
+        <DashboardHeader
+          user={user}
+          lang={lang}
+          activeView={activeView}
+          invoice={invoice}
+          saveStatus={saveStatus}
+          lastSavedTime={lastSavedTime}
+          isExporting={isExporting}
+          onExportPdf={handleExportPdf}
+          onSaveTemplate={() => setIsSaveTemplateDialogOpen(true)}
+          onShare={() => setIsShareDialogOpen(true)}
+          onLangChange={setLang}
+          onBack={() => changeView('records')}
+        />
         {/* Render content */}
-        <main className="flex-1 p-4 lg:p-8">
-          <Breadcrumbs activeView={activeView} lang={lang} onNavigate={changeView} />
-          {renderContent()}
-        </main>
+        <main className="flex-1 p-4 lg:p-8">{renderContent()}</main>
 
         {/* Hidden Print Area */}
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">

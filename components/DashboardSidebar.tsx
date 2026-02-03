@@ -94,7 +94,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             </nav>
 
             {/* Bottom Actions */}
-            <div className="p-4 border-t border-slate-100 space-y-4">
+            <div className="pt-4 px-4 pb-8 border-t border-slate-100 space-y-4">
                 {/* Language Selector */}
                 <div className="relative">
                     <button

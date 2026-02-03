@@ -153,10 +153,9 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView, showToas
 
   return (
     <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/50 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-100/50 blur-[120px] rounded-full"></div>
 
-      <div className="w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden relative z-10">
+
+      <div className="w-full max-w-md bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden relative z-10">
         <div className="p-8 sm:p-12">
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-[1.5rem] text-white text-3xl shadow-xl shadow-blue-100 mb-6">

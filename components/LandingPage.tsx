@@ -179,15 +179,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Preview Image or Content */}
-                <div className="max-w-6xl mx-auto mt-20 relative">
-                    <div className="absolute inset-0 bg-blue-600 blur-[100px] opacity-10 rounded-full"></div>
-                    <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 sm:p-4 overflow-hidden">
-                        <img src="/images/app-preview.png" alt="App Preview" className="w-full h-auto rounded-xl bg-slate-50" onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=2000'; // Fallback
-                        }} />
-                    </div>
-                </div>
+
 
                 <section className="mt-20">
                     <SEOContent lang={lang} />
