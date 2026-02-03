@@ -38,6 +38,7 @@ import { smartGenerateLineItems } from '../services/geminiService';
 import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 import { translations } from '../i18n';
 import { useToast } from '../hooks/useToast';
+import Breadcrumbs from './Breadcrumbs';
 
 declare var html2pdf: any;
 
@@ -910,7 +911,10 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 relative h-screen overflow-y-auto">
         {/* Render content */}
-        <main className="flex-1 p-4 lg:p-8">{renderContent()}</main>
+        <main className="flex-1 p-4 lg:p-8">
+          <Breadcrumbs activeView={activeView} lang={lang} onNavigate={changeView} />
+          {renderContent()}
+        </main>
 
         {/* Hidden Print Area */}
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
