@@ -246,6 +246,7 @@ const App: React.FC = () => {
   const [isNewInvoiceConfirmOpen, setIsNewInvoiceConfirmOpen] = useState(false);
   const [isCreatingNewInvoice, setIsCreatingNewInvoice] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null); // Track which record is being deleted
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // New state for logout loading transition
 
   // Save status tracking
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -288,6 +289,11 @@ const App: React.FC = () => {
    * 4. 如果是 Google 登录，调用 Supabase signOut
    */
   const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    // Smooth exit delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     // 立即清除本地状态实现“简单直接”的退出
     syncRef.current = null;
     setUser(null);
@@ -834,6 +840,26 @@ const App: React.FC = () => {
             <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
           </div>
           <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">{translations[lang].welcomeSub || 'Loading SmartBill...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Logout Transition Overlay
+  if (isLoggingOut) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 animate-in fade-in duration-300">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 shadow-sm border border-slate-100">
+              <i className="fas fa-sign-out-alt text-2xl"></i>
+            </div>
+            <div className="absolute inset-0 border-4 border-blue-600/20 border-t-blue-600 rounded-2xl animate-spin"></div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Signing out...</h3>
+            <p className="text-slate-400 text-xs uppercase tracking-widest font-bold">See you soon</p>
+          </div>
         </div>
       </div>
     );
