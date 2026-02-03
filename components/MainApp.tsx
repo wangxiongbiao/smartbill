@@ -299,8 +299,8 @@ const App: React.FC = () => {
     const supabase = createClient();
     supabase.auth.signOut().catch(console.error);
 
-    changeView('records');
-    window.scrollTo(0, 0);
+    // Redirect to Landing Page
+    window.location.href = '/';
   };
 
   const updateInvoice = (updates: Partial<Invoice>) => {
@@ -630,21 +630,24 @@ const App: React.FC = () => {
         return (
           <>
             <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
-            <div className="container mx-auto px-4 py-8 flex flex-col gap-6 relative">
+            <div className="container mx-auto flex flex-col gap-6 relative">
               {/* Action Toolbar */}
               <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-sm p-4">
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Primary Actions Group */}
                   <div className="flex gap-3 flex-1">
                     <button
-                      onClick={() => setIsNewInvoiceConfirmOpen(true)}
-                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md"
+                      onClick={handleExportPdf}
+                      disabled={isExporting}
+                      className="flex-1 group relative px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer border-2 border-blue-600 hover:border-blue-700 shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <div className="flex items-center justify-center gap-3">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span className="text-sm tracking-wide">{translations[lang].newInvoiceShort || 'New Invoice'}</span>
+                        {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        )}
+                        <span className="text-sm tracking-wide">{isExporting ? (translations[lang].generating || 'Generating...') : (translations[lang].exportPdf || 'Export PDF')}</span>
                       </div>
                     </button>
 
