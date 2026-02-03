@@ -1,9 +1,16 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { translations } from '../i18n';
 import SEOContent from './SEOContent';
 import { Language } from '../types';
+import { createClient } from '@/lib/supabase/client';
+
+declare global {
+    interface Window {
+        google: any;
+    }
+}
 
 const LandingPage: React.FC = () => {
     const [lang, setLang] = useState<Language>('en');
@@ -17,6 +24,71 @@ const LandingPage: React.FC = () => {
     ];
 
     const currentLangLabel = languages.find(l => l.id === lang)?.label || 'English';
+
+    // Google One Tap Implementation
+    useEffect(() => {
+        // Check if script is already present
+        let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]') as HTMLScriptElement;
+
+        const initializeOneTap = () => {
+            if (!window.google) return;
+
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+                    callback: async (response: any) => {
+                        console.log('[LandingPage] One Tap response received');
+
+                        try {
+                            const supabase = createClient();
+                            const { data, error } = await supabase.auth.signInWithIdToken({
+                                provider: 'google',
+                                token: response.credential,
+                            });
+
+                            if (error) {
+                                console.error('One Tap login error:', error);
+                            } else {
+                                console.log('[LandingPage] One Tap login success:', data);
+                                if (data.session) {
+                                    // Redirect to dashboard on success
+                                    router.push('/dashboard');
+                                }
+                            }
+                        } catch (err: any) {
+                            console.error('One Tap exception:', err);
+                        }
+                    },
+                    auto_select: false,
+                    cancel_on_tap_outside: false,
+                    use_fedcm_for_prompt: false, // Fix for "FedCM get() rejects" error
+                });
+
+                window.google.accounts.id.prompt((notification: any) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        console.log('[LandingPage] One Tap suppressed:', notification.getNotDisplayedReason());
+                    }
+                });
+            } catch (e) {
+                console.error('Error initializing Google One Tap:', e);
+            }
+        };
+
+        if (!script) {
+            script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = initializeOneTap;
+            document.body.appendChild(script);
+        } else if (window.google) {
+            initializeOneTap();
+        }
+
+        return () => {
+            // Cleanup if needed
+        };
+    }, [router]);
 
     return (
         <div className="min-h-screen bg-white">

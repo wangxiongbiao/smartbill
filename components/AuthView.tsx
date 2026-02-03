@@ -1,9 +1,15 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Language, ViewType } from '../types';
 import { translations } from '../i18n';
 import { createClient } from '@/lib/supabase/client';
+
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 interface AuthViewProps {
   onLogin: (user: User) => void;
@@ -73,6 +79,78 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView, showToas
     }
   };
 
+  // Google One Tap Implementation
+  useEffect(() => {
+    // Check if script is already present
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]') as HTMLScriptElement;
+
+    const initializeOneTap = () => {
+      if (!window.google) return;
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID', // Needs env var. Fallback or ensure env is set.
+          callback: async (response: any) => {
+            console.log('[AuthView] One Tap response received');
+            setIsGoogleLoading(true);
+
+            try {
+              const supabase = createClient();
+              const { data, error } = await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: response.credential,
+              });
+
+              if (error) {
+                console.error('One Tap login error:', error);
+                showToast?.(`One Tap login failed: ${error.message}`, 'error');
+                setIsGoogleLoading(false);
+              } else {
+                console.log('[AuthView] One Tap login success:', data);
+                // Redirect handling or state update will be handled by MainApp's auth listener
+                // But we can also force a reload or redirect if needed
+                if (data.session) {
+                  // Let MainApp handle the session change via onAuthStateChange
+                  // Or verify if we need to manually trigger onLogin (handler passed from parent)
+                  // The onAuthStateChange in MainApp should catch this.
+                }
+              }
+            } catch (err: any) {
+              console.error('One Tap exception:', err);
+              setIsGoogleLoading(false);
+            }
+          },
+          auto_select: false,
+          cancel_on_tap_outside: false,
+          use_fedcm_for_prompt: false, // Fix for "FedCM get() rejects" error
+        });
+
+        window.google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            console.log('[AuthView] One Tap suppressed:', notification.getNotDisplayedReason());
+          }
+        });
+      } catch (e) {
+        console.error('Error initializing Google One Tap:', e);
+      }
+    };
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeOneTap;
+      document.body.appendChild(script);
+    } else if (window.google) {
+      initializeOneTap();
+    }
+
+    return () => {
+      // Cleanup if needed? Usually prompt is global.
+    };
+  }, []);
+
   return (
     <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/50 blur-[120px] rounded-full"></div>
@@ -97,6 +175,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView, showToas
           </div>
 
           <div className="space-y-4">
+            {/* Standard Google Login Button logic remains ... */}
             <button
               type="button"
               onClick={handleGoogleLogin}
