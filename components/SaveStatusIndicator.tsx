@@ -66,20 +66,19 @@ const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({ status, lang,
     return (
         <div
             className={`
-                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100]
-                flex items-center gap-3
-                px-6 py-4 rounded-3xl
-                border-2 shadow-2xl
-                transition-all duration-500 ease-out
+                flex items-center gap-2
+                px-4 py-2 rounded-full
+                border shadow-sm
+                transition-all duration-300 ease-out
                 ${config.bgColor} ${config.textColor} ${config.borderColor}
                 ${isVisible
                     ? 'opacity-100 scale-100'
-                    : 'opacity-0 scale-90 pointer-events-none'}
+                    : 'opacity-0 scale-90 w-0 p-0 border-0 overflow-hidden'}
             `}
         >
-            <i className={`fas ${config.icon} text-2xl`}></i>
-            <span className="text-lg font-black tracking-tight whitespace-nowrap uppercase">{config.text}</span>
-        </div>
+            <i className={`fas ${config.icon} text-sm`}></i>
+            <span className="text-xs font-black tracking-wide whitespace-nowrap uppercase">{config.text}</span>
+        </div >
     );
 };
 

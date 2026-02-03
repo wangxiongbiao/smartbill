@@ -15,6 +15,7 @@ interface DashboardHeaderProps {
     onExportPdf: () => void;
     onSaveTemplate: () => void;
     onShare: () => void;
+    onSendEmail: () => void;
     onLangChange: (lang: Language) => void;
     onBack?: () => void;
 }
@@ -30,6 +31,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     onExportPdf,
     onSaveTemplate,
     onShare,
+    onSendEmail,
     onLangChange,
     onBack
 }) => {
@@ -56,12 +58,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
                 <span key="records" className="text-slate-400 font-bold uppercase tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>RECORDS</span>,
                 <i key="sep2" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <div key="current" className="flex items-center gap-3">
+                <div key="current" className="relative flex items-center group">
                     <span className="text-slate-900 font-black text-sm">
                         Editing: {invoice.invoiceNumber}
                     </span>
-                    <div className="scale-75 origin-left">
-                        <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3">
+                        <div className="scale-90 origin-left">
+                            <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
+                        </div>
                     </div>
                 </div>
             );
@@ -81,7 +85,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     };
 
     return (
-        <div className="sticky top-0 z-40 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+        <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-20 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
             {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
                 {getBreadcrumbs()}
@@ -91,6 +95,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <div className="flex items-center gap-3">
                 {activeView === 'editor' && (
                     <>
+                        <button
+                            onClick={onSendEmail}
+                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-lg hover:border-blue-400 hover:text-blue-600 transition-all flex items-center gap-2"
+                        >
+                            <i className="fas fa-envelope"></i>
+                            <span>{t.sendEmail || 'Send'}</span>
+                        </button>
                         <button
                             onClick={onShare}
                             className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-lg hover:border-blue-400 hover:text-blue-600 transition-all flex items-center gap-2"
@@ -115,6 +126,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                             {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-pdf"></i>}
                             <span>{isExporting ? t.generating : t.exportPdf}</span>
                         </button>
+
+
 
                         <div className="w-px h-6 bg-slate-200 mx-1"></div>
                     </>

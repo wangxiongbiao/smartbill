@@ -636,7 +636,7 @@ const App: React.FC = () => {
         // Editor is now open to guests
         return (
           <>
-            <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
+
             <div className="container mx-auto flex flex-col gap-6 relative">
               {/* Action Toolbar Removed - Moved to DashboardHeader */}
 
@@ -860,6 +860,7 @@ const App: React.FC = () => {
           onExportPdf={handleExportPdf}
           onSaveTemplate={() => setIsSaveTemplateDialogOpen(true)}
           onShare={() => setIsShareDialogOpen(true)}
+          onSendEmail={() => setIsEmailDialogOpen(true)}
           onLangChange={setLang}
           onBack={() => changeView('records')}
         />
