@@ -28,7 +28,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     const navItems: { id: ViewType; label: string; icon: string }[] = [
         { id: 'records', label: t.records, icon: 'fas fa-file-invoice' },
         { id: 'templates', label: t.myTemplates, icon: 'fas fa-file-contract' },
-        { id: 'profile', label: t.profile, icon: 'fas fa-user' },
     ];
 
     const languages: { id: Language; label: string }[] = [
@@ -55,7 +54,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 </div>
             </div>
 
-            <div className="px-4 py-6">
+            {/* <div className="px-4 py-6">
                 <button
                     onClick={onNewInvoice}
                     className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group ring-4 ring-transparent hover:ring-blue-50"
@@ -63,7 +62,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     <i className="fas fa-plus group-hover:rotate-90 transition-transform"></i>
                     <span>{t.newInvoiceShort || 'New Invoice'}</span>
                 </button>
-            </div>
+            </div> */}
 
             {/* Navigation */}
             <nav className="flex-1 px-4 space-y-2">
@@ -136,7 +135,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
                 {/* User Profile / Logout */}
                 {user ? (
-                    <div className="flex items-center gap-3 px-2 group">
+                    <div
+                        className="flex items-center gap-3 px-2 group cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-all"
+                        onClick={() => setView('profile')}
+                    >
                         <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 text-xs font-bold shadow-sm ring-2 ring-white">
                             {user.avatar ? (
                                 <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
@@ -149,7 +151,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             <p className="text-[10px] text-slate-400 truncate font-medium">{user.email}</p>
                         </div>
                         <button
-                            onClick={onLogout}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onLogout();
+                            }}
                             className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"
                             title="Logout"
                         >

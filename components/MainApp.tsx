@@ -865,7 +865,7 @@ const App: React.FC = () => {
           onBack={() => changeView('records')}
         />
         {/* Render content */}
-        <main className="flex-1 p-4 lg:p-8">{renderContent()}</main>
+        <main className="flex-1 ">{renderContent()}</main>
 
         {/* Hidden Print Area */}
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">

@@ -45,22 +45,22 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
     const getBreadcrumbs = () => {
         const crumbs = [
-            <span key="home" className="text-slate-400 font-bold uppercase tracking-widest text-xs">SMARTBILL PRO</span>
+            <span key="home" className="text-slate-400 font-bold  tracking-widest text-[16px]">SmartBill Pro</span>
         ];
 
         if (activeView === 'records') {
             crumbs.push(
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <span key="records" className="text-slate-400 font-bold uppercase tracking-widest text-xs">RECORDS</span>
+                <span key="records" className="text-slate-800 font-bold  tracking-widest text-[15px]">{t.breadcrumbRecords}</span>
             );
         } else if (activeView === 'editor' && invoice) {
             crumbs.push(
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <span key="records" className="text-slate-400 font-bold uppercase tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>RECORDS</span>,
+                <span key="records" className="text-slate-400 font-bold  tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>{t.breadcrumbRecords}</span>,
                 <i key="sep2" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
                 <div key="current" className="relative flex items-center group">
                     <span className="text-slate-900 font-black text-sm">
-                        Editing: {invoice.invoiceNumber}
+                        {t.editing}: {invoice.invoiceNumber}
                     </span>
                     <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3">
                         <div className="scale-90 origin-left">
@@ -72,12 +72,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         } else if (activeView === 'profile') {
             crumbs.push(
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <span key="profile" className="text-slate-900 font-black uppercase tracking-widest text-xs">PROFILE</span>
+                <span key="profile" className="text-slate-900 font-black  tracking-widest text-xs">{t.breadcrumbProfile}</span>
             );
         } else if (activeView === 'templates') {
             crumbs.push(
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <span key="templates" className="text-slate-900 font-black uppercase tracking-widest text-xs">TEMPLATES</span>
+                <span key="templates" className="text-slate-900 font-black  tracking-widest text-xs">{t.breadcrumbTemplates}</span>
             );
         }
 

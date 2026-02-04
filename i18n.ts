@@ -102,6 +102,26 @@ export const translations: Record<Language, any> = {
     confirm: 'Confirm',
     cancel: 'Cancel',
     amountTotal: 'Total Amount',
+    // Records Redesign
+    searchPlaceholder: 'Search everything...',
+    filter: 'Filter',
+    recordsOverview: 'RECORDS OVERVIEW',
+    showingRecords: 'Showing {start} to {end} of {count} records',
+    colClient: 'CLIENT',
+    colAmount: 'TOTAL AMOUNT',
+    colDate: 'ISSUE DATE',
+    invoiceBadge: 'INVOICE',
+    // Templates Redesign
+    colTemplateName: 'TEMPLATE NAME',
+    colDescription: 'DESCRIPTION',
+    colUsage: 'USAGE',
+    colCreated: 'CREATED',
+    templateBadge: 'TEMPLATE',
+    // Breadcrumbs
+    breadcrumbRecords: 'Records',
+    breadcrumbProfile: 'Profile',
+    breadcrumbTemplates: 'Templates',
+    editing: 'Editing',
     // Footer
     footerDesc: 'SmartBill Pro is the premier billing platform designed for modern entrepreneurs and freelancers. We help global users improve billing efficiency through innovative AI technology.',
     productFeatures: 'Products',
@@ -462,6 +482,26 @@ export const translations: Record<Language, any> = {
     confirm: '確認',
     cancel: '取消',
     amountTotal: '賬單總額',
+    // Records Redesign
+    searchPlaceholder: '搜索所有內容...',
+    filter: '篩選',
+    recordsOverview: '記錄概覽',
+    showingRecords: '顯示 {start} 到 {end} 條，共 {count} 條記錄',
+    colClient: '客戶',
+    colAmount: '總金額',
+    colDate: '開票日期',
+    invoiceBadge: '發票',
+    // Templates Redesign
+    colTemplateName: '模板名稱',
+    colDescription: '描述',
+    colUsage: '使用次數',
+    colCreated: '創建日期',
+    templateBadge: '模板',
+    // Breadcrumbs
+    breadcrumbRecords: '發票',
+    breadcrumbProfile: '我的',
+    breadcrumbTemplates: '模板',
+    editing: '編輯中',
     // Footer
     footerDesc: 'SmartBill Pro 是專為現代企業家和自由職業者打造的頂級開票平台。我們通過創新的 AI 技術，幫助全球用戶提升計費效率。',
     productFeatures: '產品功能',
