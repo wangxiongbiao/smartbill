@@ -637,11 +637,11 @@ const App: React.FC = () => {
         return (
           <>
 
-            <div className="container mx-auto flex flex-col gap-6 relative">
+            <div className="container mx-auto flex flex-col gap-6 relative p-6">
               {/* Action Toolbar Removed - Moved to DashboardHeader */}
 
               {/* 表单和预览区 */}
-              <div className="lg:flex gap-8" style={{ zoom: 0.9 }}>
+              <div className="lg:flex gap-4" style={{ zoom: 0.9 }}>
                 <div className="lg:w-1/2 flex flex-col gap-6">
 
                   <InvoiceForm invoice={invoice} onChange={updateInvoice} lang={lang} userId={user?.id} />

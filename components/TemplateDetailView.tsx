@@ -49,11 +49,11 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-4">
             {/* Back Button */}
             <button
                 onClick={onBack}
-                className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors group"
+                className="mb-4 flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors group"
             >
                 <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
                 <span>{t.backToTemplates}</span>
