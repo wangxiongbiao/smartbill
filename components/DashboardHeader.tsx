@@ -58,15 +58,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
                 <span key="records" className="text-slate-400 font-bold  tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>{t.breadcrumbRecords}</span>,
                 <i key="sep2" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
-                <div key="current" className="relative flex items-center group">
-                    <span className="text-slate-900 font-black text-sm">
+                <div key="current" className="flex items-center gap-3">
+                    <span className="text-slate-900 font-black text-lg">
                         {t.editing}: {invoice.invoiceNumber}
                     </span>
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3">
-                        <div className="scale-90 origin-left">
-                            <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
-                        </div>
-                    </div>
+                    <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
                 </div>
             );
         } else if (activeView === 'profile') {

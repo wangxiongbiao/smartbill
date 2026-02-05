@@ -16,41 +16,34 @@ const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({ status, lang,
     const getStatusConfig = () => {
         switch (status) {
             case 'idle':
+            case 'saved':
                 return {
-                    icon: 'fa-cloud',
-                    text: t.autoSaved || 'Auto Saved', // Assuming translation key exists or fallback
-                    bgColor: 'bg-slate-50',
-                    textColor: 'text-slate-500',
-                    borderColor: 'border-slate-200'
+                    icon: null,
+                    text: t.autoSaved || 'AUTO-SAVED',
+                    bgColor: 'bg-green-50',
+                    textColor: 'text-green-600',
+                    borderColor: 'border-green-100'
                 };
             case 'saving':
                 return {
                     icon: 'fa-circle-notch fa-spin',
                     text: t.saving,
                     bgColor: 'bg-blue-50',
-                    textColor: 'text-blue-700',
-                    borderColor: 'border-blue-200'
-                };
-            case 'saved':
-                return {
-                    icon: 'fa-check-circle',
-                    text: lastSavedTime ? `${t.saved_status} ${formatTime(lastSavedTime, t)}` : t.saved_status,
-                    bgColor: 'bg-green-50',
-                    textColor: 'text-green-700',
-                    borderColor: 'border-green-200'
+                    textColor: 'text-blue-600',
+                    borderColor: 'border-blue-100'
                 };
             case 'error':
                 return {
                     icon: 'fa-exclamation-triangle',
                     text: t.save_failed,
                     bgColor: 'bg-red-50',
-                    textColor: 'text-red-700',
-                    borderColor: 'border-red-200'
+                    textColor: 'text-red-600',
+                    borderColor: 'border-red-100'
                 };
             default:
                 return {
-                    icon: 'fa-cloud',
-                    text: 'Auto Save',
+                    icon: null,
+                    text: 'AUTO SAVE',
                     bgColor: 'bg-slate-50',
                     textColor: 'text-slate-400',
                     borderColor: 'border-slate-100'
@@ -64,14 +57,14 @@ const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({ status, lang,
         <div
             className={`
                 flex items-center gap-2
-                px-4 py-2 rounded-full
-                border shadow-sm
+                px-3 py-1 rounded-md
+                border
                 transition-colors duration-300
                 ${config.bgColor} ${config.textColor} ${config.borderColor}
             `}
         >
-            <i className={`fas ${config.icon} text-sm`}></i>
-            <span className="text-xs font-black tracking-wide whitespace-nowrap uppercase">{config.text}</span>
+            {config.icon && <i className={`fas ${config.icon} text-xs`}></i>}
+            <span className="text-[10px] sm:text-xs font-black tracking-wider whitespace-nowrap uppercase">{config.text}</span>
         </div>
     );
 };
