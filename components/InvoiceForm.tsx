@@ -532,6 +532,28 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
         ))}
       </div>
 
+      {/* Custom Invoice Title Input */}
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.invoiceMode.replace('Mode', 'Title') || 'Document Title'}</label>
+        <div className="relative">
+          <input
+            type="text"
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder={invoice.type === 'invoice' ? (t.invoiceMode?.split(' ')[0] || 'INVOICE') : (t.receiptMode?.split(' ')[0] || 'RECEIPT')}
+            value={invoice.customStrings?.invoiceTitle ?? ''}
+            onChange={(e) => onChange({
+              customStrings: {
+                ...invoice.customStrings,
+                invoiceTitle: e.target.value
+              }
+            })}
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <i className="fas fa-pen text-xs"></i>
+          </div>
+        </div>
+      </div>
+
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Invoice Number */}
         <div className="space-y-2 relative group">
@@ -604,7 +626,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
                 className="rounded text-blue-600 focus:ring-blue-500"
               />
-              <span className="font-medium">{t.invoiceDate}</span>
+              <input
+                type="text"
+                className="font-medium bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full min-w-[60px]"
+                value={invoice.customStrings?.dateLabel ?? t.invoiceDate}
+                onChange={(e) => onChange({
+                  customStrings: { ...invoice.customStrings, dateLabel: e.target.value }
+                })}
+                onClick={(e) => e.stopPropagation()} // Prevent triggering the label click
+              />
             </label>
             <div className="relative flex items-center">
               <button
@@ -633,7 +663,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
                 className="rounded text-blue-600 focus:ring-blue-500"
               />
-              <span className="font-medium">{t.dueDate}</span>
+              <input
+                type="text"
+                className="font-medium bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full min-w-[60px]"
+                value={invoice.customStrings?.dueDateLabel ?? t.dueDate}
+                onChange={(e) => onChange({
+                  customStrings: { ...invoice.customStrings, dueDateLabel: e.target.value }
+                })}
+                onClick={(e) => e.stopPropagation()}
+              />
             </label>
             <div className="relative flex items-center">
               <button

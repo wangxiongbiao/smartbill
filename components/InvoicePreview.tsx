@@ -42,7 +42,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   };
 
 
-  const docTitle = invoice.type === 'invoice' ? t.invoiceMode.split(' ')[0].toUpperCase() : t.receiptMode.split(' ')[0].toUpperCase();
+  const docTitle = invoice.customStrings?.invoiceTitle || (invoice.type === 'invoice' ? t.invoiceMode.split(' ')[0].toUpperCase() : t.receiptMode.split(' ')[0].toUpperCase());
 
   const columns = invoice.columnConfig || defaultColumns;
   const visibleColumns = columns.filter(col => col.visible).sort((a, b) => a.order - b.order);
@@ -134,13 +134,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className="text-right">
             {invoice.visibility?.date !== false && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{t.invoiceDate}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{invoice.customStrings?.dateLabel ?? t.invoiceDate}</p>
                 <p className="text-sm font-medium mb-4">{invoice.date}</p>
               </>
             )}
             {invoice.visibility?.dueDate !== false && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{t.dueDate}</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-1">{invoice.customStrings?.dueDateLabel ?? t.dueDate}</p>
                 <p className={`text-sm font-bold text-${styles.accentColor}`}>{invoice.dueDate}</p>
               </>
             )}

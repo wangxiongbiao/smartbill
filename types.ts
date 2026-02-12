@@ -1,5 +1,10 @@
-
-export type ColumnType = 'system-quantity' | 'system-rate' | 'system-amount' | 'system-text' | 'custom-text' | 'custom-number';
+export type ColumnType =
+  | "system-quantity"
+  | "system-rate"
+  | "system-amount"
+  | "system-text"
+  | "custom-text"
+  | "custom-number";
 
 export interface InvoiceColumn {
   id: string;
@@ -26,7 +31,6 @@ export interface CustomField {
   value: string;
 }
 
-
 export interface Client {
   name: string;
   email: string;
@@ -51,7 +55,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  provider: 'email' | 'facebook' | 'google';
+  provider: "email" | "facebook" | "google";
   profile?: Profile;
 }
 
@@ -73,12 +77,10 @@ export interface InvoiceRecord {
   updated_at: string;
 }
 
+export type DocumentType = "invoice" | "receipt";
+export type Language = "zh-TW" | "en";
 
-export type DocumentType = 'invoice' | 'receipt';
-export type Language = 'zh-TW' | 'en';
-
-
-export type PaymentFieldType = 'text' | 'textarea';
+export type PaymentFieldType = "text" | "textarea";
 
 export interface PaymentInfoField {
   id: string;
@@ -114,29 +116,43 @@ export interface Invoice {
   taxRate: number;
   currency: string;
   notes: string;
-  status?: 'Draft' | 'Sent' | 'Paid';
+  status?: "Draft" | "Sent" | "Paid";
   // Template Configuration
   template?: TemplateType;
   isHeaderReversed?: boolean;
   visibility?: Record<string, boolean>;
   columnConfig?: InvoiceColumn[];
+  customStrings?: {
+    invoiceTitle?: string;
+    dateLabel?: string;
+    dueDateLabel?: string;
+  };
 }
 
-export type TemplateType = 'minimalist';
-export type ViewType = 'home' | 'editor' | 'records' | 'templates' | 'template-detail' | 'profile' | 'about' | 'help' | 'login';
-export type ImageType = 'logo' | 'qrcode';
+export type TemplateType = "minimalist";
+export type ViewType =
+  | "home"
+  | "editor"
+  | "records"
+  | "templates"
+  | "template-detail"
+  | "profile"
+  | "about"
+  | "help"
+  | "login";
+export type ImageType = "logo" | "qrcode";
 
 // Invoice Template Types
 export interface InvoiceTemplate {
-  id: string;                    // 模板唯一ID
-  user_id: string;               // 所属用户ID
-  name: string;                  // 模板名称
-  description?: string;          // 模板描述
+  id: string; // 模板唯一ID
+  user_id: string; // 所属用户ID
+  name: string; // 模板名称
+  description?: string; // 模板描述
   template_data: Partial<Invoice>; // 模板数据（基于现有Invoice类型）
-  thumbnail?: string;            // 预览缩略图（可选，后期优化）
-  created_at: string;            // 创建时间
-  updated_at: string;            // 更新时间
-  usage_count?: number;          // 使用次数统计（可选）
+  thumbnail?: string; // 预览缩略图（可选，后期优化）
+  created_at: string; // 创建时间
+  updated_at: string; // 更新时间
+  usage_count?: number; // 使用次数统计（可选）
 }
 
 export interface IndustryTemplate {
