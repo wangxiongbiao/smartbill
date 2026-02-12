@@ -105,29 +105,22 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
               key={record.id}
               className="bg-white rounded-[2rem] p-6 border border-slate-100 flex flex-col xl:flex-row items-center gap-6 xl:gap-0 hover:shadow-lg transition-all group"
             >
-              {/* Col 1: Icon + Number */}
-              <div className="flex items-center gap-5 w-full xl:w-[25%]">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <i className="fas fa-file-invoice"></i>
+              {/* Col 1: Client */}
+              <div className="flex items-center gap-4 w-full xl:w-[30%]">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i className="fas fa-building"></i>
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-slate-900 text-lg tracking-tight leading-none mb-1.5">{record.invoiceNumber}</span>
-                  <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider w-fit">{t.invoiceBadge}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{t.colClient || 'CLIENT'}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900 text-base truncate">{record.client.name || 'Untitled Client'}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Col 2: Client */}
-              <div className="flex flex-col w-full xl:w-[25%] pl-0 xl:pl-4 border-l-0 xl:border-l border-slate-50">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colClient}</span>
-                <div className="flex items-center gap-2">
-                  <i className="fas fa-user text-slate-300 text-xs"></i>
-                  <span className="font-bold text-slate-700 text-sm truncate">{record.client.name || 'Untitled Client'}</span>
-                </div>
-              </div>
-
-              {/* Col 3: Amount */}
-              <div className="flex flex-col w-full xl:w-[20%]">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colAmount}</span>
+              {/* Col 2: Amount */}
+              <div className="flex flex-col w-full xl:w-[20%] pl-0 xl:pl-4 border-l-0 xl:border-l border-slate-50">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colAmount || 'TOTAL AMOUNT'}</span>
                 <div className="flex items-end gap-1">
                   <span className="text-xs font-bold text-slate-400 mb-0.5">{record.currency}</span>
                   <span className="font-black text-slate-900 text-lg leading-none">
@@ -138,9 +131,15 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                 </div>
               </div>
 
+              {/* Col 3: Invoice Number */}
+              <div className="flex flex-col w-full xl:w-[20%]">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.invoiceBadge || 'INVOICE'}</span>
+                <span className="font-bold text-slate-700 text-base tracking-tight">{record.invoiceNumber}</span>
+              </div>
+
               {/* Col 4: Date */}
               <div className="flex flex-col w-full xl:w-[15%]">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colDate}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colDate || 'ISSUE DATE'}</span>
                 <div className="flex items-center gap-2">
                   <i className="fas fa-calendar text-slate-300 text-xs"></i>
                   <span className="font-bold text-slate-700 text-sm">{record.date}</span>
