@@ -1,82 +1,44 @@
 import React, { useEffect } from 'react';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-interface ToastProps {
-    message: string;
-    type: ToastType;
-    isVisible: boolean;
-    onClose: () => void;
-    duration?: number;
+export interface ToastProps {
+  message: string;
+  type?: 'error' | 'success' | 'info';
+  duration?: number;
+  onClose: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ message, type, isVisible, onClose, duration = 3000 }) => {
-    useEffect(() => {
-        if (isVisible && duration > 0) {
-            const timer = setTimeout(() => {
-                onClose();
-            }, duration);
-            return () => clearTimeout(timer);
-        }
-    }, [isVisible, duration, onClose]);
+export const Toast: React.FC<ToastProps> = ({ 
+  message, 
+  type = 'error', 
+  duration = 3000,
+  onClose 
+}) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, duration);
 
-    if (!isVisible) return null;
+    return () => clearTimeout(timer);
+  }, [duration, onClose]);
 
-    const getIcon = () => {
-        switch (type) {
-            case 'success':
-                return 'fa-check-circle';
-            case 'error':
-                return 'fa-exclamation-circle';
-            case 'warning':
-                return 'fa-exclamation-triangle';
-            case 'info':
-                return 'fa-info-circle';
-        }
-    };
+  const bgColor = {
+    error: 'bg-red-500',
+    success: 'bg-green-500',
+    info: 'bg-blue-500',
+  }[type];
 
-    const getColors = () => {
-        switch (type) {
-            case 'success':
-                return 'bg-emerald-50 border-emerald-200 text-emerald-800';
-            case 'error':
-                return 'bg-red-50 border-red-200 text-red-800';
-            case 'warning':
-                return 'bg-amber-50 border-amber-200 text-amber-800';
-            case 'info':
-                return 'bg-blue-50 border-blue-200 text-blue-800';
-        }
-    };
+  const icon = {
+    error: 'error',
+    success: 'check_circle',
+    info: 'info',
+  }[type];
 
-    const getIconColor = () => {
-        switch (type) {
-            case 'success':
-                return 'text-emerald-600';
-            case 'error':
-                return 'text-red-600';
-            case 'warning':
-                return 'text-amber-600';
-            case 'info':
-                return 'text-blue-600';
-        }
-    };
-
-    return (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-top-4 fade-in duration-300">
-            <div className={`${getColors()} border-2 rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-4 min-w-[320px] max-w-md`}>
-                <div className={`w-10 h-10 rounded-full ${getColors()} flex items-center justify-center flex-shrink-0`}>
-                    <i className={`fas ${getIcon()} ${getIconColor()} text-xl`}></i>
-                </div>
-                <p className="font-bold text-sm flex-1 leading-relaxed">{message}</p>
-                <button
-                    onClick={onClose}
-                    className="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors flex-shrink-0"
-                >
-                    <i className="fas fa-times text-sm opacity-50"></i>
-                </button>
-            </div>
-        </div>
-    );
+  return (
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-down">
+      <div className={`${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md`}>
+        <span className="material-symbols-outlined text-2xl">{icon}</span>
+        <p className="font-medium text-sm leading-relaxed">{message}</p>
+      </div>
+    </div>
+  );
 };
-
-export default Toast;

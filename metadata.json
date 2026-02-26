@@ -1,5 +1,4 @@
 {
-  "name": "SmartBill Pro - Free Professional Invoice Maker",
-  "description": "A high-end, easy-to-use invoice and receipt generator for freelancers and small businesses. Features professional templates, real-time preview, and AI-powered billing assistance.",
-  "requestFramePermissions": []
+  "name": "Wordle Helper AI",
+  "description": "An intelligent Wordle assistant that uses DeepSeek AI to analyze your board state and suggest the statistically best next guesses."
 }
