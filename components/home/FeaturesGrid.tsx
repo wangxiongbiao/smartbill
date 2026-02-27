@@ -14,20 +14,20 @@ export function FeaturesGrid() {
     ];
 
     return (
-        <section className="py-5 md:py-7 bg-white" data-purpose="features-grid">
-            <div className="px-4 sm:px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-dark tracking-tight">All the features you need</h2>
-                    <p className="text-slate-500 text-lg mt-3">Everything to create, manage, and send invoices like a pro.</p>
+        <section className="py-9 md:py-14 bg-white" data-purpose="features-grid">
+            <div className="px-6 sm:px-10">
+                <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold text-dark tracking-tight">All the features you need</h2>
+                    <p className="text-slate-500 text-base mt-3">Everything to create, manage, and send invoices like a pro.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-10">
                     {features.map((item, index) => (
                         <div key={index} className="flex items-start gap-4">
-                            <div className="shrink-0 w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-[#7D2AE8]">
-                                <i className={`fas ${item.icon} text-xl`}></i>
+                            <div className="shrink-0 w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center text-[#7D2AE8]">
+                                <i className={`fas ${item.icon} text-lg`}></i>
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-900 text-lg mb-1">{item.title}</h4>
+                                <h4 className="font-bold text-slate-900 text-base mb-1">{item.title}</h4>
                                 <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
                             </div>
                         </div>

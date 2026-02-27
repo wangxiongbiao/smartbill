@@ -17,14 +17,14 @@ export function Hero() {
 
     return (
         <section className="relative bg-[#E2EAE8] rounded-br-[120px] overflow-hidden" data-purpose="hero">
-            <div className="px-4 sm:px-6 py-3 md:py-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center min-h-[260px]">
+            <div className="px-6 sm:px-10 py-6 md:py-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center min-h-[280px]">
                     {/* Text Content */}
                     <div className="text-left z-10">
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
                             Generate Invoices in<br />Seconds with AI
                         </h1>
-                        <p className="text-base md:text-lg text-slate-600 mb-8 max-w-[480px] leading-relaxed">
+                        <p className="text-sm md:text-base text-slate-600 mb-6 max-w-[480px] leading-relaxed">
                             Experience seamless invoicing with Invoicefiy. Simply type your details on the left, and watch our AI instantly build your professional invoice on the right in real-time. Share with one click and let clients pay directly on the invoice.
                         </p>
                         <button

@@ -17,13 +17,13 @@ export function TemplatesGallery() {
     ];
 
     return (
-        <section className="bg-white py-5 md:py-7" data-purpose="templates">
-            <div className="mx-auto px-4 sm:px-6 text-center">
-                <h2 className="text-3xl md:text-4xl font-bold mb-3 text-dark tracking-tight">Start inspired with free invoice templates</h2>
-                <p className="text-slate-500 text-lg mb-8">Browse our collection of professionally designed templates.</p>
+        <section className="bg-white py-9 md:py-14" data-purpose="templates">
+            <div className="mx-auto px-6 sm:px-10 text-center">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-dark tracking-tight">Start inspired with free invoice templates</h2>
+                <p className="text-slate-500 text-base mb-7">Browse our collection of professionally designed templates.</p>
 
                 {/* Tabs */}
-                <div className="flex flex-wrap justify-center gap-3 mb-10">
+                <div className="flex flex-wrap justify-center gap-2.5 mb-9">
                     <button className="px-5 py-2.5 rounded-full bg-dark text-white font-semibold text-sm">All Templates</button>
                     <button className="px-5 py-2.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold text-sm transition-colors">Business</button>
                     <button className="px-5 py-2.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold text-sm transition-colors">Freelance</button>
@@ -43,7 +43,7 @@ export function TemplatesGallery() {
                     ))}
                 </div>
                 <div className="mt-10">
-                    <button className="text-primary font-bold text-base hover:underline">View all invoice templates →</button>
+                    <button className="text-primary font-bold text-sm hover:underline">View all invoice templates →</button>
                 </div>
             </div>
         </section>
