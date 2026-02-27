@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
+import { AuthProvider } from '@/context/AuthContext'
+import { LoginModal } from '@/components/LoginModal'
+import { GoogleOneTap } from '@/components/GoogleOneTap'
 
-const jakarta = Plus_Jakarta_Sans({ 
-  subsets: ['latin'], 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 })
@@ -24,7 +27,11 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>
       <body className="antialiased font-sans">
-        {children}
+        <AuthProvider>
+          {children}
+          <LoginModal />
+          <GoogleOneTap />
+        </AuthProvider>
       </body>
     </html>
   )

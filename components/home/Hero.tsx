@@ -1,6 +1,20 @@
+'use client';
+
 import React from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 export function Hero() {
+    const { user, openLoginModal } = useAuth();
+
+    function handleCTA() {
+        if (!user) {
+            openLoginModal();
+        } else {
+            // Navigate to dashboard when available
+            window.location.href = '/dashboard';
+        }
+    }
+
     return (
         <section className="relative bg-[#E2EAE8] rounded-br-[120px] overflow-hidden" data-purpose="hero">
             <div className="px-4 sm:px-6 py-3 md:py-5">
@@ -13,7 +27,10 @@ export function Hero() {
                         <p className="text-base md:text-lg text-slate-600 mb-8 max-w-[480px] leading-relaxed">
                             Experience seamless invoicing with Invoicefiy. Simply type your details on the left, and watch our AI instantly build your professional invoice on the right in real-time. Share with one click and let clients pay directly on the invoice.
                         </p>
-                        <button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold text-base transition-colors duration-200">
+                        <button
+                            onClick={handleCTA}
+                            className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold text-base transition-colors duration-200 cursor-pointer"
+                        >
                             Create Invoice with AI
                         </button>
                     </div>
