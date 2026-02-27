@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Free Online Invoice Generator</title>
+<!-- Load Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B3DFF',
+                        'primary-hover': '#7a36e0',
+                        dark: '#333333',
+                        lightbg: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Custom CSS for specific overrides and tweaks -->
+<style data-purpose="global-styles">
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #333333;
+        }
+        .btn-primary {
+            background-color: #8B3DFF;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #7a36e0;
+        }
+    </style>
+<style data-purpose="faq-styles">
+        /* Simple accordion style */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary ~ * {
+            animation: sweep .5s ease-in-out;
+        }
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+    </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/><style>.template-card { transition: transform 0.3s ease; } .template-card:hover { transform: translateY(-5px); }</style></head>
+<body class="bg-white antialiased">
+<!-- BEGIN: Header -->
+<header class="fixed w-full top-0 z-50 bg-white border-b border-gray-100" data-purpose="navigation">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-16">
+<!-- Logo and Primary Nav -->
+<div class="flex items-center gap-8">
+<a class="text-2xl font-bold text-primary tracking-tight" href="#">Canva</a>
+<nav class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
+<a class="hover:text-primary transition-colors" href="#">Design</a>
+<a class="hover:text-primary transition-colors" href="#">Plans</a>
+<a class="hover:text-primary transition-colors" href="#">Business</a>
+<a class="hover:text-primary transition-colors" href="#">Education</a>
+<a class="hover:text-primary transition-colors" href="#">Help</a>
+</nav>
+</div>
+<!-- Secondary Nav (Auth) -->
+<div class="flex items-center gap-4">
+<button class="text-sm font-medium hover:bg-gray-100 px-4 py-2 rounded-md transition-colors">Log in</button>
+<button class="btn-primary px-5 py-2 rounded-md font-medium text-sm" style="background-color: #7D2AE8;">Sign up</button>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: MainContent -->
+<main class="pt-16">
+<!-- BEGIN: HeroSection -->
+<section class="relative bg-white overflow-hidden py-24" data-purpose="hero">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<!-- Text Content -->
+<div class="text-center md:text-left z-10">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-dark mb-6 leading-tight">
+                            Free Online Invoice Generator
+                        </h1>
+<p class="text-lg text-gray-600 mb-8 max-w-lg mx-auto md:mx-0">
+                            Create professional invoices in seconds with our easy-to-use invoice maker. Fully customizable templates to help you get paid faster.
+                        </p>
+<button class="btn-primary px-8 py-3.5 font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5" style="background-color: #7D2AE8; border-radius: 8px; font-weight: 600;">
+                            Create an invoice
+                        </button>
+</div>
+<!-- Hero Image -->
+<div class="relative">
+<!-- Decorative blob background -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+<div class="relative rounded-2xl overflow-hidden shadow-2xl">
+<img alt="Desk with invoices and laptop" class="w-full h-auto object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFjOGfyVAgWsusaP-deR7A3dV6slsO8jRUuni83bsEdIiJQauKlN_ZvMqvuYeZYRVzb3NdRQYZtePrwRRvqXxPxPTHIhflrb76AQqNu2CA_dVvqhq9otRbnR5_7M9T88ngJGfGPfGBNyATis2lCmfnk_E8qdr1PWcIEAprD7R8-DytLXUm9jDX9-Z8mx0TyMZaYMLltY0dNWFMg6QSOR0_K7KhGJHROJP3IshWApKUTfJ9A4rQZPRjk2_P4hHI3rVll-yXWGui8Po"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HeroSection -->
+<!-- BEGIN: SocialProof -->
+<section class="bg-gray-50 py-24" data-purpose="trust-badges">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<p class="text-center text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6">Trusted by companies worldwide</p>
+<div class="flex justify-center items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500"><img alt="Trusted Companies" class="max-w-[80%] h-auto object-contain mx-auto" src="[IMAGE]"/></div>
+</div>
+</section>
+<!-- END: SocialProof -->
+<!-- BEGIN: FeatureSection1 -->
+<section class="bg-white py-24" data-purpose="feature-left-text">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+<!-- Content -->
+<div>
+<h2 class="text-3xl md:text-4xl font-bold mb-6 text-dark">Simplify billing with a free invoice maker</h2>
+<p class="text-gray-600 mb-8 text-lg">Say goodbye to manual spreadsheets. Our tool automates the heavy lifting so you can focus on your business.</p>
+<ul class="space-y-4">
+<li class="flex items-start">
+<svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-gray-700 font-medium">Professional templates ready to use</span>
+</li>
+<li class="flex items-start">
+<svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-gray-700 font-medium">Automatic tax and total calculations</span>
+</li>
+<li class="flex items-start">
+<svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-gray-700 font-medium">Download as PDF or email directly</span>
+</li>
+</ul>
+</div>
+<!-- Image -->
+<div class="relative p-6 bg-purple-50 rounded-3xl">
+<img alt="Invoice document preview" class="rounded-xl shadow-lg w-full h-auto transform rotate-2 hover:rotate-0 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb2YDgSTlVITh56nkDcd0lNGrtt_3h3IkCC4KSBvyspW-Hc1JZJyallbmPezLsLl-cCDd6WstrbCQ-AiJwdm2bbiqh7ef3nW7iOxy9kzdTLAupLFX2fC9XIETlJVRvm05DDH9iyD4iOPj66c7qyJJGhbbJRaqMFI0mxy5vU7NR02cGl5MLg9wAajLLz2JgS7wO3jmkVoH5R4keSOgV5GKxaI8wvDJ3zjT5-LLU1m32n0bAJF8qth41KYarWQ6PkqjXXK8tV0s9a4Y"/>
+</div>
+</div>
+</div>
+</section>
+<!-- END: FeatureSection1 -->
+<!-- BEGIN: FeatureSection2 -->
+<section class="bg-lightbg py-24" data-purpose="feature-right-text">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+<!-- Image (Order 2 on mobile to appear below text, Order 1 on desktop) -->
+<div class="order-2 md:order-1 relative p-6 bg-white rounded-3xl shadow-sm">
+<img alt="Editor UI Interface" class="rounded-xl shadow-md w-full h-auto shadow-xl" src="[IMAGE]"/>
+</div>
+<!-- Content (Order 1 on mobile, Order 2 on desktop) -->
+<div class="order-1 md:order-2">
+<h2 class="text-3xl md:text-4xl font-bold mb-6 text-dark">Easily generate and send invoices</h2>
+<p class="text-gray-600 mb-8 text-lg">Customize every detail. Add your logo, change colors to match your brand, and personalize the thank you message.</p>
+<ul class="space-y-6">
+<li class="flex gap-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-primary">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="font-bold text-gray-900">Drag &amp; Drop Editor</h4>
+<p class="text-gray-600 text-sm mt-1">Intuitive interface that requires no design skills.</p>
+</div>
+</li>
+<li class="flex gap-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-primary">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="font-bold text-gray-900">Save Time</h4>
+<p class="text-gray-600 text-sm mt-1">Save client details for faster recurring billing.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- END: FeatureSection2 -->
+<!-- BEGIN: TemplatesGallery -->
+<section class="bg-white py-24" data-purpose="templates">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h2 class="text-3xl md:text-4xl font-bold mb-4 text-dark">Start inspired with free invoice templates</h2>
+<p class="text-gray-600 mb-10">Browse our collection of professionally designed templates.</p>
+<!-- Tabs -->
+<div class="flex flex-wrap justify-center gap-2 mb-10">
+<button class="px-4 py-2 rounded-full bg-dark text-white font-medium text-sm">All Templates</button>
+<button class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors">Business</button>
+<button class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors">Freelance</button>
+<button class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors">Commercial</button>
+<button class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors">Simple</button>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Minimal Blue Invoice</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Corporate Modern</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Creative Freelancer</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Simple Clean</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Minimal Blue Invoice</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Corporate Modern</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Creative Freelancer</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Simple Clean</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Minimal Blue Invoice</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Corporate Modern</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Creative Freelancer</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Simple Clean</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Minimal Blue Invoice</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Corporate Modern</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Creative Freelancer</h3>
+</div>
+<div class="group cursor-pointer bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all template-card">
+<div class="rounded-lg overflow-hidden border border-gray-100 aspect-[3/4] mb-4">
+<img alt="Invoice Template" class="w-full h-full object-cover" src="[IMAGE]"/>
+</div>
+<h3 class="text-sm font-semibold text-gray-800 group-hover:text-primary text-center">Simple Clean</h3>
+</div>
+</div>
+<div class="mt-12">
+<button class="text-primary font-semibold hover:underline">View all invoice templates →</button>
+</div>
+</div>
+</section>
+<!-- END: TemplatesGallery -->
+<!-- BEGIN: TargetAudience -->
+<section class="bg-lightbg py-24" data-purpose="audience-segments">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl font-bold text-dark">Invoicing made easy for everyone</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center"><!-- Column 1 -->
+<div class="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+<div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6 text-[#7D2AE8]" style="background-color: #F3E5F5;"><i class="fas fa-user text-xl"></i></div>
+<h3 class="text-xl font-bold mb-3">Freelancers</h3>
+<p class="text-gray-600 text-sm">Get paid faster and look professional without hiring an accountant. Keep track of your gigs easily.</p>
+</div>
+<!-- Column 2 -->
+<div class="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+<div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6 text-[#7D2AE8]" style="background-color: #F3E5F5;"><i class="fas fa-store text-xl"></i></div>
+<h3 class="text-xl font-bold mb-3">Small Businesses</h3>
+<p class="text-gray-600 text-sm">Streamline your billing process. Create branded invoices that impress clients and organize records.</p>
+</div>
+<!-- Column 3 -->
+<div class="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+<div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6 text-[#7D2AE8]" style="background-color: #F3E5F5;"><i class="fas fa-building text-xl"></i></div>
+<h3 class="text-xl font-bold mb-3">Enterprise</h3>
+<p class="text-gray-600 text-sm">Scale your invoicing operations. Integrate with existing workflows and manage teams securely.</p>
+</div></div>
+</div>
+</section>
+<!-- END: TargetAudience -->
+<!-- BEGIN: FeaturesGrid -->
+<section class="py-24 bg-white" data-purpose="features-grid">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold text-dark">All the features you need</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8"><!-- Grid Item 1 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-file-invoice"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Thousands of formats</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Choose from a massive library of formats suited for any industry or style.</p>
+</div>
+</div>
+<!-- Grid Item 2 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-users"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Real-time collaboration</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Work together with your team on invoices instantly, no matter where you are.</p>
+</div>
+</div>
+<!-- Grid Item 3 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-mobile-alt"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Access on any device</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Create invoices on the go from your phone, tablet, or desktop computer.</p>
+</div>
+</div>
+<!-- Grid Item 4 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-save"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Auto-save drafts</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Never lose your work. Changes are saved automatically as you type.</p>
+</div>
+</div>
+<!-- Grid Item 5 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-globe"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Multi-currency support</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Bill international clients easily with support for over 100 currencies.</p>
+</div>
+</div>
+<!-- Grid Item 6 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-print"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Instant PDF export</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Download high-quality PDFs ready for print or email in a single click.</p>
+</div>
+</div>
+<!-- Grid Item 7 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-lock"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Secure cloud storage</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Your data is encrypted and stored safely in the cloud for easy retrieval.</p>
+</div>
+</div>
+<!-- Grid Item 8 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-palette"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">Brand customization</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Upload your own fonts, logos, and color palettes for brand consistency.</p>
+</div>
+</div>
+<!-- Grid Item 9 -->
+<div class="flex flex-col items-center text-center gap-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-xl text-[#7D2AE8]">
+<i class="fas fa-headset"></i>
+</div>
+<div>
+<h4 class="font-bold text-lg mb-2">24/7 Support</h4>
+<p class="text-gray-500 text-sm leading-relaxed">Our support team is always available to help you with any issues.</p>
+</div>
+</div></div>
+</div>
+</section>
+<!-- END: FeaturesGrid -->
+<!-- BEGIN: FAQ -->
+<section class="bg-lightbg py-24" data-purpose="faq">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-12">
+<h2 class="text-3xl font-bold text-dark">Your questions, answered</h2>
+</div>
+<div class="space-y-4">
+<!-- Question 1 -->
+<details class="group bg-white rounded-lg shadow-sm">
+<summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6">
+<span class="text-lg text-gray-800">What is an invoice?</span>
+<span class="transition group-open:rotate-180"><svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg></span>
+</summary>
+<div class="text-gray-600 px-6 pb-6 text-sm leading-relaxed">
+                            An invoice is a time-stamped commercial document that records a transaction between a buyer and a seller. If goods or services were purchased on credit, the invoice usually specifies the terms of the deal and provides information on the available methods of payment.
+                        </div>
+</details>
+<!-- Question 2 -->
+<details class="group bg-white rounded-lg shadow-sm">
+<summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6">
+<span class="text-lg text-gray-800">Is this invoice generator really free?</span>
+<span class="transition group-open:rotate-180"><svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg></span>
+</summary>
+<div class="text-gray-600 px-6 pb-6 text-sm leading-relaxed">
+                            Yes! You can create, download, and send a specific number of invoices for free. We also offer premium plans for advanced features like bulk creation and automated recurring billing.
+                        </div>
+</details>
+<!-- Question 3 -->
+<details class="group bg-white rounded-lg shadow-sm">
+<summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6">
+<span class="text-lg text-gray-800">Can I add my company logo?</span>
+<span class="transition group-open:rotate-180"><svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg></span>
+</summary>
+<div class="text-gray-600 px-6 pb-6 text-sm leading-relaxed">
+                            Absolutely. Our editor allows you to upload your logo and place it anywhere on the invoice to ensure your documents look professional and branded.
+                        </div>
+</details>
+<!-- Question 4 -->
+<details class="group bg-white rounded-lg shadow-sm">
+<summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6">
+<span class="text-lg text-gray-800">What file formats are supported?</span>
+<span class="transition group-open:rotate-180"><svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg></span>
+</summary>
+<div class="text-gray-600 px-6 pb-6 text-sm leading-relaxed">
+                            You can download your invoices as high-quality PDFs, which are compatible with virtually all devices and operating systems.
+                        </div>
+</details>
+</div>
+</div>
+</section>
+<!-- END: FAQ -->
+<!-- BEGIN: Resources -->
+<section class="bg-white py-24" data-purpose="blog-resources">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-end mb-10">
+<h2 class="text-3xl font-bold text-dark">More resources</h2>
+<a class="text-primary font-semibold hover:underline hidden md:block" href="#">See all articles</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Resource Card 1 -->
+<div class="group cursor-pointer">
+<div class="rounded-xl overflow-hidden mb-4">
+<img alt="Blog thumbnail" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy2D0YPYhtjV0YF_-UA6HcPf3krXByXj02TuMzoDpLIWyum475bRvG0fOWFVlSFSUnlmrxiUk8yHXYeEcg5H4cZWZYB28YS3wjjeyrV0vcFvM__ZkUF4K3LkW3EEec3PBTvmN0S5MMNodAIj9KrDAhCYpyYJ-LI_j0roXJqZ73NILyNxwvL5qzivGLktGfRZjNA6TuvRmN23R1SEx5MqwD6dbO3BJ8qTqS4kFxaaJmUXgBd63czhS1Mcqvng3zEf5EIo8khZo7CXk"/>
+</div>
+<span class="text-xs font-bold text-purple-600 uppercase tracking-wide">Guide</span>
+<h3 class="text-xl font-bold text-gray-900 mt-2 mb-2 group-hover:text-primary transition-colors">How to write an invoice</h3>
+<p class="text-gray-500 text-sm">Learn the essential elements every professional invoice needs.</p>
+</div>
+<!-- Resource Card 2 -->
+<div class="group cursor-pointer">
+<div class="rounded-xl overflow-hidden mb-4">
+<img alt="Blog thumbnail" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqm9xrxDtZVRpdV2JbRlAgKE5LbJb40R021IJz1_1lt76yPtipJUyZ5zF16mCC3H4EPUqmKDG3CUoNWwXMUzFxHipUW9RuqQdQQsi0BOjHdfgJRlT7T1SEi2PgXS4YLqwanXpJI9D39DesctK-_5X362Ly15d52UlXC4yJqhEhFcSWkeyU1TXEg3gSnkmD0tsMVppmNnmZJnS2KFtHI_qhr8_MRXGW2MCj_6iwkQfcYXsOmpHSIzDnm-9-K4WNyxhF8AzQ8MF5ihc"/>
+</div>
+<span class="text-xs font-bold text-purple-600 uppercase tracking-wide">Tips</span>
+<h3 class="text-xl font-bold text-gray-900 mt-2 mb-2 group-hover:text-primary transition-colors">5 tips for getting paid on time</h3>
+<p class="text-gray-500 text-sm">Actionable advice to improve your cash flow and reduce late payments.</p>
+</div>
+<!-- Resource Card 3 -->
+<div class="group cursor-pointer">
+<div class="rounded-xl overflow-hidden mb-4">
+<img alt="Blog thumbnail" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTYw3EyaYjLlhWIT8658mFKYzQWSLcQwt40cTPokZckSacqrhMOIA_ojdW4k3Aj-bXPq8pEP6nyJkhSAktpHtZIaH4jNMGes57YMF_RKL7AStiHvhbt93B82pgrVuKJY6Z5NyGmqMvwY9bChJtsbuOp-F37HVEcA6X4ErCZiw-KK7d1V6zbeGzR1Mhph-71qoCVENXKx1F__HpOcHlpGfZm9dAe6SdpqHfMxekC5YFd22AYupQVu50GQt-ongq1CIQHKUybEBSjqk"/>
+</div>
+<span class="text-xs font-bold text-purple-600 uppercase tracking-wide">Freelancing</span>
+<h3 class="text-xl font-bold text-gray-900 mt-2 mb-2 group-hover:text-primary transition-colors">Invoicing for freelancers 101</h3>
+<p class="text-gray-500 text-sm">Everything you need to know about billing clients as a freelancer.</p>
+</div>
+</div>
+<div class="mt-8 md:hidden text-center">
+<a class="text-primary font-semibold hover:underline" href="#">See all articles</a>
+</div>
+</div>
+</section>
+<!-- END: Resources -->
+<!-- BEGIN: MoreProducts -->
+<section class="bg-gray-50 border-t border-gray-200 py-24" data-purpose="product-discovery">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl font-bold text-dark mb-10 text-center md:text-left">Discover more products</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+<!-- Prod 1 -->
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all">
+<img alt="Newsletters" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-II_B3rCmCPZb4qe_CTxIn7aE2bvst7sU9qAKXUo9wZw2iKOASMj_z5T0MbbahE5A7EA-MASRVG-N-Hq2ImWvD9hORffFdfi8kB3Oz1GOStlwuemFDhKlpDMa7CF0ezTpP6CnnigKpkh7nyW_pTkY8sWWkyImRPWmemTBmQaqARnIxV7stpOKftIdw3aeF2gfwKzZCdaCwGV_7v2CweXYu0HALJehMIrMY1NIZOLNQNloC6zx-giy236HUfswOCWimezRASJyMVY"/>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Newsletters</span>
+</a>
+<!-- Prod 2 -->
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all">
+<img alt="Business Cards" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2GY-dB6Z8WLbwQY-Y_-wfdEs-3m-a8GsaIyT1DcGrZ9Wifzu_VRfftk9PH6X0c4JjrKs5s1Qsjm3h28FEe43hawp-lvtdjYZHOo_8R7rgjbepmt2OfTgKPsnWd_MC311UMWYv0jx6kYsvs21ttru8aM6ItDi2rqGH7m2zNyQG2bygd1OcWRqDIkw65h8tXyCde7-NXuXl2amZW1NUck94YpfCk-x4BeCbHp82vl_zkjn8KO_507MBNnJdO4b3ykrVVnOJ4KvOkxU"/>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Business Cards</span>
+</a>
+<!-- Prod 3 -->
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all">
+<img alt="Presentations" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf5t9YVhRwtOv8zRKILkDrPhRNLTIaiW2r0wOtA2KDIkp0bbyWPOl-3AC3ji4507hbDX261n-GcCwAGUjt_kYXb8-lrufHuaM4BvE0OxxSjryAmWpvUtKx5fp5aBjACN3Y2Fn0qF2F_dWgBkwpyx86VltCgsdVczHOygKxuJhlFwXLacqnKxoBF9vzUA7jc8Ux8g85WCbu6or2SO56Kj8vy3ALjtHy9BvgGhFaqVeLc5PUiWjCCz9wYBX2MD9-_kdLqzshf53o6yE"/>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Presentations</span>
+</a>
+<!-- Placeholders for remaining grid items to fill space as implied by "row" but ensuring responsiveness -->
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all flex items-center justify-center bg-gray-50">
+<span class="text-gray-300">Img</span>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Flyers</span>
+</a>
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all flex items-center justify-center bg-gray-50">
+<span class="text-gray-300">Img</span>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Logos</span>
+</a>
+<a class="group block text-center" href="#">
+<div class="rounded-lg overflow-hidden shadow-sm mb-3 aspect-square bg-white border border-gray-100 group-hover:shadow-md transition-all flex items-center justify-center bg-gray-50">
+<span class="text-gray-300">Img</span>
+</div>
+<span class="text-sm font-medium text-gray-700 group-hover:text-primary">Resumes</span>
+</a>
+</div>
+</div>
+</section>
+<!-- END: MoreProducts -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Footer -->
+<footer class="border-t border-gray-200 pt-16 pb-8" data-purpose="footer" style="background-color: #FAFAFA; color: #333333;">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+<div class="col-span-2 lg:col-span-1">
+<a class="text-2xl font-bold text-primary tracking-tight block mb-4" href="#">Canva</a>
+<select class="form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+<option>English (US)</option>
+<option>Español</option>
+<option>Français</option>
+</select>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 mb-4">Features</h4>
+<ul class="space-y-2 text-sm text-gray-600">
+<li><a class="hover:underline" href="#">Curved text generator</a></li>
+<li><a class="hover:underline" href="#">Photo effects</a></li>
+<li><a class="hover:underline" href="#">Image enhancer</a></li>
+<li><a class="hover:underline" href="#">Add text to photos</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 mb-4">Explore</h4>
+<ul class="space-y-2 text-sm text-gray-600">
+<li><a class="hover:underline" href="#">Design ideas</a></li>
+<li><a class="hover:underline" href="#">Custom prints</a></li>
+<li><a class="hover:underline" href="#">Font pairing</a></li>
+<li><a class="hover:underline" href="#">Colors</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 mb-4">Community</h4>
+<ul class="space-y-2 text-sm text-gray-600">
+<li><a class="hover:underline" href="#">Online communities</a></li>
+<li><a class="hover:underline" href="#">Creators</a></li>
+<li><a class="hover:underline" href="#">Canva Represent</a></li>
+<li><a class="hover:underline" href="#">Developers</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 mb-4">Company</h4>
+<ul class="space-y-2 text-sm text-gray-600">
+<li><a class="hover:underline" href="#">About</a></li>
+<li><a class="hover:underline" href="#">Newsroom</a></li>
+<li><a class="hover:underline" href="#">Careers</a></li>
+<li><a class="hover:underline" href="#">Sustainability</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+<p>© 2023 All Rights Reserved.</p>
+<div class="flex space-x-6 mt-4 md:mt-0">
+<a class="hover:text-dark" href="#">Privacy</a>
+<a class="hover:text-dark" href="#">Terms</a>
+<a class="hover:text-dark" href="#">Accessibility</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

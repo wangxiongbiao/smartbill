@@ -1,0 +1,32 @@
+import React from 'react';
+
+export function Hero() {
+    return (
+        <section className="relative bg-[#E2EAE8] rounded-br-[120px] overflow-hidden" data-purpose="hero">
+            <div className="px-4 sm:px-6 py-3 md:py-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center min-h-[260px]">
+                    {/* Text Content */}
+                    <div className="text-left z-10">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">
+                            Generate Invoices in<br />Seconds with AI
+                        </h1>
+                        <p className="text-base md:text-lg text-slate-600 mb-8 max-w-[480px] leading-relaxed">
+                            Experience seamless invoicing with Invoicefiy. Simply type your details on the left, and watch our AI instantly build your professional invoice on the right in real-time. Share with one click and let clients pay directly on the invoice.
+                        </p>
+                        <button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold text-base transition-colors duration-200">
+                            Create Invoice with AI
+                        </button>
+                    </div>
+                    {/* Hero Image Area */}
+                    <div className="relative h-full hidden md:flex items-center justify-center overflow-visible">
+                        <img
+                            src="/hero-illustration-v2.png"
+                            alt="Invoice Generator Dashboard"
+                            className="w-full max-w-[400px] h-auto object-contain mix-blend-multiply hover:-translate-y-2 transition-transform duration-500 scale-[1.35] lg:scale-[1.5] origin-center"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}

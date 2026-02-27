@@ -1,5 +1,5 @@
 {
-  "name": "wordle-helper-ai",
+  "name": "smartbill",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,12 +10,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.88.0",
     "next": "^16.0.8",
-    "openai": "^6.14.0",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "react-markdown": "^10.1.0"
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
