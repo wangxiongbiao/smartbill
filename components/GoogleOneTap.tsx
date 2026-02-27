@@ -16,6 +16,7 @@ declare global {
                         use_fedcm_for_prompt?: boolean;
                     }) => void;
                     prompt: (notification?: (n: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void;
+                    cancel: () => void;
                 };
             };
         };
@@ -36,12 +37,14 @@ export function GoogleOneTap() {
     const { user, login } = useAuth();
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
+    // Only pre-initialize the GSI library so it's ready for LoginModal's useGoogleLogin().
+    // We intentionally do NOT call prompt() here to avoid FedCM conflicts with LoginModal.
+    // Chrome 131+ forces FedCM and only allows one concurrent request.
     useEffect(() => {
         if (user || !clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') return;
 
-        function initOneTap() {
+        function initGsi() {
             if (!window.google) return;
-
             window.google.accounts.id.initialize({
                 client_id: clientId!,
                 callback: (response) => {
@@ -55,33 +58,25 @@ export function GoogleOneTap() {
                         });
                     }
                 },
-                auto_select: true,
-                cancel_on_tap_outside: false,
+                auto_select: false,
+                cancel_on_tap_outside: true,
                 use_fedcm_for_prompt: false,
             });
-
-            window.google.accounts.id.prompt();
+            // NOTE: prompt() intentionally NOT called here.
+            // Login is triggered explicitly via LoginModal → useGoogleLogin().
         }
 
-        // If GSI script is already loaded
         if (window.google) {
-            initOneTap();
+            initGsi();
             return;
         }
 
-        // Load GSI script
         const script = document.createElement('script');
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
         script.defer = true;
-        script.onload = initOneTap;
+        script.onload = initGsi;
         document.head.appendChild(script);
-
-        return () => {
-            // Cleanup: remove the script on unmount
-            const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-            if (existingScript) existingScript.remove();
-        };
     }, [user, clientId, login]);
 
     return null;
