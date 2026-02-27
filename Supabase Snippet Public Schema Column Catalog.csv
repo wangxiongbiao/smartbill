@@ -1,0 +1,38 @@
+table_name,column_name,data_type,is_nullable,column_default
+image_uploads,id,uuid,NO,uuid_generate_v4()
+image_uploads,user_id,uuid,NO,null
+image_uploads,image_type,character varying,NO,null
+image_uploads,image_data,text,NO,null
+image_uploads,file_name,character varying,YES,null
+image_uploads,file_size,integer,YES,null
+image_uploads,created_at,timestamp with time zone,YES,now()
+image_uploads,updated_at,timestamp with time zone,YES,now()
+invoice_shares,id,uuid,NO,gen_random_uuid()
+invoice_shares,invoice_id,text,NO,null
+invoice_shares,user_id,uuid,NO,null
+invoice_shares,share_token,text,NO,null
+invoice_shares,allow_download,boolean,YES,true
+invoice_shares,expires_at,timestamp with time zone,YES,null
+invoice_shares,created_at,timestamp with time zone,NO,now()
+invoice_shares,last_accessed_at,timestamp with time zone,YES,null
+invoice_shares,access_count,integer,YES,0
+invoice_templates,id,uuid,NO,uuid_generate_v4()
+invoice_templates,user_id,uuid,NO,null
+invoice_templates,name,character varying,NO,null
+invoice_templates,description,text,YES,null
+invoice_templates,template_data,jsonb,NO,null
+invoice_templates,thumbnail,text,YES,null
+invoice_templates,usage_count,integer,YES,0
+invoice_templates,created_at,timestamp with time zone,YES,now()
+invoice_templates,updated_at,timestamp with time zone,YES,now()
+invoices,id,text,NO,null
+invoices,user_id,uuid,NO,null
+invoices,invoice_number,text,NO,null
+invoices,invoice_data,jsonb,NO,null
+invoices,created_at,timestamp with time zone,NO,now()
+invoices,updated_at,timestamp with time zone,NO,now()
+profiles,id,uuid,NO,null
+profiles,full_name,text,YES,null
+profiles,avatar_url,text,YES,null
+profiles,created_at,timestamp with time zone,YES,now()
+profiles,updated_at,timestamp with time zone,YES,now()

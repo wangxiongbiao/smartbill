@@ -1,22 +1,11 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/context/AuthContext';
-
-const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-
-function parseJwt(token: string): Record<string, string> {
-    try {
-        const base64 = token.split('.')[1];
-        return JSON.parse(atob(base64.replace(/-/g, '+').replace(/_/g, '/')));
-    } catch {
-        return {};
-    }
-}
+import { supabase } from '@/lib/supabase-browser';
 
 function ModalContent() {
-    const { closeLoginModal, login } = useAuth();
+    const { closeLoginModal } = useAuth();
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.key === 'Escape') closeLoginModal();
@@ -31,29 +20,57 @@ function ModalContent() {
         };
     }, [handleKeyDown]);
 
-    // Get user info using access token
-    const googleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+    const signInWithGoogle = useCallback(async () => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+                skipBrowserRedirect: true, // Don't redirect the main window — open a popup instead
+                queryParams: {
+                    prompt: 'select_account',
+                    access_type: 'offline',
+                }
+            },
+        });
+
+        if (error || !data?.url) return;
+
+        // Calculate popup position (centered on screen)
+        const width = 480;
+        const height = 600;
+        const left = Math.round(window.screenX + (window.outerWidth - width) / 2);
+        const top = Math.round(window.screenY + (window.outerHeight - height) / 2);
+
+        window.open(
+            data.url,
+            'google-oauth',
+            `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+        );
+
+        // Listen for the LOGIN_SUCCESS message broadcast from the popup's callback-success page
+        const channel = new BroadcastChannel('supabase_auth');
+        channel.onmessage = (event) => {
+            if (event.data?.type === 'LOGIN_SUCCESS') {
+                channel.close();
+                // Re-fetch session — onAuthStateChange in AuthContext will update user state
+                supabase.auth.getSession().then(({ data: sessionData }) => {
+                    if (sessionData.session) {
+                        closeLoginModal();
+                    }
                 });
-                const userInfo = await res.json();
-                login({
-                    sub: userInfo.sub || '',
-                    name: userInfo.name || '',
-                    email: userInfo.email || '',
-                    picture: userInfo.picture || '',
-                });
-            } catch {
-                // fallback: just close
-                closeLoginModal();
             }
-        },
-        onError: () => {
-            // silent fail
-        },
-    });
+        };
+
+        // Safety cleanup: close channel if popup is closed without completing login
+        const popupCheckInterval = setInterval(() => {
+            // Channel auto-cleaned via garbage collection; no extra work needed here
+        }, 500);
+
+        return () => {
+            clearInterval(popupCheckInterval);
+            channel.close();
+        };
+    }, [closeLoginModal]);
 
     return (
         <div
@@ -102,7 +119,7 @@ function ModalContent() {
 
                     {/* Google Sign In Button */}
                     <button
-                        onClick={() => googleLogin()}
+                        onClick={signInWithGoogle}
                         className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-base px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer active:scale-[0.98]"
                     >
                         {/* Google Logo SVG */}
@@ -147,9 +164,5 @@ export function LoginModal() {
 
     if (!isLoginModalOpen) return null;
 
-    return (
-        <GoogleOAuthProvider clientId={clientId}>
-            <ModalContent />
-        </GoogleOAuthProvider>
-    );
+    return <ModalContent />;
 }

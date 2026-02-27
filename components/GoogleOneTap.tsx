@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase-browser';
 
 declare global {
     interface Window {
@@ -23,23 +24,10 @@ declare global {
     }
 }
 
-function parseJwt(token: string): Record<string, string> {
-    try {
-        const base64 = token.split('.')[1];
-        const decoded = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
-        return JSON.parse(decoded);
-    } catch {
-        return {};
-    }
-}
-
 export function GoogleOneTap() {
-    const { user, login } = useAuth();
+    const { user } = useAuth();
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-    // Only pre-initialize the GSI library so it's ready for LoginModal's useGoogleLogin().
-    // We intentionally do NOT call prompt() here to avoid FedCM conflicts with LoginModal.
-    // Chrome 131+ forces FedCM and only allows one concurrent request.
     useEffect(() => {
         if (user || !clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') return;
 
@@ -47,23 +35,20 @@ export function GoogleOneTap() {
             if (!window.google) return;
             window.google.accounts.id.initialize({
                 client_id: clientId!,
-                callback: (response) => {
-                    const payload = parseJwt(response.credential);
-                    if (payload.sub) {
-                        login({
-                            sub: payload.sub,
-                            name: payload.name || '',
-                            email: payload.email || '',
-                            picture: payload.picture || '',
-                        });
-                    }
+                callback: async (response) => {
+                    // Use Supabase signInWithIdToken — no manual JWT parsing needed
+                    await supabase.auth.signInWithIdToken({
+                        provider: 'google',
+                        token: response.credential,
+                    });
+                    // onAuthStateChange in AuthContext will automatically update the user state
                 },
                 auto_select: false,
                 cancel_on_tap_outside: true,
                 use_fedcm_for_prompt: false,
             });
             // NOTE: prompt() intentionally NOT called here.
-            // Login is triggered explicitly via LoginModal → useGoogleLogin().
+            // Login is triggered explicitly via LoginModal.
         }
 
         if (window.google) {
@@ -77,7 +62,7 @@ export function GoogleOneTap() {
         script.defer = true;
         script.onload = initGsi;
         document.head.appendChild(script);
-    }, [user, clientId, login]);
+    }, [user, clientId]);
 
     return null;
 }

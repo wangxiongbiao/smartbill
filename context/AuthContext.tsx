@@ -8,60 +8,73 @@ import React, {
     useCallback,
     ReactNode,
 } from 'react';
-
-export interface GoogleUser {
-    name: string;
-    email: string;
-    picture: string;
-    sub: string;
-}
+import { type User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-browser';
 
 interface AuthContextType {
-    user: GoogleUser | null;
+    user: User | null;
     isLoginModalOpen: boolean;
-    login: (user: GoogleUser) => void;
-    logout: () => void;
+    isLoggingOut: boolean;
+    logout: () => Promise<void>;
     openLoginModal: () => void;
     closeLoginModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'invoicefiy_user';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<GoogleUser | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                setUser(JSON.parse(stored));
+
+        // Load the current session from the Cookie (set by middleware / callback)
+        supabase.auth.getSession().then(({ data }) => {
+            setUser(data.session?.user ?? null);
+        });
+
+        // Listen for auth state changes (login / logout / token refresh)
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                setUser(session?.user ?? null);
+
+                // Sync user profile to the `profiles` table on first login
+                if (event === 'SIGNED_IN' && session?.user) {
+                    const { user } = session;
+                    await supabase.from('profiles').upsert({
+                        id: user.id,
+                        full_name: user.user_metadata?.full_name ?? null,
+                        avatar_url: user.user_metadata?.avatar_url ?? null,
+                        updated_at: new Date().toISOString(),
+                    });
+                }
             }
-        } catch {
-            // ignore
-        }
+        );
+
+        return () => {
+            listener.subscription.unsubscribe();
+        };
     }, []);
 
-    const login = useCallback((googleUser: GoogleUser) => {
-        setUser(googleUser);
+    const logout = useCallback(async () => {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
-        } catch {
-            // ignore
-        }
-        setIsLoginModalOpen(false);
-    }, []);
-
-    const logout = useCallback(() => {
-        setUser(null);
-        try {
-            localStorage.removeItem(STORAGE_KEY);
-        } catch {
-            // ignore
+            setIsLoggingOut(true);
+            await supabase.auth.signOut();
+            // Force local state update even if the listener is slow
+            setUser(null);
+            // hard redirect is the most reliable way to clear all Next.js server/client state
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Error signing out:', error);
+            // Fallback: clear state anyway
+            setUser(null);
+            window.location.href = '/';
+        } finally {
+            // Usually the redirect happens first, but for safety:
+            setIsLoggingOut(false);
         }
     }, []);
 
@@ -72,7 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider
-            value={{ user, isLoginModalOpen, login, logout, openLoginModal, closeLoginModal }}
+            value={{
+                user,
+                isLoginModalOpen,
+                isLoggingOut,
+                logout,
+                openLoginModal,
+                closeLoginModal
+            }}
         >
             {children}
         </AuthContext.Provider>
