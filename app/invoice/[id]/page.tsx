@@ -160,7 +160,7 @@ export default function InvoiceEditorPage() {
             </nav>
 
             <main className="max-w-[1600px] mx-auto p-4 sm:p-8">
-                <div className={`grid gap-8 ${viewMode === 'split' ? 'grid-cols-1 xl:grid-cols-[1fr_minmax(auto,850px)]' : 'grid-cols-1'}`}>
+                <div className={`grid gap-8 ${viewMode === 'split' ? 'grid-cols-1 xl:grid-cols-[1fr_minmax(auto,850px)] xl:items-start' : 'grid-cols-1'}`}>
                     {/* Form Side */}
                     {(viewMode === 'split' || viewMode === 'edit-only') && (
                         <div className={`animate-in fade-in slide-in-from-left-4 duration-500`}>
@@ -180,7 +180,7 @@ export default function InvoiceEditorPage() {
 
                     {/* Preview Side */}
                     {(viewMode === 'split' || viewMode === 'preview-only') && (
-                        <div className="bg-slate-200/30 rounded-[2.5rem] border-4 border-white shadow-inner">
+                        <div className={`bg-slate-200/30 rounded-[2.5rem] border-4 border-white shadow-inner ${viewMode === 'split' ? 'xl:sticky xl:top-[100px] h-fit xl:self-start max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar' : ''}`}>
                             <div className=" origin-top transform-gpu">
                                 <InvoicePreview
                                     invoice={invoice}
