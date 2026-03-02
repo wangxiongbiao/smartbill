@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { PaymentInfoField, PaymentFieldType, Language } from '@/types/invoice';
-import { translations } from '@/lib/i18n';
+import { PaymentInfoField, PaymentFieldType } from '@/types/invoice';
 import {
     DndContext,
     closestCenter,
@@ -27,21 +26,18 @@ interface PaymentFieldConfiguratorProps {
     fields: PaymentInfoField[];
     onChange: (fields: PaymentInfoField[]) => void;
     onClose: () => void;
-    lang: Language;
 }
 
 const SortableFieldItem = ({
     field,
     onToggleVisibility,
     onRename,
-    onDelete,
-    t
+    onDelete
 }: {
     field: PaymentInfoField;
     onToggleVisibility: (id: string) => void;
     onRename: (id: string, newLabel: string) => void;
     onDelete: (id: string) => void;
-    t: any;
 }) => {
     const {
         attributes,
@@ -69,7 +65,7 @@ const SortableFieldItem = ({
             <button
                 onClick={() => onToggleVisibility(field.id)}
                 className={`p-1 rounded ${field.visible ? 'text-blue-600' : 'text-slate-300'}`}
-                title={field.visible ? t.visible : t.hidden}
+                title={field.visible ? '可见' : '已隐藏'}
             >
                 {field.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
@@ -78,21 +74,21 @@ const SortableFieldItem = ({
                 value={field.label}
                 onChange={(e) => onRename(field.id, e.target.value)}
                 className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                placeholder={t.fieldName || 'Field Name'}
+                placeholder="字段名称"
             />
 
             {!field.required && (
                 <button
                     onClick={() => onDelete(field.id)}
                     className="text-slate-300 hover:text-red-500 p-1"
-                    title={t.deleteField || 'Delete Field'}
+                    title="删除字段"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             )}
 
             {field.required && (
-                <span className="text-xs text-slate-300 px-1 select-none" title={t.systemField || 'System Field'}>
+                <span className="text-xs text-slate-300 px-1 select-none" title="系统字段 (不可删除)">
                     <Lock className="w-3 h-3 opacity-70" />
                 </span>
             )}
@@ -100,11 +96,10 @@ const SortableFieldItem = ({
     );
 };
 
-const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fields, onChange, onClose, lang }) => {
+const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fields, onChange, onClose }) => {
     const [newFieldName, setNewFieldName] = useState('');
     const [newFieldType, setNewFieldType] = useState<PaymentFieldType>('textarea');
     const containerRef = useRef<HTMLDivElement>(null);
-    const t = translations[lang] || translations['en'];
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -182,10 +177,10 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
     return (
         <div
             ref={containerRef}
-            className="absolute right-0 top-10 z-[100] w-80 sm:w-[480px] bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right"
+            className="absolute right-0 top-10 z-100 w-80 sm:w-[480px] bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right"
         >
             <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-700">{t.configurePaymentFields || 'Configure Payment Fields'}</h3>
+                <h3 className="font-bold text-slate-700">配置收款字段</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
                     <X className="w-5 h-5" />
                 </button>
@@ -208,7 +203,6 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                                 onToggleVisibility={toggleVisibility}
                                 onRename={renameField}
                                 onDelete={deleteField}
-                                t={t}
                             />
                         ))}
                     </SortableContext>
@@ -220,7 +214,7 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                     <input
                         value={newFieldName}
                         onChange={(e) => setNewFieldName(e.target.value)}
-                        placeholder={t.newFieldName || 'New Field Name'}
+                        placeholder="新字段名称"
                         className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
                         onKeyDown={(e) => e.key === 'Enter' && addField()}
                     />
@@ -229,7 +223,7 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                         disabled={!newFieldName.trim()}
                         className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {t.add}
+                        添加
                     </button>
                 </div>
             </div>

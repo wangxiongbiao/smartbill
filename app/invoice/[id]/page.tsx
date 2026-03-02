@@ -9,6 +9,7 @@ import { saveInvoice, getInvoiceById } from '@/lib/invoices';
 import InvoiceForm from '@/components/invoice/InvoiceForm';
 import InvoicePreview from '@/components/invoice/InvoicePreview';
 import SaveStatusIndicator from '@/components/invoice/SaveStatusIndicator';
+import ImagePickerDialog from '@/components/invoice/ImagePickerDialog'; // Added import
 import {
     ChevronLeft,
     Download,
@@ -31,6 +32,8 @@ export default function InvoiceEditorPage() {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [lastSaved, setLastSaved] = useState<Date | undefined>();
     const [viewMode, setViewMode] = useState<'split' | 'edit-only' | 'preview-only'>('split');
+    const [showLogoPicker, setShowLogoPicker] = useState(false);
+    const [showQRCodePicker, setShowQRCodePicker] = useState(false);
 
     // Load Invoice
     useEffect(() => {
@@ -87,14 +90,13 @@ export default function InvoiceEditorPage() {
     }, []);
 
     const [template, setTemplate] = useState<'minimalist' | 'modern' | 'professional'>('minimalist');
-    const [lang, setLang] = useState<'en' | 'zh-TW'>('en');
 
     if (isLoading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 size={48} className="text-blue-600 animate-spin" />
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Editor...</p>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">正在载入编辑器...</p>
                 </div>
             </div>
         );
@@ -116,19 +118,9 @@ export default function InvoiceEditorPage() {
                     <div className="h-8 w-px bg-slate-100"></div>
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-sm font-black text-slate-900 leading-tight">INVOICE EDITOR</h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Editing: {invoice.invoiceNumber || 'Untitled'}</p>
+                            <h1 className="text-sm font-black text-slate-900 leading-tight">发票编辑器</h1>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">正在编辑: {invoice.invoiceNumber || '未命名'}</p>
                         </div>
-
-                        {/* Lang Selector */}
-                        <select
-                            value={lang}
-                            onChange={(e) => setLang(e.target.value as any)}
-                            className="bg-slate-50 border-none text-[10px] font-black uppercase tracking-widest rounded-lg px-2 py-1 focus:ring-0 cursor-pointer hover:bg-slate-100 transition-colors"
-                        >
-                            <option value="en">English</option>
-                            <option value="zh-TW">繁體中文</option>
-                        </select>
                     </div>
                 </div>
 
@@ -162,7 +154,7 @@ export default function InvoiceEditorPage() {
                         className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
                     >
                         <Download size={14} />
-                        Export PDF
+                        导出 PDF
                     </button>
                 </div>
             </nav>
@@ -175,8 +167,13 @@ export default function InvoiceEditorPage() {
                             <InvoiceForm
                                 invoice={invoice}
                                 onChange={handleUpdate}
-                                lang={lang}
                                 userId={user?.id}
+                                onShowLogoPicker={() => setShowLogoPicker(true)}
+                                onShowQRCodePicker={() => setShowQRCodePicker(true)}
+                                showLogoPicker={showLogoPicker}
+                                setShowLogoPicker={setShowLogoPicker}
+                                showQRCodePicker={showQRCodePicker}
+                                setShowQRCodePicker={setShowQRCodePicker}
                             />
                         </div>
                     )}
@@ -187,14 +184,32 @@ export default function InvoiceEditorPage() {
                             <div className=" origin-top transform-gpu">
                                 <InvoicePreview
                                     invoice={invoice}
-                                    lang={lang}
                                     template={template}
+                                    onChange={handleUpdate}
+                                    onShowLogoPicker={() => setShowLogoPicker(true)}
+                                    onShowQRCodePicker={() => setShowQRCodePicker(true)}
                                 />
                             </div>
                         </div>
                     )}
                 </div>
             </main>
+
+            <ImagePickerDialog
+                isOpen={showLogoPicker}
+                onClose={() => setShowLogoPicker(false)}
+                imageType="logo"
+                onSelect={(img) => handleUpdate({ sender: { ...invoice.sender, logo: img } })}
+                currentUserId={user?.id || ''}
+            />
+
+            <ImagePickerDialog
+                isOpen={showQRCodePicker}
+                onClose={() => setShowQRCodePicker(false)}
+                imageType="qrcode"
+                onSelect={(img) => handleUpdate({ paymentInfo: { ...invoice.paymentInfo, qrCode: img } as any })}
+                currentUserId={user?.id || ''}
+            />
         </div>
     );
 }

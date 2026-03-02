@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { InvoiceColumn, Language } from '@/types/invoice';
-import { translations } from '@/lib/i18n';
+import { InvoiceColumn } from '@/types/invoice';
 import {
     DndContext,
     closestCenter,
@@ -27,21 +26,18 @@ interface ColumnConfiguratorProps {
     columns: InvoiceColumn[];
     onChange: (columns: InvoiceColumn[]) => void;
     onClose: () => void;
-    lang: Language;
 }
 
 const SortableColumnItem = ({
     column,
     onToggleVisibility,
     onRename,
-    onDelete,
-    t
+    onDelete
 }: {
     column: InvoiceColumn;
     onToggleVisibility: (id: string) => void;
     onRename: (id: string, newLabel: string) => void;
     onDelete: (id: string) => void;
-    t: any;
 }) => {
     const {
         attributes,
@@ -69,7 +65,7 @@ const SortableColumnItem = ({
             <button
                 onClick={() => onToggleVisibility(column.id)}
                 className={`p-1 rounded ${column.visible ? 'text-blue-600' : 'text-slate-300'}`}
-                title={column.visible ? t.visible : t.hidden}
+                title={column.visible ? '可见' : '已隐藏'}
             >
                 {column.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
@@ -78,21 +74,21 @@ const SortableColumnItem = ({
                 value={column.label}
                 onChange={(e) => onRename(column.id, e.target.value)}
                 className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                placeholder={t.columnName}
+                placeholder="列名称"
             />
 
             {!column.required && (
                 <button
                     onClick={() => onDelete(column.id)}
                     className="text-slate-300 hover:text-red-500 p-1"
-                    title={t.deleteColumn}
+                    title="删除列"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             )}
 
             {column.required && (
-                <span className="text-xs text-slate-300 px-1 select-none" title={t.systemColumn}>
+                <span className="text-xs text-slate-300 px-1 select-none" title="系统列 (不可删除)">
                     <Lock className="w-3 h-3" />
                 </span>
             )}
@@ -100,10 +96,9 @@ const SortableColumnItem = ({
     );
 };
 
-const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChange, onClose, lang }) => {
+const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChange, onClose }) => {
     const [newColumnName, setNewColumnName] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
-    const t = translations[lang] || translations['en'];
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -181,10 +176,10 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
     return (
         <div
             ref={containerRef}
-            className="absolute right-0 top-10 z-[100] w-80 sm:w-[480px] bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right"
+            className="absolute right-0 top-10 z-100 w-80 sm:w-[480px] bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right"
         >
             <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-700">{t.customizeColumns}</h3>
+                <h3 className="font-bold text-slate-700">自定义列</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
                     <X className="w-5 h-5" />
                 </button>
@@ -207,7 +202,6 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                                 onToggleVisibility={toggleVisibility}
                                 onRename={renameColumn}
                                 onDelete={deleteColumn}
-                                t={t}
                             />
                         ))}
                     </SortableContext>
@@ -218,7 +212,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                 <input
                     value={newColumnName}
                     onChange={(e) => setNewColumnName(e.target.value)}
-                    placeholder={t.newColumnName}
+                    placeholder="新列名称"
                     className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
                     onKeyDown={(e) => e.key === 'Enter' && addColumn()}
                 />
@@ -227,7 +221,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                     disabled={!newColumnName.trim()}
                     className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {t.add}
+                    添加
                 </button>
             </div>
         </div>

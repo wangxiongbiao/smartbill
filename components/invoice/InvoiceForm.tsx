@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Invoice, InvoiceItem, DocumentType, Language, CustomField, InvoiceColumn, PaymentInfoField } from '@/types/invoice';
+import { Invoice, InvoiceItem, DocumentType, CustomField, InvoiceColumn, PaymentInfoField } from '@/types/invoice';
 import CustomFieldsEditor from './CustomFieldsEditor';
-import { translations } from '@/lib/i18n';
 import {
     DndContext,
     closestCenter,
@@ -52,9 +51,14 @@ import { nanoid } from 'nanoid';
 interface InvoiceFormProps {
     invoice: Invoice;
     onChange: (updates: Partial<Invoice>) => void;
-    lang: Language;
     userId?: string;
     showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+    onShowLogoPicker?: () => void;
+    onShowQRCodePicker?: () => void;
+    showLogoPicker?: boolean;
+    setShowLogoPicker?: (show: boolean) => void;
+    showQRCodePicker?: boolean;
+    setShowQRCodePicker?: (show: boolean) => void;
 }
 
 const defaultColumns: InvoiceColumn[] = [
@@ -89,7 +93,18 @@ const SortableItem = ({ id, children }: { id: string; children: (props: { listen
     );
 };
 
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, userId, showToast }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({
+    invoice,
+    onChange,
+    userId,
+    showToast,
+    onShowLogoPicker,
+    onShowQRCodePicker,
+    showLogoPicker,
+    setShowLogoPicker,
+    showQRCodePicker,
+    setShowQRCodePicker
+}) => {
     const dateInputRef = useRef<HTMLInputElement>(null);
     const dueDateInputRef = useRef<HTMLInputElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -99,15 +114,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
     const [focusItemId, setFocusItemId] = useState<string | null>(null);
     const [showColumnConfig, setShowColumnConfig] = useState(false);
     const [showPaymentFieldConfig, setShowPaymentFieldConfig] = useState(false);
-    const [showLogoPickerDialog, setShowLogoPickerDialog] = useState(false);
-    const [showQRCodePickerDialog, setShowQRCodePickerDialog] = useState(false);
-
-    const t = translations[lang] || translations['en'];
 
     // Initialize columns if not present
     useEffect(() => {
         if (!invoice.columnConfig) {
-            onChange({ columnConfig: defaultColumns });
+            onChange({
+                columnConfig: [
+                    { id: 'desc', field: 'description', label: '项目描述', type: 'system-text', order: 0, visible: true, required: true },
+                    { id: 'qty', field: 'quantity', label: '数量', type: 'system-quantity', order: 1, visible: true, required: true },
+                    { id: 'rate', field: 'rate', label: '单价', type: 'system-rate', order: 2, visible: true, required: true },
+                    { id: 'amt', field: 'amount', label: '金额', type: 'system-amount', order: 3, visible: true, required: true },
+                ]
+            });
         }
     }, [invoice.columnConfig, onChange]);
 
@@ -116,11 +134,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
         if (!invoice.paymentInfo?.fields) {
             const oldInfo = invoice.paymentInfo;
             const migratedFields: PaymentInfoField[] = [
-                { id: 'bankName', label: t.bankName || 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
-                { id: 'accountName', label: t.accountName || 'Account Name', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
-                { id: 'accountNumber', label: t.accountNumber || 'Account Number', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
-                { id: 'address', label: lang === 'zh-TW' ? '詳細地址' : 'Bank Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
-                { id: 'extraInfo', label: t.extraInfo || 'Additional Info (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
+                { id: 'bankName', label: '银行名称', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
+                { id: 'accountName', label: '账户名称', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
+                { id: 'accountNumber', label: '银行账号', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
+                { id: 'address', label: '详细地址', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+                { id: 'extraInfo', label: '备注信息 (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
             ];
 
             if (oldInfo?.customFields) {
@@ -144,7 +162,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 }
             });
         }
-    }, [invoice.paymentInfo, onChange, lang, t]);
+    }, [invoice.paymentInfo, onChange]);
 
     const columns = invoice.columnConfig || defaultColumns;
     const sortedColumns = columns.slice().sort((a, b) => a.order - b.order);
@@ -371,7 +389,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     <div className="space-y-3" style={{
                         gridColumn: 'span 2'
                     }}>
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Document Type</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">单据类型</label>
                         <div className="flex bg-slate-100 p-1.5 rounded-2xl h-[52px]">
                             {(['invoice', 'receipt'] as DocumentType[]).map((type) => (
                                 <button
@@ -383,7 +401,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                         }`}
                                 >
                                     <span className="mr-2">{type === 'invoice' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}</span>
-                                    {type === 'invoice' ? t.invoiceMode : t.receiptMode}
+                                    {type === 'invoice' ? '发票模式' : '收据模式'}
                                 </button>
                             ))}
                         </div>
@@ -392,7 +410,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     {/* Invoice No. */}
                     <div className="space-y-3">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
-                            {invoice.type === 'invoice' ? t.invNo : t.recNo}
+                            {invoice.type === 'invoice' ? '发票编号' : '收据编号'}
                         </label>
                         <input
                             type="text"
@@ -414,7 +432,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                 onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
                                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
                             />
-                            {t.invoiceDate}
+                            {invoice.visibility?.date !== false ? '开票日期' : '日期已隐藏'}
                         </label>
                         <button
                             onClick={() => dateInputRef.current?.showPicker()}
@@ -435,7 +453,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                 onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
                                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
                             />
-                            {t.dueDate}
+                            {invoice.visibility?.dueDate !== false ? '截止日期' : '截止日期已隐藏'}
                         </label>
                         <button
                             onClick={() => dueDateInputRef.current?.showPicker()}
@@ -449,7 +467,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
 
                     {/* Currency */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">{t.currency}</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">货币单位</label>
                         <CurrencySelector
                             value={invoice.currency}
                             onChange={(currency) => onChange({ currency })}
@@ -467,11 +485,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                         <div className="flex justify-between items-center mb-1">
                             <div className="flex items-center gap-2 text-slate-800 font-black uppercase tracking-widest text-sm">
                                 <Building2 className="w-5 h-5 text-blue-500" />
-                                {t.billFrom}
+                                发件人
                             </div>
                             {/* Logo Button */}
                             <button
-                                onClick={() => invoice.sender.logo ? onChange({ sender: { ...invoice.sender, logo: undefined } }) : setShowLogoPickerDialog(true)}
+                                onClick={() => invoice.sender.logo ? onChange({ sender: { ...invoice.sender, logo: undefined } }) : onShowLogoPicker?.()}
                                 className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold tracking-wider hover:bg-blue-100 transition-colors uppercase flex items-center gap-2"
                             >
                                 {invoice.sender.logo ? (
@@ -491,7 +509,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                             <div className="mb-2 relative group aspect-video sm:aspect-auto sm:h-24 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
                                 <img src={invoice.sender.logo} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain" />
                                 <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                    <button onClick={() => setShowLogoPickerDialog(true)} className="p-2 bg-white rounded-full text-blue-600 hover:scale-110 transition-transform shadow-lg">
+                                    <button onClick={(e) => { e.stopPropagation(); onShowLogoPicker?.(); }} className="p-2 bg-white rounded-full text-blue-600 hover:scale-110 transition-transform shadow-lg">
                                         <RefreshCw className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -499,7 +517,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                         )}
 
                         <input
-                            placeholder={t.namePlaceholder}
+                            placeholder="公司/个人名称"
                             value={invoice.sender.name}
                             onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
@@ -508,7 +526,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                         <div className="relative">
                             <MapPin className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
                             <textarea
-                                placeholder={t.addrPlaceholder}
+                                placeholder="详细地址"
                                 value={invoice.sender.address}
                                 onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
                                 className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
@@ -539,7 +557,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                             <CustomFieldsEditor
                                 fields={invoice.sender.customFields || []}
                                 onChange={(fields) => onChange({ sender: { ...invoice.sender, customFields: fields } })}
-                                lang={lang}
                             />
                         </div>
                     </div>
@@ -549,12 +566,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                         <div className="flex justify-between items-center mb-1">
                             <div className="flex items-center gap-2 text-slate-800 font-black uppercase tracking-widest text-sm">
                                 <User className="w-5 h-5 text-blue-500" />
-                                {t.billTo}
+                                收件人
                             </div>
                         </div>
 
                         <input
-                            placeholder={t.clientName}
+                            placeholder="接收方名称"
                             value={invoice.client.name}
                             onChange={(e) => onChange({ client: { ...invoice.client, name: e.target.value } })}
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
@@ -563,7 +580,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                         <div className="relative">
                             <MapPin className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
                             <textarea
-                                placeholder={t.clientAddr}
+                                placeholder="接收方地址"
                                 value={invoice.client.address}
                                 onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })}
                                 className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
@@ -594,7 +611,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                             <CustomFieldsEditor
                                 fields={invoice.client.customFields || []}
                                 onChange={(fields) => onChange({ client: { ...invoice.client, customFields: fields } })}
-                                lang={lang}
                             />
                         </div>
                     </div>
@@ -605,7 +621,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     {/* Line Items Section */}
                     <section className="space-y-4">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">{t.items}</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">项目明细</h3>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowColumnConfig(!showColumnConfig)}
@@ -613,10 +629,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                         }`}
                                 >
                                     <Settings className={`w-4 h-4 ${showColumnConfig ? 'animate-spin-slow' : ''}`} />
-                                    {t.customizeColumns}
+                                    自定义列
                                 </button>
                                 {showColumnConfig && (
-                                    <ColumnConfigurator columns={columns} onChange={(newCols) => onChange({ columnConfig: newCols })} onClose={() => setShowColumnConfig(false)} lang={lang} />
+                                    <ColumnConfigurator columns={columns} onChange={(newCols) => onChange({ columnConfig: newCols })} onClose={() => setShowColumnConfig(false)} />
                                 )}
                             </div>
                         </div>
@@ -649,7 +665,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                                                 {/* Description - take more space */}
                                                                 {systemColumns.find(c => c.field === 'description') && (
                                                                     <div className="md:col-span-6">
-                                                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">{t.itemDesc}</label>
+                                                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">项目描述</label>
                                                                         {renderCell(item, systemColumns.find(c => c.field === 'description')!)}
                                                                     </div>
                                                                 )}
@@ -694,7 +710,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                 className="px-20 py-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all group shadow-sm"
                             >
                                 <Plus className="w-4 h-4 transform group-hover:rotate-90 transition-transform" />
-                                <span className="font-bold uppercase tracking-wider text-xs">{t.addItems}</span>
+                                <span className="font-bold uppercase tracking-wider text-xs">添加项目</span>
                             </button>
                         </div>
                     </section>
@@ -703,16 +719,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     <div className="mt-3 border-t border-slate-100">
                         <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 space-y-4">
                             <div className="flex justify-between items-center text-sm">
-                                <span className="font-bold text-slate-400 uppercase tracking-widest">Subtotal</span>
+                                <span className="font-bold text-slate-400 uppercase tracking-widest">小计</span>
                                 <span className="font-black text-slate-600">
-                                    {new Intl.NumberFormat(lang, { style: 'currency', currency: invoice.currency }).format(
+                                    {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
                                         invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0)
                                     )}
                                 </span>
                             </div>
 
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t.taxRate}</span>
+                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">税率</span>
                                 <div className="flex items-center gap-2">
                                     {/* 限制只能输入数字,上下加一减一的控件不展示 */}
                                     <input
@@ -733,9 +749,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                             </div>
 
                             <div className="pt-4 border-t border-slate-200/50 flex justify-between items-baseline">
-                                <span className="text-sm font-black text-blue-600 uppercase tracking-[0.2em]">{t.payable}</span>
+                                <span className="text-sm font-black text-blue-600 uppercase tracking-[0.2em]">应付总额</span>
                                 <span className="text-3xl font-black text-blue-600 tracking-tighter">
-                                    {new Intl.NumberFormat(lang, { style: 'currency', currency: invoice.currency }).format(
+                                    {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
                                         invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
                                     )}
                                 </span>
@@ -750,7 +766,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">{t.paymentInfo}</h3>
+                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">收款信息</h3>
                                 <button
                                     onClick={() => onChange({ visibility: { ...invoice.visibility, paymentInfo: !invoice.visibility?.paymentInfo } })}
                                     className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.paymentInfo ? 'bg-blue-600' : 'bg-slate-300'}`}
@@ -764,7 +780,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                         <Settings className="w-4 h-4" />
                                     </button>
                                     {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
-                                        <PaymentFieldConfigurator fields={invoice.paymentInfo.fields} onChange={(fields) => onChange({ paymentInfo: { ...invoice.paymentInfo, fields } })} onClose={() => setShowPaymentFieldConfig(false)} lang={lang} />
+                                        <PaymentFieldConfigurator fields={invoice.paymentInfo.fields} onChange={(fields) => onChange({ paymentInfo: { ...invoice.paymentInfo, fields } })} onClose={() => setShowPaymentFieldConfig(false)} />
                                     )}
                                 </div>
                             )}
@@ -778,14 +794,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                         <>
                                             <img src={invoice.paymentInfo.qrCode} alt="QR Code" className="w-[85%] h-[85%] object-contain" />
                                             <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/qr:opacity-100 transition-all flex items-center justify-center gap-2">
-                                                <button onClick={() => setShowQRCodePickerDialog(true)} className="p-1.5 bg-white rounded-full text-blue-600"><RefreshCw className="w-4 h-4" /></button>
+                                                <button onClick={() => onShowQRCodePicker?.()} className="p-1.5 bg-white rounded-full text-blue-600"><RefreshCw className="w-4 h-4" /></button>
                                                 <button onClick={() => onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } })} className="p-1.5 bg-white rounded-full text-red-500"><Trash2 className="w-4 h-4" /></button>
                                             </div>
                                         </>
                                     ) : (
-                                        <button onClick={() => setShowQRCodePickerDialog(true)} className="flex flex-col items-center gap-1 text-slate-300 group-hover/qr:text-blue-400">
+                                        <button onClick={() => onShowQRCodePicker?.()} className="flex flex-col items-center gap-1 text-slate-300 group-hover/qr:text-blue-400">
                                             <Upload className="w-5 h-5" />
-                                            <span className="text-[8px] font-black uppercase tracking-widest">{t.uploadQR}</span>
+                                            <span className="text-[8px] font-black uppercase tracking-widest">上传收款码</span>
                                         </button>
                                     )}
                                 </div>
@@ -816,7 +832,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">{t.signature}</h3>
+                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">电子签名</h3>
                                 <button
                                     onClick={() => onChange({ visibility: { ...invoice.visibility, signature: !invoice.visibility?.signature } })}
                                     className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.signature ? 'bg-blue-600' : 'bg-slate-300'}`}
@@ -826,7 +842,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                             </div>
                             {invoice.visibility?.signature && (
                                 <div className="flex gap-4">
-                                    <button onClick={clearSignature} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">{t.signClear}</button>
+                                    <button onClick={clearSignature} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">清除签名</button>
                                 </div>
                             )}
                         </div>
@@ -849,7 +865,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                                 {!invoice.sender.signature && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-300">
                                         <SignatureIcon className="w-8 h-8 mb-2 opacity-20" />
-                                        <span className="text-xs font-bold uppercase tracking-widest">{t.signPlaceholder}</span>
+                                        <span className="text-xs font-bold uppercase tracking-widest">在此区域签名</span>
                                     </div>
                                 )}
                             </div>
@@ -861,7 +877,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-600">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">{t.disclaimerText}</h3>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">免责声明</h3>
                             <button
                                 onClick={() => onChange({ visibility: { ...invoice.visibility, disclaimer: invoice.visibility?.disclaimer === false } })}
                                 className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.disclaimer !== false ? 'bg-blue-600' : 'bg-slate-300'}`}
@@ -881,26 +897,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
                 </div>
             </div>
 
-            <ImagePickerDialog
-                isOpen={showLogoPickerDialog}
-
-                onClose={() => setShowLogoPickerDialog(false)}
-                imageType="logo"
-                onSelect={(img) => onChange({ sender: { ...invoice.sender, logo: img } })}
-                currentUserId={userId || ''}
-                lang={lang}
-                showToast={showToast}
-            />
-
-            <ImagePickerDialog
-                isOpen={showQRCodePickerDialog}
-                onClose={() => setShowQRCodePickerDialog(false)}
-                imageType="qrcode"
-                onSelect={(img) => onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: img } as any })}
-                currentUserId={userId || ''}
-                lang={lang}
-                showToast={showToast}
-            />
         </div >
     );
 };

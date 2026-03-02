@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ImageType, Language } from '@/types/invoice';
-import { translations } from '@/lib/i18n';
+import { ImageType } from '@/types/invoice';
 import { X, Loader2, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 
@@ -12,7 +11,6 @@ interface ImagePickerDialogProps {
     imageType: ImageType;
     onSelect: (imageData: string) => void;
     currentUserId: string;
-    lang: Language;
     showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
@@ -22,7 +20,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     imageType,
     onSelect,
     currentUserId,
-    lang,
     showToast
 }) => {
     const [historyImages, setHistoryImages] = useState<any[]>([]);
@@ -30,7 +27,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     const [isUploading, setIsUploading] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const t = translations[lang] || translations['en'];
 
     // Load history images from localStorage (Mock Mode)
     useEffect(() => {
@@ -87,7 +83,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                 onClose();
             } catch (error) {
                 console.error('Error uploading image:', error);
-                showToast?.('Failed to upload image', 'error');
+                showToast?.('上传失败', 'error');
             } finally {
                 setIsUploading(false);
                 if (fileInputRef.current) {
@@ -98,7 +94,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
         reader.onerror = () => {
             console.error('Error reading file');
-            showToast?.('Failed to read file', 'error');
+            showToast?.('读取文件失败', 'error');
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -128,7 +124,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
             }
         } catch (error) {
             console.error('Error deleting image:', error);
-            showToast?.('Failed to delete image', 'error');
+            showToast?.('删除失败', 'error');
         } finally {
             setDeletingId(null);
         }
@@ -136,7 +132,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
     if (!isOpen) return null;
 
-    const dialogTitle = imageType === 'logo' ? t.imagePickerLogo : t.imagePickerQRCode;
+    const dialogTitle = imageType === 'logo' ? '选择 LOGO' : '选择二维码';
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -172,12 +168,12 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                             {isUploading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    {t.uploadingImage}
+                                    正在上传...
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
                                     <Upload className="w-5 h-5" />
-                                    {t.uploadNewImage}
+                                    上传新图片
                                 </span>
                             )}
                         </label>
@@ -186,18 +182,18 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                     {/* History Section */}
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
-                            {t.selectFromHistory}
+                            从历史记录选择
                         </h3>
 
                         {isLoading ? (
                             <div className="text-center py-12 text-slate-300">
                                 <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 opacity-20" />
-                                <p className="text-sm font-medium">{t.loadingHistory}</p>
+                                <p className="text-sm font-medium">正在加载历史记录...</p>
                             </div>
                         ) : historyImages.length === 0 ? (
                             <div className="text-center py-16 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                                 <ImageIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                <p className="text-sm font-medium text-slate-400">{t.noHistoryImages}</p>
+                                <p className="text-sm font-medium text-slate-400">暂无历史记录</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -216,7 +212,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
                                             <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/5 transition-all flex items-center justify-center">
                                                 <span className="text-white font-bold opacity-0 group-hover:opacity-100 transition-all bg-blue-600 px-4 py-2 rounded-full text-xs shadow-lg transform translate-y-2 group-hover:translate-y-0">
-                                                    {t.clickToSelect}
+                                                    点击选择
                                                 </span>
                                             </div>
                                         </div>
@@ -225,7 +221,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                                             onClick={(e) => handleDeleteImage(img.id, e)}
                                             disabled={deletingId === img.id}
                                             className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-red-500 w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:text-red-600 flex items-center justify-center shadow-lg border border-red-100"
-                                            title={t.deleteImage}
+                                            title="删除图片"
                                         >
                                             {deletingId === img.id ? (
                                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -254,7 +250,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                         onClick={onClose}
                         className="px-6 py-2 text-slate-500 hover:text-slate-800 font-bold transition-colors"
                     >
-                        {lang === 'zh-TW' ? '取消' : 'Cancel'}
+                        取消
                     </button>
                 </div>
             </div>
