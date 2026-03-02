@@ -30,10 +30,10 @@ export function Header() {
                             Invoicefiy
                         </a>
                         <nav className="hidden md:flex space-x-8 text-base font-semibold text-slate-600">
-                            <a className="hover:text-primary transition-colors" href="#features">Features</a>
-                            <a className="hover:text-primary transition-colors" href="#templates">Templates</a>
-                            <a className="hover:text-primary transition-colors" href="#pricing">Pricing</a>
-                            <a className="hover:text-primary transition-colors" href="#faq">FAQ</a>
+                            <a className="hover:text-primary transition-colors" href="#features">功能</a>
+                            <a className="hover:text-primary transition-colors" href="#templates">模板</a>
+                            <a className="hover:text-primary transition-colors" href="#pricing">價格</a>
+                            <a className="hover:text-primary transition-colors" href="#faq">常見問題</a>
                         </nav>
                     </div>
 
@@ -85,14 +85,14 @@ export function Header() {
                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
-                                                    Signing out...
+                                                    正在登出...
                                                 </>
                                             ) : (
                                                 <>
                                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                         <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                                     </svg>
-                                                    Sign out
+                                                    登出
                                                 </>
                                             )}
                                         </button>
@@ -105,7 +105,7 @@ export function Header() {
                                 onClick={openLoginModal}
                                 className="bg-primary hover:bg-primary-hover px-6 py-2.5 rounded-lg font-bold text-base text-white transition-colors cursor-pointer"
                             >
-                                Log in
+                                登入
                             </button>
                         )}
                     </div>

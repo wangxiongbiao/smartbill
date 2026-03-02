@@ -96,7 +96,7 @@ export default function InvoiceEditorPage() {
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 size={48} className="text-blue-600 animate-spin" />
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">正在载入编辑器...</p>
+                    <p className="text-slate-400 font-bold tracking-widest text-xs">正在載入編輯器...</p>
                 </div>
             </div>
         );
@@ -118,8 +118,8 @@ export default function InvoiceEditorPage() {
                     <div className="h-8 w-px bg-slate-100"></div>
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-sm font-black text-slate-900 leading-tight">发票编辑器</h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">正在编辑: {invoice.invoiceNumber || '未命名'}</p>
+                            <h1 className="text-sm font-black text-slate-900 leading-tight">發票編輯器</h1>
+                            <p className="text-[10px] font-bold text-slate-400 tracking-widest leading-none mt-0.5">正在編輯: {invoice.invoiceNumber || '未命名'}</p>
                         </div>
                     </div>
                 </div>
@@ -151,10 +151,10 @@ export default function InvoiceEditorPage() {
 
                     <button
                         onClick={() => window.print()}
-                        className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+                        className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-2xl font-black text-xs tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
                     >
                         <Download size={14} />
-                        导出 PDF
+                        匯出 PDF
                     </button>
                 </div>
             </nav>

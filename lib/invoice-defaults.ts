@@ -27,7 +27,7 @@ export const createDefaultInvoice = (userId?: string): Invoice => {
             name: '',
             email: '',
             address: '',
-            disclaimerText: 'This is a computer generated document and no signature is required.\n此为电脑生成文件，无需签名。'
+            disclaimerText: '此為電腦生成文件，無需簽名。'
         },
         client: {
             name: '',
@@ -36,10 +36,10 @@ export const createDefaultInvoice = (userId?: string): Invoice => {
         },
         paymentInfo: {
             fields: [
-                { id: 'bankName', label: 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: '' },
-                { id: 'accountName', label: 'Account Name', type: 'text', order: 1, visible: true, required: true, value: '' },
-                { id: 'accountNumber', label: 'Account Number', type: 'text', order: 2, visible: true, required: true, value: '' },
-                { id: 'extra', label: 'SWIFT/IBAN', type: 'text', order: 3, visible: true, required: false, value: '' },
+                { id: 'bankName', label: '銀行名稱', type: 'text', order: 0, visible: true, required: true, value: '' },
+                { id: 'accountName', label: '賬戶名稱', type: 'text', order: 1, visible: true, required: true, value: '' },
+                { id: 'accountNumber', label: '銀行賬號', type: 'text', order: 2, visible: true, required: true, value: '' },
+                { id: 'extra', label: '附加信息 (SWIFT/IBAN)', type: 'text', order: 3, visible: true, required: false, value: '' },
             ]
         },
         notes: '',

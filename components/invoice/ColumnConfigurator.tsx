@@ -65,7 +65,7 @@ const SortableColumnItem = ({
             <button
                 onClick={() => onToggleVisibility(column.id)}
                 className={`p-1 rounded ${column.visible ? 'text-blue-600' : 'text-slate-300'}`}
-                title={column.visible ? '可见' : '已隐藏'}
+                title={column.visible ? '可見' : '已隱藏'}
             >
                 {column.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
@@ -74,21 +74,21 @@ const SortableColumnItem = ({
                 value={column.label}
                 onChange={(e) => onRename(column.id, e.target.value)}
                 className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                placeholder="列名称"
+                placeholder="列名稱"
             />
 
             {!column.required && (
                 <button
                     onClick={() => onDelete(column.id)}
                     className="text-slate-300 hover:text-red-500 p-1"
-                    title="删除列"
+                    title="刪除列"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             )}
 
             {column.required && (
-                <span className="text-xs text-slate-300 px-1 select-none" title="系统列 (不可删除)">
+                <span className="text-xs text-slate-300 px-1 select-none" title="系統列 (不可刪除)">
                     <Lock className="w-3 h-3" />
                 </span>
             )}
@@ -179,7 +179,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
             className="absolute right-0 top-10 z-100 w-80 sm:w-[480px] bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in duration-200 origin-top-right"
         >
             <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-700">自定义列</h3>
+                <h3 className="font-bold text-slate-700">自定義列</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
                     <X className="w-5 h-5" />
                 </button>
@@ -212,7 +212,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                 <input
                     value={newColumnName}
                     onChange={(e) => setNewColumnName(e.target.value)}
-                    placeholder="新列名称"
+                    placeholder="新列名稱"
                     className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
                     onKeyDown={(e) => e.key === 'Enter' && addColumn()}
                 />
@@ -221,7 +221,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                     disabled={!newColumnName.trim()}
                     className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    添加
+                    新增
                 </button>
             </div>
         </div>

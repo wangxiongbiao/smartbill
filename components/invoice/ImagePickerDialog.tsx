@@ -83,7 +83,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                 onClose();
             } catch (error) {
                 console.error('Error uploading image:', error);
-                showToast?.('上传失败', 'error');
+                showToast?.('上傳失敗', 'error');
             } finally {
                 setIsUploading(false);
                 if (fileInputRef.current) {
@@ -94,7 +94,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
         reader.onerror = () => {
             console.error('Error reading file');
-            showToast?.('读取文件失败', 'error');
+            showToast?.('讀取文件失敗', 'error');
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -124,7 +124,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
             }
         } catch (error) {
             console.error('Error deleting image:', error);
-            showToast?.('删除失败', 'error');
+            showToast?.('刪除失敗', 'error');
         } finally {
             setDeletingId(null);
         }
@@ -132,7 +132,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
     if (!isOpen) return null;
 
-    const dialogTitle = imageType === 'logo' ? '选择 LOGO' : '选择二维码';
+    const dialogTitle = imageType === 'logo' ? '選擇標誌' : '選擇二維碼';
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -168,12 +168,12 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                             {isUploading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    正在上传...
+                                    正在上傳...
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
                                     <Upload className="w-5 h-5" />
-                                    上传新图片
+                                    上傳新圖片
                                 </span>
                             )}
                         </label>
@@ -181,19 +181,19 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
                     {/* History Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
-                            从历史记录选择
+                        <h3 className="text-xs font-bold text-slate-400 tracking-widest px-1">
+                            從歷史記錄選擇
                         </h3>
 
                         {isLoading ? (
                             <div className="text-center py-12 text-slate-300">
                                 <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 opacity-20" />
-                                <p className="text-sm font-medium">正在加载历史记录...</p>
+                                <p className="text-sm font-medium">正在加載歷史記錄...</p>
                             </div>
                         ) : historyImages.length === 0 ? (
                             <div className="text-center py-16 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                                 <ImageIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                <p className="text-sm font-medium text-slate-400">暂无历史记录</p>
+                                <p className="text-sm font-medium text-slate-400">暫無歷史記錄</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -212,7 +212,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
                                             <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/5 transition-all flex items-center justify-center">
                                                 <span className="text-white font-bold opacity-0 group-hover:opacity-100 transition-all bg-blue-600 px-4 py-2 rounded-full text-xs shadow-lg transform translate-y-2 group-hover:translate-y-0">
-                                                    点击选择
+                                                    點擊選擇
                                                 </span>
                                             </div>
                                         </div>
@@ -221,7 +221,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                                             onClick={(e) => handleDeleteImage(img.id, e)}
                                             disabled={deletingId === img.id}
                                             className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-red-500 w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:text-red-600 flex items-center justify-center shadow-lg border border-red-100"
-                                            title="删除图片"
+                                            title="刪除圖片"
                                         >
                                             {deletingId === img.id ? (
                                                 <Loader2 className="w-4 h-4 animate-spin" />

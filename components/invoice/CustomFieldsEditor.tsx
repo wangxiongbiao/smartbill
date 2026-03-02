@@ -29,13 +29,13 @@ const CustomFieldsEditor: React.FC<CustomFieldsEditorProps> = ({ fields, onChang
     return (
         <div className="space-y-3">
             <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
-                    自定义字段
+                <span className="text-[10px] font-black tracking-[0.2em] text-slate-400 ml-1">
+                    自定義字段
                 </span>
                 <button
                     onClick={addField}
                     className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                    title="添加自定义字段"
+                    title="添加自定義字段"
                 >
                     <Plus className="w-3.5 h-3.5" />
                 </button>
@@ -48,14 +48,14 @@ const CustomFieldsEditor: React.FC<CustomFieldsEditorProps> = ({ fields, onChang
                             <div className="relative">
                                 <Tag className="absolute top-2.5 left-3 w-3 h-3 text-slate-300" />
                                 <input
-                                    placeholder="标题 (如: 纳税识别号)"
+                                    placeholder="標題 (如: 納稅識別號)"
                                     value={field.label}
                                     onChange={(e) => updateField(field.id, { label: e.target.value })}
-                                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-500 tracking-widest focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                 />
                             </div>
                             <input
-                                placeholder="内容"
+                                placeholder="內容"
                                 value={field.value}
                                 onChange={(e) => updateField(field.id, { value: e.target.value })}
                                 className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
@@ -72,7 +72,7 @@ const CustomFieldsEditor: React.FC<CustomFieldsEditorProps> = ({ fields, onChang
 
                 {fields.length === 0 && (
                     <div className="text-[10px] italic text-slate-300 ml-1">
-                        可以添加任何额外的备注信息。
+                        可以添加任何額外的備註信息。
                     </div>
                 )}
             </div>

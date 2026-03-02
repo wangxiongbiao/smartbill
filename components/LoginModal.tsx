@@ -110,8 +110,8 @@ function ModalContent() {
 
                     {/* Headline */}
                     <div className="text-center">
-                        <h2 className="text-xl font-bold text-slate-900 mb-1">Welcome back</h2>
-                        <p className="text-sm text-slate-500">Sign in to create and manage your invoices</p>
+                        <h2 className="text-xl font-bold text-slate-900 mb-1">歡迎回來</h2>
+                        <p className="text-sm text-slate-500">登入以創建和管理您的發票</p>
                     </div>
 
                     {/* Divider */}
@@ -129,15 +129,15 @@ function ModalContent() {
                             <path d="M24 45c5.5 0 10.5-1.9 14.3-5.1l-6.6-5.6C29.8 35.9 27 37 24 37c-5.7 0-10.6-3.1-11.7-7.5l-7 5.4C8.5 41.7 15.7 45 24 45z" fill="#4CAF50" />
                             <path d="M44.5 20H24v8.5h11.8c-1 2.9-2.9 5.2-5.3 6.8l6.6 5.6C41.2 37.4 45 31.2 45 24c0-1.4-.2-2.7-.5-4z" fill="#1976D2" />
                         </svg>
-                        Sign in with Google
+                        使用 Google 登入
                     </button>
 
                     {/* Privacy note */}
                     <p className="text-xs text-slate-400 text-center">
-                        By signing in, you agree to our{' '}
-                        <a href="#" className="underline hover:text-slate-600 transition-colors">Terms</a>{' '}
-                        and{' '}
-                        <a href="#" className="underline hover:text-slate-600 transition-colors">Privacy Policy</a>.
+                        登入即表示您同意我們的{' '}
+                        <a href="#" className="underline hover:text-slate-600 transition-colors">服務條款</a>{' '}
+                        和{' '}
+                        <a href="#" className="underline hover:text-slate-600 transition-colors">隱私政策</a>。
                     </p>
                 </div>
             </div>

@@ -16,17 +16,17 @@ export default function SaveStatusIndicator({ status, lastSaved }: Props) {
             {status === 'saving' && (
                 <div className="flex items-center gap-2 text-blue-600">
                     <Loader2 size={14} className="animate-spin" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Saving...</span>
+                    <span className="text-[10px] font-bold tracking-widest">正在儲存...</span>
                 </div>
             )}
 
             {status === 'saved' && (
                 <div className="flex items-center gap-2 text-emerald-600">
                     <CheckCircle2 size={14} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Saved</span>
+                    <span className="text-[10px] font-bold tracking-widest">已儲存</span>
                     {lastSaved && (
                         <span className="text-[10px] text-slate-300 font-medium">
-                            at {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            於 {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                         </span>
                     )}
                 </div>
@@ -35,13 +35,13 @@ export default function SaveStatusIndicator({ status, lastSaved }: Props) {
             {status === 'error' && (
                 <div className="flex items-center gap-2 text-red-500">
                     <AlertCircle size={14} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Save Failed</span>
+                    <span className="text-[10px] font-bold tracking-widest">儲存失敗</span>
                 </div>
             )}
 
             {status === 'idle' && lastSaved && (
                 <div className="flex items-center gap-2 text-slate-400">
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Last Saved</span>
+                    <span className="text-[10px] font-bold tracking-widest">上次儲存</span>
                     <span className="text-[10px] font-medium">
                         {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>

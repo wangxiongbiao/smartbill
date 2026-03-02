@@ -10,44 +10,44 @@ export interface CurrencyConfig {
 
 export const CURRENCY_REGIONS = [
     {
-        name: '亚洲 Asia',
+        name: '亞洲',
         currencies: [
-            { code: 'CNY', symbol: '¥', label: '中国', flag: '🇨🇳' },
+            { code: 'CNY', symbol: '¥', label: '中國', flag: '🇨🇳' },
             { code: 'JPY', symbol: '¥', label: '日本', flag: '🇯🇵' },
-            { code: 'HKD', symbol: '$', label: '中国香港', flag: '🇭🇰' },
-            { code: 'TWD', symbol: '$', label: '中国台灣', flag: '🇹🇼' }, // Using Taiwan flag emoji
-            { code: 'KRW', symbol: '₩', label: '한국', flag: '🇰🇷' },
+            { code: 'HKD', symbol: '$', label: '中國香港', flag: '🇭🇰' },
+            { code: 'TWD', symbol: '$', label: '中國台灣', flag: '🇹🇼' }, // Using Taiwan flag emoji
+            { code: 'KRW', symbol: '₩', label: '韓國', flag: '🇰🇷' },
         ]
     },
     {
-        name: '东南亚 Southeast Asia',
+        name: '東南亞',
         currencies: [
-            { code: 'SGD', symbol: '$', label: 'Singapore', flag: '🇸🇬' },
-            { code: 'MYR', symbol: 'RM', label: 'Malaysia', flag: '🇲🇾' },
-            { code: 'THB', symbol: '฿', label: 'ประเทศไทย', flag: '🇹🇭' },
-            { code: 'PHP', symbol: '₱', label: 'Pilipinas', flag: '🇵🇭' },
-            { code: 'VND', symbol: '₫', label: 'Việt Nam', flag: '🇻🇳' },
-            { code: 'IDR', symbol: 'Rp', label: 'Indonesia', flag: '🇮🇩' },
+            { code: 'SGD', symbol: '$', label: '新加坡', flag: '🇸🇬' },
+            { code: 'MYR', symbol: 'RM', label: '馬來西亞', flag: '🇲🇾' },
+            { code: 'THB', symbol: '฿', label: '泰國', flag: '🇹🇭' },
+            { code: 'PHP', symbol: '₱', label: '菲律賓', flag: '🇵🇭' },
+            { code: 'VND', symbol: '₫', label: '越南', flag: '🇻🇳' },
+            { code: 'IDR', symbol: 'Rp', label: '印尼', flag: '🇮🇩' },
         ]
     },
     {
-        name: '北美洲 North America',
+        name: '北美洲',
         currencies: [
-            { code: 'USD', symbol: '$', label: 'United States', flag: '🇺🇸' },
+            { code: 'USD', symbol: '$', label: '美國', flag: '🇺🇸' },
         ]
     },
     {
-        name: '欧洲 Europe',
+        name: '歐洲',
         currencies: [
-            { code: 'EUR', symbol: '€', label: 'Europe', flag: '🇪🇺' },
-            { code: 'GBP', symbol: '£', label: 'United Kingdom', flag: '🇬🇧' },
+            { code: 'EUR', symbol: '€', label: '歐盟', flag: '🇪🇺' },
+            { code: 'GBP', symbol: '£', label: '英國', flag: '🇬🇧' },
         ]
     },
     {
-        name: '大洋洲 Oceania',
+        name: '大洋洲',
         currencies: [
-            { code: 'AUD', symbol: '$', label: 'Australia', flag: '🇦🇺' },
-            { code: 'NZD', symbol: '$', label: 'New Zealand', flag: '🇳🇿' },
+            { code: 'AUD', symbol: '$', label: '澳大利亞', flag: '🇦🇺' },
+            { code: 'NZD', symbol: '$', label: '新西蘭', flag: '🇳🇿' },
         ]
     }
 ];

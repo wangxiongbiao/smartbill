@@ -65,7 +65,7 @@ const SortableFieldItem = ({
             <button
                 onClick={() => onToggleVisibility(field.id)}
                 className={`p-1 rounded ${field.visible ? 'text-blue-600' : 'text-slate-300'}`}
-                title={field.visible ? '可见' : '已隐藏'}
+                title={field.visible ? '可見' : '已隱藏'}
             >
                 {field.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
@@ -74,21 +74,21 @@ const SortableFieldItem = ({
                 value={field.label}
                 onChange={(e) => onRename(field.id, e.target.value)}
                 className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700"
-                placeholder="字段名称"
+                placeholder="字段名稱"
             />
 
             {!field.required && (
                 <button
                     onClick={() => onDelete(field.id)}
                     className="text-slate-300 hover:text-red-500 p-1"
-                    title="删除字段"
+                    title="刪除字段"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             )}
 
             {field.required && (
-                <span className="text-xs text-slate-300 px-1 select-none" title="系统字段 (不可删除)">
+                <span className="text-xs text-slate-300 px-1 select-none" title="系統字段 (不可刪除)">
                     <Lock className="w-3 h-3 opacity-70" />
                 </span>
             )}
@@ -214,7 +214,7 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                     <input
                         value={newFieldName}
                         onChange={(e) => setNewFieldName(e.target.value)}
-                        placeholder="新字段名称"
+                        placeholder="新字段名稱"
                         className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
                         onKeyDown={(e) => e.key === 'Enter' && addField()}
                     />
@@ -223,7 +223,7 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                         disabled={!newFieldName.trim()}
                         className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        添加
+                        新增
                     </button>
                 </div>
             </div>

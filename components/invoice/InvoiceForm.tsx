@@ -62,10 +62,10 @@ interface InvoiceFormProps {
 }
 
 const defaultColumns: InvoiceColumn[] = [
-    { id: 'desc', field: 'description', label: 'Description', type: 'system-text', order: 0, visible: true, required: true },
-    { id: 'qty', field: 'quantity', label: 'Quantity', type: 'system-quantity', order: 1, visible: true, required: true },
-    { id: 'rate', field: 'rate', label: 'Rate', type: 'system-rate', order: 2, visible: true, required: true },
-    { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
+    { id: 'desc', field: 'description', label: '項目描述', type: 'system-text', order: 0, visible: true, required: true },
+    { id: 'qty', field: 'quantity', label: '數量', type: 'system-quantity', order: 1, visible: true, required: true },
+    { id: 'rate', field: 'rate', label: '單價', type: 'system-rate', order: 2, visible: true, required: true },
+    { id: 'amt', field: 'amount', label: '金額', type: 'system-amount', order: 3, visible: true, required: true },
 ];
 
 const SortableItem = ({ id, children }: { id: string; children: (props: { listeners: any; attributes: any }) => React.ReactNode }) => {
@@ -115,15 +115,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     const [showColumnConfig, setShowColumnConfig] = useState(false);
     const [showPaymentFieldConfig, setShowPaymentFieldConfig] = useState(false);
 
-    // Initialize columns if not present
+    // Initialize default columns if not present
     useEffect(() => {
         if (!invoice.columnConfig) {
             onChange({
                 columnConfig: [
-                    { id: 'desc', field: 'description', label: '项目描述', type: 'system-text', order: 0, visible: true, required: true },
-                    { id: 'qty', field: 'quantity', label: '数量', type: 'system-quantity', order: 1, visible: true, required: true },
-                    { id: 'rate', field: 'rate', label: '单价', type: 'system-rate', order: 2, visible: true, required: true },
-                    { id: 'amt', field: 'amount', label: '金额', type: 'system-amount', order: 3, visible: true, required: true },
+                    { id: 'desc', field: 'description', label: '項目描述', type: 'system-text', order: 0, visible: true, required: true },
+                    { id: 'qty', field: 'quantity', label: '數量', type: 'system-quantity', order: 1, visible: true, required: true },
+                    { id: 'rate', field: 'rate', label: '單價', type: 'system-rate', order: 2, visible: true, required: true },
+                    { id: 'amt', field: 'amount', label: '金額', type: 'system-amount', order: 3, visible: true, required: true },
                 ]
             });
         }
@@ -131,36 +131,63 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
     // Migrate and initialize payment fields (directly from old logic)
     useEffect(() => {
-        if (!invoice.paymentInfo?.fields) {
-            const oldInfo = invoice.paymentInfo;
-            const migratedFields: PaymentInfoField[] = [
-                { id: 'bankName', label: '银行名称', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
-                { id: 'accountName', label: '账户名称', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
-                { id: 'accountNumber', label: '银行账号', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
-                { id: 'address', label: '详细地址', type: 'textarea', order: 3, visible: true, required: true, value: '' },
-                { id: 'extraInfo', label: '备注信息 (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
-            ];
+        try {
+            // Case 1: Migrate from old structure if fields array is missing
+            if (!invoice.paymentInfo?.fields) {
+                const oldInfo = invoice.paymentInfo as any;
+                const migratedFields: PaymentInfoField[] = [
+                    { id: 'bankName', label: '銀行名稱', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
+                    { id: 'accountName', label: '賬戶名稱', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
+                    { id: 'accountNumber', label: '銀行賬號', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
+                    { id: 'address', label: '詳細地址', type: 'textarea', order: 3, visible: true, required: true, value: '' },
+                    { id: 'extraInfo', label: '備註信息 (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
+                ];
 
-            if (oldInfo?.customFields) {
-                oldInfo.customFields.forEach((cf, idx) => {
-                    migratedFields.push({
-                        id: cf.id,
-                        label: cf.label,
-                        type: 'text',
-                        order: 5 + idx,
-                        visible: true,
-                        required: false,
-                        value: cf.value
+                if (oldInfo?.customFields) {
+                    oldInfo.customFields.forEach((cf: any, idx: number) => {
+                        migratedFields.push({
+                            id: cf.id,
+                            label: cf.label,
+                            type: 'text',
+                            order: 5 + idx,
+                            visible: true,
+                            required: false,
+                            value: cf.value
+                        });
                     });
-                });
-            }
-
-            onChange({
-                paymentInfo: {
-                    fields: migratedFields,
-                    qrCode: oldInfo?.qrCode
                 }
-            });
+
+                onChange({
+                    paymentInfo: {
+                        fields: migratedFields,
+                        qrCode: oldInfo?.qrCode
+                    }
+                });
+            } else {
+                // Case 2: Ensure English labels are converted to Traditional Chinese for existing invoices
+                const labelMap: Record<string, string> = {
+                    'Bank Name': '銀行名稱',
+                    'Account Name': '賬戶名稱',
+                    'Account Number': '銀行賬號',
+                    'SWIFT/IBAN': '附加信息 (SWIFT/IBAN)',
+                    'Additional Info (SWIFT/IBAN)': '附加信息 (SWIFT/IBAN)'
+                };
+
+                let hasChanges = false;
+                const updatedFields = invoice.paymentInfo.fields.map(field => {
+                    if (labelMap[field.label]) {
+                        hasChanges = true;
+                        return { ...field, label: labelMap[field.label] };
+                    }
+                    return field;
+                });
+
+                if (hasChanges) {
+                    onChange({ paymentInfo: { ...invoice.paymentInfo, fields: updatedFields } });
+                }
+            }
+        } catch (error) {
+            console.error('Migration error:', error);
         }
     }, [invoice.paymentInfo, onChange]);
 
@@ -380,16 +407,152 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
     return (
         <div className="space-y-4">
+            {/* Sender & Receiver */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Bill From */}
+                <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
+                    <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-2 text-slate-800 font-black tracking-widest text-sm">
+                            <Building2 className="w-5 h-5 text-blue-500" />
+                            發件人
+                        </div>
+                        {/* Logo Button */}
+                        <button
+                            onClick={() => invoice.sender.logo ? onChange({ sender: { ...invoice.sender, logo: undefined } }) : onShowLogoPicker?.()}
+                            className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold tracking-wider hover:bg-blue-100 transition-colors flex items-center gap-2"
+                        >
+                            {invoice.sender.logo ? (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    移除
+                                </>
+                            ) : (
+                                <>
+                                    標誌
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {invoice.sender.logo && (
+                        <div className="mb-2 relative group aspect-video sm:aspect-auto sm:h-24 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
+                            <img src={invoice.sender.logo} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain" />
+                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                <button onClick={(e) => { e.stopPropagation(); onShowLogoPicker?.(); }} className="p-2 bg-white rounded-full text-blue-600 hover:scale-110 transition-transform shadow-lg">
+                                    <RefreshCw className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <input
+                        placeholder="公司/个人名称"
+                        value={invoice.sender.name}
+                        onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                    />
+
+                    <div className="relative">
+                        <MapPin className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
+                        <textarea
+                            placeholder="詳細地址"
+                            value={invoice.sender.address}
+                            onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Phone className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
+                        <input
+                            placeholder="電話"
+                            value={invoice.sender.phone || ''}
+                            onChange={(e) => onChange({ sender: { ...invoice.sender, phone: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Mail className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
+                        <input
+                            placeholder="電子郵箱"
+                            value={invoice.sender.email || ''}
+                            onChange={(e) => onChange({ sender: { ...invoice.sender, email: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100/50 mt-1">
+                        <CustomFieldsEditor
+                            fields={invoice.sender.customFields || []}
+                            onChange={(fields) => onChange({ sender: { ...invoice.sender, customFields: fields } })}
+                        />
+                    </div>
+                </div>
+
+                {/* Bill To */}
+                <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
+                    <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-2 text-slate-800 font-black tracking-widest text-sm">
+                            <User className="w-5 h-5 text-blue-500" />
+                            收件人
+                        </div>
+                    </div>
+
+                    <input
+                        placeholder="接收方名称"
+                        value={invoice.client.name}
+                        onChange={(e) => onChange({ client: { ...invoice.client, name: e.target.value } })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                    />
+
+                    <div className="relative">
+                        <MapPin className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
+                        <textarea
+                            placeholder="接收方地址"
+                            value={invoice.client.address}
+                            onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Phone className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
+                        <input
+                            placeholder="電話"
+                            value={invoice.client.phone || ''}
+                            onChange={(e) => onChange({ client: { ...invoice.client, phone: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Mail className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
+                        <input
+                            placeholder="電子郵箱"
+                            value={invoice.client.email || ''}
+                            onChange={(e) => onChange({ client: { ...invoice.client, email: e.target.value } })}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100/50 mt-1">
+                        <CustomFieldsEditor
+                            fields={invoice.client.customFields || []}
+                            onChange={(fields) => onChange({ client: { ...invoice.client, customFields: fields } })}
+                        />
+                    </div>
+                </div>
+            </section>
+
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-
                 {/* Row 1: Document Type & Invoice No. */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Document Type Toggle */}
                     <div className="space-y-3" style={{
                         gridColumn: 'span 2'
                     }}>
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">单据类型</label>
+                        <label className="text-xs font-bold text-slate-500 tracking-widest px-1">單據類型</label>
                         <div className="flex bg-slate-100 p-1.5 rounded-2xl h-[52px]">
                             {(['invoice', 'receipt'] as DocumentType[]).map((type) => (
                                 <button
@@ -401,7 +564,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                                         }`}
                                 >
                                     <span className="mr-2">{type === 'invoice' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}</span>
-                                    {type === 'invoice' ? '发票模式' : '收据模式'}
+                                    {type === 'invoice' ? '發票模式' : '收據模式'}
                                 </button>
                             ))}
                         </div>
@@ -409,8 +572,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
                     {/* Invoice No. */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
-                            {invoice.type === 'invoice' ? '发票编号' : '收据编号'}
+                        <label className="text-xs font-bold text-slate-500 tracking-widest px-1">
+                            {invoice.type === 'invoice' ? '發票編號' : '收據編號'}
                         </label>
                         <input
                             type="text"
@@ -425,14 +588,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Date */}
                     <div className="flex flex-col gap-3">
-                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 tracking-widest px-1">
                             <input
                                 type="checkbox"
                                 checked={invoice.visibility?.date !== false}
                                 onChange={() => onChange({ visibility: { ...invoice.visibility, date: !invoice.visibility?.date } })}
                                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
                             />
-                            {invoice.visibility?.date !== false ? '开票日期' : '日期已隐藏'}
+                            {invoice.visibility?.date !== false ? '開票日期' : '日期已隱藏'}
                         </label>
                         <button
                             onClick={() => dateInputRef.current?.showPicker()}
@@ -446,14 +609,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
                     {/* Due Date */}
                     <div className="flex flex-col gap-3">
-                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 tracking-widest px-1">
                             <input
                                 type="checkbox"
                                 checked={invoice.visibility?.dueDate !== false}
                                 onChange={() => onChange({ visibility: { ...invoice.visibility, dueDate: !invoice.visibility?.dueDate } })}
                                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
                             />
-                            {invoice.visibility?.dueDate !== false ? '截止日期' : '截止日期已隐藏'}
+                            {invoice.visibility?.dueDate !== false ? '截止日期' : '截止日期已隱藏'}
                         </label>
                         <button
                             onClick={() => dueDateInputRef.current?.showPicker()}
@@ -467,7 +630,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
                     {/* Currency */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">货币单位</label>
+                        <label className="text-xs font-bold text-slate-500 tracking-widest px-1">貨幣單位</label>
                         <CurrencySelector
                             value={invoice.currency}
                             onChange={(currency) => onChange({ currency })}
@@ -476,428 +639,284 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                 </div>
             </div>
 
-            <div className="space-y-4">
-
-                {/* Sender & Receiver */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Bill From */}
-                    <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
-                        <div className="flex justify-between items-center mb-1">
-                            <div className="flex items-center gap-2 text-slate-800 font-black uppercase tracking-widest text-sm">
-                                <Building2 className="w-5 h-5 text-blue-500" />
-                                发件人
-                            </div>
-                            {/* Logo Button */}
+            {/* Line Items & Totals Card */}
+            <div className="bg-white rounded-[24px]  border border-slate-200 p-6 shadow-sm">
+                {/* Line Items Section */}
+                <section className="space-y-4">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-sm font-black tracking-widest text-slate-400">項目明細</h3>
+                        <div className="relative">
                             <button
-                                onClick={() => invoice.sender.logo ? onChange({ sender: { ...invoice.sender, logo: undefined } }) : onShowLogoPicker?.()}
-                                className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold tracking-wider hover:bg-blue-100 transition-colors uppercase flex items-center gap-2"
+                                onClick={() => setShowColumnConfig(!showColumnConfig)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${showColumnConfig ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400 hover:text-blue-500 hover:bg-blue-50'
+                                    }`}
                             >
-                                {invoice.sender.logo ? (
-                                    <>
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                        Remove
-                                    </>
-                                ) : (
-                                    <>
-                                        LOGO
-                                    </>
-                                )}
+                                <Settings className={`w-4 h-4 ${showColumnConfig ? 'animate-spin-slow' : ''}`} />
+                                自定義列
                             </button>
-                        </div>
-
-                        {invoice.sender.logo && (
-                            <div className="mb-2 relative group aspect-video sm:aspect-auto sm:h-24 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
-                                <img src={invoice.sender.logo} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain" />
-                                <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                    <button onClick={(e) => { e.stopPropagation(); onShowLogoPicker?.(); }} className="p-2 bg-white rounded-full text-blue-600 hover:scale-110 transition-transform shadow-lg">
-                                        <RefreshCw className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        <input
-                            placeholder="公司/个人名称"
-                            value={invoice.sender.name}
-                            onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                        />
-
-                        <div className="relative">
-                            <MapPin className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
-                            <textarea
-                                placeholder="详细地址"
-                                value={invoice.sender.address}
-                                onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
-                            />
-                        </div>
-
-                        <div className="relative">
-                            <Phone className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
-                            <input
-                                placeholder="Phone"
-                                value={invoice.sender.phone || ''}
-                                onChange={(e) => onChange({ sender: { ...invoice.sender, phone: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                            />
-                        </div>
-
-                        <div className="relative">
-                            <Mail className="absolute top-3.5 left-4 w-4 h-4 text-slate-400" />
-                            <input
-                                placeholder="Email"
-                                value={invoice.sender.email || ''}
-                                onChange={(e) => onChange({ sender: { ...invoice.sender, email: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-2 border-t border-slate-100/50 mt-1">
-                            <CustomFieldsEditor
-                                fields={invoice.sender.customFields || []}
-                                onChange={(fields) => onChange({ sender: { ...invoice.sender, customFields: fields } })}
-                            />
+                            {showColumnConfig && (
+                                <ColumnConfigurator columns={columns} onChange={(newCols) => onChange({ columnConfig: newCols })} onClose={() => setShowColumnConfig(false)} />
+                            )}
                         </div>
                     </div>
 
-                    {/* Bill To */}
-                    <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
-                        <div className="flex justify-between items-center mb-1">
-                            <div className="flex items-center gap-2 text-slate-800 font-black uppercase tracking-widest text-sm">
-                                <User className="w-5 h-5 text-blue-500" />
-                                收件人
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={invoice.items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                            <div className="space-y-6">
+                                {invoice.items.map((item) => {
+                                    const systemColumns = sortedColumns.filter(col => col.type.startsWith('system-'));
+                                    const customColumns = sortedColumns.filter(col => col.type.startsWith('custom-'));
+                                    return (
+                                        <SortableItem key={item.id} id={item.id}>
+                                            {({ listeners }) => (
+                                                <div className="bg-white rounded-2xl border border-slate-200 p-6 relative group/item shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300">
+                                                    <div className="absolute top-4 -left-3 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                                        <div {...listeners} className="p-2 cursor-grab active:cursor-grabbing text-slate-300 hover:text-blue-500 bg-white rounded-full shadow-md border border-slate-100">
+                                                            <GripVertical className="w-4 h-4" />
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => removeItem(item.id)}
+                                                        className="absolute -top-2 -right-2 w-8 h-8 bg-white border border-slate-200 text-slate-300 hover:text-red-500 hover:border-red-100 hover:shadow-md flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-100 transition-all z-10"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+
+                                                    <div className="space-y-2">
+                                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                                            {/* Description - take more space */}
+                                                            {systemColumns.find(c => c.field === 'description') && (
+                                                                <div className="md:col-span-6">
+                                                                    <label className="text-[10px] font-black tracking-[0.2em] text-slate-400 mb-2 block">項目描述</label>
+                                                                    {renderCell(item, systemColumns.find(c => c.field === 'description')!)}
+                                                                </div>
+                                                            )}
+
+                                                            <div className="md:col-span-6 grid grid-cols-3 gap-4">
+                                                                {systemColumns.filter(c => c.field !== 'description').map(col => (
+                                                                    <div key={col.id}>
+                                                                        <label className="text-[10px] font-black tracking-[0.2em] text-slate-400 mb-2 block text-center truncate">
+                                                                            {col.label}
+                                                                        </label>
+                                                                        {renderCell(item, col)}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Custom columns */}
+                                                        {customColumns.length > 0 && (
+                                                            <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                                                {customColumns.map(col => (
+                                                                    <div key={col.id}>
+                                                                        <label className="text-[10px] font-black tracking-[0.2em] text-slate-400 mb-2 block">{col.label}</label>
+                                                                        {renderCell(item, col)}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </SortableItem>
+                                    );
+                                })}
                             </div>
-                        </div>
+                        </SortableContext>
 
-                        <input
-                            placeholder="接收方名称"
-                            value={invoice.client.name}
-                            onChange={(e) => onChange({ client: { ...invoice.client, name: e.target.value } })}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                        />
+                    </DndContext>
 
-                        <div className="relative">
-                            <MapPin className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
-                            <textarea
-                                placeholder="接收方地址"
-                                value={invoice.client.address}
-                                onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none min-h-[80px]"
-                            />
-                        </div>
-
-                        <div className="relative">
-                            <Phone className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
-                            <input
-                                placeholder="Phone"
-                                value={invoice.client.phone || ''}
-                                onChange={(e) => onChange({ client: { ...invoice.client, phone: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                            />
-                        </div>
-
-                        <div className="relative">
-                            <Mail className="absolute top-[14px] left-4 w-4 h-4 text-slate-400" />
-                            <input
-                                placeholder="Email"
-                                value={invoice.client.email || ''}
-                                onChange={(e) => onChange({ client: { ...invoice.client, email: e.target.value } })}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-2 border-t border-slate-100/50 mt-1">
-                            <CustomFieldsEditor
-                                fields={invoice.client.customFields || []}
-                                onChange={(fields) => onChange({ client: { ...invoice.client, customFields: fields } })}
-                            />
-                        </div>
+                    <div className="flex justify-center mt-3">
+                        <button
+                            onClick={addItem}
+                            className="px-20 py-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all group shadow-sm"
+                        >
+                            <Plus className="w-4 h-4 transform group-hover:rotate-90 transition-transform" />
+                            <span className="font-bold tracking-wider text-xs">添加項目</span>
+                        </button>
                     </div>
                 </section>
 
-                {/* Line Items & Totals Card */}
-                <div className="bg-white rounded-[24px]  border border-slate-200 p-6 shadow-sm">
-                    {/* Line Items Section */}
-                    <section className="space-y-4">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">项目明细</h3>
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowColumnConfig(!showColumnConfig)}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${showColumnConfig ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400 hover:text-blue-500 hover:bg-blue-50'
-                                        }`}
-                                >
-                                    <Settings className={`w-4 h-4 ${showColumnConfig ? 'animate-spin-slow' : ''}`} />
-                                    自定义列
-                                </button>
-                                {showColumnConfig && (
-                                    <ColumnConfigurator columns={columns} onChange={(newCols) => onChange({ columnConfig: newCols })} onClose={() => setShowColumnConfig(false)} />
+                {/* Subtotal */}
+                <div className="mt-3 border-t border-slate-100">
+                    <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 space-y-4">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="font-bold text-slate-400 tracking-widest">小計</span>
+                            <span className="font-black text-slate-600">
+                                {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
+                                    invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0)
                                 )}
-                            </div>
+                            </span>
                         </div>
 
-                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                            <SortableContext items={invoice.items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                                <div className="space-y-6">
-                                    {invoice.items.map((item) => {
-                                        const systemColumns = sortedColumns.filter(col => col.type.startsWith('system-'));
-                                        const customColumns = sortedColumns.filter(col => col.type.startsWith('custom-'));
-                                        return (
-                                            <SortableItem key={item.id} id={item.id}>
-                                                {({ listeners }) => (
-                                                    <div className="bg-white rounded-2xl border border-slate-200 p-6 relative group/item shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300">
-                                                        <div className="absolute top-4 -left-3 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                                            <div {...listeners} className="p-2 cursor-grab active:cursor-grabbing text-slate-300 hover:text-blue-500 bg-white rounded-full shadow-md border border-slate-100">
-                                                                <GripVertical className="w-4 h-4" />
-                                                            </div>
-                                                        </div>
-
-                                                        <button
-                                                            onClick={() => removeItem(item.id)}
-                                                            className="absolute -top-2 -right-2 w-8 h-8 bg-white border border-slate-200 text-slate-300 hover:text-red-500 hover:border-red-100 hover:shadow-md flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-100 transition-all z-10"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-
-                                                        <div className="space-y-2">
-                                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                                                                {/* Description - take more space */}
-                                                                {systemColumns.find(c => c.field === 'description') && (
-                                                                    <div className="md:col-span-6">
-                                                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">项目描述</label>
-                                                                        {renderCell(item, systemColumns.find(c => c.field === 'description')!)}
-                                                                    </div>
-                                                                )}
-
-                                                                <div className="md:col-span-6 grid grid-cols-3 gap-4">
-                                                                    {systemColumns.filter(c => c.field !== 'description').map(col => (
-                                                                        <div key={col.id}>
-                                                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block text-center truncate">
-                                                                                {col.label}
-                                                                            </label>
-                                                                            {renderCell(item, col)}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Custom columns */}
-                                                            {customColumns.length > 0 && (
-                                                                <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                                                    {customColumns.map(col => (
-                                                                        <div key={col.id}>
-                                                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">{col.label}</label>
-                                                                            {renderCell(item, col)}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </SortableItem>
-                                        );
-                                    })}
-                                </div>
-                            </SortableContext>
-
-                        </DndContext>
-
-                        <div className="flex justify-center mt-3">
-                            <button
-                                onClick={addItem}
-                                className="px-20 py-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all group shadow-sm"
-                            >
-                                <Plus className="w-4 h-4 transform group-hover:rotate-90 transition-transform" />
-                                <span className="font-bold uppercase tracking-wider text-xs">添加项目</span>
-                            </button>
-                        </div>
-                    </section>
-
-                    {/* Subtotal */}
-                    <div className="mt-3 border-t border-slate-100">
-                        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 space-y-4">
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="font-bold text-slate-400 uppercase tracking-widest">小计</span>
-                                <span className="font-black text-slate-600">
-                                    {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
-                                        invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0)
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">税率</span>
-                                <div className="flex items-center gap-2">
-                                    {/* 限制只能输入数字,上下加一减一的控件不展示 */}
-                                    <input
-
-
-                                        className="w-16 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-right font-black text-sm text-blue-600"
-                                        value={invoice.taxRate}
-                                        onChange={(e) => {
-                                            // 只有数字有效
-                                            const value = e.target.value;
-                                            if (/^\d*\.?\d*$/.test(value)) {
-                                                onChange({ taxRate: Number(value) })
-                                            }
-                                        }}
-                                    />
-                                    <span className="text-sm font-black text-slate-400">%</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-200/50 flex justify-between items-baseline">
-                                <span className="text-sm font-black text-blue-600 uppercase tracking-[0.2em]">应付总额</span>
-                                <span className="text-3xl font-black text-blue-600 tracking-tighter">
-                                    {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
-                                        invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
-                                    )}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                {/* Payment Info Card */}
-                <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-400">
-                    <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">收款信息</h3>
-                                <button
-                                    onClick={() => onChange({ visibility: { ...invoice.visibility, paymentInfo: !invoice.visibility?.paymentInfo } })}
-                                    className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.paymentInfo ? 'bg-blue-600' : 'bg-slate-300'}`}
-                                >
-                                    <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.paymentInfo ? 'right-0.5' : 'left-0.5'}`} />
-                                </button>
-                            </div>
-                            {invoice.visibility?.paymentInfo && (
-                                <div className="relative">
-                                    <button onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)} className="text-slate-400 hover:text-blue-600 transition-colors">
-                                        <Settings className="w-4 h-4" />
-                                    </button>
-                                    {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
-                                        <PaymentFieldConfigurator fields={invoice.paymentInfo.fields} onChange={(fields) => onChange({ paymentInfo: { ...invoice.paymentInfo, fields } })} onClose={() => setShowPaymentFieldConfig(false)} />
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {invoice.visibility?.paymentInfo && (
-                            <div className="flex flex-col md:flex-row gap-8 animate-in slide-in-from-top-2 duration-300">
-                                {/* QR Code */}
-                                <div className="relative group/qr aspect-square w-24 h-24 bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all hover:border-blue-400 shrink-0">
-                                    {invoice.paymentInfo?.qrCode ? (
-                                        <>
-                                            <img src={invoice.paymentInfo.qrCode} alt="QR Code" className="w-[85%] h-[85%] object-contain" />
-                                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/qr:opacity-100 transition-all flex items-center justify-center gap-2">
-                                                <button onClick={() => onShowQRCodePicker?.()} className="p-1.5 bg-white rounded-full text-blue-600"><RefreshCw className="w-4 h-4" /></button>
-                                                <button onClick={() => onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } })} className="p-1.5 bg-white rounded-full text-red-500"><Trash2 className="w-4 h-4" /></button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <button onClick={() => onShowQRCodePicker?.()} className="flex flex-col items-center gap-1 text-slate-300 group-hover/qr:text-blue-400">
-                                            <Upload className="w-5 h-5" />
-                                            <span className="text-[8px] font-black uppercase tracking-widest">上传收款码</span>
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="space-y-4 flex-1">
-                                    {invoice.paymentInfo?.fields?.filter(f => f.visible).sort((a, b) => a.order - b.order).map(field => (
-                                        <div key={field.id} className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">{field.label}</label>
-                                            <input
-                                                value={field.value}
-                                                placeholder={field.label}
-                                                onChange={(e) => {
-                                                    const fields = invoice.paymentInfo?.fields?.map(f => f.id === field.id ? { ...f, value: e.target.value } : f) || [];
-                                                    onChange({ paymentInfo: { ...invoice.paymentInfo, fields } });
-                                                }}
-                                                className={`w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Signature Card */}
-                <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">电子签名</h3>
-                                <button
-                                    onClick={() => onChange({ visibility: { ...invoice.visibility, signature: !invoice.visibility?.signature } })}
-                                    className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.signature ? 'bg-blue-600' : 'bg-slate-300'}`}
-                                >
-                                    <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.signature ? 'right-0.5' : 'left-0.5'}`} />
-                                </button>
-                            </div>
-                            {invoice.visibility?.signature && (
-                                <div className="flex gap-4">
-                                    <button onClick={clearSignature} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">清除签名</button>
-                                </div>
-                            )}
-                        </div>
-
-                        {invoice.visibility?.signature && (
-                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl overflow-hidden relative group/sig animate-in slide-in-from-top-2 duration-300">
-                                <canvas
-                                    ref={canvasRef}
-                                    width={800}
-                                    height={320}
-                                    onMouseDown={startDrawing}
-                                    onMouseMove={draw}
-                                    onMouseUp={stopDrawing}
-                                    onMouseLeave={stopDrawing}
-                                    onTouchStart={startDrawing}
-                                    onTouchMove={draw}
-                                    onTouchEnd={stopDrawing}
-                                    className="w-full h-[160px] cursor-crosshair touch-none bg-white/20"
+                            <span className="text-sm font-bold text-slate-400 tracking-widest">稅率</span>
+                            <div className="flex items-center gap-2">
+                                {/* 限制只能输入数字,上下加一减一的控件不展示 */}
+                                <input
+                                    className="w-16 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-right font-black text-sm text-blue-600"
+                                    value={invoice.taxRate}
+                                    onChange={(e) => {
+                                        // 只有数字有效
+                                        const value = e.target.value;
+                                        if (/^\d*\.?\d*$/.test(value)) {
+                                            onChange({ taxRate: Number(value) })
+                                        }
+                                    }}
                                 />
-                                {!invoice.sender.signature && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-300">
-                                        <SignatureIcon className="w-8 h-8 mb-2 opacity-20" />
-                                        <span className="text-xs font-bold uppercase tracking-widest">在此区域签名</span>
-                                    </div>
-                                )}
+                                <span className="text-sm font-black text-slate-400">%</span>
                             </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Disclaimer Card */}
-                <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-600">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">免责声明</h3>
-                            <button
-                                onClick={() => onChange({ visibility: { ...invoice.visibility, disclaimer: invoice.visibility?.disclaimer === false } })}
-                                className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.disclaimer !== false ? 'bg-blue-600' : 'bg-slate-300'}`}
-                            >
-                                <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.disclaimer !== false ? 'right-0.5' : 'left-0.5'}`} />
-                            </button>
                         </div>
-                        {invoice.visibility?.disclaimer !== false && (
-                            <textarea
-                                value={invoice.sender.disclaimerText || ''}
-                                onChange={(e) => onChange({ sender: { ...invoice.sender, disclaimerText: e.target.value } })}
-                                placeholder="e.g., Computer generated document, no signature required."
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl h-24 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-500 italic"
-                            />
-                        )}
+
+                        <div className="pt-4 border-t border-slate-200/50 flex justify-between items-baseline">
+                            <span className="text-sm font-black text-blue-600 tracking-[0.2em]">應付總額</span>
+                            <span className="text-3xl font-black text-blue-600 tracking-tighter">
+                                {new Intl.NumberFormat('zh-CN', { style: 'currency', currency: invoice.currency }).format(
+                                    invoice.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.rate || 0)), 0) * (1 + invoice.taxRate / 100)
+                                )}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-        </div >
+
+            {/* Payment Info Card */}
+            <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <h3 className="text-xs font-black tracking-widest text-slate-400">收款信息</h3>
+                            <button
+                                onClick={() => onChange({ visibility: { ...invoice.visibility, paymentInfo: !invoice.visibility?.paymentInfo } })}
+                                className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.paymentInfo ? 'bg-blue-600' : 'bg-slate-300'}`}
+                            >
+                                <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.paymentInfo ? 'right-0.5' : 'left-0.5'}`} />
+                            </button>
+                        </div>
+                        {invoice.visibility?.paymentInfo && (
+                            <div className="relative">
+                                <button onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)} className="text-slate-400 hover:text-blue-600 transition-colors">
+                                    <Settings className="w-4 h-4" />
+                                </button>
+                                {showPaymentFieldConfig && invoice.paymentInfo?.fields && (
+                                    <PaymentFieldConfigurator fields={invoice.paymentInfo.fields} onChange={(fields) => onChange({ paymentInfo: { ...invoice.paymentInfo, fields } })} onClose={() => setShowPaymentFieldConfig(false)} />
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {invoice.visibility?.paymentInfo && (
+                        <div className="flex flex-col md:flex-row gap-8 animate-in slide-in-from-top-2 duration-300">
+                            {/* QR Code */}
+                            <div className="relative group/qr aspect-square w-24 h-24 bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all hover:border-blue-400 shrink-0">
+                                {invoice.paymentInfo?.qrCode ? (
+                                    <>
+                                        <img src={invoice.paymentInfo.qrCode} alt="QR Code" className="w-[85%] h-[85%] object-contain" />
+                                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/qr:opacity-100 transition-all flex items-center justify-center gap-2">
+                                            <button onClick={() => onShowQRCodePicker?.()} className="p-1.5 bg-white rounded-full text-blue-600"><RefreshCw className="w-4 h-4" /></button>
+                                            <button onClick={() => onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } })} className="p-1.5 bg-white rounded-full text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <button onClick={() => onShowQRCodePicker?.()} className="flex flex-col items-center gap-1 text-slate-300 group-hover/qr:text-blue-400">
+                                        <Upload className="w-5 h-5" />
+                                        <span className="text-[8px] font-black tracking-widest">上傳收款碼</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="space-y-4 flex-1">
+                                {invoice.paymentInfo?.fields?.filter(f => f.visible).sort((a, b) => a.order - b.order).map(field => (
+                                    <div key={field.id} className="space-y-1.5">
+                                        <label className="text-[10px] font-black tracking-[0.2em] text-slate-400 ml-1">{field.label}</label>
+                                        <input
+                                            value={field.value}
+                                            placeholder={field.label}
+                                            onChange={(e) => {
+                                                const fields = invoice.paymentInfo?.fields?.map(f => f.id === field.id ? { ...f, value: e.target.value } : f) || [];
+                                                onChange({ paymentInfo: { ...invoice.paymentInfo, fields } });
+                                            }}
+                                            className={`w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Signature Card */}
+            <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <h3 className="text-xs font-black tracking-widest text-slate-400">電子簽名</h3>
+                            <button
+                                onClick={() => onChange({ visibility: { ...invoice.visibility, signature: !invoice.visibility?.signature } })}
+                                className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.signature ? 'bg-blue-600' : 'bg-slate-300'}`}
+                            >
+                                <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.signature ? 'right-0.5' : 'left-0.5'}`} />
+                            </button>
+                        </div>
+                        {invoice.visibility?.signature && (
+                            <div className="flex gap-4">
+                                <button onClick={clearSignature} className="text-[10px] font-black tracking-widest text-blue-600 hover:text-blue-700 transition-colors">清除簽名</button>
+                            </div>
+                        )}
+                    </div>
+
+                    {invoice.visibility?.signature && (
+                        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl overflow-hidden relative group/sig animate-in slide-in-from-top-2 duration-300">
+                            <canvas
+                                ref={canvasRef}
+                                width={800}
+                                height={320}
+                                onMouseDown={startDrawing}
+                                onMouseMove={draw}
+                                onMouseUp={stopDrawing}
+                                onMouseLeave={stopDrawing}
+                                onTouchStart={startDrawing}
+                                onTouchMove={draw}
+                                onTouchEnd={stopDrawing}
+                                className="w-full h-[160px] cursor-crosshair touch-none bg-white/20"
+                            />
+                            {!invoice.sender.signature && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-300">
+                                    <SignatureIcon className="w-8 h-8 mb-2 opacity-20" />
+                                    <span className="text-xs font-bold tracking-widest">在此区域签名</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Disclaimer Card */}
+            <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm mt-4 animate-in fade-in slide-in-from-bottom-2 duration-600">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <h3 className="text-xs font-black tracking-widest text-slate-400">免责声明</h3>
+                        <button
+                            onClick={() => onChange({ visibility: { ...invoice.visibility, disclaimer: invoice.visibility?.disclaimer === false } })}
+                            className={`flex items-center justify-center w-9 h-5 rounded-full transition-all relative ${invoice.visibility?.disclaimer !== false ? 'bg-blue-600' : 'bg-slate-300'}`}
+                        >
+                            <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${invoice.visibility?.disclaimer !== false ? 'right-0.5' : 'left-0.5'}`} />
+                        </button>
+                    </div>
+                    {invoice.visibility?.disclaimer !== false && (
+                        <textarea
+                            value={invoice.sender.disclaimerText || ''}
+                            onChange={(e) => onChange({ sender: { ...invoice.sender, disclaimerText: e.target.value } })}
+                            placeholder="e.g., Computer generated document, no signature required."
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl h-24 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-500 italic"
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };
 

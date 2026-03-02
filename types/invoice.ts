@@ -89,6 +89,7 @@ export interface PaymentInfo {
 export interface Invoice {
     id: string;
     type: DocumentType;
+    customTitle?: string;
     invoiceNumber: string;
     date: string;
     dueDate: string;
