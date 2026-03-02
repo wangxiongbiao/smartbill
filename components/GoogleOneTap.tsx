@@ -6,21 +6,7 @@ import { supabase } from '@/lib/supabase-browser';
 
 declare global {
     interface Window {
-        google?: {
-            accounts: {
-                id: {
-                    initialize: (config: {
-                        client_id: string;
-                        callback: (response: { credential: string }) => void;
-                        auto_select?: boolean;
-                        cancel_on_tap_outside?: boolean;
-                        use_fedcm_for_prompt?: boolean;
-                    }) => void;
-                    prompt: (notification?: (n: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void;
-                    cancel: () => void;
-                };
-            };
-        };
+        google: any;
     }
 }
 
@@ -35,7 +21,7 @@ export function GoogleOneTap() {
             if (!window.google) return;
             window.google.accounts.id.initialize({
                 client_id: clientId!,
-                callback: async (response) => {
+                callback: async (response: any) => {
                     // Use Supabase signInWithIdToken — no manual JWT parsing needed
                     await supabase.auth.signInWithIdToken({
                         provider: 'google',

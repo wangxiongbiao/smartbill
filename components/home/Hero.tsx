@@ -1,17 +1,18 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export function Hero() {
     const { user, openLoginModal } = useAuth();
+    const router = useRouter();
 
     function handleCTA() {
         if (!user) {
             openLoginModal();
         } else {
-            // Navigate to dashboard when available
-            window.location.href = '/dashboard';
+            router.push('/invoice/new');
         }
     }
 
