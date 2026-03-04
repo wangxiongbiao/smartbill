@@ -132,10 +132,11 @@ export default function DashboardPage() {
               </button>
               <Link
                 href="/invoice/new"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition-colors text-sm font-semibold"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover transition-colors text-sm font-semibold !text-white"
+                style={{ color: 'white' }}
               >
-                <Plus className="w-4 h-4 text-white" />
-                <span className="text-white">新建发票</span>
+                <Plus className="w-4 h-4" style={{ color: 'white' }} />
+                <span style={{ color: 'white' }}>新建发票</span>
               </Link>
             </div>
           </div>
