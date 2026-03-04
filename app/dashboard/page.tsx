@@ -126,7 +126,7 @@ export default function DashboardPage() {
                   className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm w-64"
                 />
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-500 hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors text-sm">
                 <Filter className="w-4 h-4" />
                 筛选
               </button>
@@ -204,13 +204,13 @@ export default function DashboardPage() {
           <div className="p-6 border-t border-gray-100 flex items-center justify-between">
             <p className="text-sm text-gray-500">显示 1-5 条，共 128 条</p>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>
+              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>
                 上一页
               </button>
-              <button className="px-3 py-1.5 rounded-lg bg-primary text-white text-sm">1</button>
-              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">2</button>
-              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">3</button>
-              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">
+              <button className="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium">1</button>
+              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 hover:text-primary transition-colors">2</button>
+              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 hover:text-primary transition-colors">3</button>
+              <button className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 hover:text-primary transition-colors">
                 下一页
               </button>
             </div>
