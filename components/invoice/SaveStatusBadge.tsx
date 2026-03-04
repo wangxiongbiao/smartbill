@@ -7,8 +7,8 @@ interface Props {
 }
 
 export function SaveStatusBadge({ status }: Props) {
-  const config: Record<SaveStatus, { icon: string; text: string; color: string } | null> = {
-    idle: null,
+  const config: Record<SaveStatus, { icon: string; text: string; color: string }> = {
+    idle: { icon: '○', text: '未保存', color: 'text-gray-400' },
     saving: { icon: '⏳', text: '保存中...', color: 'text-blue-500' },
     saved: { icon: '✓', text: '已保存', color: 'text-green-500' },
     offline: { icon: '⚠️', text: '离线 - 将在联网后同步', color: 'text-orange-500' },
@@ -16,10 +16,9 @@ export function SaveStatusBadge({ status }: Props) {
   };
 
   const current = config[status];
-  if (!current) return null;
 
   return (
-    <span className={`text-xs ${current.color} flex items-center gap-1`}>
+    <span className={`text-xs ${current.color} flex items-center gap-1 px-2 py-1 rounded-full bg-gray-50`}>
       {current.icon} {current.text}
     </span>
   );
