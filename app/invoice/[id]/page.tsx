@@ -5,16 +5,15 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Invoice } from '@/types/invoice';
 import { createDefaultInvoice } from '@/lib/invoice-defaults';
-import { saveInvoice, getInvoiceById } from '@/lib/invoices';
+import { loadInvoice } from '@/lib/invoices';
+import { useAutoSave, SaveStatus } from '@/hooks/useAutoSave';
 import InvoiceForm from '@/components/invoice/InvoiceForm';
 import InvoicePreview from '@/components/invoice/InvoicePreview';
-import SaveStatusIndicator from '@/components/invoice/SaveStatusIndicator';
-import ImagePickerDialog from '@/components/invoice/ImagePickerDialog'; // Added import
+import { SaveStatusBadge } from '@/components/invoice/SaveStatusBadge';
+import ImagePickerDialog from '@/components/invoice/ImagePickerDialog';
 import {
     ChevronLeft,
     Download,
-    Share2,
-    Trash2,
     Loader2,
     Monitor,
     Layout,
@@ -29,29 +28,25 @@ export default function InvoiceEditorPage() {
 
     const [invoice, setInvoice] = useState<Invoice | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-    const [lastSaved, setLastSaved] = useState<Date | undefined>();
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
     const [viewMode, setViewMode] = useState<'split' | 'edit-only' | 'preview-only'>('split');
     const [showLogoPicker, setShowLogoPicker] = useState(false);
     const [showQRCodePicker, setShowQRCodePicker] = useState(false);
 
-    // Load Invoice
+    // 加载发票（优先云端，fallback 本地）
     useEffect(() => {
         async function load() {
-            if (id) {
-                try {
-                    // Try loading from localStorage first for "mock" persistence
-                    const savedData = localStorage.getItem(`invoice_${id}`);
-                    if (savedData) {
-                        setInvoice(JSON.parse(savedData));
-                    } else {
-                        setInvoice(createDefaultInvoice(user?.id));
-                    }
-                } catch (error) {
-                    console.error('Error loading local invoice:', error);
-                    setInvoice(createDefaultInvoice(user?.id));
-                }
-            } else {
+            if (!id) {
+                setInvoice(createDefaultInvoice(user?.id));
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const data = await loadInvoice(user?.id || '', id);
+                setInvoice(data || createDefaultInvoice(user?.id));
+            } catch (error) {
+                console.error('加载失败:', error);
                 setInvoice(createDefaultInvoice(user?.id));
             }
             setIsLoading(false);
@@ -59,31 +54,8 @@ export default function InvoiceEditorPage() {
         load();
     }, [id, user?.id]);
 
-    // Mock Auto-save logic (1s debounce for snappier mock feel)
-    useEffect(() => {
-        if (!invoice) return;
-
-        const timer = setTimeout(async () => {
-            setSaveStatus('saving');
-            try {
-                // Save to localStorage instead of Supabase
-                localStorage.setItem(`invoice_${invoice.id}`, JSON.stringify(invoice));
-
-                setSaveStatus('saved');
-                setLastSaved(new Date());
-
-                // Update URL if it was /new (simulated)
-                if (!id && invoice.id) {
-                    window.history.replaceState(null, '', `/invoice/${invoice.id}`);
-                }
-            } catch (error) {
-                console.error('Mock save error:', error);
-                setSaveStatus('error');
-            }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, [invoice, id]);
+    // 自动保存
+    useAutoSave(invoice, user?.id, setSaveStatus);
 
     const handleUpdate = useCallback((updates: Partial<Invoice>) => {
         setInvoice(prev => prev ? { ...prev, ...updates, updatedAt: new Date().toISOString() } : null);
@@ -126,7 +98,7 @@ export default function InvoiceEditorPage() {
 
                 {/* Save Status & Actions */}
                 <div className="flex items-center gap-4">
-                    <SaveStatusIndicator status={saveStatus} lastSaved={lastSaved} />
+                    <SaveStatusBadge status={saveStatus} />
 
                     <div className="hidden sm:flex bg-slate-100 p-1 rounded-xl">
                         <button

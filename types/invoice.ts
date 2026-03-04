@@ -105,6 +105,8 @@ export interface Invoice {
     isHeaderReversed?: boolean;
     visibility?: Record<string, boolean>;
     columnConfig?: InvoiceColumn[];
+    updatedAt?: string;
+    syncStatus?: 'synced' | 'pending' | 'error';
 }
 
 export type TemplateType = 'minimalist' | 'modern' | 'professional';
