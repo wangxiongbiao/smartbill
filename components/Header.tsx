@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
+import { LayoutDashboard } from 'lucide-react';
 
 export function Header() {
     const { user, logout, openLoginModal, isLoggingOut } = useAuth();
@@ -69,6 +71,14 @@ export function Header() {
                                             <p className="text-sm font-semibold text-slate-900 truncate">{user.user_metadata?.full_name ?? 'User'}</p>
                                             <p className="text-xs text-slate-400 truncate">{user.email}</p>
                                         </div>
+                                        <Link
+                                            href="/dashboard"
+                                            onClick={() => setDropdownOpen(false)}
+                                            className="w-full text-left px-4 py-2.5 text-sm text-slate-700 font-medium hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-2"
+                                        >
+                                            <LayoutDashboard className="w-4 h-4" />
+                                            控制台
+                                        </Link>
                                         <button
                                             onClick={async () => {
                                                 // We don't close the dropdown immediately if we want to show loading inside it,
