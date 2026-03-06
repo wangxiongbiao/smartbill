@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Invoice } from '@/types/invoice';
 import { createDefaultInvoice } from '@/lib/invoice-defaults';
-import { loadInvoice } from '@/lib/invoices';
 import { useAutoSave, SaveStatus } from '@/hooks/useAutoSave';
+import { loadInvoice } from '@/lib/invoices';
 import InvoiceForm from '@/components/invoice/InvoiceForm';
 import InvoicePreview from '@/components/invoice/InvoicePreview';
 import { SaveStatusBadge } from '@/components/invoice/SaveStatusBadge';
@@ -14,10 +14,10 @@ import ImagePickerDialog from '@/components/invoice/ImagePickerDialog';
 import {
     ChevronLeft,
     Download,
-    Loader2,
     Monitor,
     Layout,
-    ArrowLeftRight
+    ArrowLeftRight,
+    Loader2
 } from 'lucide-react';
 
 export default function InvoiceEditorPage() {
@@ -26,55 +26,67 @@ export default function InvoiceEditorPage() {
     const params = useParams();
     const id = params?.id as string;
 
-    const [invoice, setInvoice] = useState<Invoice | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    // 直接初始化默认发票
+    const [invoice, setInvoice] = useState<Invoice>(() => createDefaultInvoice(user?.id));
+    const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
     const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
     const [viewMode, setViewMode] = useState<'split' | 'edit-only' | 'preview-only'>('split');
     const [showLogoPicker, setShowLogoPicker] = useState(false);
     const [showQRCodePicker, setShowQRCodePicker] = useState(false);
 
-    // 加载发票（优先云端，fallback 本地）
     useEffect(() => {
-        async function load() {
-            if (!id) {
-                setInvoice(createDefaultInvoice(user?.id));
-                setIsLoading(false);
-                return;
-            }
+        setMounted(true);
+    }, []);
 
+    // Load invoice data
+    useEffect(() => {
+        if (!user || !id) return;
+
+        async function fetchInvoice() {
             try {
-                const data = await loadInvoice(user?.id || '', id);
-                setInvoice(data || createDefaultInvoice(user?.id));
-            } catch (error) {
-                console.error('加载失败:', error);
-                setInvoice(createDefaultInvoice(user?.id));
+                setLoading(true);
+                const data = await loadInvoice(user.id, id);
+                if (data) {
+                    setInvoice(data);
+                }
+            } catch (err) {
+                console.error('Failed to load invoice:', err);
+            } finally {
+                setLoading(false);
             }
-            setIsLoading(false);
         }
-        load();
-    }, [id, user?.id]);
+
+        fetchInvoice();
+    }, [user, id]);
 
     // 自动保存
     useAutoSave(invoice, user?.id, setSaveStatus);
 
     const handleUpdate = useCallback((updates: Partial<Invoice>) => {
-        setInvoice(prev => prev ? { ...prev, ...updates, updatedAt: new Date().toISOString() } : null);
+        setInvoice(prev => ({ ...prev, ...updates, updatedAt: new Date().toISOString() }));
     }, []);
 
     const [template, setTemplate] = useState<'minimalist' | 'modern' | 'professional'>('minimalist');
 
-    if (isLoading) {
+    if (!mounted) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 size={48} className="text-blue-600 animate-spin" />
-                    <p className="text-slate-400 font-bold tracking-widest text-xs">正在載入編輯器...</p>
-                </div>
+            <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
         );
     }
 
-    if (!invoice) return null;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+                    <p className="text-slate-500 font-medium">正在加載發票數據...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
@@ -132,7 +144,7 @@ export default function InvoiceEditorPage() {
             </nav>
 
             <main className="max-w-[1600px] mx-auto p-4 sm:p-8">
-                <div className={`grid gap-8 ${viewMode === 'split' ? 'grid-cols-1 xl:grid-cols-[1fr_minmax(auto,850px)]' : 'grid-cols-1'}`}>
+                <div className={`grid gap-4 ${viewMode === 'split' ? 'grid-cols-1 xl:grid-cols-[1fr_minmax(auto,850px)]' : 'grid-cols-1'}`}>
                     {/* Form Side */}
                     {(viewMode === 'split' || viewMode === 'edit-only') && (
                         <div className={`animate-in fade-in slide-in-from-left-4 duration-500`}>

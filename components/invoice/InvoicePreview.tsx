@@ -41,7 +41,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
     });
 
     return (
-        <div className={`${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden shadow-2xl animate-in fade-in duration-700`}>
+        <div className={`${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden  animate-in fade-in duration-700`}>
             {/* Header */}
             <PreviewHeader
                 invoice={invoice}

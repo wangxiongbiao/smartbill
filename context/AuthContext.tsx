@@ -81,7 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const openLoginModal = useCallback(() => setIsLoginModalOpen(true), []);
     const closeLoginModal = useCallback(() => setIsLoginModalOpen(false), []);
 
-    if (!mounted) return null;
+    // We don't return null here to avoid hydration mismatch.
+    // The components using useAuth will handle the user being null initially.
 
     return (
         <AuthContext.Provider
