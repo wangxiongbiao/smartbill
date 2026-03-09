@@ -23,6 +23,22 @@ export interface CreateShareOptions {
 /**
  * 创建发票分享链接
  */
+export async function getOwnedInvoiceById(supabase: SupabaseClient, userId: string, invoiceId: string) {
+    const { data, error } = await supabase
+        .from('invoices')
+        .select('id, user_id')
+        .eq('id', invoiceId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (error) {
+        console.error('Error fetching owned invoice:', error);
+        throw error;
+    }
+
+    return data;
+}
+
 export async function createInvoiceShare(
     supabase: SupabaseClient,
     userId: string,

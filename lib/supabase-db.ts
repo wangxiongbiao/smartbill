@@ -132,12 +132,18 @@ export async function getLatestInvoice(userId: string): Promise<Invoice | null> 
 /**
  * 删除发票
  */
-export async function deleteInvoice(invoiceId: string): Promise<void> {
+export async function deleteInvoice(invoiceId: string, userId?: string): Promise<void> {
     const supabase = createClient();
-    const { error } = await supabase
+    let query = supabase
         .from('invoices')
         .delete()
         .eq('id', invoiceId);
+
+    if (userId) {
+        query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
 
     if (error) {
         console.error('Error deleting invoice:', error);

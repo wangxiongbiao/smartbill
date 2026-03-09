@@ -112,11 +112,17 @@ export async function updateTemplate(
 /**
  * 删除模板
  */
-export async function deleteTemplate(templateId: string): Promise<void> {
-    const { error } = await supabase
+export async function deleteTemplate(templateId: string, userId?: string): Promise<void> {
+    let query = supabase
         .from('invoice_templates')
         .delete()
         .eq('id', templateId);
+
+    if (userId) {
+        query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
 
     if (error) {
         console.error('Error deleting template:', error);
