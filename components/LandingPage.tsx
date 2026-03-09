@@ -1,18 +1,38 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { translations } from '../i18n';
 import SEOContent from './SEOContent';
 import { Language } from '../types';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { createClient } from '@/lib/supabase/client';
 
 const LandingPage: React.FC = () => {
     const [lang, setLang] = useState<Language>('en');
     const [showLangMenu, setShowLangMenu] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const t = translations[lang];
     const router = useRouter();
-    useGoogleAuth({ onSuccess: () => router.push('/dashboard') });
+    useGoogleAuth({ onSuccess: () => router.push('/dashboard?view=records') });
+
+    useEffect(() => {
+        const supabase = createClient();
+        let mounted = true;
+
+        supabase.auth.getSession().then(({ data }) => {
+            if (mounted) setIsLoggedIn(!!data.session?.user);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (mounted) setIsLoggedIn(!!session?.user);
+        });
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
+    }, []);
 
     const languages: { id: Language; label: string }[] = [
         { id: 'en', label: 'English' },
@@ -31,7 +51,11 @@ const LandingPage: React.FC = () => {
                             <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors"><i className="fas fa-globe"></i><span>{currentLangLabel}</span><i className={`fas fa-chevron-down text-xs transition-transform ${showLangMenu ? 'rotate-180' : ''}`}></i></button>
                             {showLangMenu && <><div className="fixed inset-0 z-0" onClick={() => setShowLangMenu(false)}></div><div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-20">{languages.map((l) => <button key={l.id} onClick={() => { setLang(l.id); setShowLangMenu(false); }} className={`w-full px-4 py-3 text-left text-xs font-bold flex items-center justify-between transition-colors ${lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>{l.label}{lang === l.id && <i className="fas fa-check text-blue-600"></i>}</button>)}</div></>}
                         </div>
-                        <Link href="/dashboard?view=login" target="_blank" rel="noopener noreferrer" className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50"><span>Login</span><i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i></Link>
+                        {isLoggedIn ? (
+                            <Link href="/dashboard?view=records" className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-600/20"><span>控制台</span><i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i></Link>
+                        ) : (
+                            <Link href="/dashboard?view=login" className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50"><span>{t.login || 'Login'}</span><i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i></Link>
+                        )}
                     </div>
                 </div>
             </header>
@@ -40,7 +64,7 @@ const LandingPage: React.FC = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>Professional Invoice Generator</div>
                     <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.05]">{t.heroTitle?.split(' ')[0]} <span className="text-blue-600">{t.heroTitle?.split(' ').slice(1).join(' ')}</span></h1>
                     <p className="text-slate-500 max-w-2xl mx-auto text-xl font-medium px-4 leading-relaxed">{t.heroSub}</p>
-                    <div className="flex justify-center pt-8"><Link href="/dashboard" target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 text-lg group"><span>Go to Dashboard</span><i className="fas fa-external-link-alt group-hover:rotate-45 transition-transform"></i></Link></div>
+                    <div className="flex justify-center pt-8"><Link href="/dashboard?view=records" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 text-lg group"><span>{isLoggedIn ? '进入控制台' : 'Go to Dashboard'}</span><i className="fas fa-external-link-alt group-hover:rotate-45 transition-transform"></i></Link></div>
                 </div>
                 <section className="mt-20"><SEOContent lang={lang} /></section>
             </main>
