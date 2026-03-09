@@ -1,20 +1,21 @@
 'use client';
 import React from 'react';
-import { Language, User, ViewType } from '../types';
+import { Language, ViewType } from '../types';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 
 interface AuthViewProps {
-  onLogin: (user: User) => void;
   lang: Language;
   targetView?: ViewType;
   showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin, lang, targetView, showToast }) => {
+const AuthView: React.FC<AuthViewProps> = ({ lang, targetView, showToast }) => {
   const { isGoogleLoading, handleGoogleLogin } = useGoogleAuth({
     targetView,
     onError: (message) => showToast?.(message, 'error'),
-    onSuccess: () => void onLogin
+    onSuccess: () => {
+      // Session restore is handled centrally in useAuthSession after OAuth/One Tap completes.
+    }
   });
 
   return (

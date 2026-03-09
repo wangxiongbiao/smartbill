@@ -66,7 +66,11 @@ export function useGoogleAuth(options: UseGoogleAuthOptions = {}) {
             });
 
             if (error) throw error;
-            if (data.session) options.onSuccess?.();
+            if (data.session) {
+              options.onSuccess?.();
+              const targetView = options.targetView && options.targetView !== 'login' ? options.targetView : 'records';
+              window.location.replace(`/dashboard?view=${targetView}`);
+            }
           } catch (error: any) {
             options.onError?.(error.message || 'One Tap login failed');
           } finally {

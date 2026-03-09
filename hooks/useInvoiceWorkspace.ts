@@ -149,6 +149,35 @@ export function useInvoiceWorkspace(params: {
     if (user?.id) await persistInvoice(nextInvoice);
   }, [persistInvoice, setActiveView, user?.id]);
 
+  const duplicateInvoice = useCallback(async (sourceInvoice: Invoice) => {
+    const newId = Date.now().toString();
+    const duplicatedInvoice: Invoice = {
+      ...sourceInvoice,
+      id: newId,
+      invoiceNumber: `INV-${newId.slice(-6)}`,
+      date: new Date().toISOString().split('T')[0],
+      dueDate: sourceInvoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'Draft',
+      items: sourceInvoice.items.map((item, index) => ({
+        ...item,
+        id: `${newId}-item-${index + 1}`
+      }))
+    };
+
+    setInvoice(duplicatedInvoice);
+    setActiveView('editor');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (user?.id) {
+      await persistInvoice(duplicatedInvoice);
+      showToast('发票已复制', 'success');
+      return;
+    }
+
+    setRecords(prev => [duplicatedInvoice, ...prev]);
+    showToast('发票已复制到本地', 'success');
+  }, [persistInvoice, setActiveView, setRecords, showToast, user?.id]);
+
   const saveAsTemplate = useCallback(async (name: string, description: string) => {
     if (!user?.id) {
       showToast('Please login to save templates', 'warning');
@@ -176,6 +205,7 @@ export function useInvoiceWorkspace(params: {
     saveCurrentInvoice,
     saveAsTemplate,
     useTemplate,
+    duplicateInvoice,
     removeInvoice,
     refreshRecords,
     setInvoice,
@@ -183,7 +213,7 @@ export function useInvoiceWorkspace(params: {
     setTemplate,
     setIsHeaderReversed,
     setIsExporting
-  }), [createInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, updateInvoice, useTemplate]);
+  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, updateInvoice, useTemplate]);
 
   return {
     invoice,

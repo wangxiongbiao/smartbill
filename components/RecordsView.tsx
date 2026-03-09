@@ -8,6 +8,7 @@ import DeleteConfirmDialog from './DeleteConfirmDialog';
 interface RecordsViewProps {
   records: Invoice[];
   onEdit: (record: Invoice) => void;
+  onDuplicate: (record: Invoice) => void;
   onDelete: (id: string) => void;
   onExport: (record: Invoice) => void;
   lang: Language;
@@ -15,7 +16,7 @@ interface RecordsViewProps {
   isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
@@ -154,10 +155,13 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                 <button onClick={() => setEmailInvoice(record)} className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-colors">
                   <i className="fas fa-envelope text-xs"></i>
                 </button>
-                <button onClick={() => onEdit(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-600 hover:text-white flex items-center justify-center transition-colors">
+                <button onClick={() => onEdit(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-600 hover:text-white flex items-center justify-center transition-colors" title="Edit">
                   <i className="fas fa-pen text-xs"></i>
                 </button>
-                <button onClick={() => onExport(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors">
+                <button onClick={() => onDuplicate(record)} className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors" title="Duplicate">
+                  <i className="fas fa-copy text-xs"></i>
+                </button>
+                <button onClick={() => onExport(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors" title="Export">
                   <i className="fas fa-download text-xs"></i>
                 </button>
                 <button

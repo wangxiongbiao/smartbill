@@ -143,7 +143,7 @@ export default function MainApp() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-full max-w-md p-4">
           <div className="mb-8 text-center flex flex-col items-center"><div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 mb-4"><i className="fas fa-file-invoice text-xl"></i></div><h1 className="text-2xl font-black text-slate-900 tracking-tight">Welcome Back</h1><p className="text-slate-500 font-medium mt-2">Sign in to access your dashboard</p></div>
-          <AuthView onLogin={(user) => auth.setUser(user)} lang={lang} targetView="records" showToast={showToast} />
+          <AuthView lang={lang} targetView="records" showToast={showToast} />
           <div className="mt-8 text-center"><Link href="/" className="text-slate-400 hover:text-slate-600 text-sm font-bold transition-colors inline-flex items-center"><i className="fas fa-arrow-left mr-2"></i>Back to Home</Link></div>
         </div>
       </div>
@@ -155,13 +155,13 @@ export default function MainApp() {
       case 'home':
         return <HomeView onSelectTemplate={workspace.actions.createInvoice} onCreateEmpty={() => workspace.actions.createInvoice()} lang={lang} />;
       case 'records':
-        if (!auth.user) return <AuthView onLogin={(user) => auth.setUser(user)} lang={lang} targetView="records" showToast={showToast} />;
-        return <RecordsView records={auth.records} lang={lang} isDeletingId={workspace.isDeletingId} onEdit={(record) => { workspace.actions.setInvoice(record); if (record.template) workspace.actions.setTemplate(record.template); workspace.actions.setIsHeaderReversed(record.isHeaderReversed ?? true); setView('editor'); }} onDelete={workspace.actions.removeInvoice} onExport={(record) => { workspace.actions.setInvoice(record); setTimeout(handleExportPdf, 200); }} onNewDoc={() => workspace.actions.createInvoice()} />;
+        if (!auth.user) return <AuthView lang={lang} targetView="records" showToast={showToast} />;
+        return <RecordsView records={auth.records} lang={lang} isDeletingId={workspace.isDeletingId} onEdit={(record) => { workspace.actions.setInvoice(record); if (record.template) workspace.actions.setTemplate(record.template); workspace.actions.setIsHeaderReversed(record.isHeaderReversed ?? true); setView('editor'); }} onDuplicate={workspace.actions.duplicateInvoice} onDelete={workspace.actions.removeInvoice} onExport={(record) => { workspace.actions.setInvoice(record); setTimeout(handleExportPdf, 200); }} onNewDoc={() => workspace.actions.createInvoice()} />;
       case 'profile':
-        if (!auth.user) return <AuthView onLogin={(user) => auth.setUser(user)} lang={lang} targetView="profile" showToast={showToast} />;
+        if (!auth.user) return <AuthView lang={lang} targetView="profile" showToast={showToast} />;
         return <ProfileView recordsCount={auth.records.length} user={auth.user} onLogout={auth.logout} onUpdateUser={auth.setUser} lang={lang} showToast={showToast} />;
       case 'templates':
-        if (!auth.user) return <AuthView onLogin={(user) => auth.setUser(user)} lang={lang} targetView="templates" showToast={showToast} />;
+        if (!auth.user) return <AuthView lang={lang} targetView="templates" showToast={showToast} />;
         return <TemplatesView lang={lang} userId={auth.user.id} onUseTemplate={workspace.actions.useTemplate} onViewDetail={(template) => { setActiveTemplateId(template.id); setView('template-detail'); }} onNewDoc={() => workspace.actions.createInvoice()} />;
       case 'template-detail':
         if (!activeTemplateId) return null;

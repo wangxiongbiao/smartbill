@@ -1,34 +1,61 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { batchSaveInvoiceRecords, getProfile, listInvoices } from '@/lib/api/invoice';
 import type { Invoice, User, ViewType } from '@/types';
+
+const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail'];
+const ALLOWED_VIEWS: ViewType[] = ['home', 'records', 'profile', 'editor', 'about', 'help', 'login', 'templates', 'template-detail'];
+
+function getRequestedView(): ViewType {
+  if (typeof window === 'undefined') return 'home';
+  const params = new URLSearchParams(window.location.search);
+  const targetView = params.get('view') as ViewType | null;
+  return targetView && ALLOWED_VIEWS.includes(targetView) ? targetView : 'home';
+}
 
 export function useAuthSession() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [records, setRecords] = useState<Invoice[]>([]);
-  const [activeView, setActiveView] = useState<ViewType>(() => {
-    if (typeof window === 'undefined') return 'records';
-    return localStorage.getItem('sb_user_session') ? 'records' : 'login';
-  });
+  const [activeView, setActiveView] = useState<ViewType>(getRequestedView);
   const syncRef = useRef<string | null>(null);
+  const userRef = useRef<User | null>(null);
+  const requestedView = useMemo(() => getRequestedView(), []);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   useEffect(() => {
     let mounted = true;
     const supabase = createClient();
-    const savedRecords = localStorage.getItem('invoice_records_v2');
-    if (savedRecords) {
+
+    const hydrateLocalRecords = () => {
+      const savedRecords = localStorage.getItem('invoice_records_v2');
+      if (!savedRecords) return;
       try {
         setRecords(JSON.parse(savedRecords));
-      } catch {}
-    }
+      } catch {
+        console.warn('[useAuthSession] Failed to parse local invoice records');
+      }
+    };
+
+    const applyViewForAuth = (hasUser: boolean) => {
+      if (!hasUser && PRIVATE_VIEWS.includes(requestedView)) {
+        setActiveView('login');
+        return;
+      }
+      setActiveView(requestedView === 'login' && hasUser ? 'records' : requestedView);
+    };
 
     const syncUser = async (authUser: any) => {
-      if (!mounted || syncRef.current === authUser.id) {
+      if (!mounted) return;
+      if (syncRef.current === authUser.id && userRef.current?.id === authUser.id) {
         setIsInitialized(true);
+        applyViewForAuth(true);
         return;
       }
 
@@ -52,25 +79,21 @@ export function useAuthSession() {
         };
 
         setUser(nextUser);
-        setIsInitialized(true);
-
-        const params = new URLSearchParams(window.location.search);
-        const targetView = params.get('view') as ViewType | null;
-        if (targetView && ['records', 'profile', 'editor', 'about', 'help', 'login', 'templates'].includes(targetView)) {
-          setActiveView(targetView);
-          window.history.replaceState({}, '', window.location.pathname);
-        } else {
-          setActiveView('records');
-        }
+        applyViewForAuth(true);
 
         if (invoices.length > 0) {
           setRecords(invoices);
         } else {
           const localRecords = JSON.parse(localStorage.getItem('invoice_records_v2') || '[]');
           if (localRecords.length > 0) {
-            await batchSaveInvoiceRecords(localRecords);
-            const refreshed = await listInvoices(authUser.id);
-            if (mounted) setRecords(refreshed.invoices);
+            try {
+              await batchSaveInvoiceRecords(localRecords);
+              const refreshed = await listInvoices(authUser.id);
+              if (mounted) setRecords(refreshed.invoices);
+            } catch (error) {
+              console.error('[useAuthSession] Batch sync failed:', error);
+              if (mounted) setRecords(localRecords);
+            }
           }
         }
       } catch (error) {
@@ -80,7 +103,38 @@ export function useAuthSession() {
       }
     };
 
-    const timeout = setTimeout(() => mounted && setIsInitialized(true), 5000);
+    hydrateLocalRecords();
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        if (session?.user) {
+          await syncUser(session.user);
+          return;
+        }
+
+        setUser(null);
+        applyViewForAuth(false);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('[useAuthSession] Initial session restore failed:', error);
+        if (mounted) {
+          setUser(null);
+          applyViewForAuth(false);
+          setIsInitialized(true);
+        }
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      if (!mounted) return;
+      applyViewForAuth(!!userRef.current);
+      setIsInitialized(true);
+    }, 5000);
+
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
@@ -98,6 +152,7 @@ export function useAuthSession() {
         localStorage.removeItem('sb_user_session');
       }
 
+      applyViewForAuth(false);
       setIsInitialized(true);
     });
 
@@ -106,7 +161,7 @@ export function useAuthSession() {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [requestedView]);
 
   useEffect(() => {
     if (!isInitialized) return;
