@@ -1,0 +1,13 @@
+
+🦞 OpenClaw 2026.3.7 (42a1394)
+   I'm not AI-powered, I'm AI-possessed. Big difference.
+
+17:49:36 [canvas] host mounted at http://127.0.0.1:18789/__openclaw__/canvas/ (root /Users/admin/.openclaw/canvas)
+17:49:36 [heartbeat] started
+17:49:36 [health-monitor] started (interval: 300s, startup-grace: 60s, channel-connect-grace: 120s)
+17:49:36 [gateway] agent model: [97mopenai-codex/gpt-5.4[39m
+17:49:36 [gateway] listening on ws://127.0.0.1:18789, ws://[::1]:18789 (PID 10251)
+17:49:36 [gateway] log file: /tmp/openclaw/openclaw-2026-03-09.log
+17:49:36 [browser/server] Browser control listening on http://127.0.0.1:18791/ (auth=token)
+17:49:37 [gateway] signal SIGTERM received
+17:49:37 [gateway] received SIGTERM; shutting down
