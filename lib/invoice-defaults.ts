@@ -1,13 +1,18 @@
-import { Invoice } from "@/types/invoice";
+import { Invoice, TemplateType } from "@/types/invoice";
 import { nanoid } from "nanoid";
 
-export const createDefaultInvoice = (userId?: string): Invoice => {
+interface CreateDefaultInvoiceOptions {
+    id?: string;
+    template?: TemplateType;
+}
+
+export const createDefaultInvoice = (_userId?: string, options: CreateDefaultInvoiceOptions = {}): Invoice => {
     const now = new Date();
     const dueDate = new Date();
     dueDate.setDate(now.getDate() + 30);
 
-    return {
-        id: nanoid(),
+    const invoice: Invoice = {
+        id: options.id ?? nanoid(),
         type: 'invoice',
         invoiceNumber: `INV-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${Math.floor(Math.random() * 100).toString().padStart(2, '0')}`,
         date: now.toISOString().split('T')[0],
@@ -53,4 +58,10 @@ export const createDefaultInvoice = (userId?: string): Invoice => {
             disclaimer: true
         }
     };
+
+    if (options.template) {
+        invoice.template = options.template;
+    }
+
+    return invoice;
 };

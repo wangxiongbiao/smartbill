@@ -9,7 +9,8 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'offline' | 'syncing';
 export function useAutoSave(
   invoice: Invoice | null,
   userId: string | undefined,
-  onStatusChange: (status: SaveStatus) => void
+  onStatusChange: (status: SaveStatus) => void,
+  enabled = true
 ) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -23,7 +24,7 @@ export function useAutoSave(
   }, [userId, onStatusChange]);
 
   useEffect(() => {
-    if (!invoice || !userId) return;
+    if (!enabled || !invoice || !userId) return;
 
     // 清除之前的定时器
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -36,11 +37,11 @@ export function useAutoSave(
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [invoice, userId, save]);
+  }, [enabled, invoice, userId, save]);
 
   // 网络恢复时自动同步
   useEffect(() => {
-    if (!userId) return;
+    if (!enabled || !userId) return;
 
     const handleOnline = () => {
       onStatusChange('syncing');
@@ -49,5 +50,5 @@ export function useAutoSave(
 
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [userId, onStatusChange]);
+  }, [enabled, userId, onStatusChange]);
 }

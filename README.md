@@ -1,65 +1,47 @@
-# Wordle Helper AI
+# SmartBill
 
-An intelligent Wordle helper powered by AI that provides smart word suggestions and real-time candidate filtering.
+SmartBill is a web-based invoice generator built with `Next.js`, `React`, and `Supabase`. It provides a landing page, Google sign-in, an invoice editor with live preview, dashboard management, and reusable invoice templates.
 
-## ✨ Features
+## Features
 
-- 🤖 **AI-Powered Starting Words**: Daily curated word recommendations from DeepSeek AI
-- 🔍 **Real-time Filtering**: Instant candidate word filtering based on color feedback
-- 🎯 **Smart Suggestions**: Get the top 10 best words for your next guess
-- 🏆 **Game Modes**: Support for both Classic and Hard modes
-- 📊 **Live Stats**: See remaining candidates and letter distribution
+- Live invoice editing with side-by-side preview
+- Automatic draft saving with local fallback when sync fails
+- Invoice dashboard with search, status display, and delete flow
+- Template center with built-in templates and custom template management
+- Google OAuth via Supabase session cookies
+- Browser-based export flow for printing or saving as PDF
 
-## 🗂️ Wordlist Management
+## Project Structure
 
-### Automatic Updates
+- `app/`: App Router pages, auth callbacks, dashboard, invoice routes, and API handlers
+- `components/`: marketing page, dashboard, editor, preview, and auth UI
+- `context/`: shared auth state
+- `hooks/`: client-side autosave logic
+- `lib/`: Supabase clients, invoice/template persistence, shared helpers
+- `types/`: invoice and profile type definitions
 
-This project uses an automated wordlist update system to stay synchronized with the official Wordle word list.
+## Getting Started
 
-- **Source**: [stuartpb/wordles](https://github.com/stuartpb/wordles) (The New York Times official word list)
-- **Update Frequency**: Automatically checks for updates on the 1st of every month
-- **Process**: GitHub Actions creates a Pull Request when updates are detected
+1. Install dependencies with `pnpm install`
+2. Configure Supabase environment variables in `.env.local`
+3. Start the dev server with `pnpm dev`
+4. Run the type check with `pnpm lint`
 
-### Manual Update
+## Environment Variables
 
-You can manually trigger an update:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
-```bash
-# Run the update script
-node scripts/update-wordlist.js
+## Tech Stack
 
-# Or trigger the GitHub Action manually
-# Go to: Actions → Update Wordle Wordlist → Run workflow
-```
+- `Next.js 16`
+- `React 19`
+- `TypeScript`
+- `Tailwind CSS 4`
+- `Supabase`
 
-### Wordlist Details
+## Notes
 
-| File                     | Count  | Description                     |
-| ------------------------ | ------ | ------------------------------- |
-| `data/answers.json`      | 2,309  | Possible answer words           |
-| `data/validGuesses.json` | 10,638 | Valid guess words (non-answers) |
-
-**Note**: The New York Times periodically updates the word list to remove obscure, insensitive, or offensive words.
-
-## 🚀 Getting Started
-
-1. Clone the repository
-2. Install dependencies: `pnpm install`
-3. Set up environment variables (see `.env.example`)
-4. Run development server: `pnpm dev`
-
-## 📝 SEO
-
-- **Title**: Wordle Helper | Smart Solver, Hints & Best Starting Words
-- **Description**: Enter your color feedback to instantly filter remaining answers, get opening word suggestions, letter stats, and next-move hints—works for classic and hard mode.
-
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 16 + React 19
-- **AI**: DeepSeek API
-- **Database**: Supabase
-- **Language**: TypeScript
-
-## 📄 License
-
-MIT
+- The editor saves drafts to Supabase first and falls back to `localStorage` if cloud sync fails.
+- Template preview/export is currently HTML/print based rather than a server-generated PDF pipeline.

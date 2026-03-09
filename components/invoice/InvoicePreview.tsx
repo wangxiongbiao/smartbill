@@ -3,6 +3,7 @@
 import React from 'react';
 import { Invoice, TemplateType } from '@/types/invoice';
 import { getCurrencyDetails } from './CurrencySelector';
+import { getInvoiceTheme } from '@/lib/invoice-theme';
 import PreviewHeader from './preview/PreviewHeader';
 import PreviewClientInfo from './preview/PreviewClientInfo';
 import PreviewLineItems from './preview/PreviewLineItems';
@@ -30,6 +31,8 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
     onShowLogoPicker,
     onShowQRCodePicker
 }) => {
+    const activeTemplate = invoice.template || template;
+    const theme = getInvoiceTheme(activeTemplate);
     const subtotal = invoice.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.rate)), 0);
     const tax = subtotal * (invoice.taxRate / 100);
     const total = subtotal + tax;
@@ -41,41 +44,55 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
     });
 
     return (
-        <div className={`${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} bg-white mx-auto text-slate-800 flex flex-col overflow-hidden  animate-in fade-in duration-700`}>
+        <div
+            className={`${isForPdf ? 'min-h-[296mm]' : 'min-h-[297mm]'} mx-auto flex flex-col overflow-hidden animate-in fade-in duration-700`}
+            style={{ backgroundColor: theme.pageBackground, color: theme.textColor }}
+        >
             {/* Header */}
             <PreviewHeader
                 invoice={invoice}
+                theme={theme}
                 onChange={onChange}
                 onShowLogoPicker={onShowLogoPicker}
             />
 
-            <div className="h-[3px] bg-slate-900 mx-12" />
+            <div
+                className="mx-12 h-[3px]"
+                style={{ backgroundColor: theme.id === 'professional' ? theme.accentColor : theme.borderColor }}
+            />
 
             <div className="px-12 py-10 flex-1 flex flex-col">
                 {/* Client & Dates */}
                 <PreviewClientInfo
                     invoice={invoice}
+                    theme={theme}
                     onChange={onChange}
                 />
 
                 {/* Line Items Table */}
                 <PreviewLineItems
                     invoice={invoice}
+                    theme={theme}
                     currencyFormatter={currencyFormatter}
                     currencySymbol={currencyDetails.symbol}
                     onChange={onChange}
                 />
 
-                <div className="flex justify-between pt-12 border-t border-slate-100 mt-auto items-end">
+                <div
+                    className="mt-auto flex items-end justify-between pt-12"
+                    style={{ borderTop: `1px solid ${theme.borderColor}` }}
+                >
                     {/* Signature */}
                     <PreviewSignature
                         invoice={invoice}
+                        theme={theme}
                         onChange={onChange}
                     />
 
                     {/* Totals */}
                     <PreviewTotals
                         invoice={invoice}
+                        theme={theme}
                         subtotal={subtotal}
                         tax={tax}
                         total={total}
@@ -86,6 +103,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 {/* Payment Info */}
                 <PreviewPaymentInfo
                     invoice={invoice}
+                    theme={theme}
                     onChange={onChange}
                     onShowQRCodePicker={onShowQRCodePicker}
                 />
@@ -94,6 +112,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             {/* Disclaimer */}
             <PreviewDisclaimer
                 invoice={invoice}
+                theme={theme}
                 onChange={onChange}
             />
         </div>

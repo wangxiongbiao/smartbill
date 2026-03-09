@@ -1,19 +1,12 @@
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { LoginModal } from '@/components/LoginModal'
 import { GoogleOneTap } from '@/components/GoogleOneTap'
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: 'Invoicefiy | AI-Powered Online Invoice Generator',
-  description: 'Create professional invoices effortlessly with Invoicefiy. Featuring AI generation, real-time live preview, one-click sharing, and direct payments.',
+  title: 'Invoicefiy | Online Invoice Generator',
+  description: 'Create professional invoices with live preview, reusable templates, one-click sharing, and direct payment details.',
 }
 
 export default function RootLayout({
@@ -22,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={jakarta.variable}>
+    <html lang="en">
       <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>

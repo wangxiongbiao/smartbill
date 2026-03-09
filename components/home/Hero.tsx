@@ -23,16 +23,16 @@ export function Hero() {
                     {/* Text Content */}
                     <div className="text-left z-10">
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
-                            Generate Invoices in<br />Seconds with AI
+                            Create polished invoices<br />with live preview
                         </h1>
                         <p className="text-sm md:text-base text-slate-600 mb-6 max-w-[480px] leading-relaxed">
-                            Experience seamless invoicing with Invoicefiy. Simply type your details on the left, and watch our AI instantly build your professional invoice on the right in real-time. Share with one click and let clients pay directly on the invoice.
+                            Build professional invoices in a focused editor, preview every change instantly, and reuse templates that match your workflow.
                         </p>
                         <button
                             onClick={handleCTA}
                             className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold text-base transition-colors duration-200 cursor-pointer"
                         >
-                            Create Invoice with AI
+                            Create Invoice
                         </button>
                     </div>
                     {/* Hero Image Area */}

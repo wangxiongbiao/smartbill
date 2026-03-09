@@ -1,9 +1,11 @@
 import React from 'react';
 import { Invoice, InvoiceColumn, InvoiceItem } from '@/types/invoice';
+import { InvoiceTheme } from '@/lib/invoice-theme';
 import EditableText from './EditableText';
 
 interface PreviewLineItemsProps {
     invoice: Invoice;
+    theme: InvoiceTheme;
     currencyFormatter: Intl.NumberFormat;
     currencySymbol: string;
     onChange?: (updates: Partial<Invoice>) => void;
@@ -18,6 +20,7 @@ const defaultColumns: InvoiceColumn[] = [
 
 const PreviewLineItems: React.FC<PreviewLineItemsProps> = ({
     invoice,
+    theme,
     currencyFormatter,
     currencySymbol,
     onChange
@@ -100,7 +103,10 @@ const PreviewLineItems: React.FC<PreviewLineItemsProps> = ({
     return (
         <table className="w-full text-left mb-10 border-collapse">
             <thead>
-                <tr className="bg-slate-50 text-slate-900 border-b border-slate-200 text-[10px] font-black tracking-widest">
+                <tr
+                    className="border-b text-[10px] font-black tracking-widest"
+                    style={{ backgroundColor: theme.tableHeaderFill, color: theme.tableHeaderText, borderColor: theme.borderColor }}
+                >
                     {visibleColumns.map(col => (
                         <th key={col.id} className={`px-6 py-5 ${col.type === 'system-amount' ? 'text-right' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : '')}`}>
                             {col.label}
@@ -108,11 +114,15 @@ const PreviewLineItems: React.FC<PreviewLineItemsProps> = ({
                     ))}
                 </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y" style={{ borderColor: theme.borderColor }}>
                 {invoice.items.map((item) => (
-                    <tr key={item.id} className="text-[11px] text-slate-700">
+                    <tr key={item.id} className="text-[11px]" style={{ color: theme.mutedColor }}>
                         {visibleColumns.map(col => (
-                            <td key={col.id} className={`px-6 py-5 ${col.type === 'system-amount' ? 'text-right font-black text-slate-900 text-sm' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center font-bold' : 'font-medium')} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap leading-relaxed max-w-[300px]' : ''}`}>
+                            <td
+                                key={col.id}
+                                className={`px-6 py-5 ${col.type === 'system-amount' ? 'text-right text-sm font-black' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center font-bold' : 'font-medium')} ${col.type === 'system-text' || col.type === 'custom-text' ? 'max-w-[300px] whitespace-pre-wrap leading-relaxed' : ''}`}
+                                style={{ color: col.type === 'system-amount' ? theme.textColor : undefined }}
+                            >
                                 {renderCell(item, col)}
                             </td>
                         ))}

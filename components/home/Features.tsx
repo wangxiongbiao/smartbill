@@ -8,24 +8,24 @@ export function Features() {
                 <div className="px-6 sm:px-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-dark leading-snug tracking-tight">Get Paid Faster with Quick Invoice Payments</h2>
-                            <p className="text-slate-600 mb-5 text-base leading-relaxed">Send invoices with built-in payment links. Let your clients pay instantly via credit card, Apple Pay, or Google Pay directly from the invoice.</p>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-dark leading-snug tracking-tight">Share payment details clearly and consistently</h2>
+                            <p className="text-slate-600 mb-5 text-base leading-relaxed">Add bank details, QR code images, and notes directly into the invoice so clients have everything they need in one place.</p>
                             <ul className="space-y-3">
                                 <li className="flex items-start">
                                     <svg className="w-5 h-5 text-green-500 mr-3 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
-                                    <span className="text-slate-700 text-sm">Accept fast and secure online payments</span>
+                                    <span className="text-slate-700 text-sm">Keep bank transfer instructions inside the invoice</span>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-5 h-5 text-green-500 mr-3 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
-                                    <span className="text-slate-700 text-sm">Automatic payment status tracking</span>
+                                    <span className="text-slate-700 text-sm">Support QR code screenshots and custom payment fields</span>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-5 h-5 text-green-500 mr-3 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
-                                    <span className="text-slate-700 text-sm">Zero setup required to start collecting funds</span>
+                                    <span className="text-slate-700 text-sm">Avoid follow-up messages by sending complete billing info once</span>
                                 </li>
                             </ul>
                             <button className="mt-7 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors">
-                                Start getting paid
+                                Start a new invoice
                             </button>
                         </div>
                         <div className="relative p-6 bg-purple-50 rounded-xl flex items-center justify-center min-h-[220px]">
@@ -40,16 +40,16 @@ export function Features() {
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <div className="pr-2">
-                                    <p className="text-xs text-slate-500 font-medium mb-0.5 whitespace-nowrap">Invoice #1024 Paid</p>
-                                    <p className="text-base font-bold text-slate-900">$4,200.00</p>
+                                    <p className="text-xs text-slate-500 font-medium mb-0.5 whitespace-nowrap">Payment details ready</p>
+                                    <p className="text-base font-bold text-slate-900">Bank + QR + Notes</p>
                                 </div>
                             </div>
 
-                            {/* Payment Methods Card */}
+                            {/* Billing Details Card */}
                             <div className="absolute top-4 left-0 md:-left-6 bg-white py-2 px-4 rounded-lg shadow-lg border border-gray-50 flex items-center gap-4 z-20">
-                                <i className="fa-brands fa-cc-stripe text-[#635BFF] text-2xl"></i>
-                                <i className="fa-brands fa-apple text-gray-800 text-2xl"></i>
-                                <i className="fa-brands fa-google-pay text-gray-700 text-3xl leading-none flex items-center mt-1"></i>
+                                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">Bank</span>
+                                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">QR Code</span>
+                                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">Notes</span>
                             </div>
                         </div>
                     </div>
@@ -82,8 +82,8 @@ export function Features() {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900 text-base">AI Smart Editor</h4>
-                                        <p className="text-slate-500 text-sm mt-1 leading-relaxed">Intuitive interface that leverages AI to help you draft invoices in seconds.</p>
+                                        <h4 className="font-bold text-slate-900 text-base">Structured editor</h4>
+                                        <p className="text-slate-500 text-sm mt-1 leading-relaxed">Edit sender, client, line items, totals, notes, and payment details in one focused workspace.</p>
                                     </div>
                                 </li>
                                 <li className="flex gap-4 group">
@@ -91,8 +91,8 @@ export function Features() {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900 text-base">Instant Sync</h4>
-                                        <p className="text-slate-500 text-sm mt-1 leading-relaxed">Every change you make reflects instantly on the preview, ensuring a perfect result every time.</p>
+                                        <h4 className="font-bold text-slate-900 text-base">Live preview</h4>
+                                        <p className="text-slate-500 text-sm mt-1 leading-relaxed">Every change appears immediately in the preview so layout and totals stay visible while you edit.</p>
                                     </div>
                                 </li>
                             </ul>

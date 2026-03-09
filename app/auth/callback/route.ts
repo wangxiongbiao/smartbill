@@ -25,5 +25,8 @@ export async function GET(request: Request) {
         }
     }
 
-    return NextResponse.redirect(`${origin}/auth/auth-error`)
+    const errorUrl = new URL('/auth/auth-error', origin)
+    errorUrl.searchParams.set('next', next)
+
+    return NextResponse.redirect(errorUrl)
 }

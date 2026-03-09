@@ -41,17 +41,28 @@ function ModalContent() {
         const left = Math.round(window.screenX + (window.outerWidth - width) / 2);
         const top = Math.round(window.screenY + (window.outerHeight - height) / 2);
 
-        window.open(
+        const popup = window.open(
             data.url,
             'google-oauth',
             `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
         );
 
+        if (!popup) return;
+
         // Listen for the LOGIN_SUCCESS message broadcast from the popup's callback-success page
         const channel = new BroadcastChannel('supabase_auth');
+        let isCleanedUp = false;
+
+        const cleanup = () => {
+            if (isCleanedUp) return;
+            isCleanedUp = true;
+            window.clearInterval(popupCheckInterval);
+            channel.close();
+        };
+
         channel.onmessage = (event) => {
             if (event.data?.type === 'LOGIN_SUCCESS') {
-                channel.close();
+                cleanup();
                 // Re-fetch session — onAuthStateChange in AuthContext will update user state
                 supabase.auth.getSession().then(({ data: sessionData }) => {
                     if (sessionData.session) {
@@ -61,15 +72,11 @@ function ModalContent() {
             }
         };
 
-        // Safety cleanup: close channel if popup is closed without completing login
-        const popupCheckInterval = setInterval(() => {
-            // Channel auto-cleaned via garbage collection; no extra work needed here
+        const popupCheckInterval = window.setInterval(() => {
+            if (popup.closed) {
+                cleanup();
+            }
         }, 500);
-
-        return () => {
-            clearInterval(popupCheckInterval);
-            channel.close();
-        };
     }, [closeLoginModal]);
 
     return (

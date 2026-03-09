@@ -2,18 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { Plus, Search, Filter, Eye, Edit, Trash2, FileText, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, FileText, Loader2, Download } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { getUserInvoices, deleteInvoice } from '@/lib/invoices';
+import InvoicePdfPreviewDialog from '@/components/invoice/InvoicePdfPreviewDialog';
 import { Invoice } from '@/types/invoice';
 
 const statusMap = {
-  Paid: { label: '已付款', className: 'bg-green-100 text-green-700' },
-  Sent: { label: '待付款', className: 'bg-yellow-100 text-yellow-700' },
-  Draft: { label: '草稿', className: 'bg-gray-100 text-gray-700' },
+  paid: { label: '已付款', className: 'bg-green-100 text-green-700' },
+  sent: { label: '待付款', className: 'bg-yellow-100 text-yellow-700' },
+  draft: { label: '草稿', className: 'bg-gray-100 text-gray-700' },
   overdue: { label: '已逾期', className: 'bg-red-100 text-red-700' },
-};
+} as const;
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -31,12 +33,16 @@ export default function DashboardPage() {
 
   // 加载发票数据
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) {
+      setInvoices([]);
+      setLoading(false);
+      return;
+    }
 
-    async function loadInvoices() {
+    async function loadInvoices(userId: string) {
       try {
         setLoading(true);
-        const data = await getUserInvoices(user.id);
+        const data = await getUserInvoices(userId);
         setInvoices(data);
       } catch (err) {
         console.error('加载发票失败:', err);
@@ -46,24 +52,37 @@ export default function DashboardPage() {
       }
     }
 
-    loadInvoices();
+    loadInvoices(user.id);
   }, [user]);
 
   // 计算统计数据
   const stats = React.useMemo(() => {
+    const normalizeStatus = (status?: string) => (status || 'Draft').toLowerCase();
+
+    const calculateLineAmount = (item: Invoice['items'][number]) => {
+      if (item.amount !== undefined && item.amount !== '') {
+        const amount = Number(item.amount);
+        if (Number.isFinite(amount)) {
+          return amount;
+        }
+      }
+
+      return Number(item.quantity || 0) * Number(item.rate || 0);
+    };
+
     const calculateTotal = (inv: Invoice) => {
-      return inv.items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      return inv.items.reduce((sum, item) => sum + calculateLineAmount(item), 0);
     };
 
     const totalRevenue = invoices
-      .filter(inv => inv.status === 'Paid')
+      .filter(inv => normalizeStatus(inv.status) === 'paid')
       .reduce((sum, inv) => sum + calculateTotal(inv), 0);
 
     const pendingAmount = invoices
-      .filter(inv => inv.status === 'Sent')
+      .filter(inv => normalizeStatus(inv.status) === 'sent')
       .reduce((sum, inv) => sum + calculateTotal(inv), 0);
 
-    const pendingCount = invoices.filter(inv => inv.status === 'Sent').length;
+    const pendingCount = invoices.filter(inv => normalizeStatus(inv.status) === 'sent').length;
 
     // 获取本月新增
     const now = new Date();
@@ -113,10 +132,14 @@ export default function DashboardPage() {
     }
   };
 
+  const handlePreviewPdf = (invoice: Invoice) => {
+    setPreviewInvoice(invoice);
+  };
+
   // 获取状态显示
   const getStatusDisplay = (status?: string) => {
-    const key = (status as keyof typeof statusMap) || 'Draft';
-    return statusMap[key] || statusMap.Draft;
+    const key = (status || 'Draft').toLowerCase() as keyof typeof statusMap;
+    return statusMap[key] || statusMap.draft;
   };
 
   // 格式化日期
@@ -126,6 +149,19 @@ export default function DashboardPage() {
       return new Date(dateStr).toLocaleDateString('zh-CN');
     } catch (e) {
       return '-';
+    }
+  };
+
+  const formatCurrency = (invoice: Invoice) => {
+    const total = stats.calculateTotal(invoice);
+
+    try {
+      return new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: invoice.currency || 'USD',
+      }).format(total);
+    } catch {
+      return `${invoice.currency || 'USD'} ${total.toFixed(2)}`;
     }
   };
 
@@ -299,7 +335,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-sm font-medium text-gray-900">
-                            {invoice.currency === 'USD' ? '$' : '¥'}{stats.calculateTotal(invoice).toLocaleString() || 0}
+                            {formatCurrency(invoice)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -316,7 +352,7 @@ export default function DashboardPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Link
-                              href={`/invoice/${invoice.id}`}
+                              href={`/invoice/${invoice.id}?view=preview`}
                               className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-primary transition-colors"
                             >
                               <Eye className="w-4 h-4" />
@@ -327,6 +363,13 @@ export default function DashboardPage() {
                             >
                               <Edit className="w-4 h-4" />
                             </Link>
+                            <button
+                              onClick={() => handlePreviewPdf(invoice)}
+                              className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="预览并下载 PDF"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
                             <button
                               onClick={() => handleDelete(invoice.id)}
                               className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-600 transition-colors"
@@ -385,6 +428,12 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      <InvoicePdfPreviewDialog
+        invoice={previewInvoice}
+        isOpen={!!previewInvoice}
+        onClose={() => setPreviewInvoice(null)}
+      />
     </DashboardLayout>
   );
 }

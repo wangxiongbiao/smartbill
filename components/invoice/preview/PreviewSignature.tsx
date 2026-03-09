@@ -1,14 +1,17 @@
 import React from 'react';
 import { Invoice } from '@/types/invoice';
+import { InvoiceTheme } from '@/lib/invoice-theme';
 import EditableText from './EditableText';
 
 interface PreviewSignatureProps {
     invoice: Invoice;
+    theme: InvoiceTheme;
     onChange?: (updates: Partial<Invoice>) => void;
 }
 
 const PreviewSignature: React.FC<PreviewSignatureProps> = ({
     invoice,
+    theme,
     onChange
 }) => {
     if (invoice.visibility?.signature === false) return null;
@@ -25,13 +28,13 @@ const PreviewSignature: React.FC<PreviewSignatureProps> = ({
                 ) : (
                     <div className="h-20" />
                 )}
-                <div className="w-56 space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 tracking-widest">授權簽名</p>
-                    <div className="border-t border-slate-900 pt-2">
+                <div className="w-56 space-y-2" style={{ color: theme.textColor }}>
+                    <p className="text-[10px] font-bold tracking-widest" style={{ color: theme.metaLabelColor }}>授權簽名</p>
+                    <div className="pt-2" style={{ borderTop: `1px solid ${theme.accentColor}` }}>
                         <EditableText
                             value={invoice.sender.name}
                             onChange={(val) => handleSenderUpdate({ name: val })}
-                            className="text-xs font-black text-slate-900"
+                            className="text-xs font-black"
                         />
                     </div>
                 </div>

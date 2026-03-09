@@ -16,46 +16,46 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 text-lg">Features</h4>
                         <ul className="space-y-3 text-base text-gray-500 font-medium">
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Curved text generator</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Photo effects</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Image enhancer</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Add text to photos</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/invoice/new">Invoice editor</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard">Invoice dashboard</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard/templates">Template center</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="#faq">FAQ</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-900 mb-6 text-lg">Explore</h4>
+                        <h4 className="font-bold text-gray-900 mb-6 text-lg">Workflow</h4>
                         <ul className="space-y-3 text-base text-gray-500 font-medium">
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Design ideas</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Custom prints</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Font pairing</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Colors</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/invoice/new">Create invoice</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard">Track drafts</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard/templates">Reuse templates</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/">Preview online</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-900 mb-6 text-lg">Community</h4>
+                        <h4 className="font-bold text-gray-900 mb-6 text-lg">Support</h4>
                         <ul className="space-y-3 text-base text-gray-500 font-medium">
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Online communities</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Creators</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Canva Represent</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Developers</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="#faq">Help center</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="#features">Product overview</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard/templates">Template examples</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/dashboard">Workspace</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 text-lg">Company</h4>
                         <ul className="space-y-3 text-base text-gray-500 font-medium">
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">About</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Newsroom</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Careers</a></li>
-                            <li><a className="hover:text-primary transition-colors hover:underline" href="#">Sustainability</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/">About</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/">Contact</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/">Privacy</a></li>
+                            <li><a className="hover:text-primary transition-colors hover:underline" href="/">Terms</a></li>
                         </ul>
                     </div>
                 </div>
                 <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-base text-gray-500 font-medium">
-                    <p>© 2023 All Rights Reserved.</p>
+                    <p>© 2026 Invoicefiy. All rights reserved.</p>
                     <div className="flex space-x-8 mt-4 md:mt-0">
-                        <a className="hover:text-gray-900 transition-colors" href="#">Privacy</a>
-                        <a className="hover:text-gray-900 transition-colors" href="#">Terms</a>
-                        <a className="hover:text-gray-900 transition-colors" href="#">Accessibility</a>
+                        <a className="hover:text-gray-900 transition-colors" href="/">Privacy</a>
+                        <a className="hover:text-gray-900 transition-colors" href="/">Terms</a>
+                        <a className="hover:text-gray-900 transition-colors" href="/">Accessibility</a>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,454 @@
+{
+    "meta": {
+        "lastTouchedVersion": "2026.3.3",
+        "lastTouchedAt": "2026-03-06T14:27:18.524Z"
+    },
+    "wizard": {
+        "lastRunAt": "2026-03-05T01:46:28.065Z",
+        "lastRunVersion": "2026.3.3",
+        "lastRunCommand": "doctor",
+        "lastRunMode": "local"
+    },
+    "auth": {
+        "profiles": {
+            "moonshot:default": {
+                "provider": "moonshot",
+                "mode": "api_key"
+            },
+            "kimi-coding:default": {
+                "provider": "kimi-coding",
+                "mode": "api_key"
+            }
+        }
+    },
+    "models": {
+        "mode": "merge",
+        "providers": {
+            "moonshot": {
+                "baseUrl": "https://api.moonshot.cn/v1",
+                "api": "openai-completions",
+                "models": [
+                    {
+                        "id": "kimi-k2.5",
+                        "name": "Kimi K2.5",
+                        "reasoning": false,
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "cost": {
+                            "input": 0,
+                            "output": 0,
+                            "cacheRead": 0,
+                            "cacheWrite": 0
+                        },
+                        "contextWindow": 256000,
+                        "maxTokens": 8192
+                    }
+                ]
+            },
+            "kimi-coding": {
+                "baseUrl": "https://api.kimi.com/coding/",
+                "apiKey": "sk-kimi-gavowCZk7aZyKDUZfEEdNUce6UnXkIbqrCuy3v2swsX1OWyvnjfApxP8PjfDDhJx",
+                "api": "anthropic-messages",
+                "models": [
+                    {
+                        "id": "k2p5",
+                        "name": "Kimi for Coding",
+                        "reasoning": true,
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "cost": {
+                            "input": 0,
+                            "output": 0,
+                            "cacheRead": 0,
+                            "cacheWrite": 0
+                        },
+                        "contextWindow": 262144,
+                        "maxTokens": 32768
+                    }
+                ]
+            }
+        }
+    },
+    "agents": {
+        "defaults": {
+            "model": {
+                "fallbacks": [
+                    "kimi-coding/k2p5"
+                ],
+                "primary": "moonshot/kimi-k2.5"
+            },
+            "models": {
+                "moonshot/kimi-k2.5": {
+                    "alias": "Kimi"
+                },
+                "kimi-coding/k2p5": {
+                    "alias": "Kimi for Coding"
+                }
+            },
+            "workspace": "/Users/admin/.openclaw/workspace",
+            "memorySearch": {
+                "enabled": true,
+                "provider": "openai",
+                "remote": {
+                    "apiKey": "SET_OPENAI_API_KEY"
+                },
+                "fallback": "openai",
+                "model": "text-embedding-3-small",
+                "sync": {
+                    "watch": true
+                },
+                "query": {
+                    "hybrid": {
+                        "enabled": true,
+                        "vectorWeight": 0.75,
+                        "textWeight": 0.25
+                    }
+                }
+            },
+            "compaction": {
+                "mode": "safeguard",
+                "reserveTokensFloor": 20000,
+                "memoryFlush": {
+                    "enabled": true,
+                    "softThresholdTokens": 4000,
+                    "prompt": "Write lasting decisions or facts to memory/YYYY-MM-DD.md (concise bullets). Reply NO_REPLY if nothing to store.",
+                    "systemPrompt": "Session nearing compaction. Store durable memories now."
+                }
+            },
+            "maxConcurrent": 4,
+            "subagents": {
+                "maxConcurrent": 8
+            },
+            "sandbox": {
+                "mode": "off"
+            }
+        },
+        "list": [
+            {
+                "id": "main",
+                "default": true,
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            },
+            {
+                "id": "product-manager",
+                "workspace": "/Users/admin/.openclaw/agents/product-manager/agent",
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            },
+            {
+                "id": "flow-interface",
+                "workspace": "/Users/admin/.openclaw/agents/flow-interface/agent",
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            },
+            {
+                "id": "ui-designer",
+                "workspace": "/Users/admin/.openclaw/agents/ui-designer/agent",
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            },
+            {
+                "id": "interface-designer",
+                "workspace": "/Users/admin/.openclaw/agents/interface-designer/agent",
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            },
+            {
+                "id": "ai-tester",
+                "workspace": "/Users/admin/.openclaw/agents/ai-tester/agent",
+                "sandbox": {
+                    "mode": "off"
+                },
+                "tools": {
+                    "profile": "full",
+                    "allow": [
+                        "*"
+                    ],
+                    "exec": {
+                        "security": "full",
+                        "ask": "off",
+                        "applyPatch": {
+                            "workspaceOnly": false
+                        }
+                    },
+                    "fs": {
+                        "workspaceOnly": false
+                    }
+                }
+            }
+        ]
+    },
+    "tools": {
+        "profile": "full",
+        "allow": [
+            "read",
+            "write",
+            "edit",
+            "apply_patch",
+            "exec",
+            "process",
+            "web_search",
+            "web_fetch",
+            "browser",
+            "image",
+            "memory_search",
+            "memory_get",
+            "sessions_list",
+            "sessions_history",
+            "sessions_send",
+            "sessions_spawn",
+            "session_status",
+            "message",
+            "cron",
+            "gateway",
+            "agents_list"
+        ],
+        "deny": [
+            "nodes",
+            "canvas",
+            "llm_task",
+            "lobster"
+        ],
+        "elevated": {
+            "enabled": true
+        },
+        "exec": {
+            "security": "full",
+            "ask": "off"
+        },
+        "fs": {
+            "workspaceOnly": false
+        }
+    },
+    "bindings": [
+        {
+            "agentId": "product-manager",
+            "match": {
+                "channel": "feishu",
+                "accountId": "productmanager"
+            }
+        },
+        {
+            "agentId": "flow-interface",
+            "match": {
+                "channel": "feishu",
+                "accountId": "flowinterface"
+            }
+        },
+        {
+            "agentId": "ui-designer",
+            "match": {
+                "channel": "feishu",
+                "accountId": "uidesigner"
+            }
+        },
+        {
+            "agentId": "interface-designer",
+            "match": {
+                "channel": "feishu",
+                "accountId": "interfacedesigner"
+            }
+        },
+        {
+            "agentId": "ai-tester",
+            "match": {
+                "channel": "feishu",
+                "accountId": "aitester"
+            }
+        }
+    ],
+    "commands": {
+        "native": "auto",
+        "nativeSkills": "auto",
+        "restart": true,
+        "ownerDisplay": "raw"
+    },
+    "session": {
+        "dmScope": "per-channel-peer"
+    },
+    "channels": {
+        "feishu": {
+            "enabled": true,
+            "defaultAccount": "admin",
+            "domain": "feishu",
+            "connectionMode": "websocket",
+            "accounts": {
+                "admin": {
+                    "appId": "cli_a92ccae944b91ced",
+                    "appSecret": "QDM1J9I83OOumcnQrTXllgbjo0g5zaLF",
+                    "botName": "管理员",
+                    "groupPolicy": "open",
+                    "requireMention": false
+                },
+                "productmanager": {
+                    "appId": "cli_a922e97d6da1dcc2",
+                    "appSecret": "GsTHwqjPPscl9Bxncqv0gfITnumInwZp",
+                    "botName": "二花产品经理"
+                },
+                "flowinterface": {
+                    "appId": "cli_a922ea5ca6f8dcce",
+                    "appSecret": "qKUwSqvcZVTpOrMqQXnoagEo84rwr82p",
+                    "botName": "二花流程接口对接",
+                    "agentId": "flow-interface"
+                },
+                "uidesigner": {
+                    "appId": "cli_a922e9ea25215cba",
+                    "appSecret": "DF03ASOX9pkZVuED2eORCdztXKIrVn5I",
+                    "botName": "二花UI设计",
+                    "agentId": "ui-designer"
+                },
+                "interfacedesigner": {
+                    "appId": "cli_a922e9b6fb78dcd3",
+                    "appSecret": "Dfo1GboqdaNftM6p7Z0OfbjsylcSyoDg",
+                    "botName": "二花界面设计",
+                    "agentId": "interface-designer"
+                },
+                "aitester": {
+                    "appId": "cli_a923364c5578dbd2",
+                    "appSecret": "7rZV200bbDtt7aXaybC7wdQ2r4yiFOlb",
+                    "botName": "二花AI测试",
+                    "agentId": "ai-tester",
+                    "groupPolicy": "open"
+                },
+                "default": {
+                    "groupPolicy": "open"
+                }
+            }
+        }
+    },
+    "gateway": {
+        "port": 18789,
+        "mode": "local",
+        "bind": "lan",
+        "controlUi": {
+            "allowedOrigins": [
+                "*"
+            ],
+            "allowInsecureAuth": true,
+            "dangerouslyDisableDeviceAuth": true
+        },
+        "auth": {
+            "mode": "token",
+            "token": "a16dd9951354259011ef7585898dbfefcfc3876a809dceb5"
+        },
+        "tailscale": {
+            "mode": "off",
+            "resetOnExit": false
+        }
+    },
+    "skills": {
+        "allowBundled": [
+            "gog",
+            "github",
+            "tmux",
+            "session-logs",
+            "weather",
+            "summarize",
+            "clawhub",
+            "healthcheck",
+            "skill-creator"
+        ]
+    },
+    "plugins": {
+        "load": {
+            "paths": [
+                "/Users/admin/.gemini/antigravity/scratch/openclaw/extensions/feishu"
+            ]
+        },
+        "entries": {
+            "feishu": {
+                "enabled": true
+            }
+        }
+    }
+}
