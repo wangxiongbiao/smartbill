@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const profile = await getUserProfile(user.id);
+  const profile = await getUserProfile(user.id, supabase);
   return NextResponse.json({ profile });
 }
 
@@ -35,8 +35,8 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
   }
 
-  await updateUserProfile(user.id, { full_name: fullName });
-  const profile = await getUserProfile(user.id);
+  await updateUserProfile(user.id, { full_name: fullName }, supabase);
+  const profile = await getUserProfile(user.id, supabase);
 
   return NextResponse.json({ success: true, profile });
 }

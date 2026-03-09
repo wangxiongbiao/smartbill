@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const invoices = await getUserInvoices(user.id);
+  const invoices = await getUserInvoices(user.id, supabase);
   return NextResponse.json({ invoices });
 }
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invoice is required' }, { status: 400 });
   }
 
-  await saveInvoice(user.id, body.invoice);
+  await saveInvoice(user.id, body.invoice, supabase);
   return NextResponse.json({ success: true });
 }
 
@@ -41,6 +41,6 @@ export async function DELETE(request: NextRequest) {
   const invoiceId = request.nextUrl.searchParams.get('id');
   if (!invoiceId) return NextResponse.json({ error: 'Invoice ID is required' }, { status: 400 });
 
-  await deleteInvoice(invoiceId, user.id);
+  await deleteInvoice(invoiceId, user.id, supabase);
   return NextResponse.json({ success: true });
 }

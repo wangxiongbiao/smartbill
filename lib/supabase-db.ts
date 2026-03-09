@@ -1,20 +1,24 @@
-import { createClient } from './supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient as createBrowserClient } from './supabase/client';
 import { Invoice, Profile } from '../types';
 import { safeDeepClean } from './utils';
+
+function getSupabaseClient(supabase?: SupabaseClient) {
+    return supabase ?? createBrowserClient();
+}
 
 /**
  * 获取用户 profile
  */
-export async function getUserProfile(userId: string): Promise<Profile | null> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+export async function getUserProfile(userId: string, supabase?: SupabaseClient): Promise<Profile | null> {
+    const client = getSupabaseClient(supabase);
+    const { data, error } = await client
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
     if (error) {
-        // PGRST116 means no rows found, which is normal for first-time users
         if (error.code === 'PGRST116') {
             console.log('[getUserProfile] Profile not found for user:', userId, '(first-time user)');
             return null;
@@ -28,9 +32,9 @@ export async function getUserProfile(userId: string): Promise<Profile | null> {
 /**
  * 更新用户 profile
  */
-export async function updateUserProfile(userId: string, updates: Partial<Pick<Profile, 'full_name' | 'avatar_url'>>) {
-    const supabase = createClient();
-    const { error } = await supabase
+export async function updateUserProfile(userId: string, updates: Partial<Pick<Profile, 'full_name' | 'avatar_url'>>, supabase?: SupabaseClient) {
+    const client = getSupabaseClient(supabase);
+    const { error } = await client
         .from('profiles')
         .update({
             ...updates,
@@ -47,15 +51,13 @@ export async function updateUserProfile(userId: string, updates: Partial<Pick<Pr
 /**
  * 保存或更新发票到数据库
  */
-export async function saveInvoice(userId: string, invoice: Invoice): Promise<void> {
+export async function saveInvoice(userId: string, invoice: Invoice, supabase?: SupabaseClient): Promise<void> {
     console.log('[saveInvoice] 开始保存');
     console.log('[saveInvoice] userId:', userId);
     console.log('[saveInvoice] invoice.id:', invoice.id);
     console.log('[saveInvoice] invoice.invoiceNumber:', invoice.invoiceNumber);
 
-    const supabase = createClient();
-
-    // Use safeDeepClean to remove circular references and DOM nodes
+    const client = getSupabaseClient(supabase);
     const cleanInvoiceData = safeDeepClean(invoice);
 
     if (!cleanInvoiceData || !cleanInvoiceData.id) {
@@ -73,7 +75,7 @@ export async function saveInvoice(userId: string, invoice: Invoice): Promise<voi
 
     console.log('[saveInvoice] 准备 upsert，payload已清理');
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from('invoices')
         .upsert(payload, {
             onConflict: 'id'
@@ -92,9 +94,9 @@ export async function saveInvoice(userId: string, invoice: Invoice): Promise<voi
 /**
  * 获取用户所有发票
  */
-export async function getUserInvoices(userId: string): Promise<Invoice[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+export async function getUserInvoices(userId: string, supabase?: SupabaseClient): Promise<Invoice[]> {
+    const client = getSupabaseClient(supabase);
+    const { data, error } = await client
         .from('invoices')
         .select('invoice_data')
         .eq('user_id', userId)
@@ -111,9 +113,9 @@ export async function getUserInvoices(userId: string): Promise<Invoice[]> {
 /**
  * 获取用户最新的一张发票
  */
-export async function getLatestInvoice(userId: string): Promise<Invoice | null> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+export async function getLatestInvoice(userId: string, supabase?: SupabaseClient): Promise<Invoice | null> {
+    const client = getSupabaseClient(supabase);
+    const { data, error } = await client
         .from('invoices')
         .select('invoice_data')
         .eq('user_id', userId)
@@ -132,9 +134,9 @@ export async function getLatestInvoice(userId: string): Promise<Invoice | null> 
 /**
  * 删除发票
  */
-export async function deleteInvoice(invoiceId: string, userId?: string): Promise<void> {
-    const supabase = createClient();
-    let query = supabase
+export async function deleteInvoice(invoiceId: string, userId?: string, supabase?: SupabaseClient): Promise<void> {
+    const client = getSupabaseClient(supabase);
+    let query = client
         .from('invoices')
         .delete()
         .eq('id', invoiceId);
@@ -154,10 +156,8 @@ export async function deleteInvoice(invoiceId: string, userId?: string): Promise
 /**
  * 批量保存发票 (用于首次同步 localStorage 数据)
  */
-export async function batchSaveInvoices(userId: string, invoices: Invoice[]): Promise<void> {
-    const supabase = createClient();
-
-    // Use safeDeepClean for robust sanitization of all invoices
+export async function batchSaveInvoices(userId: string, invoices: Invoice[], supabase?: SupabaseClient): Promise<void> {
+    const client = getSupabaseClient(supabase);
     const cleanInvoices = invoices.map(invoice => safeDeepClean(invoice)).filter(i => i && i.id);
 
     const records = cleanInvoices.map(invoice => ({
@@ -168,7 +168,7 @@ export async function batchSaveInvoices(userId: string, invoices: Invoice[]): Pr
         updated_at: new Date().toISOString()
     }));
 
-    const { error } = await supabase
+    const { error } = await client
         .from('invoices')
         .upsert(records, { onConflict: 'id' });
 

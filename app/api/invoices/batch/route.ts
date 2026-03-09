@@ -11,6 +11,6 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const invoices = Array.isArray(body?.invoices) ? body.invoices : [];
 
-  await batchSaveInvoices(user.id, invoices);
+  await batchSaveInvoices(user.id, invoices, supabase);
   return NextResponse.json({ success: true });
 }
