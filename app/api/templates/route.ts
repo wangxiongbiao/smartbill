@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const templates = await getUserTemplates(user.id);
+  const templates = await getUserTemplates(supabase, user.id);
   return NextResponse.json({ templates });
 }
 
@@ -28,6 +28,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid template payload' }, { status: 400 });
   }
 
-  const template = await saveTemplate(user.id, body.name, body.description || '', body.templateData);
+  const template = await saveTemplate(supabase, user.id, body.name, body.description || '', body.templateData);
   return NextResponse.json({ template });
 }

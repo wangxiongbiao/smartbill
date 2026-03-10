@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { ViewType, Language, User } from '../types';
+import { Language, User, ViewType } from '../types';
 import { translations } from '../i18n';
+import { getPrimaryNavItems, isNavItemActive } from '@/lib/navigation';
 
 interface DashboardSidebarProps {
     user: User | null;
@@ -25,10 +26,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     const [showLangMenu, setShowLangMenu] = useState(false);
     const t = translations[lang];
 
-    const navItems: { id: ViewType; label: string; icon: string }[] = [
-        { id: 'records', label: t.records, icon: 'fas fa-file-invoice' },
-        { id: 'templates', label: t.myTemplates, icon: 'fas fa-file-contract' },
-    ];
+    const navItems = getPrimaryNavItems(lang).filter((item) => item.id !== 'editor' && item.id !== 'profile');
 
     const languages: { id: Language; label: string }[] = [
         { id: 'zh-TW', label: '繁體中文' },
@@ -54,7 +52,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 </div>
             </div>
 
-            {/* <div className="px-4 py-6">
+            <div className="px-4 py-6">
                 <button
                     onClick={onNewInvoice}
                     className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group ring-4 ring-transparent hover:ring-blue-50"
@@ -62,14 +60,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     <i className="fas fa-plus group-hover:rotate-90 transition-transform"></i>
                     <span>{t.newInvoiceShort || 'New Invoice'}</span>
                 </button>
-            </div> */}
+            </div>
 
             {/* Navigation */}
             <nav className="flex-1 px-4 space-y-2">
                 {navItems.map((item) => {
-                    const isActive = activeView === item.id ||
-                        (item.id === 'records' && activeView === 'editor') ||
-                        (item.id === 'templates' && activeView === 'template-detail');
+                    const isActive = isNavItemActive(item.id, activeView);
 
                     return (
                         <button
@@ -105,7 +101,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     >
                         <div className="flex items-center gap-2">
                             <i className="fas fa-globe text-xs"></i>
-                            <span className="text-xs font-bold uppercase tracking-wider">{currentLangLabel}</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">{lang === 'zh-TW' ? '繁體中文' : currentLangLabel}</span>
                         </div>
                         <i className={`fas fa-chevron-up text-[10px] transition-transform ${showLangMenu ? 'rotate-180' : ''}`}></i>
                     </button>
@@ -166,7 +162,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         onClick={() => setView('records')} // Trigger auth view
                         className="w-full py-3 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all active:scale-95 border border-blue-100"
                     >
-                        Sign In
+登录
                     </button>
                 )}
             </div>

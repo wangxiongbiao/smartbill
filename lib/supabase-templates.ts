@@ -1,13 +1,13 @@
-import { createClient } from '@/lib/supabase/client';
 import { InvoiceTemplate, Invoice } from '../types';
 import { safeDeepClean } from './utils';
 
-const supabase = createClient();
+type SupabaseClientLike = any;
 
 /**
  * 创建新的发票模板
  */
 export async function saveTemplate(
+    supabase: SupabaseClientLike,
     userId: string,
     name: string,
     description: string,
@@ -54,7 +54,7 @@ export async function saveTemplate(
 /**
  * 获取用户的所有模板
  */
-export async function getUserTemplates(userId: string): Promise<InvoiceTemplate[]> {
+export async function getUserTemplates(supabase: SupabaseClientLike, userId: string): Promise<InvoiceTemplate[]> {
     const { data, error } = await supabase
         .from('invoice_templates')
         .select('*')
@@ -72,7 +72,7 @@ export async function getUserTemplates(userId: string): Promise<InvoiceTemplate[
 /**
  * 获取单个模板详情
  */
-export async function getTemplate(templateId: string): Promise<InvoiceTemplate | null> {
+export async function getTemplate(supabase: SupabaseClientLike, templateId: string): Promise<InvoiceTemplate | null> {
     const { data, error } = await supabase
         .from('invoice_templates')
         .select('*')
@@ -95,6 +95,7 @@ export async function getTemplate(templateId: string): Promise<InvoiceTemplate |
  * 更新模板
  */
 export async function updateTemplate(
+    supabase: SupabaseClientLike,
     templateId: string,
     updates: Partial<InvoiceTemplate>
 ): Promise<void> {
@@ -112,7 +113,7 @@ export async function updateTemplate(
 /**
  * 删除模板
  */
-export async function deleteTemplate(templateId: string, userId?: string): Promise<void> {
+export async function deleteTemplate(supabase: SupabaseClientLike, templateId: string, userId?: string): Promise<void> {
     let query = supabase
         .from('invoice_templates')
         .delete()
@@ -133,7 +134,7 @@ export async function deleteTemplate(templateId: string, userId?: string): Promi
 /**
  * 增加模板使用次数
  */
-export async function incrementTemplateUsage(templateId: string): Promise<void> {
+export async function incrementTemplateUsage(supabase: SupabaseClientLike, templateId: string): Promise<void> {
     const { error } = await supabase.rpc('increment_template_usage', {
         template_id: templateId
     });
@@ -141,9 +142,9 @@ export async function incrementTemplateUsage(templateId: string): Promise<void> 
     if (error) {
         // 如果RPC函数不存在，使用fallback方法
         console.warn('RPC function not found, using fallback method');
-        const template = await getTemplate(templateId);
+        const template = await getTemplate(supabase, templateId);
         if (template) {
-            await updateTemplate(templateId, {
+            await updateTemplate(supabase, templateId, {
                 usage_count: (template.usage_count || 0) + 1
             });
         }

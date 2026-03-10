@@ -2,6 +2,7 @@
 import React from 'react';
 import { Language, ViewType } from '../types';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { ROUTE_BY_VIEW } from '@/lib/routes';
 
 interface AuthViewProps {
   lang: Language;
@@ -10,11 +11,12 @@ interface AuthViewProps {
 }
 
 const AuthView: React.FC<AuthViewProps> = ({ lang, targetView, showToast }) => {
+  const nextPath = targetView ? (ROUTE_BY_VIEW[targetView] || '/invoices') : '/invoices';
   const { isGoogleLoading, handleGoogleLogin } = useGoogleAuth({
-    targetView,
+    nextPath,
     onError: (message) => showToast?.(message, 'error'),
     onSuccess: () => {
-      // Session restore is handled centrally in useAuthSession after OAuth/One Tap completes.
+      // Session restore is handled centrally in AppShell after OAuth completes.
     }
   });
 

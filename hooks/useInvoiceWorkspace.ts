@@ -45,8 +45,18 @@ export function useInvoiceWorkspace(params: {
   const [lastSavedTime, setLastSavedTime] = useState<Date | undefined>();
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const waitForFirstEditRef = useRef(false);
+
+  const upsertRecordLocally = useCallback((targetInvoice: Invoice) => {
+    setRecords(prev => {
+      const exists = prev.some(record => record.id === targetInvoice.id);
+      if (exists) return prev.map(record => record.id === targetInvoice.id ? targetInvoice : record);
+      return [targetInvoice, ...prev];
+    });
+  }, [setRecords]);
 
   const updateInvoice = useCallback((updates: Partial<Invoice>) => {
+    waitForFirstEditRef.current = false;
     setInvoice(prev => ({ ...prev, ...updates }));
   }, []);
 
@@ -70,15 +80,15 @@ export function useInvoiceWorkspace(params: {
     setSaveStatus('saving');
     try {
       await saveInvoiceRecord(targetInvoice);
+      upsertRecordLocally(targetInvoice);
       setSaveStatus('saved');
       setLastSavedTime(new Date());
-      await refreshRecords();
     } catch (error) {
       console.error('Save failed:', error);
       setSaveStatus('error');
       throw error;
     }
-  }, [refreshRecords, user?.id]);
+  }, [upsertRecordLocally, user?.id]);
 
   const createInvoice = useCallback(async (preset?: Partial<Invoice>) => {
     const newId = Date.now().toString();
@@ -92,13 +102,17 @@ export function useInvoiceWorkspace(params: {
       invoiceNumber: `INV-${newId.slice(-6)}`
     };
 
+    waitForFirstEditRef.current = !!user?.id;
     setInvoice(nextInvoice);
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (user?.id) await persistInvoice(nextInvoice);
+    if (!user?.id) {
+      upsertRecordLocally(nextInvoice);
+    }
+
     return nextInvoice;
-  }, [lang, persistInvoice, setActiveView, user?.id]);
+  }, [lang, setActiveView, upsertRecordLocally, user?.id]);
 
   const saveCurrentInvoice = useCallback(async () => {
     if (user?.id) {
@@ -106,21 +120,20 @@ export function useInvoiceWorkspace(params: {
       return;
     }
 
-    setRecords(prev => {
-      const exists = prev.find(record => record.id === invoice.id);
-      const nextRecords = exists ? prev.map(record => record.id === invoice.id ? invoice : record) : [invoice, ...prev];
-      localStorage.setItem('invoice_records_v2', JSON.stringify(nextRecords));
-      return nextRecords;
-    });
+    upsertRecordLocally(invoice);
     showToast('账单已本地保存（登录后可同步云端）', 'success');
-  }, [invoice, persistInvoice, setRecords, showToast, user?.id]);
+  }, [invoice, persistInvoice, showToast, upsertRecordLocally, user?.id]);
 
   const removeInvoice = useCallback(async (invoiceId: string) => {
     if (user?.id) {
       setIsDeletingId(invoiceId);
+      const previousRecords = records;
+      setRecords(prev => prev.filter(record => record.id !== invoiceId));
       try {
         await deleteInvoiceRecord(invoiceId);
-        await refreshRecords();
+      } catch (error) {
+        setRecords(previousRecords);
+        throw error;
       } finally {
         setIsDeletingId(null);
       }
@@ -128,7 +141,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     setRecords(prev => prev.filter(record => record.id !== invoiceId));
-  }, [refreshRecords, setRecords, user?.id]);
+  }, [records, setRecords, user?.id]);
 
   const useTemplate = useCallback(async (templateRecord: InvoiceTemplate) => {
     const newId = Date.now().toString();
@@ -143,11 +156,17 @@ export function useInvoiceWorkspace(params: {
       status: 'Draft'
     };
 
+    waitForFirstEditRef.current = !!user?.id;
     setInvoice(nextInvoice);
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (user?.id) await persistInvoice(nextInvoice);
-  }, [persistInvoice, setActiveView, user?.id]);
+
+    if (!user?.id) {
+      upsertRecordLocally(nextInvoice);
+    }
+
+    return nextInvoice;
+  }, [setActiveView, upsertRecordLocally, user?.id]);
 
   const duplicateInvoice = useCallback(async (sourceInvoice: Invoice) => {
     const newId = Date.now().toString();
@@ -164,19 +183,15 @@ export function useInvoiceWorkspace(params: {
       }))
     };
 
+    waitForFirstEditRef.current = !!user?.id;
     setInvoice(duplicatedInvoice);
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (user?.id) {
-      await persistInvoice(duplicatedInvoice);
-      showToast('发票已复制', 'success');
-      return;
-    }
-
-    setRecords(prev => [duplicatedInvoice, ...prev]);
-    showToast('发票已复制到本地', 'success');
-  }, [persistInvoice, setActiveView, setRecords, showToast, user?.id]);
+    upsertRecordLocally(duplicatedInvoice);
+    showToast(user?.id ? '发票副本已创建，编辑后会自动保存' : '发票已复制到本地', 'success');
+    return duplicatedInvoice;
+  }, [setActiveView, showToast, upsertRecordLocally, user?.id]);
 
   const saveAsTemplate = useCallback(async (name: string, description: string) => {
     if (!user?.id) {
@@ -190,6 +205,7 @@ export function useInvoiceWorkspace(params: {
 
   useEffect(() => {
     if (!user?.id || !invoice.id || activeView !== 'editor') return;
+    if (waitForFirstEditRef.current) return;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => {
       persistInvoice(invoice).catch(() => undefined);

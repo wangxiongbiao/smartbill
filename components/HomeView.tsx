@@ -1,189 +1,331 @@
-
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Invoice, IndustryTemplate, Language } from '../types';
-import { translations } from '../i18n';
-import SEOContent from './SEOContent';
+import React, { useMemo, useState } from 'react';
+import { Invoice, Language } from '../types';
 
 interface HomeViewProps {
-  onSelectTemplate: (data: Partial<Invoice>) => void;
-  onCreateEmpty: () => void;
+  records: Invoice[];
   lang: Language;
+  onCreateEmpty: () => void;
+  onOpenRecords: () => void;
+  onOpenTemplates: () => void;
+  onOpenAI: () => void;
+  onExportLatest: () => void;
 }
 
-const INDUSTRY_CONFIG = [
-  {
-    id: 'freelance',
-    color: 'bg-emerald-500',
-    icon: 'fa-user-ninja',
-    imageIds: [
-      '/images/freelance-typing.png', // Laptop on desk (WAS INVALID #1)
-      '1498050108023-c5249f4df085', // Code on screen
-      '1519389950473-47ba0277781c', // Team working
-      '/images/freelance-code.png',  // Desk setup (WAS INVALID #4)
-      '1484867114623-ff5ef4c21801', // Typing
-      '1497030767101-fa0972d21231'  // Office
-    ]
-  },
-  {
-    id: 'construction',
-    color: 'bg-orange-500',
-    icon: 'fa-hard-hat',
-    imageIds: [
-      '1503387762-592deb58ef4e', // Modern architecture
-      '/images/construction-engineering.png', // Construction site (WAS INVALID #2)
-      '/images/construction-blueprints.png', // Blueprints (LOCAL)
-      '/images/construction-tools.png', // Tools (LOCAL)
-      '1581094771181-437754374a81', // Engineering
-      '1523413551-7890664e585f'  // Building materials
-    ]
-  },
-  {
-    id: 'retail',
-    color: 'bg-pink-500',
-    icon: 'fa-shopping-bag',
-    imageIds: [
-      '1441986300917-64674bd600d8', // Store interior
-      '/images/retail-checkout.png', // Shop shelf (WAS INVALID #2)
-      '1556742044-3c52d6e88c62', // Checkout
-      '1556740738-b6a63e27c4df', // Shopping bags
-      '1567401893414-76b7b1e5a7a5', // Clothing rack
-      '1441986233159-45d45ca44571'  // Retail display
-    ]
-  },
-  {
-    id: 'consulting',
-    color: 'bg-blue-500',
-    icon: 'fa-briefcase',
-    imageIds: [
-      '1552664730-d307ca884978', // Business meeting
-      '/images/consulting-collaboration.png', // Office people (WAS INVALID #2)
-      '1521737604893-d14cc237f11d', // Collaboration
-      '/images/consulting-data-charts.png', // Workshop (WAS INVALID #4)
-      '1542744094-246d7ac42a7a', // Data charts
-      '1600881333744-4405814239b0'  // Professional portrait
-    ]
-  },
-  {
-    id: 'design',
-    color: 'bg-purple-500',
-    icon: 'fa-paint-brush',
-    imageIds: [
-      '/images/design-workspace.png', // Designer workspace (LOCAL #1)
-      '/images/design-graphic.png', // Graphic design (LOCAL #2)
-      '1550684848-fac1c5b4e853', // Color palettes
-      '/images/design-tablet.png', // Drawing tablet (LOCAL #4)
-      '1618005182381-e23e03f191b4', // Abstract art
-      '1581299894628-3ad044748d1c'  // UI/UX design
-    ]
-  },
-];
+function getInvoiceTotal(invoice: Invoice) {
+  const subtotal = invoice.items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.rate || 0), 0);
+  return subtotal * (1 + Number(invoice.taxRate || 0) / 100);
+}
 
-const TemplateImage: React.FC<{
-  src: string;
-  alt: string;
-  icon: string;
-  color: string;
-}> = ({ src, alt, icon, color }) => {
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const imgRef = useRef<HTMLImageElement>(null);
+function formatCurrency(amount: number, currency = 'USD') {
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount || 0);
+  } catch {
+    return `${currency} ${amount.toFixed(0)}`;
+  }
+}
 
-  useEffect(() => {
-    // 檢查是否已經加載（針對緩存）
-    if (imgRef.current && imgRef.current.complete) {
-      setStatus('loaded');
-    }
-  }, []);
+const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpenRecords, onOpenTemplates, onOpenAI, onExportLatest }) => {
+  const [activeTrendIndex, setActiveTrendIndex] = useState<number | null>(null);
 
-  return (
-    <div className="absolute inset-0 bg-slate-100 overflow-hidden">
-      {/* 骨架屏：在加載或錯誤時顯示 */}
-      {(status === 'loading' || status === 'error') && (
-        <div className={`absolute inset-0 flex flex-col items-center justify-center ${status === 'error' ? 'bg-slate-200' : 'animate-pulse bg-slate-100'}`}>
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center ${color} text-white text-2xl mb-4 shadow-lg opacity-30`}>
-            <i className={`fas ${icon}`}></i>
-          </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
-            {status === 'error' ? 'Image Lost' : 'Loading...'}
-          </span>
-        </div>
-      )}
+  const dashboard = useMemo(() => {
+    const now = new Date();
+    const totalAmount = records.reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0);
+    const unpaid = records.filter(invoice => invoice.status !== 'Paid');
+    const unpaidAmount = unpaid.reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0);
+    const paidInvoices = records.filter(invoice => invoice.status === 'Paid');
+    const paidAmount = paidInvoices.reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0);
+    const overdue = records.filter(invoice => invoice.status !== 'Paid' && invoice.dueDate && new Date(invoice.dueDate) < now);
+    const overdueAmount = overdue.reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0);
+    const latestCurrency = records[0]?.currency || 'USD';
 
-      {/* 實際圖片：移除所有遮罩和濾鏡 */}
-      <img
-        ref={imgRef}
-        src={src}
-        alt={alt}
-        onLoad={() => setStatus('loaded')}
-        onError={() => setStatus('error')}
-        className={`w-full h-full object-cover transition-opacity duration-700 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'
-          }`}
-      />
-    </div>
-  );
-};
+    const trend = Array.from({ length: 7 }).map((_, index) => {
+      const day = new Date();
+      day.setDate(day.getDate() - (6 - index));
+      const key = day.toISOString().split('T')[0];
+      const value = records
+        .filter(invoice => invoice.date === key)
+        .reduce((sum, invoice) => sum + getInvoiceTotal(invoice), 0);
+      return { label: day.toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US', { weekday: 'short' }), value };
+    });
 
-const HomeView: React.FC<HomeViewProps> = ({ onSelectTemplate, onCreateEmpty, lang }) => {
-  const t = translations[lang] || translations['en'];
+    const maxTrend = Math.max(...trend.map(item => item.value), 1);
 
-  const industries = useMemo(() => {
-    const labels = {
-      freelance: t.ind_freelance,
-      construction: t.ind_construction,
-      retail: t.ind_retail,
-      consulting: t.ind_consulting,
-      design: t.ind_design,
+    const recentActivity = [...records]
+      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+      .slice(0, 5)
+      .map((invoice) => ({
+        id: invoice.id,
+        title: invoice.invoiceNumber,
+        subtitle: invoice.client.name || 'Unnamed client',
+        status: invoice.status || 'Draft',
+        amount: formatCurrency(getInvoiceTotal(invoice), invoice.currency),
+        date: invoice.date
+      }));
+
+    const monthlyPerformance = [...records]
+      .reduce((acc, invoice) => {
+        const key = invoice.client.name || 'Unknown client';
+        acc.set(key, (acc.get(key) || 0) + getInvoiceTotal(invoice));
+        return acc;
+      }, new Map<string, number>())
+      .entries();
+
+    const topClients = Array.from(monthlyPerformance)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([name, amount]) => ({ name, amount: formatCurrency(amount, latestCurrency) }));
+
+    return {
+      latestCurrency,
+      summary: {
+        totalAmount,
+        unpaidAmount,
+        paidAmount,
+        overdueAmount,
+        paidCount: paidInvoices.length
+      },
+      trend,
+      maxTrend,
+      recentActivity,
+      topClients
     };
+  }, [records, lang]);
 
-    return INDUSTRY_CONFIG.map(config => ({
-      ...config,
-      name: labels[config.id as keyof typeof labels] || config.id,
-      templates: Array.from({ length: 4 }).map((_, i) => {
-        const imageId = config.imageIds[i];
-        // Check if it's a local path or Unsplash ID
-        const backgroundImage = imageId.startsWith('/')
-          ? imageId  // Use local path directly
-          : `https://images.unsplash.com/photo-${imageId}?auto=format&fit=crop&w=800&q=80`;
+  const summaryCards = [
+    { label: '总账单金额', value: formatCurrency(dashboard.summary.totalAmount, dashboard.latestCurrency), icon: 'fa-wallet', color: 'bg-blue-50 text-blue-600' },
+    { label: '待付款金额', value: formatCurrency(dashboard.summary.unpaidAmount, dashboard.latestCurrency), icon: 'fa-hourglass-half', color: 'bg-amber-50 text-amber-600' },
+    { label: '已付款金额', value: formatCurrency(dashboard.summary.paidAmount, dashboard.latestCurrency), sub: `${dashboard.summary.paidCount} 笔`, icon: 'fa-circle-check', color: 'bg-emerald-50 text-emerald-600' },
+    { label: '逾期金额', value: formatCurrency(dashboard.summary.overdueAmount, dashboard.latestCurrency), icon: 'fa-triangle-exclamation', color: 'bg-rose-50 text-rose-600' },
+  ];
 
-        return {
-          id: `${config.id}-${i}`,
-          category: labels[config.id as keyof typeof labels] || config.id,
-          title: lang === 'en'
-            ? `Professional ${labels[config.id as keyof typeof labels] || config.id} Invoice Template #${i + 1}`
-            : `專業 ${labels[config.id as keyof typeof labels] || config.id} 發票模板 #${i + 1}`,
-          previewColor: config.color,
-          backgroundImage,
-          defaultData: {
-            items: [{ id: `tpl-${config.id}-${i}`, description: `${labels[config.id as keyof typeof labels]} Service Package`, quantity: 1, rate: (450 + (i * 120)) }]
-          }
-        };
-      })
-    }));
-  }, [t]);
+  const chartWidth = 640;
+  const chartHeight = 240;
+  const chartPadding = { top: 20, right: 16, bottom: 28, left: 16 };
+  const innerWidth = chartWidth - chartPadding.left - chartPadding.right;
+  const innerHeight = chartHeight - chartPadding.top - chartPadding.bottom;
+  const pointGap = dashboard.trend.length > 1 ? innerWidth / (dashboard.trend.length - 1) : innerWidth;
+
+  const trendPoints = dashboard.trend.map((item, index) => {
+    const x = chartPadding.left + pointGap * index;
+    const y = chartPadding.top + innerHeight - (item.value / dashboard.maxTrend) * innerHeight;
+
+    return {
+      ...item,
+      x,
+      y,
+      amount: formatCurrency(item.value, dashboard.latestCurrency)
+    };
+  });
+
+  const linePath = trendPoints
+    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+    .join(' ');
+
+  const areaPath = trendPoints.length
+    ? `${linePath} L ${trendPoints[trendPoints.length - 1].x} ${chartHeight - chartPadding.bottom} L ${trendPoints[0].x} ${chartHeight - chartPadding.bottom} Z`
+    : '';
+
+  const activePoint = activeTrendIndex !== null ? trendPoints[activeTrendIndex] : null;
 
   return (
-    <div className="max-w-7xl mx-auto py-12 space-y-16 overflow-hidden">
-      <section className="text-center space-y-8 py-16 relative">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
-          Professional Invoice Generator
+    <div className="max-w-7xl mx-auto p-5 md:p-6 space-y-5">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {summaryCards.map(card => (
+          <div key={card.label} className="bg-white rounded-[28px] border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${card.color}`}><i className={`fas ${card.icon}`}></i></div>
+              {card.sub && <span className="text-xs font-bold text-slate-400">{card.sub}</span>}
+            </div>
+            <div className="text-sm font-bold text-slate-500">{card.label}</div>
+            <div className="mt-2 text-2xl font-black text-slate-900 tracking-tight">{card.value}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-black text-slate-900">营收趋势</h2>
+              <p className="text-sm text-slate-500">最近 7 天开票金额</p>
+            </div>
+          </div>
+          <div className="mt-8 bg-slate-50/70 rounded-[28px] p-4 border border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-3xl font-black text-slate-900">{formatCurrency(dashboard.summary.totalAmount, dashboard.latestCurrency)}</div>
+                <div className="text-xs font-bold text-slate-400 mt-1">近 7 天累计开票金额</div>
+              </div>
+              <div className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-black">本周</div>
+            </div>
+            <div
+              className="relative h-56"
+              onMouseLeave={() => setActiveTrendIndex(null)}
+            >
+              {activePoint && (
+                <div
+                  className="absolute z-10 -translate-x-1/2 -translate-y-full rounded-2xl bg-slate-950 px-3 py-2 text-white shadow-2xl pointer-events-none"
+                  style={{
+                    left: `${(activePoint.x / chartWidth) * 100}%`,
+                    top: `${Math.max(((activePoint.y - 14) / chartHeight) * 100, 8)}%`
+                  }}
+                >
+                  <div className="text-[11px] font-bold text-white/60">{activePoint.label}</div>
+                  <div className="text-sm font-black leading-none mt-1">{activePoint.amount}</div>
+                </div>
+              )}
+
+              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible">
+                <defs>
+                  <linearGradient id="trendAreaGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.03" />
+                  </linearGradient>
+                </defs>
+
+                {[0, 1, 2, 3].map((step) => {
+                  const y = chartPadding.top + (innerHeight / 3) * step;
+                  return (
+                    <line
+                      key={step}
+                      x1={chartPadding.left}
+                      x2={chartWidth - chartPadding.right}
+                      y1={y}
+                      y2={y}
+                      stroke="#e2e8f0"
+                      strokeDasharray="4 6"
+                    />
+                  );
+                })}
+
+                {areaPath && <path d={areaPath} fill="url(#trendAreaGradient)" />}
+                {linePath && <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />}
+
+                {trendPoints.map((point, index) => (
+                  <g key={`${point.label}-${index}`}>
+                    <line
+                      x1={point.x}
+                      x2={point.x}
+                      y1={chartPadding.top}
+                      y2={chartHeight - chartPadding.bottom}
+                      stroke={activeTrendIndex === index ? '#93c5fd' : 'transparent'}
+                      strokeDasharray="4 6"
+                      strokeWidth="1.5"
+                    />
+                    <line
+                      x1={chartPadding.left}
+                      x2={chartWidth - chartPadding.right}
+                      y1={point.y}
+                      y2={point.y}
+                      stroke={activeTrendIndex === index ? '#cbd5e1' : 'transparent'}
+                      strokeDasharray="4 6"
+                      strokeWidth="1.5"
+                    />
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={activeTrendIndex === index ? 7 : 5}
+                      fill="#ffffff"
+                      stroke="#2563eb"
+                      strokeWidth="3"
+                      className="transition-all duration-150"
+                    />
+                    <text
+                      x={point.x}
+                      y={Math.max(point.y - 14, chartPadding.top + 12)}
+                      textAnchor="middle"
+                      className={`fill-slate-500 text-[11px] font-bold ${activeTrendIndex === index ? 'fill-blue-600' : ''}`}
+                    >
+                      {point.value > 0 ? point.amount : '0'}
+                    </text>
+                    <rect
+                      x={index === 0 ? chartPadding.left : point.x - pointGap / 2}
+                      y={chartPadding.top}
+                      width={index === 0 || index === trendPoints.length - 1 ? pointGap / 2 : pointGap}
+                      height={innerHeight}
+                      fill="transparent"
+                      className="cursor-crosshair"
+                      onMouseEnter={() => setActiveTrendIndex(index)}
+                      onFocus={() => setActiveTrendIndex(index)}
+                    />
+                  </g>
+                ))}
+              </svg>
+
+              <div className="mt-3 grid grid-cols-7 gap-2">
+                {trendPoints.map((point, index) => (
+                  <button
+                    key={`${point.label}-label`}
+                    type="button"
+                    onMouseEnter={() => setActiveTrendIndex(index)}
+                    onMouseLeave={() => setActiveTrendIndex(current => (current === index ? null : current))}
+                    onFocus={() => setActiveTrendIndex(index)}
+                    onBlur={() => setActiveTrendIndex(current => (current === index ? null : current))}
+                    className={`rounded-xl px-2 py-1.5 text-xs font-bold transition-colors ${activeTrendIndex === index ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:bg-white hover:text-slate-600'}`}
+                    aria-label={`${point.label} ${point.amount}`}
+                  >
+                    {point.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-        <h1 className="text-5xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.05]">
-          {t.heroTitle.split(' ')[0]} <span className="text-blue-600">{t.heroTitle.split(' ').slice(1).join(' ')}</span>
-        </h1>
-        <p className="text-slate-500 max-w-2xl mx-auto text-xl font-medium px-4 leading-relaxed">{t.heroSub}</p>
-        <div className="flex justify-center pt-8">
-          <button
-            onClick={onCreateEmpty}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-100 flex items-center gap-3 transition-all active:scale-95 text-lg group"
-          >
-            <i className="fas fa-plus-circle group-hover:rotate-90 transition-transform"></i> {t.createEmpty}
-          </button>
+
+        <div className="bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm">
+          <h2 className="text-xl font-black text-slate-900 mb-1">快捷操作</h2>
+          <p className="text-sm text-slate-500 mb-6">高频动作直接进入</p>
+          <div className="space-y-3">
+            <button onClick={onCreateEmpty} className="w-full flex items-center justify-between p-4 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors"><span>快速创建</span><i className="fas fa-plus"></i></button>
+            <button onClick={onExportLatest} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 font-bold hover:bg-slate-100 transition-colors"><span>导出 PDF</span><i className="fas fa-file-pdf"></i></button>
+            <button onClick={onOpenRecords} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 font-bold hover:bg-slate-100 transition-colors"><span>查看发票列表</span><i className="fas fa-file-invoice"></i></button>
+            <button onClick={onOpenTemplates} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-slate-700 font-bold hover:bg-slate-100 transition-colors"><span>模板中心</span><i className="fas fa-layer-group"></i></button>
+          </div>
         </div>
       </section>
 
-      {/* Legacy Template List Removed - Keeping page clean as per SEO Plan A */}
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm">
+          <h2 className="text-xl font-black text-slate-900 mb-1">核心表现</h2>
+          <p className="text-sm text-slate-500 mb-5">按客户汇总的月度表现</p>
+          <div className="space-y-4">
+            {dashboard.topClients.length > 0 ? dashboard.topClients.map(client => (
+              <div key={client.name} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <div>
+                  <div className="font-bold text-slate-900">{client.name}</div>
+                  <div className="text-xs text-slate-400">本月累计</div>
+                </div>
+                <div className="font-black text-slate-900">{client.amount}</div>
+              </div>
+            )) : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center"><div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-chart-line"></i></div><div className="text-sm font-bold text-slate-500">暂无客户表现数据</div><div className="text-xs text-slate-400 mt-1">创建并保存账单后，这里会展示核心客户表现。</div></div>}
+          </div>
+        </div>
 
-      <SEOContent lang={lang} />
+        <div className="bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm xl:col-span-1">
+          <h2 className="text-xl font-black text-slate-900 mb-1">最近动态</h2>
+          <p className="text-sm text-slate-500 mb-5">最近创建和更新的账单</p>
+          <div className="space-y-4">
+            {dashboard.recentActivity.length > 0 ? dashboard.recentActivity.map(item => (
+              <div key={item.id} className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center"><i className="fas fa-file-lines"></i></div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-slate-900 truncate">{item.title}</div>
+                  <div className="text-sm text-slate-500 truncate">{item.subtitle}</div>
+                  <div className="text-xs text-slate-400 mt-1">{item.status} · {item.date}</div>
+                </div>
+                <div className="text-sm font-black text-slate-700">{item.amount}</div>
+              </div>
+            )) : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center"><div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-clock-rotate-left"></i></div><div className="text-sm font-bold text-slate-500">暂无最近动态</div><div className="text-xs text-slate-400 mt-1">账单创建、分享、付款后，这里会自动出现记录。</div></div>}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[32px] p-6 shadow-sm text-white">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4"><i className="fas fa-wand-magic-sparkles"></i></div>
+          <h2 className="text-2xl font-black mb-2">AI 助手</h2>
+          <p className="text-white/70 text-sm leading-relaxed mb-6">让 AI 帮你生成条目、润色描述、快速整理账单内容。</p>
+          <button onClick={onOpenAI} className="w-full rounded-2xl bg-white text-slate-900 py-3 font-black hover:bg-slate-100 transition-colors shadow-[0_12px_24px_-16px_rgba(255,255,255,0.9)]">打开 AI 助手</button>
+        </div>
+      </section>
     </div>
   );
 };

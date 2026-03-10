@@ -1,18 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { ViewType } from '@/types';
-
-declare global {
-  interface Window {
-    google: any;
-  }
-}
 
 interface UseGoogleAuthOptions {
-  targetView?: ViewType;
-  onSuccess?: () => void;
+  nextPath?: string;
+  onSuccess?: (nextPath: string) => void;
   onError?: (message: string) => void;
 }
 
@@ -21,79 +14,92 @@ export function useGoogleAuth(options: UseGoogleAuthOptions = {}) {
 
   const handleGoogleLogin = useCallback(async () => {
     setIsGoogleLoading(true);
+
     try {
       const supabase = createClient();
-      const currentPath = typeof window !== 'undefined' && window.location.pathname === '/' ? '' : window.location.pathname;
-      const viewParam = options.targetView ? `view=${options.targetView}` : '';
+      const nextPath = options.nextPath || '/dashboard';
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}&popup=1`;
 
-      let nextUrl = currentPath;
-      if (viewParam) nextUrl += (nextUrl.includes('?') ? '&' : '?') + viewParam;
-
-      const redirectTo = `${window.location.origin}/auth/callback${nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ''}`;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
-          queryParams: { access_type: 'offline', prompt: 'consent' }
+          queryParams: { access_type: 'offline', prompt: 'select_account' },
+          skipBrowserRedirect: true,
         }
       });
 
       if (error) throw error;
       if (!data?.url) throw new Error('Failed to get Google login URL');
 
-      window.location.href = data.url;
+      const popup = window.open(
+        data.url,
+        'smartbill-google-login',
+        'popup=yes,width=520,height=680,menubar=no,toolbar=no,location=yes,resizable=yes,scrollbars=yes,status=no'
+      );
+
+      if (!popup) throw new Error('Popup was blocked. Please allow popups and try again.');
+
+      await new Promise<void>((resolve, reject) => {
+        let handled = false;
+
+        const cleanup = () => {
+          window.clearTimeout(timeout);
+          window.clearInterval(poll);
+          window.removeEventListener('message', onMessage);
+          try { popup.close(); } catch {}
+          setIsGoogleLoading(false);
+        };
+
+        const timeout = window.setTimeout(() => {
+          if (handled) return;
+          handled = true;
+          cleanup();
+          reject(new Error('Google login timed out. Please try again.'));
+        }, 120000);
+
+        const poll = window.setInterval(() => {
+          if (!popup.closed || handled) return;
+
+          window.setTimeout(() => {
+            if (handled) return;
+            handled = true;
+            cleanup();
+            reject(new Error('Google login was cancelled.'));
+          }, 800);
+        }, 500);
+
+        const onMessage = async (event: MessageEvent) => {
+          if (event.origin !== window.location.origin || handled) return;
+          const type = event.data?.type;
+
+          if (type === 'SMARTBILL_AUTH_SUCCESS') {
+            handled = true;
+            const target = event.data?.next || nextPath;
+
+            try {
+              await supabase.auth.getUser();
+            } catch (refreshError) {
+              console.warn('[GoogleAuth] Failed to refresh auth state after popup login:', refreshError);
+            }
+
+            cleanup();
+            options.onSuccess?.(target);
+            resolve();
+          }
+
+          if (type === 'SMARTBILL_AUTH_ERROR') {
+            handled = true;
+            cleanup();
+            reject(new Error('Google login failed.'));
+          }
+        };
+
+        window.addEventListener('message', onMessage);
+      });
     } catch (error: any) {
       setIsGoogleLoading(false);
       options.onError?.(error.message || 'Google login failed');
-    }
-  }, [options]);
-
-  useEffect(() => {
-    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]') as HTMLScriptElement | null;
-
-    const initializeOneTap = () => {
-      if (!window.google) return;
-
-      window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
-        callback: async (response: any) => {
-          setIsGoogleLoading(true);
-          try {
-            const supabase = createClient();
-            const { data, error } = await supabase.auth.signInWithIdToken({
-              provider: 'google',
-              token: response.credential
-            });
-
-            if (error) throw error;
-            if (data.session) {
-              options.onSuccess?.();
-              const targetView = options.targetView && options.targetView !== 'login' ? options.targetView : 'records';
-              window.location.replace(`/dashboard?view=${targetView}`);
-            }
-          } catch (error: any) {
-            options.onError?.(error.message || 'One Tap login failed');
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        },
-        auto_select: false,
-        cancel_on_tap_outside: false,
-        use_fedcm_for_prompt: false
-      });
-
-      window.google.accounts.id.prompt();
-    };
-
-    if (!script) {
-      script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeOneTap;
-      document.body.appendChild(script);
-    } else if (window.google) {
-      initializeOneTap();
     }
   }, [options]);
 

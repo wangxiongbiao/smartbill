@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { batchSaveInvoiceRecords, getProfile, listInvoices } from '@/lib/api/invoice';
+import { getViewFromPath } from '@/lib/routes';
 import type { Invoice, User, ViewType } from '@/types';
 
 const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail'];
@@ -10,7 +11,12 @@ const ALLOWED_VIEWS: ViewType[] = ['home', 'records', 'profile', 'editor', 'abou
 
 function getRequestedView(): ViewType {
   if (typeof window === 'undefined') return 'home';
-  const params = new URLSearchParams(window.location.search);
+
+  const { pathname, search } = window.location;
+  const routeView = getViewFromPath(pathname);
+  if (routeView !== 'home' || pathname === '/dashboard') return routeView;
+
+  const params = new URLSearchParams(search);
   const targetView = params.get('view') as ViewType | null;
   return targetView && ALLOWED_VIEWS.includes(targetView) ? targetView : 'home';
 }
@@ -48,7 +54,7 @@ export function useAuthSession() {
         setActiveView('login');
         return;
       }
-      setActiveView(requestedView === 'login' && hasUser ? 'records' : requestedView);
+      setActiveView(requestedView === 'login' && hasUser ? 'home' : requestedView);
     };
 
     const syncUser = async (authUser: any) => {

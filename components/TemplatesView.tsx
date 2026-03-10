@@ -1,68 +1,54 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
-import { bumpTemplateUsage, listTemplates, removeTemplate } from '@/lib/api/template';
 
 interface TemplatesViewProps {
     lang: Language;
-    userId: string;
-    onUseTemplate: (template: InvoiceTemplate) => void;
+    templates: InvoiceTemplate[];
+    loading?: boolean;
+    onUseTemplate: (template: InvoiceTemplate) => void | Promise<void>;
     onViewDetail: (template: InvoiceTemplate) => void;
-    onNewDoc: () => void;
+    onDeleteTemplate?: (template: InvoiceTemplate) => Promise<void>;
+    onNewDoc: () => void | Promise<void>;
+    onRefresh?: () => Promise<void>;
 }
 
 const TemplatesView: React.FC<TemplatesViewProps> = ({
     lang,
-    userId,
+    templates,
+    loading = false,
     onUseTemplate,
     onViewDetail,
-    onNewDoc
+    onDeleteTemplate,
+    onNewDoc,
 }) => {
     const t = translations[lang] || translations['en'];
-    const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
-    const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteTemplateItem, setDeleteTemplateItem] = useState<InvoiceTemplate | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
     const [searchQuery, setSearchQuery] = useState('');
 
-    const loadTemplates = async () => {
-        setLoading(true);
-        try {
-            const data = await listTemplates(userId);
-            setTemplates(data.templates);
-        } catch (error) {
-            console.error('Error loading templates:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadTemplates();
-    }, [userId]);
-
     const handleUseTemplate = async (template: InvoiceTemplate) => {
         try {
-            await bumpTemplateUsage(template.id);
-            await loadTemplates();
+            await onUseTemplate(template);
         } catch (error) {
             console.error('Error using template:', error);
         }
-        onUseTemplate(template);
     };
 
     const handleDeleteTemplate = async (template: InvoiceTemplate) => {
         setDeletingId(template.id);
         try {
-            await removeTemplate(template.id);
-            await loadTemplates();
-        } catch (error) {
-            console.error('Error deleting template:', error);
+            if (onDeleteTemplate) {
+                await onDeleteTemplate(template);
+                return;
+            }
+            onViewDetail(template);
         } finally {
             setDeletingId(null);
+            setDeleteTemplateItem(null);
         }
     };
 
