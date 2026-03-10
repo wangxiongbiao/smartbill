@@ -1,152 +1,166 @@
-
 'use client';
-import React, { useState } from 'react';
-import { ViewType, Language } from '../types';
-import { translations } from '../i18n';
 
-interface HeaderProps {
-  onPrint: () => void;
-  isExporting?: boolean;
-  activeView: ViewType;
-  setView: (v: ViewType) => void;
-  lang: Language;
-  setLang: (l: Language) => void;
-}
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { createClient } from '@/lib/supabase/client';
 
-const Header: React.FC<HeaderProps> = ({ onPrint, isExporting, activeView, setView, lang, setLang }) => {
-  const [showLangMenu, setShowLangMenu] = useState(false);
-  const t = translations[lang];
+export function Header() {
+  const router = useRouter();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profile, setProfile] = useState<{ name?: string | null; email?: string | null; avatar?: string | null }>({});
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isGoogleLoading, handleGoogleLogin } = useGoogleAuth({
+    nextPath: '/dashboard',
+    onSuccess: (target) => router.replace(target || '/dashboard'),
+  });
 
-  const navItems: { id: ViewType; label: string; icon: string }[] = [
-    { id: 'home', label: t.home, icon: 'fas fa-home' },
-    { id: 'records', label: t.records, icon: 'fas fa-file-invoice' },
-    { id: 'templates', label: t.myTemplates, icon: 'fas fa-file-contract' },
-    { id: 'profile', label: t.profile, icon: 'fas fa-user' },
-  ];
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
-  const languages: { id: Language; label: string }[] = [
-    { id: 'zh-TW', label: '繁體中文' },
-    { id: 'en', label: 'English' },
-    // { id: 'fr', label: 'Français' },
-    // { id: 'de', label: 'Deutsch' },
-    // { id: 'ja', label: '日本語' },
-  ];
+  useEffect(() => {
+    const supabase = createClient();
+    let mounted = true;
 
-  const currentLangLabel = languages.find(l => l.id === lang)?.label || 'Language';
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      const sessionUser = data.session?.user;
+      setIsLoggedIn(!!sessionUser);
+      setProfile({
+        name: sessionUser?.user_metadata?.full_name ?? null,
+        email: sessionUser?.email ?? null,
+        avatar: sessionUser?.user_metadata?.avatar_url ?? null,
+      });
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      const sessionUser = session?.user;
+      setIsLoggedIn(!!sessionUser);
+      setProfile({
+        name: sessionUser?.user_metadata?.full_name ?? null,
+        email: sessionUser?.email ?? null,
+        avatar: sessionUser?.user_metadata?.avatar_url ?? null,
+      });
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setDropdownOpen(false);
+      router.replace('/');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
-    <header className="bg-white/95 backdrop-blur-2xl border-b border-slate-100 sticky top-0 z-[100] no-print shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)]">
-      {/* 核心對齊容器：統一 max-w 和 px 以確保與下方內容垂直對齊 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 h-20 flex items-center justify-between">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl" data-purpose="navigation">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-14">
+        <div className="flex items-center gap-8">
+          <Link className="flex items-center gap-3" href="/" aria-label="SmartBill home">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+              <i className="fas fa-file-invoice text-sm"></i>
+            </div>
+            <div className="leading-none">
+              <div className="text-lg font-black tracking-tight text-slate-950">SmartBill</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">Invoice workflow</div>
+            </div>
+          </Link>
 
-        {/* 左側：品牌標識 */}
-        <div
-          className="flex items-center gap-3 cursor-pointer group select-none"
-          onClick={() => setView('home')}
-        >
-          <div className="bg-blue-600 w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 transition-all group-hover:rotate-6 group-hover:scale-105">
-            <i className="fas fa-file-invoice text-lg"></i>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-black bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent leading-none tracking-tight">
-              SmartBill
-            </span>
-            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] leading-none mt-1.5">
-              PRO EDITION
-            </span>
-          </div>
+          <nav className="hidden items-center gap-6 md:flex text-sm font-semibold text-slate-600">
+            <a className="transition-colors hover:text-slate-950" href="#features">Features</a>
+            <a className="transition-colors hover:text-slate-950" href="#templates">Templates</a>
+            <a className="transition-colors hover:text-slate-950" href="#audience">Who it’s for</a>
+            <a className="transition-colors hover:text-slate-950" href="#faq">FAQ</a>
+          </nav>
         </div>
 
-        {/* 右側：功能區塊 */}
-        <div className="flex items-center gap-3 sm:gap-6">
-          {/* 桌面端主導航 */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-[1.25rem] border border-slate-100">
-            {navItems.map((item) => {
-              const isActive = activeView === item.id ||
-                (item.id === 'records' && activeView === 'editor') ||
-                (item.id === 'templates' && activeView === 'template-detail');
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setView(item.id)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2.5 uppercase tracking-wider ${isActive
-                    ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
-                    : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
-                    }`}
-                >
-                  <i className={`${item.icon} text-[10px] ${isActive ? 'opacity-100' : 'opacity-60'}`}></i>
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="hidden lg:block w-px h-6 bg-slate-200"></div>
-
-          {/* 語言切換與導出 */}
-          <div className="flex items-center gap-2 relative">
-            {/* 增強版語言選擇按鈕：顯示當前語言名稱 */}
-            <div className="relative">
+        <div className="flex items-center gap-3">
+          {isLoggedIn ? (
+            <div className="relative" ref={dropdownRef}>
               <button
-                onClick={() => setShowLangMenu(!showLangMenu)}
-                className={`h-11 px-4 flex items-center gap-3 rounded-2xl border transition-all shadow-sm group ${showLangMenu
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 transition-colors hover:bg-slate-50"
+                aria-label="User menu"
               >
-                <i className={`fas fa-globe text-sm transition-transform ${showLangMenu ? 'rotate-12' : 'group-hover:rotate-12'}`}></i>
-                <span className="text-[11px] font-black whitespace-nowrap uppercase tracking-tight hidden sm:inline">
-                  {currentLangLabel}
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name ?? 'User'}
+                    className="h-8 w-8 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                    {(profile.name || profile.email || 'U').slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden max-w-[130px] truncate text-sm font-semibold text-slate-700 sm:block">
+                  {profile.name ?? profile.email}
                 </span>
-                <i className={`fas fa-chevron-down text-[9px] opacity-40 transition-transform duration-300 ${showLangMenu ? 'rotate-180' : ''}`}></i>
+                <i className="fas fa-chevron-down text-xs text-slate-400"></i>
               </button>
 
-              {showLangMenu && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowLangMenu(false)}></div>
-                  <div className="absolute right-0 mt-4 w-60 bg-white rounded-[1.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-slate-100 z-20 py-2.5 overflow-hidden animate-in fade-in zoom-in duration-200">
-                    <div className="px-5 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1.5">Select Language</div>
-                    <div className="max-h-[300px] overflow-y-auto scrollbar-hide">
-                      {languages.map((l) => (
-                        <button
-                          key={l.id}
-                          onClick={() => {
-                            setLang(l.id);
-                            setShowLangMenu(false);
-                          }}
-                          className={`w-full px-5 py-3.5 text-left text-sm font-bold flex items-center justify-between transition-colors ${lang === l.id ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                        >
-                          {l.label}
-                          {lang === l.id && <i className="fas fa-check-circle text-blue-500"></i>}
-                        </button>
-                      ))}
-                    </div>
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                  <div className="border-b border-slate-100 px-3 py-2">
+                    <p className="truncate text-sm font-semibold text-slate-900">{profile.name ?? 'User'}</p>
+                    <p className="truncate text-xs text-slate-400">{profile.email}</p>
                   </div>
-                </>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setDropdownOpen(false)}
+                    className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <i className="fas fa-table-columns text-sm"></i>
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50"
+                  >
+                    <i className={`fas ${isLoggingOut ? 'fa-circle-notch fa-spin' : 'fa-right-from-bracket'}`}></i>
+                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                  </button>
+                </div>
               )}
             </div>
-
-            {/* 導出按鈕 - 僅在編輯器視圖顯示 */}
-            {activeView === 'editor' && (
+          ) : (
+            <>
+              <Link href="/dashboard" className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 md:inline-flex">
+                Live demo
+              </Link>
               <button
-                onClick={onPrint}
-                disabled={isExporting}
-                className={`bg-blue-600 hover:bg-blue-700 text-white h-11 px-6 rounded-2xl font-black shadow-lg shadow-blue-100 flex items-center gap-2.5 transition-all active:scale-95 text-xs uppercase tracking-widest ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
+                onClick={handleGoogleLogin}
+                disabled={isGoogleLoading}
+                className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-800 disabled:opacity-70"
               >
-                {isExporting ? (
-                  <i className="fas fa-circle-notch fa-spin"></i>
-                ) : (
-                  <i className="fas fa-file-export"></i>
-                )}
-                <span>{isExporting ? t.generating : t.exportPdf}</span>
+                {isGoogleLoading ? 'Signing in...' : 'Start free'}
               </button>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </header>
   );
-};
-
-export default Header;
+}

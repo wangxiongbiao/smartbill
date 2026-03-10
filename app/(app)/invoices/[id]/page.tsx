@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import EditorRoute from '@/components/app/routes/EditorRoute';
 
 export const metadata: Metadata = {
-  title: 'Invoice | SmartBill Pro',
-  description: 'Edit your invoice.',
+  title: 'Edit Invoice',
+  description: 'Update invoice details, payment information, line items, branding, and PDF-ready output in the SmartBill editor.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function InvoiceDetailPage() {

@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import TemplateDetailRoute from '@/components/app/routes/TemplateDetailRoute';
 
 export const metadata: Metadata = {
-  title: 'Template Detail | SmartBill Pro',
-  description: 'View and use a saved invoice template.',
+  title: 'Template Detail',
+  description: 'View a private invoice template inside your SmartBill workspace.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function TemplateDetailPage({ params }: { params: Promise<{ id: string }> }) {

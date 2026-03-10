@@ -1,121 +1,69 @@
-
 import React from 'react';
-import { Language, ViewType, DocumentType } from '../types';
-import { translations } from '../i18n';
+import Link from 'next/link';
 
-interface FooterProps {
-  lang: Language;
-  setView: (v: ViewType) => void;
-  onNewDoc: (type: DocumentType) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ lang, setView, onNewDoc }) => {
-  const t = translations[lang] || translations['en'];
-  const year = new Date().getFullYear();
-
+export function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-200 pt-16 pb-12 mt-auto no-print relative z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
-          <div className="md:col-span-4 space-y-6">
+    <footer className="border-t border-slate-200 bg-slate-950 text-white" data-purpose="footer">
+      <div className="px-4 py-14 sm:px-6 lg:px-10 2xl:px-14">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1.1fr]">
+          <div>
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xl shadow-blue-100">
-                <i className="fas fa-file-invoice text-lg"></i>
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-950">
+                <i className="fas fa-file-invoice"></i>
               </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">
-                  SmartBill
-                </span>
-                <span className="text-xs font-black text-blue-600 uppercase tracking-[0.2em] mt-1">
-                  Professional Pro
-                </span>
+              <div>
+                <div className="text-xl font-black tracking-tight">SmartBill</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/45">Invoice workflow</div>
               </div>
             </div>
-            <p className="text-slate-500 text-sm leading-relaxed max-w-sm font-medium">
-              {t.footerDesc}
+            <p className="mt-5 max-w-sm text-sm leading-7 text-white/65">
+              SmartBill helps freelancers and small businesses create professional invoices, reuse templates, organize records, and export polished PDFs with less manual work.
             </p>
           </div>
 
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">{t.productFeatures}</h4>
-            <ul className="space-y-4 text-sm font-bold text-slate-600">
-              <li>
-                <button onClick={() => setView('home')} className="hover:text-blue-600 transition-colors">
-                  {t.home}
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNewDoc('invoice')} className="hover:text-blue-600 transition-colors">
-                  {t.makeInvoice}
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNewDoc('receipt')} className="hover:text-blue-600 transition-colors">
-                  {t.makeReceipt}
-                </button>
-              </li>
-              <li>
-                <button onClick={() => setView('home')} className="hover:text-blue-600 transition-colors">
-                  {t.templates}
-                </button>
-              </li>
-              <li>
-                <button onClick={() => setView('editor')} className="text-blue-600/60 hover:text-blue-600 transition-colors flex items-center gap-2">
-                  <i className="fas fa-bolt text-[10px]"></i> {t.aiAssistant}
-                </button>
-              </li>
+          <div>
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-white/45">Product</h4>
+            <ul className="mt-5 space-y-3 text-sm font-medium text-white/70">
+              <li><Link className="transition-colors hover:text-white" href="/dashboard">Dashboard</Link></li>
+              <li><Link className="transition-colors hover:text-white" href="/invoices/new">Create invoice</Link></li>
+              <li><Link className="transition-colors hover:text-white" href="/templates">Templates</Link></li>
+              <li><a className="transition-colors hover:text-white" href="#features">Features</a></li>
             </ul>
           </div>
 
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">{t.support}</h4>
-            <ul className="space-y-4 text-sm font-bold text-slate-600">
-              <li><button onClick={() => setView('about')} className="hover:text-blue-600 transition-colors">{t.aboutUs}</button></li>
-              <li><button onClick={() => setView('help')} className="hover:text-blue-600 transition-colors">{t.helpCenter}</button></li>
-              {/* <li><a href="#" className="hover:text-blue-600 transition-colors">{t.privacy}</a></li> */}
+          <div>
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-white/45">Use cases</h4>
+            <ul className="mt-5 space-y-3 text-sm font-medium text-white/70">
+              <li>Freelance invoicing</li>
+              <li>Agency retainers</li>
+              <li>Consulting billing</li>
+              <li>Small business invoices</li>
             </ul>
           </div>
 
-          <div className="md:col-span-4 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">{t.contactUs}</h4>
-            <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600">
-                  <i className="fas fa-envelope"></i>
-                </div>
+          <div>
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-white/45">Contact</h4>
+            <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-5 text-sm text-white/70">
+              <div className="flex items-start gap-3">
+                <i className="fas fa-envelope mt-1 text-white/45"></i>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.supportEmail}</p>
-                  <p className="text-sm font-black text-slate-900">smartbillpro@gmail.com</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-600">
-                  <i className="fas fa-clock"></i>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.serviceTime}</p>
-                  <p className="text-sm font-black text-slate-900">{t.monToFri}</p>
-                  <p className="text-xs font-medium text-slate-500 mt-1">{t.pacificTime}</p>
+                  <div className="font-semibold text-white">smartbillpro@gmail.com</div>
+                  <div className="mt-1 text-white/55">For product feedback, support, and business inquiries.</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.4em]">
-            {t.copyright.replace('{year}', year.toString())}
-          </p>
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-              {t.systemOk}
-            </span>
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/45 md:flex-row md:items-center md:justify-between">
+          <p>© {new Date().getFullYear()} SmartBill. All rights reserved.</p>
+          <div className="flex items-center gap-5">
+            <span>Invoice generator</span>
+            <span>Templates</span>
+            <span>PDF export</span>
           </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
