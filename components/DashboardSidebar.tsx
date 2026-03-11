@@ -57,7 +57,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             { key: 'records', id: 'records' as ViewType, label: 'Invoice', icon: 'fas fa-folder-open', activeIcon: 'fas fa-folder-open', active: isNavItemActive('records', activeView) },
             { key: 'templates', id: 'templates' as ViewType, label: 'Templates', icon: 'fas fa-layer-group', activeIcon: 'fas fa-layer-group', active: isNavItemActive('templates', activeView) },
             { key: 'settings', id: 'profile' as ViewType, label: 'Settings', icon: 'fas fa-gear', activeIcon: 'fas fa-gear', active: activeView === 'profile' },
-            { key: 'account', id: 'profile' as ViewType, label: 'Account', icon: 'fas fa-user-tie', activeIcon: 'fas fa-user-tie', active: false },
         ]
         : baseNavItems.map((item) => ({
             key: item.id,

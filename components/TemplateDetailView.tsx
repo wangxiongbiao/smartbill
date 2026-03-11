@@ -166,7 +166,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                 {/* Right Panel - Preview */}
                 <div className="lg:w-3/5">
-                    <div className=" bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
+                    <div className="min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
                         <ScalableInvoiceContainer>
                             <InvoicePreview
                                 invoice={previewInvoice as any}

@@ -52,7 +52,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
           </div>
         </div>
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-          <div className="bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
+          <div className="min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
             <ScalableInvoiceContainer>
               <InvoicePreview invoice={props.invoice} template={props.template} isHeaderReversed={props.isHeaderReversed} lang={props.lang} editable onChange={props.onUpdateInvoice} />
             </ScalableInvoiceContainer>

@@ -15,7 +15,6 @@ export function getPrimaryNavItems(lang: Language): NavItemConfig[] {
         home: 'Dashboard',
         records: 'Invoice',
         templates: 'Templates',
-        profile: 'Account',
         editor: 'New',
       }
     : {
@@ -26,13 +25,18 @@ export function getPrimaryNavItems(lang: Language): NavItemConfig[] {
         editor: t.make || 'New',
       };
 
-  return [
+  const baseItems: NavItemConfig[] = [
     { id: 'home', label: labels.home, icon: 'fas fa-house', activeIcon: 'fas fa-house' },
     { id: 'records', label: labels.records, icon: 'fas fa-folder-open', activeIcon: 'fas fa-folder-open' },
     { id: 'editor', label: labels.editor, icon: 'fas fa-plus', activeIcon: 'fas fa-plus' },
     { id: 'templates', label: labels.templates, icon: 'fas fa-layer-group', activeIcon: 'fas fa-layer-group' },
-    { id: 'profile', label: labels.profile, icon: 'fas fa-user-tie', activeIcon: 'fas fa-user-tie' },
   ];
+
+  if (lang !== 'en') {
+    baseItems.push({ id: 'profile', label: labels.profile, icon: 'fas fa-user-tie', activeIcon: 'fas fa-user-tie' });
+  }
+
+  return baseItems;
 }
 
 export function isNavItemActive(itemId: ViewType, activeView: ViewType) {
