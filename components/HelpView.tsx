@@ -15,6 +15,53 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const t = translations[lang] || translations['en'];
+  const copy = lang === 'zh-TW'
+    ? {
+        supportBadge: '客戶支援',
+        heroTitle: '我們能幫您解決什麼？',
+        heroDescription: '從 AI 智能填充到專業 PDF 導出，這裡有您需要的一切教學與解答。',
+        learnMore: '了解更多',
+        cards: ['快速上手', 'AI 技巧', '風格定制', '導出管理'],
+        step1Title: '填寫基本業務資訊',
+        step1Description: '在編輯器中先填寫公司名稱與地址。你也可以點擊「上傳 Logo」加入品牌識別，接著在「發送至」區域填入客戶資料。',
+        supportPng: '支援 PNG/JPG',
+        multiCurrency: '多幣種切換',
+        step2Title: '使用 AI 助手一鍵生成',
+        step2Description: '不想手動逐欄輸入？直接在側邊欄描述工作內容，AI 會自動提取單價、數量與描述，快速填入發票明細。',
+        tryPrompt: '試試這段提示詞',
+        promptExample: '「我上週做了 4 天開發，每天 2000 元，以及一個 500 元的標誌設計。」',
+        step3Title: '預覽、簽名並導出',
+        step3Description: '在右側即時查看發票樣式，使用電子簽名板完成簽署，確認後即可下載高解析度、專業的 PDF 文件。',
+        tryNow: '現在去試試',
+        faqTitle: '常見問題 FAQ',
+        faqDescription: '快速找到您最關心的問題答案',
+        businessWorkspace: '商務工作空間',
+        aiTech: 'AI 技術示意',
+        exportSuccess: '成功導出示意',
+      }
+    : {
+        supportBadge: 'Customer Support',
+        heroTitle: 'How can we help?',
+        heroDescription: 'From AI-assisted filling to polished PDF exports, find the tutorials and answers you need here.',
+        learnMore: 'Learn More',
+        cards: ['Quick Start', 'AI Tricks', 'Customizing', 'Exports'],
+        step1Title: 'Enter Basic Business Info',
+        step1Description: 'Start by filling in your company name and address in the editor. You can upload your logo for branding, then add the client details in the recipient area.',
+        supportPng: 'Supports PNG/JPG',
+        multiCurrency: 'Multi-currency ready',
+        step2Title: 'Generate with AI Assistant',
+        step2Description: 'Do not want to type every field manually? Describe the work in the sidebar and AI will extract pricing, quantities, and descriptions into the invoice table.',
+        tryPrompt: 'Try This Prompt',
+        promptExample: '"I worked 4 development days last week at $2,000 per day, plus a $500 logo design."',
+        step3Title: 'Preview, Sign & Export',
+        step3Description: 'Check the invoice layout live, sign it with the built-in signature pad, and export a polished high-resolution PDF when everything looks right.',
+        tryNow: 'Try Now',
+        faqTitle: 'General FAQ',
+        faqDescription: 'Find quick answers to the questions people ask most.',
+        businessWorkspace: 'Business Workspace',
+        aiTech: 'AI Technology',
+        exportSuccess: 'Successful Export',
+      };
 
   const handleImageLoad = (key: string) => {
     setLoadedImages(prev => ({ ...prev, [key]: true }));
@@ -97,7 +144,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <i className="fas fa-arrow-left"></i>
         </button>
         <div className="flex flex-col items-center">
-          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-0.5">Customer Support</span>
+          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-0.5">{copy.supportBadge}</span>
           <span className="text-sm font-black text-slate-900 uppercase tracking-widest">{t.helpCenter}</span>
         </div>
         <div className="w-10"></div>
@@ -110,10 +157,10 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
             <i className="fas fa-life-ring text-3xl"></i>
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-none">
-            {lang === 'zh-TW' ? '我們能幫您解決什麼？' : 'How can we help?'}
+            {copy.heroTitle}
           </h1>
           <p className="text-slate-500 text-lg font-medium max-w-xl mx-auto">
-            {lang === 'zh-TW' ? '從 AI 智能填充到專業 PDF 導出，這裏有您需要的一切教程與解答。' : 'From AI filling to pro PDF export, find all tutorials and answers here.'}
+            {copy.heroDescription}
           </p>
 
           {/* <div className="max-w-md mx-auto relative pt-4 z-20">
@@ -129,17 +176,17 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
 
       <div className="max-w-6xl mx-auto px-6 -mt-16 grid grid-cols-1 md:grid-cols-4 gap-6 mb-20 relative z-30">
         {[
-          { icon: 'fa-play', title: lang === 'zh-TW' ? '快速上手' : 'Quick Start', color: 'bg-emerald-500' },
-          { icon: 'fa-brain', title: lang === 'zh-TW' ? 'AI 技巧' : 'AI Tricks', color: 'bg-blue-600' },
-          { icon: 'fa-palette', title: lang === 'zh-TW' ? '風格定制' : 'Customizing', color: 'bg-indigo-600' },
-          { icon: 'fa-file-pdf', title: lang === 'zh-TW' ? '導出管理' : 'Exports', color: 'bg-purple-600' }
+          { icon: 'fa-play', title: copy.cards[0], color: 'bg-emerald-500' },
+          { icon: 'fa-brain', title: copy.cards[1], color: 'bg-blue-600' },
+          { icon: 'fa-palette', title: copy.cards[2], color: 'bg-indigo-600' },
+          { icon: 'fa-file-pdf', title: copy.cards[3], color: 'bg-blue-600' }
         ].map((item, i) => (
           <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center group hover:-translate-y-2 transition-all cursor-pointer">
             <div className={`${item.color} w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl mb-4 shadow-lg group-hover:rotate-12 transition-transform`}>
               <i className={`fas ${item.icon}`}></i>
             </div>
             <h3 className="font-black text-slate-900 mb-1">{item.title}</h3>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Learn More</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{copy.learnMore}</span>
           </div>
         ))}
       </div>
@@ -150,22 +197,20 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <div className="flex-1 space-y-6">
             <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xl">1</div>
             <h2 className="text-3xl font-black text-slate-900">
-              {lang === 'zh-TW' ? '填寫基本業務信息' : 'Enter Basic Business Info'}
+              {copy.step1Title}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW'
-                ? '在編輯器中，首先填寫您的公司名稱和地址。您可以點擊“上傳 Logo”來添加您的品牌標誌。隨後在“發送至”區域輸入客戶的詳細信息。'
-                : 'In the editor, start by filling in your company name and address. Click "Upload Logo" to add your branding. Then enter the client details.'}
+              {copy.step1Description}
             </p>
             <div className="pt-4 flex gap-4">
-              <span className="flex items-center gap-2 text-xs font-black text-slate-400"><i className="fas fa-check-circle text-emerald-500"></i> 支持 PNG/JPG</span>
-              <span className="flex items-center gap-2 text-xs font-black text-slate-400"><i className="fas fa-check-circle text-emerald-500"></i> 多幣種切換</span>
+              <span className="flex items-center gap-2 text-xs font-black text-slate-400"><i className="fas fa-check-circle text-emerald-500"></i> {copy.supportPng}</span>
+              <span className="flex items-center gap-2 text-xs font-black text-slate-400"><i className="fas fa-check-circle text-emerald-500"></i> {copy.multiCurrency}</span>
             </div>
           </div>
           <TutorialImage
             id="step1"
             src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80"
-            alt="Business Workspace"
+            alt={copy.businessWorkspace}
             icon="fa-briefcase"
             gradient="from-slate-700 to-slate-900"
           />
@@ -176,22 +221,20 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <div className="flex-1 space-y-6">
             <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xl">2</div>
             <h2 className="text-3xl font-black text-slate-900">
-              {lang === 'zh-TW' ? '使用 AI 助手一鍵生成' : 'Generate with AI Assistant'}
+              {copy.step2Title}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW'
-                ? '不喜歡繁瑣的輸入？在側邊欄描述您的工作內容。我們強大的 AI 技術會自動提取單價、數量和描述，並瞬間填充到發票表格中。'
-                : 'Hate manual typing? Describe your work in the sidebar. Our powerful AI extracts rates, quantities, and descriptions into your form instantly.'}
+              {copy.step2Description}
             </p>
             <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
-              <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Try This Prompt</p>
-              <p className="text-sm font-medium italic text-slate-600">“我上週做了4天開發，每天2000元，以及一個價值500元的標誌設計。”</p>
+              <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">{copy.tryPrompt}</p>
+              <p className="text-sm font-medium italic text-slate-600">{copy.promptExample}</p>
             </div>
           </div>
           <TutorialImage
             id="step2"
             src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80"
-            alt="AI Neural Tech"
+            alt={copy.aiTech}
             icon="fa-brain"
             gradient="from-blue-500 to-indigo-700"
           />
@@ -202,23 +245,21 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
           <div className="flex-1 space-y-6">
             <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xl">3</div>
             <h2 className="text-3xl font-black text-slate-900">
-              {lang === 'zh-TW' ? '預覽、簽名並導出' : 'Preview, Sign & Export'}
+              {copy.step3Title}
             </h2>
             <p className="text-slate-500 font-medium leading-relaxed">
-              {lang === 'zh-TW'
-                ? '在右側實時查看發票樣式。使用我們的電子簽名板手寫您的簽名。滿意後，點擊“導出 PDF”即可下載高清、專業的商務文件。'
-                : 'Live preview your invoice. Use our electronic signature pad to handwrite your sign. Click "Export PDF" for a high-def business document.'}
+              {copy.step3Description}
             </p>
             <div className="pt-2">
               <button onClick={onBack} className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black transition-all">
-                {lang === 'zh-TW' ? '現在去試試' : 'Try Now'}
+                {copy.tryNow}
               </button>
             </div>
           </div>
           <TutorialImage
             id="step3"
             src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80"
-            alt="Successful Export"
+            alt={copy.exportSuccess}
             icon="fa-file-pdf"
             gradient="from-emerald-400 to-teal-600"
           />
@@ -227,8 +268,8 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
 
       <section className="max-w-4xl mx-auto px-6 mt-40">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-4">{lang === 'zh-TW' ? '常見問題 FAQ' : 'General FAQ'}</h2>
-          <p className="text-slate-400 font-medium">快速找到您最關心的問題答案</p>
+          <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-4">{copy.faqTitle}</h2>
+          <p className="text-slate-400 font-medium">{copy.faqDescription}</p>
         </div>
 
         <div className="space-y-4">

@@ -9,6 +9,19 @@ interface SEOContentProps {
 
 const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
     const t = translations[lang] || translations['en'];
+    const copy = lang === 'zh-TW'
+        ? {
+            industriesBadge: '適用產業',
+            faqDescription: '關於我們的發票工具，你需要知道的重點都在這裡。',
+            footerTitle: '適合現代商務的專業發票工具',
+            footerBody: 'SmartBill Pro 不只是發票模板，而是一套以 AI 簡化流程的完整計費方案。無論你需要自由工作者發票、顧問服務帳單、工程請款格式或簡單收據，都能用同一套工作流快速完成，建立更專業的品牌形象。',
+        }
+        : {
+            industriesBadge: 'Industries',
+            faqDescription: 'Everything you need to know about our invoice maker.',
+            footerTitle: 'Professional Invoice Maker for Modern Business',
+            footerBody: 'SmartBill Pro is more than an invoice template. It is a full billing workflow powered by AI to simplify repetitive work. Whether you need freelancer invoices, consulting bills, contractor formats, or simple receipts, SmartBill helps you build a stronger professional brand with polished billing documents.',
+        };
 
     // Simple helper to render bold text from markdown-style **text**
     const renderMarkdown = (text: string) => {
@@ -49,7 +62,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                 <div className="text-center mb-16 space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">
                         <i className="fas fa-briefcase"></i>
-                        <span>Industries</span>
+                        <span>{copy.industriesBadge}</span>
                     </div>
                     <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
                         {t.industriesTitle}
@@ -112,7 +125,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                     <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
                         {t.faqTitle}
                     </h2>
-                    <p className="text-slate-500 font-medium">{lang === 'en' ? 'Everything you need to know about our invoice maker.' : '關於發票生成器的所有您需要了解的信息。'}</p>
+                    <p className="text-slate-500 font-medium">{copy.faqDescription}</p>
                 </div>
                 <div className="grid grid-cols-1 gap-6">
                     {(t.faqs || []).map((faq: any, idx: number) => (
@@ -129,12 +142,10 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                 <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
                 <div className="prose prose-slate mx-auto">
                     <h2 className="text-2xl font-black text-slate-900">
-                        {lang === 'en' ? 'Professional Invoice Maker for Modern Business' : '現代企業的專業發票製作工具'}
+                        {copy.footerTitle}
                     </h2>
                     <p className="text-slate-500 font-medium leading-relaxed">
-                        {lang === 'en'
-                            ? "SmartBill Pro is more than just an invoice template. It's a comprehensive billing solution that leverages AI to simplify your workflow. Whether you need a freelance invoice template, a construction billing format, or a simple receipt, our platform provides the tools to build your professional brand. Our mission is to help freelancers and small business owners worldwide get paid faster and more efficiently with clean, professional-grade billing documents."
-                            : "SmartBill Pro 不僅僅是一個發票模板。它是一個利用 AI 簡化您的工作流程的綜合計費解決方案。無論您需要自由職業者發票模板、建築計費格式還是簡單的收據，我們的平台都提供了構建您專業品牌的工具。我們的使命是幫助全球的自由職業者和小型企業主通過乾淨、專業級的計費文件更快、更高效地獲得報酬。"}
+                        {copy.footerBody}
                     </p>
                 </div>
             </section>

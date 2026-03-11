@@ -42,9 +42,9 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
         date: new Date().toISOString().split('T')[0],
         dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         client: template.template_data.client || {
-            name: 'Sample Client',
+            name: lang === 'zh-TW' ? '示例客戶' : 'Sample Client',
             email: 'client@example.com',
-            address: '123 Client Street'
+            address: lang === 'zh-TW' ? '客戶地址示例' : '123 Client Street'
         }
     };
 
@@ -53,7 +53,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
             {/* Back Button */}
             <button
                 onClick={onBack}
-                className="mb-4 flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors group"
+                className="mb-4 flex items-center gap-2 text-slate-600 hover:text-blue-700 font-medium transition-colors group"
             >
                 <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
                 <span>{t.backToTemplates}</span>
@@ -106,7 +106,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                             {template.template_data.type && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                                        Type
+                                        {lang === 'zh-TW' ? '類型' : 'Type'}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700 capitalize">
                                         {template.template_data.type}
@@ -117,7 +117,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                             {template.template_data.currency && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                                        Currency
+                                        {lang === 'zh-TW' ? '幣別' : 'Currency'}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700">
                                         {template.template_data.currency}
@@ -130,7 +130,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                         <div className="space-y-3">
                             <button
                                 onClick={onUseTemplate}
-                                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-3"
                             >
                                 <i className="fas fa-plus"></i>
                                 <span>{t.useTemplate}</span>

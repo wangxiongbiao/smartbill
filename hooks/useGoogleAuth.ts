@@ -12,12 +12,12 @@ interface UseGoogleAuthOptions {
 export function useGoogleAuth(options: UseGoogleAuthOptions = {}) {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleGoogleLogin = useCallback(async () => {
+  const handleGoogleLogin = useCallback(async (overrideNextPath?: string) => {
     setIsGoogleLoading(true);
 
     try {
       const supabase = createClient();
-      const nextPath = options.nextPath || '/dashboard';
+      const nextPath = overrideNextPath || options.nextPath || '/dashboard';
       const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}&popup=1`;
 
       const { data, error } = await supabase.auth.signInWithOAuth({

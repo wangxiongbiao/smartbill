@@ -2,6 +2,7 @@ import React from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import BottomNav from '@/components/BottomNav';
+import LogoutConfirmDialog from '@/components/LogoutConfirmDialog';
 import Toast from '@/components/Toast';
 import type { DashboardShellProps } from '@/components/app/DashboardShellProps';
 
@@ -13,7 +14,6 @@ export default function DashboardShell(props: DashboardShellProps) {
         activeView={props.activeView}
         setView={props.onSetView}
         lang={props.lang}
-        setLang={props.onSetLang}
         onLogout={props.onLogout}
         onNewInvoice={props.onNewInvoice}
       />
@@ -40,6 +40,13 @@ export default function DashboardShell(props: DashboardShellProps) {
         <div className="md:hidden">
           <BottomNav activeView={props.activeView} setView={props.onSetView} lang={props.lang} />
         </div>
+        <LogoutConfirmDialog
+          isOpen={props.isLogoutConfirmOpen}
+          onClose={props.onCloseLogoutConfirm}
+          onConfirm={props.onConfirmLogout}
+          isProcessing={props.isLoggingOut}
+          lang={props.lang}
+        />
         <Toast message={props.toast.message} type={props.toast.type} isVisible={props.toast.isVisible} onClose={props.onCloseToast} />
       </div>
     </div>

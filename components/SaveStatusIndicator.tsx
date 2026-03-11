@@ -43,7 +43,7 @@ const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({ status, lang,
             default:
                 return {
                     icon: null,
-                    text: 'AUTO SAVE',
+                    text: t.autoSaved || (lang === 'zh-TW' ? '自動保存' : 'AUTO-SAVED'),
                     bgColor: 'bg-slate-50',
                     textColor: 'text-slate-400',
                     borderColor: 'border-slate-100'

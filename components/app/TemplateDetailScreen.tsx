@@ -28,7 +28,7 @@ export default function TemplateDetailScreen({ templateId, template, loading = f
       await onDelete(templateId);
     } catch (error) {
       console.error('Error deleting template:', error);
-      showToast('Failed to delete template', 'error');
+      showToast(lang === 'zh-TW' ? '刪除模板失敗' : 'Failed to delete template', 'error');
     } finally {
       setIsDeleting(false);
       setDeleteConfirmOpen(false);
@@ -36,7 +36,7 @@ export default function TemplateDetailScreen({ templateId, template, loading = f
   };
 
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>;
-  if (!template) return <div className="min-h-[60vh] flex items-center justify-center"><button onClick={onBack} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl">Back to Templates</button></div>;
+  if (!template) return <div className="min-h-[60vh] flex items-center justify-center"><button onClick={onBack} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">{lang === 'zh-TW' ? '返回模板列表' : 'Back to Templates'}</button></div>;
 
   return (
     <>

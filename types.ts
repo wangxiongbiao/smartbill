@@ -68,6 +68,23 @@ export interface Profile {
   updated_at: string;
 }
 
+export type BillingProfileKind = 'sender' | 'client';
+
+export interface BillingProfile {
+  id: string;
+  userId: string;
+  kind: BillingProfileKind;
+  name: string;
+  email: string;
+  phone?: string;
+  address: string;
+  customFields?: CustomField[];
+  isDefault: boolean;
+  lastUsedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface InvoiceRecord {
   id: string;
   user_id: string;

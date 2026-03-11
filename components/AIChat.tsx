@@ -103,7 +103,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
             const errorMsg: Message = {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: t.aiError || "Sorry, I encountered an error communicating with the server.",
+                content: t.aiError || (lang === 'zh-TW' ? '抱歉，與服務器通信時發生錯誤。' : 'Sorry, I encountered an error communicating with the server.'),
                 timestamp: Date.now()
             };
             setMessages(prev => [...prev, errorMsg]);
@@ -122,20 +122,20 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
     return (
         <div className="flex flex-col bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 h-full">
             {/* Compact Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex items-center justify-between text-white shrink-0">
+            <div className="bg-[linear-gradient(90deg,#2563eb_0%,#60a5fa_100%)] px-4 py-3 flex items-center justify-between text-white shrink-0">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
                     </div>
                     <div>
                         <h3 className="font-bold text-[14px]">{t.aiHeaderTitle}</h3>
-                        <p className="text-[12px] text-blue-100">{t.aiHeaderSub}</p>
+                        <p className="text-[12px] text-white/60">{t.aiHeaderSub}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                        <span className="text-[9px] text-blue-100">{t.aiStatusOnline}</span>
+                        <span className="text-[9px] text-white/60">{t.aiStatusOnline}</span>
                     </div>
                     {onClose && (
                         <button
@@ -179,7 +179,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
 
             {/* Single-line Input */}
             <div className="p-2 bg-white border-t border-slate-100 shrink-0">
-                <div className="flex items-end gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
+                <div className="flex items-end gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
                     <textarea
                         value={input}
                         onChange={(e) => {
@@ -197,7 +197,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         onClick={handleSend}
                         disabled={!input.trim() || isTyping}
                         className={`w-8 h-8 mb-0.5 rounded-md flex items-center justify-center transition-all shrink-0 ${input.trim()
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700 active:scale-95'
+                            ? 'bg-blue-600 text-white shadow-[0_12px_24px_-18px_rgba(37,99,235,0.52)] hover:bg-blue-700 active:scale-95'
                             : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                             }`}
                     >

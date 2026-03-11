@@ -215,7 +215,7 @@ export const translations: Record<Language, any> = {
     deleteDialogConfirm: 'Delete',
     deleteDialogCancel: 'Cancel',
     // Templates
-    myTemplates: 'My Templates',
+    myTemplates: 'Templates',
     saveAsTemplate: 'Save as Template',
     templateName: 'Template Name',
     templateDescription: 'Template Description',

@@ -58,7 +58,7 @@ const LandingPage: React.FC<{ initialNext?: string; authError?: boolean }> = ({ 
                         {isLoggedIn ? (
                             <Link href="/dashboard" className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-600/20"><span>控制台</span><i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i></Link>
                         ) : (
-                            <button type="button" onClick={handleGoogleLogin} disabled={isGoogleLoading} className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50 disabled:opacity-70">
+                            <button type="button" onClick={() => { void handleGoogleLogin(); }} disabled={isGoogleLoading} className="px-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all hover:shadow-lg hover:shadow-blue-200 flex items-center gap-2 group border border-blue-100/50 disabled:opacity-70">
                                 <span>{isGoogleLoading ? '登录中...' : (t.login || 'Login')}</span><i className={`fas ${isGoogleLoading ? 'fa-circle-notch fa-spin' : 'fa-arrow-right group-hover:translate-x-1 transition-transform'}`}></i>
                             </button>
                         )}
@@ -75,7 +75,7 @@ const LandingPage: React.FC<{ initialNext?: string; authError?: boolean }> = ({ 
                         {isLoggedIn ? (
                             <Link href="/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 text-lg group"><span>进入控制台</span><i className="fas fa-external-link-alt group-hover:rotate-45 transition-transform"></i></Link>
                         ) : (
-                            <button type="button" onClick={handleGoogleLogin} disabled={isGoogleLoading} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 text-lg group disabled:opacity-70"><span>{isGoogleLoading ? '正在打开 Google 登录…' : '使用 Google 登录'}</span><i className={`fas ${isGoogleLoading ? 'fa-circle-notch fa-spin' : 'fa-external-link-alt group-hover:rotate-45 transition-transform'}`}></i></button>
+                            <button type="button" onClick={() => { void handleGoogleLogin(); }} disabled={isGoogleLoading} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 text-lg group disabled:opacity-70"><span>{isGoogleLoading ? '正在打开 Google 登录…' : '使用 Google 登录'}</span><i className={`fas ${isGoogleLoading ? 'fa-circle-notch fa-spin' : 'fa-external-link-alt group-hover:rotate-45 transition-transform'}`}></i></button>
                         )}
                     </div>
                 </div>

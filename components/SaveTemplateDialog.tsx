@@ -7,7 +7,7 @@ interface SaveTemplateDialogProps {
     onClose: () => void;
     onSave: (name: string, description: string) => Promise<void>;
     lang: Language;
-    isUpdating?: boolean; // 是否是更新模式
+    isUpdating?: boolean;
 }
 
 const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
@@ -24,11 +24,23 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    const copy = {
+        subtitle: isUpdating
+            ? (t.updateTemplateInfo || 'Update template information')
+            : (t.saveTemplateSubtitle || 'Save this invoice configuration as a reusable template'),
+        requiredError: `${t.templateName} ${t.requiredField || 'is required'}`,
+        saveFailed: t.saveTemplateFailed || 'Failed to save template. Please try again.',
+        cancel: t.deleteDialogCancel || 'Cancel',
+        loadingText: isUpdating
+            ? `${t.updateAction || 'Update'}...`
+            : `${t.saveAction || 'Save'}...`,
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name.trim()) {
-            setError(t.templateName + ' is required');
+            setError(copy.requiredError);
             return;
         }
 
@@ -37,13 +49,12 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
 
         try {
             await onSave(name.trim(), description.trim());
-            // Reset form
             setName('');
             setDescription('');
             onClose();
         } catch (err) {
             console.error('Error saving template:', err);
-            setError('Failed to save template. Please try again.');
+            setError(copy.saveFailed);
         } finally {
             setLoading(false);
         }
@@ -69,14 +80,13 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                 className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 onClick={e => e.stopPropagation()}
             >
-                {/* Header */}
                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                             {isUpdating ? t.updateTemplate : t.saveAsTemplate}
                         </h3>
                         <p className="text-slate-500 text-sm font-medium mt-1">
-                            {isUpdating ? 'Update template information' : 'Save this invoice configuration as a reusable template'}
+                            {copy.subtitle}
                         </p>
                     </div>
                     <button
@@ -88,9 +98,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                     </button>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    {/* Template Name */}
                     <div>
                         <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2 block">
                             {t.templateName} <span className="text-red-500">*</span>
@@ -106,7 +114,6 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                         />
                     </div>
 
-                    {/* Template Description */}
                     <div>
                         <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2 block">
                             {t.templateDescription}
@@ -125,7 +132,6 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                         </div>
                     </div>
 
-                    {/* Error Message */}
                     {error && (
                         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3">
                             <i className="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
@@ -133,7 +139,6 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                         </div>
                     )}
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"
@@ -141,7 +146,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                             disabled={loading}
                             className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50"
                         >
-                            {t.deleteDialogCancel || 'Cancel'}
+                            {copy.cancel}
                         </button>
                         <button
                             type="submit"
@@ -151,7 +156,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                             {loading ? (
                                 <>
                                     <i className="fas fa-spinner fa-spin"></i>
-                                    <span>{isUpdating ? 'Updating...' : 'Saving...'}</span>
+                                    <span>{copy.loadingText}</span>
                                 </>
                             ) : (
                                 <>

@@ -16,6 +16,10 @@ export interface DashboardShellProps {
   onSaveTemplate: () => void;
   onShare: () => void;
   onSendEmail: () => void;
+  isLoggingOut: boolean;
+  isLogoutConfirmOpen: boolean;
+  onCloseLogoutConfirm: () => void;
+  onConfirmLogout: () => void;
   toast: { message: string; type: 'success' | 'error' | 'warning' | 'info'; isVisible: boolean };
   onCloseToast: () => void;
   printArea: React.ReactNode;

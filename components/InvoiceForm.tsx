@@ -1,29 +1,45 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Invoice, InvoiceItem, Language, InvoiceColumn, PaymentInfoField } from '../types';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BillingProfile, Invoice, InvoiceItem, Language, InvoiceColumn } from '../types';
 import { translations } from '../i18n';
-import { DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import ImagePickerDialog from './ImagePickerDialog';
-import BasicInfoSection from './invoice-form/BasicInfoSection';
+import InvoiceDetailsSection from './invoice-form/InvoiceDetailsSection';
+import SenderSection from './invoice-form/SenderSection';
+import RecipientSection from './invoice-form/RecipientSection';
 import ItemsSection from './invoice-form/ItemsSection';
-import PaymentSection from './invoice-form/PaymentSection';
+import InvoiceSummarySection from './invoice-form/InvoiceSummarySection';
+import PaymentInfoSection from './invoice-form/PaymentInfoSection';
+import SignatureSection from './invoice-form/SignatureSection';
+import DisclaimerSection from './invoice-form/DisclaimerSection';
+import { useBillingProfiles } from '@/hooks/useBillingProfiles';
+import {
+  applyBillingProfileToClient,
+  applyBillingProfileToSender,
+  deriveBillingProfilesFromInvoices,
+  getBillingProfileLookupKey,
+} from '@/lib/billing-profiles';
+import {
+  buildPaymentInfoFields,
+  DEFAULT_INVOICE_COLUMNS,
+  getInvoiceColumns,
+  getSortedInvoiceColumns,
+  parseEditableNumberInput,
+  updateInvoiceItem,
+  updateInvoiceItemAmount,
+  updateInvoiceItemCustomValue,
+} from '@/lib/invoice';
 
 interface InvoiceFormProps {
   invoice: Invoice;
+  records: Invoice[];
   onChange: (updates: Partial<Invoice>) => void;
   lang: Language;
   userId?: string;
   showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const defaultColumns: InvoiceColumn[] = [
-  { id: 'desc', field: 'description', label: 'Description', type: 'system-text', order: 0, visible: true, required: true },
-  { id: 'qty', field: 'quantity', label: 'Quantity', type: 'system-quantity', order: 1, visible: true, required: true },
-  { id: 'rate', field: 'rate', label: 'Rate', type: 'system-rate', order: 2, visible: true, required: true },
-  { id: 'amt', field: 'amount', label: 'Amount', type: 'system-amount', order: 3, visible: true, required: true },
-];
-
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, userId, showToast }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, lang, userId, showToast }) => {
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const dueDateInputRef = useRef<HTMLInputElement>(null);
@@ -37,30 +53,65 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingQRCode, setIsUploadingQRCode] = useState(false);
   const t = translations[lang] || translations['en'];
+  const billingProfiles = useBillingProfiles({
+    userId,
+    refreshKey: invoice.id,
+    lang,
+    showToast,
+  });
+  const recordProfiles = useMemo(() => deriveBillingProfilesFromInvoices(records), [records]);
+  const mergedProfiles = useMemo(() => {
+    const merged = new Map<string, BillingProfile>();
+
+    billingProfiles.profiles.forEach((profile) => {
+      merged.set(getBillingProfileLookupKey(profile.kind, profile), profile);
+    });
+
+    recordProfiles.forEach((profile) => {
+      const key = getBillingProfileLookupKey(profile.kind, profile);
+      if (!merged.has(key)) {
+        merged.set(key, profile);
+      }
+    });
+
+    return [...merged.values()];
+  }, [billingProfiles.profiles, recordProfiles]);
+  const senderProfiles = useMemo(
+    () => mergedProfiles.filter((profile) => profile.kind === 'sender'),
+    [mergedProfiles]
+  );
+  const clientProfiles = useMemo(
+    () => mergedProfiles.filter((profile) => profile.kind === 'client'),
+    [mergedProfiles]
+  );
+  const copy = lang === 'zh-TW'
+    ? {
+        bankAddress: '詳細地址',
+      }
+    : {
+        bankAddress: 'Bank Address',
+      };
 
   useEffect(() => {
-    if (!invoice.columnConfig) onChange({ columnConfig: defaultColumns });
+    if (!invoice.columnConfig) onChange({ columnConfig: DEFAULT_INVOICE_COLUMNS });
   }, [invoice.columnConfig, onChange]);
 
   useEffect(() => {
     if (!invoice.paymentInfo?.fields) {
-      const oldInfo = invoice.paymentInfo;
-      const migratedFields: PaymentInfoField[] = [
-        { id: 'bankName', label: t.bankName || 'Bank Name', type: 'text', order: 0, visible: true, required: true, value: oldInfo?.bankName || '' },
-        { id: 'accountName', label: t.accountName || 'Account Name', type: 'text', order: 1, visible: true, required: true, value: oldInfo?.accountName || '' },
-        { id: 'accountNumber', label: t.accountNumber || 'Account Number', type: 'text', order: 2, visible: true, required: true, value: oldInfo?.accountNumber || '' },
-        { id: 'address', label: lang === 'zh-TW' ? '詳細地址' : 'Bank Address', type: 'textarea', order: 3, visible: true, required: true, value: '' },
-        { id: 'extraInfo', label: t.extraInfo || 'Additional Info (SWIFT/IBAN)', type: 'textarea', order: 4, visible: true, required: false, value: oldInfo?.extraInfo || '' },
-      ];
-      if (oldInfo?.customFields) {
-        oldInfo.customFields.forEach((cf, idx) => migratedFields.push({ id: cf.id, label: cf.label, type: 'text', order: 5 + idx, visible: true, required: false, value: cf.value }));
-      }
-      onChange({ paymentInfo: { fields: migratedFields, qrCode: oldInfo?.qrCode } });
-    }
-  }, [invoice.paymentInfo, onChange, lang, t.bankName, t.accountName, t.accountNumber, t.extraInfo]);
+      const fields = buildPaymentInfoFields(invoice.paymentInfo, {
+        bankName: t.bankName,
+        accountName: t.accountName,
+        accountNumber: t.accountNumber,
+        bankAddress: copy.bankAddress,
+        extraInfo: t.extraInfo,
+      });
 
-  const columns = invoice.columnConfig || defaultColumns;
-  const sortedColumns = columns.slice().sort((a, b) => a.order - b.order);
+      onChange({ paymentInfo: { fields, qrCode: invoice.paymentInfo?.qrCode } });
+    }
+  }, [copy.bankAddress, invoice.paymentInfo, onChange, t.accountName, t.accountNumber, t.bankName, t.extraInfo]);
+
+  const columns = getInvoiceColumns(invoice.columnConfig);
+  const sortedColumns = getSortedInvoiceColumns(invoice.columnConfig);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 10 } }),
@@ -139,39 +190,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   };
 
   const updateItem = (id: string, updates: Partial<InvoiceItem>) => {
-    const newItems = invoice.items.map(item => {
-      if (item.id !== id) return item;
-      const updated = { ...item, ...updates };
-      if (('quantity' in updates || 'rate' in updates) && !('amount' in updates)) {
-        if (!String(updated.quantity ?? '') || !String(updated.rate ?? '')) {
-          updated.amount = undefined;
-          return updated;
-        }
-        updated.amount = Number(updated.quantity || 0) * Number(updated.rate || 0);
-      }
-      return updated;
-    });
-    onChange({ items: newItems });
+    onChange({ items: updateInvoiceItem(invoice.items, id, updates) });
   };
 
   const updateCustomValue = (itemId: string, columnId: string, value: string) => {
-    const item = invoice.items.find(i => i.id === itemId);
-    if (!item) return;
-    updateItem(itemId, { customValues: { ...(item.customValues || {}), [columnId]: value } });
+    onChange({ items: updateInvoiceItemCustomValue(invoice.items, itemId, columnId, value) });
   };
 
   const updateItemAmount = (id: string, newAmount: number | string) => {
-    const item = invoice.items.find(i => i.id === id);
-    if (!item) return;
-    if (newAmount === '') return updateItem(id, { amount: '', rate: '' });
-    const amount = Number(newAmount);
-    const qty = item.quantity;
-    const rate = item.rate;
-    if ((!qty || qty === '') && (!rate || rate === '')) return updateItem(id, { quantity: 1, rate: amount, amount });
-    if (qty && qty !== '' && (!rate || rate === '')) return updateItem(id, { rate: Number(qty) !== 0 ? amount / Number(qty) : amount, amount });
-    if ((!qty || qty === '') && rate && rate !== '') return updateItem(id, { quantity: Number(rate) !== 0 ? amount / Number(rate) : 1, amount });
-    if (qty && qty !== '' && rate && rate !== '') return updateItem(id, { rate: Number(qty) !== 0 ? amount / Number(qty) : amount, amount });
-    updateItem(id, { amount });
+    onChange({ items: updateInvoiceItemAmount(invoice.items, id, newAmount) });
   };
 
   const removeItem = (id: string) => onChange({ items: invoice.items.filter(item => item.id !== id) });
@@ -180,6 +207,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
   const handleLogoRemove = () => onChange({ sender: { ...invoice.sender, logo: undefined } });
   const handleQRCodeSelect = async (imageData: string) => { setIsUploadingQRCode(true); try { onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: imageData } as any }); } finally { setIsUploadingQRCode(false); } };
   const handleQRCodeRemove = () => onChange({ paymentInfo: { ...invoice.paymentInfo, qrCode: undefined } as any });
+  const handleApplySenderProfile = (profile: BillingProfile) => onChange({ sender: applyBillingProfileToSender(invoice.sender, profile) });
+  const handleApplyClientProfile = (profile: BillingProfile) => onChange({ client: applyBillingProfileToClient(invoice.client, profile) });
 
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -190,15 +219,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
       canvasRef.current?.getContext('2d')?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleNumberInput = (value: string, callback: (val: string | number) => void) => {
-    if (value === '' || !value) return callback('');
-    const numberRegex = /^-?\d*\.?\d*$/;
-    if (numberRegex.test(value)) {
-      if (value === '-' || value === '.' || value === '-.' || value.endsWith('.')) callback(value);
-      else callback(Number(value));
-    }
   };
 
   const autoResizeTextarea = (textarea: HTMLTextAreaElement | null) => {
@@ -212,25 +232,65 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, onChange, lang, user
       case 'system-text':
         return <textarea ref={autoResizeTextarea} placeholder={column.label} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.description} autoFocus={item.id === focusItemId} onChange={(e) => updateItem(item.id, { description: e.target.value })} rows={1} onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />;
       case 'system-quantity':
-        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => handleNumberInput(e.target.value, (val) => updateItem(item.id, { quantity: val }))} placeholder="0" />;
+        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => {
+          const nextValue = parseEditableNumberInput(e.target.value);
+          if (nextValue !== null) updateItem(item.id, { quantity: nextValue });
+        }} placeholder="0" />;
       case 'system-rate':
-        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.rate} onChange={(e) => handleNumberInput(e.target.value, (val) => updateItem(item.id, { rate: val }))} placeholder="0.00" />;
+        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.rate} onChange={(e) => {
+          const nextValue = parseEditableNumberInput(e.target.value);
+          if (nextValue !== null) updateItem(item.id, { rate: nextValue });
+        }} placeholder="0.00" />;
       case 'system-amount':
-        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm font-bold " value={item.amount !== undefined && item.amount !== '' ? item.amount : ''} onChange={(e) => handleNumberInput(e.target.value, (val) => updateItemAmount(item.id, val))} placeholder="0.00" />;
+        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm font-bold " value={item.amount !== undefined && item.amount !== '' ? item.amount : ''} onChange={(e) => {
+          const nextValue = parseEditableNumberInput(e.target.value);
+          if (nextValue !== null) updateItemAmount(item.id, nextValue);
+        }} placeholder="0.00" />;
       case 'custom-text':
         return <textarea ref={autoResizeTextarea} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.customValues?.[column.id] || ''} onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)} rows={1} onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />;
       case 'custom-number':
-        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.customValues?.[column.id] || ''} onChange={(e) => handleNumberInput(e.target.value, (val) => updateCustomValue(item.id, column.id, String(val)))} placeholder="0" />;
+        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.customValues?.[column.id] || ''} onChange={(e) => {
+          const nextValue = parseEditableNumberInput(e.target.value);
+          if (nextValue !== null) updateCustomValue(item.id, column.id, String(nextValue));
+        }} placeholder="0" />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 space-y-6">
-      <BasicInfoSection invoice={invoice} lang={lang} t={t} onChange={onChange} dateInputRef={dateInputRef} dueDateInputRef={dueDateInputRef} isUploadingLogo={isUploadingLogo} onOpenLogoPicker={() => setShowLogoPickerDialog(true)} onRemoveLogo={handleLogoRemove} />
-      <ItemsSection invoice={invoice} t={t} lang={lang} columns={columns} sortedColumns={sortedColumns} sensors={sensors} focusItemId={focusItemId} showColumnConfig={showColumnConfig} setShowColumnConfig={setShowColumnConfig} onChange={onChange} addItem={addItem} removeItem={removeItem} handleDragEnd={handleDragEnd} renderCell={renderCell} />
-      <PaymentSection invoice={invoice} lang={lang} t={t} onChange={onChange} autoResizeTextarea={autoResizeTextarea} showPaymentFieldConfig={showPaymentFieldConfig} setShowPaymentFieldConfig={setShowPaymentFieldConfig} isUploadingQRCode={isUploadingQRCode} onOpenQRCodePicker={() => setShowQRCodePickerDialog(true)} onRemoveQRCode={handleQRCodeRemove} canvasRef={canvasRef} startDrawing={startDrawing} draw={draw} stopDrawing={stopDrawing} signatureInputRef={signatureInputRef} handleSignatureUpload={handleSignatureUpload} clearSignature={clearSignature} />
+    <div className="space-y-4">
+      <InvoiceDetailsSection invoice={invoice} lang={lang} t={t} onChange={onChange} dateInputRef={dateInputRef} dueDateInputRef={dueDateInputRef} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SenderSection
+          invoice={invoice}
+          lang={lang}
+          t={t}
+          onChange={onChange}
+          isUploadingLogo={isUploadingLogo}
+          onOpenLogoPicker={() => setShowLogoPickerDialog(true)}
+          onRemoveLogo={handleLogoRemove}
+          profiles={senderProfiles}
+          profilesLoading={billingProfiles.isLoading}
+          onApplyProfile={handleApplySenderProfile}
+        />
+        <RecipientSection
+          invoice={invoice}
+          lang={lang}
+          t={t}
+          onChange={onChange}
+          profiles={clientProfiles}
+          profilesLoading={billingProfiles.isLoading}
+          onApplyProfile={handleApplyClientProfile}
+        />
+      </div>
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-4 sm:p-6 space-y-6">
+        <ItemsSection invoice={invoice} t={t} lang={lang} columns={columns} sortedColumns={sortedColumns} sensors={sensors} focusItemId={focusItemId} showColumnConfig={showColumnConfig} setShowColumnConfig={setShowColumnConfig} onChange={onChange} addItem={addItem} removeItem={removeItem} handleDragEnd={handleDragEnd} renderCell={renderCell} />
+        <InvoiceSummarySection invoice={invoice} lang={lang} t={t} onChange={onChange} />
+      </div>
+      <PaymentInfoSection invoice={invoice} lang={lang} t={t} onChange={onChange} autoResizeTextarea={autoResizeTextarea} showPaymentFieldConfig={showPaymentFieldConfig} setShowPaymentFieldConfig={setShowPaymentFieldConfig} isUploadingQRCode={isUploadingQRCode} onOpenQRCodePicker={() => setShowQRCodePickerDialog(true)} onRemoveQRCode={handleQRCodeRemove} />
+      <SignatureSection invoice={invoice} lang={lang} t={t} onChange={onChange} canvasRef={canvasRef} startDrawing={startDrawing} draw={draw} stopDrawing={stopDrawing} signatureInputRef={signatureInputRef} handleSignatureUpload={handleSignatureUpload} clearSignature={clearSignature} />
+      <DisclaimerSection invoice={invoice} lang={lang} t={t} onChange={onChange} />
 
       {userId && showLogoPickerDialog && <ImagePickerDialog isOpen={showLogoPickerDialog} onClose={() => setShowLogoPickerDialog(false)} imageType="logo" onSelect={handleLogoSelect} currentUserId={userId || ''} lang={lang} showToast={showToast} />}
       {userId && showQRCodePickerDialog && <ImagePickerDialog isOpen={showQRCodePickerDialog} onClose={() => setShowQRCodePickerDialog(false)} imageType="qrcode" onSelect={handleQRCodeSelect} currentUserId={userId || ''} lang={lang} showToast={showToast} />}

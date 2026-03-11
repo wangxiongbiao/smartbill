@@ -29,7 +29,14 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const t = translations[lang] || translations['en'];
 
-    // Load history images
+    const copy = {
+        uploadFailed: lang === 'zh-TW' ? '上傳圖片失敗' : 'Failed to upload image',
+        readFailed: lang === 'zh-TW' ? '讀取文件失敗' : 'Failed to read file',
+        deleteFailed: lang === 'zh-TW' ? '刪除圖片失敗' : 'Failed to delete image',
+        uploadedImageAlt: lang === 'zh-TW' ? '已上傳圖片' : 'Uploaded image',
+        cancel: t.deleteDialogCancel || (lang === 'zh-TW' ? '取消' : 'Cancel'),
+    };
+
     useEffect(() => {
         if (isOpen && currentUserId) {
             loadHistoryImages();
@@ -58,27 +65,13 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
         reader.onloadend = async () => {
             try {
                 const imageData = reader.result as string;
-
-                // Save to database
-                await saveImageUpload(
-                    currentUserId,
-                    imageType,
-                    imageData,
-                    file.name,
-                    file.size
-                );
-
-                // Select the newly uploaded image
+                await saveImageUpload(currentUserId, imageType, imageData, file.name, file.size);
                 onSelect(imageData);
-
-                // Reload history
                 await loadHistoryImages();
-
-                // Close dialog
                 onClose();
             } catch (error) {
                 console.error('Error uploading image:', error);
-                showToast?.('Failed to upload image', 'error');
+                showToast?.(copy.uploadFailed, 'error');
             } finally {
                 setIsUploading(false);
                 if (fileInputRef.current) {
@@ -89,7 +82,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
 
         reader.onerror = () => {
             console.error('Error reading file');
-            showToast?.('Failed to read file', 'error');
+            showToast?.(copy.readFailed, 'error');
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -113,7 +106,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
             await loadHistoryImages();
         } catch (error) {
             console.error('Error deleting image:', error);
-            showToast?.('Failed to delete image', 'error');
+            showToast?.(copy.deleteFailed, 'error');
         } finally {
             setDeletingId(null);
         }
@@ -126,7 +119,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                     <h2 className="text-xl font-bold text-slate-800">{dialogTitle}</h2>
                     <button
@@ -137,9 +129,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Upload Section */}
                     <div className="space-y-3">
                         <input
                             ref={fileInputRef}
@@ -168,7 +158,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                         </label>
                     </div>
 
-                    {/* History Section */}
                     <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
                             {t.selectFromHistory}
@@ -192,15 +181,13 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                                         className="relative group cursor-pointer bg-slate-50 rounded-lg overflow-hidden border-2 border-slate-200 hover:border-blue-500 transition-all hover:shadow-lg"
                                         onClick={() => handleSelectImage(img.image_data)}
                                     >
-                                        {/* Image */}
                                         <div className="aspect-square relative">
                                             <img
                                                 src={img.image_data}
-                                                alt={img.file_name || 'Uploaded image'}
+                                                alt={img.file_name || copy.uploadedImageAlt}
                                                 className="w-full h-full object-contain p-2"
                                             />
 
-                                            {/* Hover overlay */}
                                             <div className="absolute inset-0 bg-blue-500 bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
                                                 <span className="text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 px-3 py-1 rounded-full text-xs">
                                                     {t.clickToSelect}
@@ -208,7 +195,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                                             </div>
                                         </div>
 
-                                        {/* Delete button */}
                                         <button
                                             onClick={(e) => handleDeleteImage(img.id, e)}
                                             disabled={deletingId === img.id}
@@ -222,7 +208,6 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                                             )}
                                         </button>
 
-                                        {/* File name (optional) */}
                                         {img.file_name && (
                                             <div className="px-2 py-1 bg-white border-t border-slate-200">
                                                 <p className="text-xs text-slate-500 truncate" title={img.file_name}>
@@ -237,13 +222,12 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="px-6 py-4 border-t border-slate-200 flex justify-end">
                     <button
                         onClick={onClose}
                         className="px-6 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors"
                     >
-                        {t.copy === 'Copy' ? 'Cancel' : '取消'}
+                        {copy.cancel}
                     </button>
                 </div>
             </div>

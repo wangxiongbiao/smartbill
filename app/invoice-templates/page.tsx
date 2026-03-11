@@ -5,38 +5,40 @@ import { TemplatesGallery } from '@/components/home/TemplatesGallery';
 import { FAQ } from '@/components/home/FAQ';
 import { Footer } from '@/components/Footer';
 import { SeoNarrative } from '@/components/home/SeoNarrative';
+import { TemplatesLandingHero } from '@/components/home/TemplatesLandingHero';
+import { MarketingAuthProvider } from '@/components/marketing/MarketingAuthProvider';
+import { MarketingLanguageProvider } from '@/components/marketing/MarketingLanguageProvider';
+import { buildAbsoluteLangUrl, getPublicPageMetadata, resolveLanguage } from '@/lib/marketing';
 
-export const metadata: Metadata = {
-  title: 'Invoice Templates for Freelancers, Agencies & Small Businesses',
-  description:
-    'Explore invoice template ideas for consultants, agencies, freelancers, and service businesses. Use SmartBill to reuse structures, keep branding consistent, and export clean PDFs.',
-  alternates: {
-    canonical: '/invoice-templates',
-  },
-  openGraph: {
-    title: 'SmartBill Invoice Templates',
-    description:
-      'Explore reusable invoice template ideas for repeat billing, branding, and clean PDF exports.',
-    url: 'https://smartbillpro.com/invoice-templates',
-    images: ['/og?view=templates'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'SmartBill Invoice Templates',
-    description:
-      'Explore reusable invoice template ideas for repeat billing, branding, and clean PDF exports.',
-    images: ['/og?view=templates'],
-  },
-};
+interface InvoiceTemplatesPageProps {
+  searchParams?: Promise<{ lang?: string }>;
+}
 
-export default function InvoiceTemplatesLandingPage() {
+export async function generateMetadata({ searchParams }: InvoiceTemplatesPageProps): Promise<Metadata> {
+  const sp = (await searchParams) || {};
+  return getPublicPageMetadata('templates', resolveLanguage(sp.lang));
+}
+
+export default async function InvoiceTemplatesLandingPage({ searchParams }: InvoiceTemplatesPageProps) {
+  const sp = (await searchParams) || {};
+  const lang = resolveLanguage(sp.lang);
+  const copy = lang === 'zh-TW'
+    ? {
+        name: 'SmartBill 發票模板',
+        description: '面向自由工作者、代理商、顧問與小型企業的公開發票模板落地頁。',
+      }
+    : {
+        name: 'SmartBill Invoice Templates',
+        description: 'Public landing page about invoice templates for freelancers, agencies, consultants, and small businesses.',
+      };
+
   const collectionJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'SmartBill Invoice Templates',
-    description:
-      'Public landing page about invoice templates for freelancers, agencies, consultants, and small businesses.',
-    url: 'https://smartbillpro.com/invoice-templates',
+    inLanguage: lang,
+    name: copy.name,
+    description: copy.description,
+    url: buildAbsoluteLangUrl('/invoice-templates', lang),
   };
 
   return (
@@ -44,28 +46,18 @@ export default function InvoiceTemplatesLandingPage() {
       <Script id="smartbill-templates-collection-schema" type="application/ld+json">
         {JSON.stringify(collectionJsonLd)}
       </Script>
-      <Header />
-      <main className="pt-16">
-        <section className="bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_55%,#f8fafc_100%)] py-16 md:py-24">
-          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">
-              <i className="fas fa-layer-group"></i>
-              Public SEO landing page
-            </div>
-            <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
-              Invoice templates that help you bill faster and stay consistent.
-            </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 md:text-lg">
-              This page is the right place to target template-related search traffic. It explains how SmartBill templates help freelancers,
-              agencies, consultants, and small businesses reuse invoice structures, keep branding consistent, and export professional PDFs.
-            </p>
-          </div>
-        </section>
-        <TemplatesGallery />
-        <FAQ />
-        <SeoNarrative />
-      </main>
-      <Footer />
+      <MarketingAuthProvider>
+        <MarketingLanguageProvider initialLang={lang}>
+          <Header />
+          <main className="bg-white pt-16">
+            <TemplatesLandingHero />
+            <TemplatesGallery />
+            <FAQ />
+            <SeoNarrative />
+          </main>
+          <Footer />
+        </MarketingLanguageProvider>
+      </MarketingAuthProvider>
     </>
   );
 }

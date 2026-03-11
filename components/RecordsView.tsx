@@ -4,6 +4,7 @@ import { translations } from '../i18n';
 import ShareDialog from './ShareDialog';
 import EmailDialog from './EmailDialog';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { calculateInvoiceTotal } from '@/lib/invoice';
 
 interface RecordsViewProps {
   records: Invoice[];
@@ -21,13 +22,30 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
-
-  // Pagination & Search States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter & Pagination Logic
+  const copy = lang === 'zh-TW'
+    ? {
+        createNew: '建立新發票',
+        untitledClient: '未命名客戶',
+        edit: '編輯',
+        duplicate: '複製',
+        export: '匯出',
+        processing: '處理中...',
+        syncing: '正在與雲端同步...',
+      }
+    : {
+        createNew: 'Create New',
+        untitledClient: 'Untitled Client',
+        edit: 'Edit',
+        duplicate: 'Duplicate',
+        export: 'Export',
+        processing: 'Processing...',
+        syncing: 'Syncing with cloud...',
+      };
+
   const filteredRecords = useMemo(() => {
     if (!searchQuery) return records;
     const lowerQuery = searchQuery.toLowerCase();
@@ -55,7 +73,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.emptyTitle}</h2>
         <p className="text-slate-500 mt-3 text-lg font-medium">{t.emptySub}</p>
         <button
-          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95"
+          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] hover:bg-blue-700 transition-all active:scale-95"
           onClick={() => onNewDoc()}
         >
           {t.goToHome}
@@ -67,17 +85,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
   return (
     <>
       <div className="px-6 py-6">
-        {/* Header Section */}
         <div className="flex flex-col gap-4 mb-4">
-          {/* <h1 className="text-3xl font-black text-slate-900 tracking-tight">Records</h1> */}
-
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               onClick={() => onNewDoc()}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 text-sm"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 text-sm"
             >
               <i className="fas fa-plus-circle"></i>
-              <span>{t.newInvoice || 'Create New'}</span>
+              <span>{t.newInvoice || copy.createNew}</span>
             </button>
 
             <div className="flex w-full sm:w-auto items-center gap-3">
@@ -99,14 +114,12 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
           </div>
         </div>
 
-        {/* List Section */}
         <div className="flex flex-col gap-4">
           {currentRecords.map((record) => (
             <div
               key={record.id}
               className="bg-white rounded-[2rem] p-6 border border-slate-100 flex flex-col xl:flex-row items-center gap-6 xl:gap-0 hover:shadow-lg transition-all group"
             >
-              {/* Col 1: Client */}
               <div className="flex items-center gap-4 w-full xl:w-[30%]">
                 <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
                   <i className="fas fa-building"></i>
@@ -114,31 +127,26 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{t.colClient || 'CLIENT'}</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 text-base truncate">{record.client.name || 'Untitled Client'}</span>
+                    <span className="font-bold text-slate-900 text-base truncate">{record.client.name || copy.untitledClient}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Col 2: Amount */}
               <div className="flex flex-col w-full xl:w-[20%] pl-0 xl:pl-4 border-l-0 xl:border-l border-slate-50">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colAmount || 'TOTAL AMOUNT'}</span>
                 <div className="flex items-end gap-1">
                   <span className="text-xs font-bold text-slate-400 mb-0.5">{record.currency}</span>
                   <span className="font-black text-slate-900 text-lg leading-none">
-                    {new Intl.NumberFormat(lang, { style: 'decimal', minimumFractionDigits: 2 }).format(
-                      record.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.rate)), 0) * (1 + record.taxRate / 100)
-                    )}
+                    {new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(calculateInvoiceTotal(record))}
                   </span>
                 </div>
               </div>
 
-              {/* Col 3: Invoice Number */}
               <div className="flex flex-col w-full xl:w-[20%]">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.invoiceBadge || 'INVOICE'}</span>
                 <span className="font-bold text-slate-700 text-base tracking-tight">{record.invoiceNumber}</span>
               </div>
 
-              {/* Col 4: Date */}
               <div className="flex flex-col w-full xl:w-[15%]">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.colDate || 'ISSUE DATE'}</span>
                 <div className="flex items-center gap-2">
@@ -147,21 +155,20 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 </div>
               </div>
 
-              {/* Col 5: Actions */}
               <div className="flex items-center gap-2 w-full xl:w-[15%] justify-end">
-                <button onClick={() => setShareInvoice(record)} className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors">
+                <button onClick={() => setShareInvoice(record)} className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors">
                   <i className="fas fa-share-alt text-xs"></i>
                 </button>
-                <button onClick={() => setEmailInvoice(record)} className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-colors">
+                <button onClick={() => setEmailInvoice(record)} className="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-500 hover:text-white flex items-center justify-center transition-colors">
                   <i className="fas fa-envelope text-xs"></i>
                 </button>
-                <button onClick={() => onEdit(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-600 hover:text-white flex items-center justify-center transition-colors" title="Edit">
+                <button onClick={() => onEdit(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-600 hover:text-white flex items-center justify-center transition-colors" title={copy.edit}>
                   <i className="fas fa-pen text-xs"></i>
                 </button>
-                <button onClick={() => onDuplicate(record)} className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors" title="Duplicate">
+                <button onClick={() => onDuplicate(record)} className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors" title={copy.duplicate}>
                   <i className="fas fa-copy text-xs"></i>
                 </button>
-                <button onClick={() => onExport(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors" title="Export">
+                <button onClick={() => onExport(record)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors" title={copy.export}>
                   <i className="fas fa-download text-xs"></i>
                 </button>
                 <button
@@ -180,12 +187,10 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
           ))}
         </div>
 
-        {/* Pagination Footer */}
         {filteredRecords.length > 0 && (
           <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-1">
-
-              <span className="text-[16px]  text-slate-500">
+              <span className="text-[16px] text-slate-500">
                 {t.showingRecords
                   .replace('{start}', startRecord.toString())
                   .replace('{end}', endRecord.toString())
@@ -208,7 +213,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-10 h-10 rounded-xl border flex items-center justify-center font-bold text-sm transition-all ${currentPage === page
-                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200'
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-[0_14px_26px_-18px_rgba(37,99,235,0.52)]'
                     : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                     }`}
                 >
@@ -263,7 +268,6 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
         />
       )}
 
-      {/* Full-page Deletion Loading Overlay */}
       {isDeletingId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-6 animate-in zoom-in slide-in-from-bottom-8 duration-500">
@@ -281,7 +285,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <div className="w-2 h-2 bg-red-600 rounded-full animate-bounce"></div>
               </div>
             </div>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">{t.deleteSuccess ? 'Processing...' : 'Syncing with cloud...'}</p>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">{copy.processing}</p>
           </div>
         </div>
       )}

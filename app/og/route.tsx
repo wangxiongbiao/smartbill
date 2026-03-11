@@ -1,30 +1,85 @@
 import { ImageResponse } from 'next/og';
+import { resolveLanguage } from '@/lib/marketing';
 
 export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const view = searchParams.get('view') || 'home';
+  const lang = resolveLanguage(searchParams.get('lang'));
 
-  const presets: Record<string, { eyebrow: string; title: string; subtitle: string }> = {
+  const presets: Record<string, Record<'en' | 'zh-TW', {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    tags: string[];
+    readyLabel: string;
+    sections: string[];
+    invoicePdf: string;
+  }>> = {
     home: {
-      eyebrow: 'SmartBill',
-      title: 'Invoice generator, templates, and PDF export',
-      subtitle: 'Built for freelancers, agencies, contractors, and small businesses.',
+      en: {
+        eyebrow: 'SmartBill',
+        title: 'Invoice generator, templates, and PDF export',
+        subtitle: 'Built for freelancers, agencies, contractors, and small businesses.',
+        tags: ['Templates', 'PDF export', 'Billing workflow'],
+        readyLabel: 'Ready',
+        sections: ['Client details', 'Payment info', 'Line items', 'PDF export'],
+        invoicePdf: 'Invoice PDF',
+      },
+      'zh-TW': {
+        eyebrow: 'SmartBill',
+        title: '發票產生器、模板與 PDF 匯出',
+        subtitle: '適合自由工作者、代理商、承包商與小型企業。',
+        tags: ['模板', 'PDF 匯出', '開票流程'],
+        readyLabel: '已就緒',
+        sections: ['客戶資訊', '收款資訊', '明細項目', 'PDF 匯出'],
+        invoicePdf: '發票 PDF',
+      },
     },
     templates: {
-      eyebrow: 'SmartBill Templates',
-      title: 'Reusable invoice templates for repeat billing',
-      subtitle: 'Keep branding, speed up invoice creation, and stay consistent.',
+      en: {
+        eyebrow: 'SmartBill Templates',
+        title: 'Reusable invoice templates for repeat billing',
+        subtitle: 'Keep branding, speed up invoice creation, and stay consistent.',
+        tags: ['Template reuse', 'Brand consistency', 'PDF export'],
+        readyLabel: 'Ready',
+        sections: ['Template setup', 'Billing blocks', 'Reusable items', 'PDF export'],
+        invoicePdf: 'Invoice PDF',
+      },
+      'zh-TW': {
+        eyebrow: 'SmartBill 模板',
+        title: '適合重複開票的可重用發票模板',
+        subtitle: '維持品牌一致、加快開票速度，並保持流程穩定。',
+        tags: ['模板重用', '品牌一致', 'PDF 匯出'],
+        readyLabel: '已就緒',
+        sections: ['模板設定', '收款區塊', '可重用明細', 'PDF 匯出'],
+        invoicePdf: '發票 PDF',
+      },
     },
     'new-invoice': {
-      eyebrow: 'SmartBill Editor',
-      title: 'Create a new invoice with live preview',
-      subtitle: 'Add payment details, customize branding, and export polished PDFs.',
+      en: {
+        eyebrow: 'SmartBill Editor',
+        title: 'Create a new invoice with live preview',
+        subtitle: 'Add payment details, customize branding, and export polished PDFs.',
+        tags: ['Live preview', 'Payment info', 'Branding'],
+        readyLabel: 'Ready',
+        sections: ['Client details', 'Payment info', 'Line items', 'PDF export'],
+        invoicePdf: 'Invoice PDF',
+      },
+      'zh-TW': {
+        eyebrow: 'SmartBill 編輯器',
+        title: '在即時預覽中建立新發票',
+        subtitle: '加入收款資訊、自訂品牌，並匯出專業 PDF。',
+        tags: ['即時預覽', '收款資訊', '品牌設定'],
+        readyLabel: '已就緒',
+        sections: ['客戶資訊', '收款資訊', '明細項目', 'PDF 匯出'],
+        invoicePdf: '發票 PDF',
+      },
     },
   };
 
-  const preset = presets[view] || presets.home;
+  const preset = (presets[view] || presets.home)[lang];
 
   return new ImageResponse(
     (
@@ -52,12 +107,12 @@ export async function GET(request: Request) {
               <div style={{ width: 54, height: 54, borderRadius: 18, background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900 }}>
                 S
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#475569' }}>{preset.eyebrow}</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#475569' }}>{preset.eyebrow}</div>
             </div>
             <div style={{ marginTop: 28, fontSize: 58, lineHeight: 1.04, fontWeight: 900, letterSpacing: -2.2 }}>{preset.title}</div>
             <div style={{ marginTop: 22, fontSize: 24, lineHeight: 1.5, color: '#475569' }}>{preset.subtitle}</div>
             <div style={{ display: 'flex', gap: 14, marginTop: 28 }}>
-              {['Templates', 'PDF export', 'Billing workflow'].map((item) => (
+              {preset.tags.map((item) => (
                 <div key={item} style={{ borderRadius: 999, background: '#e2e8f0', padding: '10px 18px', fontSize: 18, fontWeight: 700, color: '#334155' }}>{item}</div>
               ))}
             </div>
@@ -67,13 +122,13 @@ export async function GET(request: Request) {
             <div style={{ width: '100%', borderRadius: 32, background: '#0f172a', padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 30px 80px rgba(15,23,42,0.22)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 18 }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.45)' }}>Invoice PDF</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.45)' }}>{preset.invoicePdf}</div>
                   <div style={{ marginTop: 8, fontSize: 28, fontWeight: 900, color: '#fff' }}>INV-2048</div>
                 </div>
-                <div style={{ borderRadius: 999, background: 'rgba(16,185,129,0.14)', color: '#bbf7d0', padding: '10px 16px', fontSize: 16, fontWeight: 800 }}>Ready</div>
+                <div style={{ borderRadius: 999, background: 'rgba(16,185,129,0.14)', color: '#bbf7d0', padding: '10px 16px', fontSize: 16, fontWeight: 800 }}>{preset.readyLabel}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 18 }}>
-                {['Client details', 'Payment info', 'Line items', 'PDF export'].map((row, index) => (
+                {preset.sections.map((row, index) => (
                   <div key={row} style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 20, padding: '16px 18px' }}>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>{row}</div>
                     <div style={{ height: 8, width: `${86 - index * 10}%`, borderRadius: 999, background: 'rgba(255,255,255,0.2)' }} />

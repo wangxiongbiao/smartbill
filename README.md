@@ -1,21 +1,67 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# SmartBill
 
-# SmartBill Pro (Next.js Version)
+SmartBill is a Next.js 15 invoice app for freelancers and small teams. It includes:
 
-This contains everything you need to run your app locally.
+- invoice editing and PDF export
+- invoice records with local-first sync
+- reusable invoice templates
+- Supabase auth and persistence
+- share links and email delivery
+- AI-assisted invoice drafting
 
-View your app in AI Studio: https://ai.studio/apps/drive/1vsNGDCRy08Zkec8C7s8qvc65L3xE7Tw3
+## Stack
 
-## Run Locally
+- Next.js 15
+- React 19
+- Tailwind CSS
+- Supabase
+- Resend
+- DeepSeek
 
-**Prerequisites:** Node.js
+## Local Setup
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+pnpm install
+```
+
+2. Create local env vars:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Fill in the required values in `.env.local`:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+4. Optional features:
+
+- `DEEPSEEK_API_KEY`: enables AI chat in the editor
+- `RESEND_API_KEY`: enables real email sending for shared invoices
+- `GEMINI_API_KEY`: enables legacy Gemini helper functions
+
+5. Start the dev server:
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+```bash
+pnpm dev
+pnpm lint
+pnpm build
+pnpm start
+```
+
+## Notes
+
+- Google OAuth is configured in the Supabase dashboard, not in `.env.local`.
+- Without `RESEND_API_KEY`, invoice email sending falls back to mock mode.
+- Public invoice sharing depends on the Supabase share tables and RPC functions in the SQL files in this repo.

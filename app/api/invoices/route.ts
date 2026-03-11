@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { deleteInvoice, getUserInvoices, saveInvoice } from '@/lib/supabase-db';
+import { syncBillingProfilesForInvoice } from '@/lib/supabase-billing-profiles';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -29,6 +30,12 @@ export async function POST(request: NextRequest) {
   }
 
   await saveInvoice(user.id, body.invoice, supabase);
+  try {
+    await syncBillingProfilesForInvoice(user.id, body.invoice, supabase);
+  } catch (error) {
+    console.error('Failed to sync billing profiles after saving invoice:', error);
+  }
+
   return NextResponse.json({ success: true });
 }
 

@@ -29,6 +29,7 @@ export const INITIAL_INVOICE: Invoice = {
 
 export function useInvoiceWorkspace(params: {
   user: User | null;
+  defaultSender: Pick<Invoice['sender'], 'name' | 'email' | 'phone' | 'address'>;
   records: Invoice[];
   setRecords: React.Dispatch<React.SetStateAction<Invoice[]>>;
   activeView: ViewType;
@@ -36,7 +37,7 @@ export function useInvoiceWorkspace(params: {
   lang: Language;
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }) {
-  const { user, records, setRecords, activeView, setActiveView, lang, showToast } = params;
+  const { user, defaultSender, records, setRecords, activeView, setActiveView, lang, showToast } = params;
   const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
   const [template, setTemplate] = useState<TemplateType>('minimalist');
   const [isHeaderReversed, setIsHeaderReversed] = useState(true);
@@ -90,6 +91,12 @@ export function useInvoiceWorkspace(params: {
     }
   }, [upsertRecordLocally, user?.id]);
 
+  const buildSenderDraft = useCallback((senderOverride?: Partial<Invoice['sender']>) => ({
+    ...INITIAL_INVOICE.sender,
+    ...(senderOverride || {}),
+    ...(user?.id ? defaultSender : {}),
+  }), [defaultSender, user?.id]);
+
   const createInvoice = useCallback(async (preset?: Partial<Invoice>) => {
     const newId = Date.now().toString();
     const defaultCurrency = lang === 'zh-TW' ? 'TWD' : 'USD';
@@ -98,6 +105,8 @@ export function useInvoiceWorkspace(params: {
       currency: defaultCurrency,
       items: [{ id: 'item-1', description: translations[lang].itemDescriptionExample || 'Example Service Item', quantity: 1, rate: 0 }],
       ...preset,
+      client: { ...INITIAL_INVOICE.client },
+      sender: buildSenderDraft(preset?.sender),
       id: newId,
       invoiceNumber: `INV-${newId.slice(-6)}`
     };
@@ -112,7 +121,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     return nextInvoice;
-  }, [lang, setActiveView, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, lang, setActiveView, upsertRecordLocally, user?.id]);
 
   const saveCurrentInvoice = useCallback(async () => {
     if (user?.id) {
@@ -148,6 +157,7 @@ export function useInvoiceWorkspace(params: {
     const nextInvoice: Invoice = {
       ...INITIAL_INVOICE,
       ...templateRecord.template_data,
+      sender: buildSenderDraft(templateRecord.template_data.sender),
       id: newId,
       invoiceNumber: `INV-${newId.slice(-6)}`,
       date: new Date().toISOString().split('T')[0],
@@ -166,7 +176,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     return nextInvoice;
-  }, [setActiveView, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, setActiveView, upsertRecordLocally, user?.id]);
 
   const duplicateInvoice = useCallback(async (sourceInvoice: Invoice) => {
     const newId = Date.now().toString();

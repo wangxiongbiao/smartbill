@@ -2,7 +2,6 @@
 'use client';
 import React, { useState } from 'react';
 import { Language } from '../types';
-import { translations } from '../i18n';
 
 interface AboutViewProps {
   lang: Language;
@@ -11,7 +10,47 @@ interface AboutViewProps {
 }
 
 const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) => {
-  const t = translations[lang] || translations['en'];
+  const copy = lang === 'zh-TW'
+    ? {
+        navTitle: 'SmartBill Pro / 全球視野',
+        heroBadge: '區域專業能力',
+        heroDescription: '我們深耕全球市場，透過理解在地商業文化，為不同地區的用戶提供更貼合、更專業的開票解決方案。',
+        invoicesProcessed: '已處理發票',
+        countriesSupported: '支援國家',
+        westernMarket: '歐美市場',
+        westernTag: '標準化且專業',
+        taiwanMarket: '台灣市場',
+        taiwanTag: '細膩在地誠信',
+        southeastAsiaMarket: '東南亞市場',
+        southeastAsiaTag: '快速數位敏捷',
+        builtFor: '專為',
+        collaboration: '協作打造',
+        securityBadge: '全球加密標準',
+        securityTitle: '智慧驅動，安全無界',
+        securityDescription: '不論你身處台北工作室還是倫敦辦公室，SmartBill Pro 都提供同等級的隱私保護與智能生成能力。資料安全始終是我們承諾的核心。',
+        craftedFor: '為現代創業者打造',
+        cta: '開啟您的專業計費之旅',
+      }
+    : {
+        navTitle: 'SmartBill Pro / Global Vision',
+        heroBadge: 'Regional Excellence',
+        heroDescription: 'Deeply rooted in global markets, we provide billing solutions shaped around local business culture and regional expectations.',
+        invoicesProcessed: 'Invoices Processed',
+        countriesSupported: 'Countries Supported',
+        westernMarket: 'Western Market',
+        westernTag: 'Standardized & Professional',
+        taiwanMarket: 'Taiwan Market',
+        taiwanTag: 'Refined Local Integrity',
+        southeastAsiaMarket: 'SE Asia Market',
+        southeastAsiaTag: 'Fast Digital Agility',
+        builtFor: 'Built for',
+        collaboration: 'Collaboration',
+        securityBadge: 'Global Encryption Standard',
+        securityTitle: 'Intelligence Driven, Security Without Borders',
+        securityDescription: 'Whether you work from a Taipei studio or a London office, SmartBill Pro delivers the same level of privacy protection and AI-powered billing support. Data security stays at the core of the promise.',
+        craftedFor: 'Crafted for Modern Entrepreneurs',
+        cta: 'Launch Your Professional Billing',
+      };
 
   // 追踪每张图片的加载状态
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
@@ -68,7 +107,7 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
         >
           <i className="fas fa-arrow-left"></i>
         </button>
-        <span className="text-xs font-black text-slate-900 uppercase tracking-[0.3em]">SmartBill Pro / Global Vision</span>
+        <span className="text-xs font-black text-slate-900 uppercase tracking-[0.3em]">{copy.navTitle}</span>
         <div className="w-10"></div>
       </nav>
 
@@ -79,24 +118,22 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
           <div className="flex-1 space-y-8 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-200">
               <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-              Regional Excellence
+              {copy.heroBadge}
             </div>
             <h1 className="text-5xl md:text-8xl font-black text-slate-900 leading-[0.85] tracking-tighter uppercase">
               SmartBill <br /><span className="text-blue-600">Pro</span>
             </h1>
             <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0">
-              {lang === 'zh-TW'
-                ? '我們深耕全球市場，通過對在地商業文化的理解，為不同區域的用戶提供最契合、最專業的計費解決方案。'
-                : 'Deeply rooted in global markets, we provide the most professional billing solutions tailored to local business cultures across regions.'}
+              {copy.heroDescription}
             </p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-8">
               <div className="flex flex-col">
                 <span className="text-4xl font-black text-slate-900">1.2M+</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoices Processed</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{copy.invoicesProcessed}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-4xl font-black text-slate-900">150+</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Countries Supported</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{copy.countriesSupported}</span>
               </div>
             </div>
           </div>
@@ -111,12 +148,12 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
                 onLoad={() => handleImageLoad(0)}
                 onError={handleImageError}
                 className={`w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${loadedImages[0] ? 'opacity-100' : 'opacity-0'}`}
-                alt="Western Customer Collaboration"
+                alt={copy.westernMarket}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
               <div className="absolute bottom-8 left-8 text-white">
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Western Market</p>
-                <h4 className="text-xl font-bold">Standardized & Professional</h4>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{copy.westernMarket}</p>
+                <h4 className="text-xl font-bold">{copy.westernTag}</h4>
               </div>
             </div>
 
@@ -130,12 +167,12 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
                   onLoad={() => handleImageLoad(1)}
                   onError={handleImageError}
                   className={`w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${loadedImages[1] ? 'opacity-100' : 'opacity-0'}`}
-                  alt="Business collaboration in Taiwan"
+                  alt={copy.taiwanMarket}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 via-transparent to-transparent"></div>
                 <div className="absolute bottom-6 left-6 text-white">
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Taiwan Market</p>
-                  <h4 className="text-base font-bold">Refined Local Integrity</h4>
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{copy.taiwanMarket}</p>
+                  <h4 className="text-base font-bold">{copy.taiwanTag}</h4>
                 </div>
               </div>
 
@@ -147,12 +184,12 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
                   onLoad={() => handleImageLoad(2)}
                   onError={handleImageError}
                   className={`w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${loadedImages[2] ? 'opacity-100' : 'opacity-0'}`}
-                  alt="Digital billing in SE Asia"
+                  alt={copy.southeastAsiaMarket}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-orange-950/80 via-transparent to-transparent"></div>
                 <div className="absolute bottom-6 left-6 text-white">
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">SE Asia Market</p>
-                  <h4 className="text-base font-bold">Fast Digital Agility</h4>
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{copy.southeastAsiaMarket}</p>
+                  <h4 className="text-base font-bold">{copy.southeastAsiaTag}</h4>
                 </div>
               </div>
             </div>
@@ -163,8 +200,8 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
                 <i className="fas fa-users-cog"></i>
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Built for</span>
-                <span className="text-xs font-bold text-slate-900">Collaboration</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{copy.builtFor}</span>
+                <span className="text-xs font-bold text-slate-900">{copy.collaboration}</span>
               </div>
             </div>
           </div>
@@ -195,15 +232,13 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
         <div className="max-w-4xl mx-auto space-y-12 relative z-10">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 rounded-full text-blue-400 text-xs font-black uppercase tracking-widest backdrop-blur-md">
-            <i className="fas fa-microchip"></i> Global Encryption Standard
+            <i className="fas fa-microchip"></i> {copy.securityBadge}
           </div>
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-none">
-            {lang === 'zh-TW' ? '智慧驅動，安全無界' : 'Intelligence Driven, Security Without Borders'}
+            {copy.securityTitle}
           </h2>
           <p className="text-slate-400 text-lg leading-relaxed font-medium">
-            {lang === 'zh-TW'
-              ? '不論您是在台北的工作室，還是倫敦的辦公樓，SmartBill Pro 都為您提供同樣高等級的隱私保護與智能生成技術。數據安全是我們承諾的核心價值。'
-              : 'Whether in a Taipei studio or a London office, SmartBill Pro provides the same high-level privacy and AI technology. Data security is the core value of our promise.'}
+            {copy.securityDescription}
           </p>
           <div className="flex flex-wrap justify-center gap-12 pt-8 opacity-30">
             <i className="fab fa-apple text-5xl hover:opacity-100 transition-opacity cursor-pointer"></i>
@@ -216,12 +251,12 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
 
       {/* 底部行動引導 */}
       <footer className="py-20 px-6 text-center bg-white border-t border-slate-100">
-        <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.4em] mb-10">Crafted for Modern Entrepreneurs</h3>
+        <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.4em] mb-10">{copy.craftedFor}</h3>
         <button
           onClick={onCreateInvoice}
           className="bg-blue-600 text-white px-12 py-5 rounded-2xl font-black shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest text-sm"
         >
-          {lang === 'zh-TW' ? '開啟您的專業計費之旅' : 'Launch Your Professional Billing'}
+          {copy.cta}
         </button>
       </footer>
     </div>

@@ -1,52 +1,76 @@
-import type { Invoice, InvoiceColumn, InvoiceItem, Language, PaymentInfoField, CustomField } from '@/types';
+import type { BillingProfile, CustomField, Invoice, InvoiceColumn, InvoiceItem, Language } from '@/types';
 
 export type InvoiceChange = (updates: Partial<Invoice>) => void;
 export type NumberInputHandler = (value: string, callback: (val: string | number) => void) => void;
 export type AutoResizeHandler = (textarea: HTMLTextAreaElement | null) => void;
-export type UpdateItemHandler = (id: string, updates: Partial<InvoiceItem>) => void;
-export type UpdateItemAmountHandler = (id: string, newAmount: number | string) => void;
-export type UpdateCustomValueHandler = (itemId: string, columnId: string, value: string) => void;
 
-export interface BasicInfoSectionProps {
+interface SharedBaseProps {
   invoice: Invoice;
   lang: Language;
   t: any;
   onChange: InvoiceChange;
+}
+
+export interface InvoiceDetailsSectionProps extends SharedBaseProps {
   dateInputRef: React.RefObject<HTMLInputElement | null>;
   dueDateInputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+export type BasicInfoSectionProps = InvoiceDetailsSectionProps & {
   isUploadingLogo: boolean;
   onOpenLogoPicker: () => void;
   onRemoveLogo: () => void;
+};
+
+export interface SenderSectionProps extends SharedBaseProps {
+  isUploadingLogo: boolean;
+  onOpenLogoPicker: () => void;
+  onRemoveLogo: () => void;
+  profiles: BillingProfile[];
+  profilesLoading: boolean;
+  onApplyProfile: (profile: BillingProfile) => void;
 }
 
-export interface ItemsSectionProps {
-  invoice: Invoice;
-  t: any;
-  lang: Language;
+export interface RecipientSectionProps extends SharedBaseProps {
+  profiles: BillingProfile[];
+  profilesLoading: boolean;
+  onApplyProfile: (profile: BillingProfile) => void;
+}
+
+export interface ItemsSectionProps extends SharedBaseProps {
   columns: InvoiceColumn[];
   sortedColumns: InvoiceColumn[];
   sensors: any;
   focusItemId: string | null;
   showColumnConfig: boolean;
   setShowColumnConfig: (value: boolean) => void;
-  onChange: InvoiceChange;
   addItem: () => void;
   removeItem: (id: string) => void;
   handleDragEnd: (event: any) => void;
   renderCell: (item: InvoiceItem, column: InvoiceColumn) => React.ReactNode;
 }
 
-export interface PaymentSectionProps {
-  invoice: Invoice;
-  lang: Language;
-  t: any;
-  onChange: InvoiceChange;
+export type InvoiceSummarySectionProps = SharedBaseProps;
+
+export interface PaymentInfoSectionProps extends SharedBaseProps {
   autoResizeTextarea: AutoResizeHandler;
   showPaymentFieldConfig: boolean;
   setShowPaymentFieldConfig: (value: boolean) => void;
   isUploadingQRCode: boolean;
   onOpenQRCodePicker: () => void;
   onRemoveQRCode: () => void;
+}
+
+export type PaymentSectionProps = PaymentInfoSectionProps & SignatureSectionProps & DisclaimerSectionProps & {
+  autoResizeTextarea: AutoResizeHandler;
+  showPaymentFieldConfig: boolean;
+  setShowPaymentFieldConfig: (value: boolean) => void;
+  isUploadingQRCode: boolean;
+  onOpenQRCodePicker: () => void;
+  onRemoveQRCode: () => void;
+};
+
+export interface SignatureSectionProps extends SharedBaseProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   startDrawing: (e: React.MouseEvent | React.TouchEvent) => void;
   draw: (e: React.MouseEvent | React.TouchEvent) => void;
@@ -55,6 +79,8 @@ export interface PaymentSectionProps {
   handleSignatureUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   clearSignature: () => void;
 }
+
+export type DisclaimerSectionProps = SharedBaseProps;
 
 export function upsertCustomField(fields: CustomField[] | undefined, index: number, field: CustomField) {
   const next = [...(fields || [])];

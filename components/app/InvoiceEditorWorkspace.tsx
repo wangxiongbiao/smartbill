@@ -14,6 +14,7 @@ import type { Invoice, Language, TemplateType, User } from '@/types';
 
 interface InvoiceEditorWorkspaceProps {
   invoice: Invoice;
+  records: Invoice[];
   template: TemplateType;
   isHeaderReversed: boolean;
   lang: Language;
@@ -43,7 +44,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
     <div className="container mx-auto flex flex-col gap-6 relative p-6">
       <div className="lg:flex gap-4" style={{ zoom: 0.9 } as React.CSSProperties}>
         <div className="lg:w-1/2 flex flex-col gap-6">
-          <InvoiceForm invoice={props.invoice} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} />
+          <InvoiceForm invoice={props.invoice} records={props.records} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} showToast={props.showToast} />
           <div className="sm:hidden mt-10 mb-16 px-2">
             <button onClick={props.onExportPdf} disabled={props.isExporting} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner">
               <span className="text-lg">{props.isExporting ? translations[props.lang].generating : translations[props.lang].exportPdf}</span>
@@ -53,7 +54,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
           <div className="bg-slate-50 rounded-xl min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-sm border border-slate-200">
             <ScalableInvoiceContainer>
-              <InvoicePreview invoice={props.invoice} template={props.template} isHeaderReversed={props.isHeaderReversed} lang={props.lang} />
+              <InvoicePreview invoice={props.invoice} template={props.template} isHeaderReversed={props.isHeaderReversed} lang={props.lang} editable onChange={props.onUpdateInvoice} />
             </ScalableInvoiceContainer>
           </div>
         </div>

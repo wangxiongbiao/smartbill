@@ -12,6 +12,7 @@ export default function EditorRoute() {
   return (
     <InvoiceEditorWorkspace
       invoice={app.invoice}
+      records={app.records}
       template={app.template}
       isHeaderReversed={app.isHeaderReversed}
       lang={app.lang}

@@ -8,6 +8,7 @@ export function useEditorUiState() {
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [isSaveTemplateDialogOpen, setIsSaveTemplateDialogOpen] = useState(false);
   const [isNewInvoiceConfirmOpen, setIsNewInvoiceConfirmOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   return {
     isAIChatOpen,
@@ -15,6 +16,7 @@ export function useEditorUiState() {
     isEmailDialogOpen,
     isSaveTemplateDialogOpen,
     isNewInvoiceConfirmOpen,
+    isLogoutConfirmOpen,
     openAIChat: () => setIsAIChatOpen(true),
     closeAIChat: () => setIsAIChatOpen(false),
     toggleAIChat: () => setIsAIChatOpen((v) => !v),
@@ -26,5 +28,7 @@ export function useEditorUiState() {
     closeSaveTemplateDialog: () => setIsSaveTemplateDialogOpen(false),
     openNewInvoiceConfirm: () => setIsNewInvoiceConfirmOpen(true),
     closeNewInvoiceConfirm: () => setIsNewInvoiceConfirmOpen(false),
+    openLogoutConfirm: () => setIsLogoutConfirmOpen(true),
+    closeLogoutConfirm: () => setIsLogoutConfirmOpen(false),
   };
 }
