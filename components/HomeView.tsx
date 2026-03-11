@@ -2,7 +2,9 @@ import React, { useMemo } from 'react';
 import RevenueTrendChart from '@/components/charts/RevenueTrendChart';
 import { Invoice, Language } from '../types';
 import { calculateInvoiceTotal } from '@/lib/invoice';
-import { getLocaleForLanguage } from '@/lib/language';
+import { getDefaultCurrencyForLanguage, getLocaleForLanguage } from '@/lib/language';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { convertAmountWithRates } from '@/lib/exchange-rates';
 
 interface HomeViewProps {
   records: Invoice[];
@@ -56,6 +58,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     aiTitle: string;
     aiDesc: string;
     aiCta: string;
+    ratesLoading: string;
+    ratesUnavailable: string;
+    convertedTo: (currency: string) => string;
+    ratesUpdated: (updatedAt: string) => string;
+    ratesBy: string;
   }> = {
     en: {
       unnamedClient: 'Unnamed client',
@@ -90,6 +97,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       aiTitle: 'Smart AI assistant',
       aiDesc: 'Generate line items, organize payment info, and polish descriptions to speed up invoice editing.',
       aiCta: 'Try it now',
+      ratesLoading: "Updating today's exchange rates...",
+      ratesUnavailable: "Today's exchange rates are unavailable right now.",
+      convertedTo: (currency: string) => `Dashboard totals converted to ${currency}`,
+      ratesUpdated: (updatedAt: string) => `Latest FX update: ${updatedAt}`,
+      ratesBy: 'Rates by ExchangeRate-API',
     },
     'zh-CN': {
       unnamedClient: '未命名客户',
@@ -124,6 +136,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       aiTitle: '专业 AI 助手',
       aiDesc: '帮你生成条目、整理收款信息、润饰描述，让账单编辑更快更顺手。',
       aiCta: '立即体验',
+      ratesLoading: '正在更新今日汇率...',
+      ratesUnavailable: '暂时无法获取今日汇率。',
+      convertedTo: (currency: string) => `仪表盘汇总已换算为 ${currency}`,
+      ratesUpdated: (updatedAt: string) => `最新汇率更新时间：${updatedAt}`,
+      ratesBy: '汇率来源：ExchangeRate-API',
     },
     'zh-TW': {
       unnamedClient: '未命名客戶',
@@ -158,6 +175,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       aiTitle: '專業 AI 助手',
       aiDesc: '幫你生成條目、整理收款資訊、潤飾描述，讓帳單編輯更快更順手。',
       aiCta: '立即體驗',
+      ratesLoading: '正在更新今日匯率...',
+      ratesUnavailable: '暫時無法取得今日匯率。',
+      convertedTo: (currency: string) => `儀表板匯總已換算為 ${currency}`,
+      ratesUpdated: (updatedAt: string) => `最新匯率更新時間：${updatedAt}`,
+      ratesBy: '匯率來源：ExchangeRate-API',
     },
     th: {
       unnamedClient: 'ลูกค้าไม่มีชื่อ',
@@ -192,6 +214,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       aiTitle: 'ผู้ช่วย AI อัจฉริยะ',
       aiDesc: 'ช่วยสร้างรายการ จัดข้อมูลการชำระเงิน และปรับคำอธิบายให้คมขึ้น เพื่อให้การแก้ไขใบแจ้งหนี้เร็วขึ้น',
       aiCta: 'ลองตอนนี้',
+      ratesLoading: 'กำลังอัปเดตอัตราแลกเปลี่ยนล่าสุด...',
+      ratesUnavailable: 'ไม่สามารถโหลดอัตราแลกเปลี่ยนล่าสุดได้ในขณะนี้',
+      convertedTo: (currency: string) => `ยอดรวมบนแดชบอร์ดแปลงเป็น ${currency}`,
+      ratesUpdated: (updatedAt: string) => `อัปเดตอัตราล่าสุด: ${updatedAt}`,
+      ratesBy: 'อัตราแลกเปลี่ยนโดย ExchangeRate-API',
     },
     id: {
       unnamedClient: 'Klien tanpa nama',
@@ -226,28 +253,83 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       aiTitle: 'Asisten AI cerdas',
       aiDesc: 'Buat item baris, rapikan info pembayaran, dan poles deskripsi untuk mempercepat pengeditan invoice.',
       aiCta: 'Coba sekarang',
+      ratesLoading: 'Sedang memperbarui kurs terbaru...',
+      ratesUnavailable: 'Kurs terbaru belum tersedia saat ini.',
+      convertedTo: (currency: string) => `Total dashboard dikonversi ke ${currency}`,
+      ratesUpdated: (updatedAt: string) => `Pembaruan kurs terbaru: ${updatedAt}`,
+      ratesBy: 'Kurs oleh ExchangeRate-API',
     },
   };
   const copy = copyByLang[lang];
+  const displayCurrency = getDefaultCurrencyForLanguage(lang);
+  const invoiceCurrencies = useMemo(
+    () => Array.from(new Set(records.map((record) => record.currency?.trim().toUpperCase()).filter(Boolean))),
+    [records]
+  );
+  const needsLiveRates = invoiceCurrencies.some((currency) => currency !== displayCurrency);
+  const { snapshot: exchangeSnapshot, loading: exchangeRatesLoading, error: exchangeRatesError } = useExchangeRates({
+    baseCurrency: displayCurrency,
+    symbols: invoiceCurrencies,
+    enabled: records.length > 0 && needsLiveRates,
+  });
+
+  const formatRateTimestamp = (value: string | null) => {
+    if (!value) return null;
+
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) return value;
+
+    return new Intl.DateTimeFormat(getLocaleForLanguage(lang), {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(parsedDate);
+  };
 
   const dashboard = useMemo(() => {
     const now = new Date();
-    const totalAmount = records.reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
-    const unpaid = records.filter(invoice => invoice.status !== 'Paid');
-    const unpaidAmount = unpaid.reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
-    const paidInvoices = records.filter(invoice => invoice.status === 'Paid');
-    const paidAmount = paidInvoices.reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
-    const overdue = records.filter(invoice => invoice.status !== 'Paid' && invoice.dueDate && new Date(invoice.dueDate) < now);
-    const overdueAmount = overdue.reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
-    const latestCurrency = records[0]?.currency || 'USD';
+    const convertedRecords = records.map((invoice) => {
+      const rawTotal = calculateInvoiceTotal(invoice);
+      const convertedTotal = convertAmountWithRates({
+        amount: rawTotal,
+        fromCurrency: invoice.currency,
+        toCurrency: displayCurrency,
+        baseCurrency: exchangeSnapshot?.base || displayCurrency,
+        rates: exchangeSnapshot?.rates,
+      });
+
+      return {
+        invoice,
+        rawTotal,
+        convertedTotal,
+      };
+    });
+    const hasConvertedTotals = convertedRecords.every(({ invoice, convertedTotal }) => (
+      invoice.currency === displayCurrency || convertedTotal !== null
+    ));
+    const totalAmount = hasConvertedTotals
+      ? convertedRecords.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+      : null;
+    const unpaid = convertedRecords.filter(({ invoice }) => invoice.status !== 'Paid');
+    const unpaidAmount = hasConvertedTotals
+      ? unpaid.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+      : null;
+    const paidInvoices = convertedRecords.filter(({ invoice }) => invoice.status === 'Paid');
+    const paidAmount = hasConvertedTotals
+      ? paidInvoices.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+      : null;
+    const overdue = convertedRecords.filter(({ invoice }) => invoice.status !== 'Paid' && invoice.dueDate && new Date(invoice.dueDate) < now);
+    const overdueAmount = hasConvertedTotals
+      ? overdue.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+      : null;
 
     const trend = Array.from({ length: 7 }).map((_, index) => {
       const day = new Date();
       day.setDate(day.getDate() - (6 - index));
       const key = day.toISOString().split('T')[0];
-      const value = records
-        .filter(invoice => invoice.date === key)
-        .reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
+      const dayEntries = convertedRecords.filter(({ invoice }) => invoice.date === key);
+      const value = hasConvertedTotals
+        ? dayEntries.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+        : 0;
       return { label: day.toLocaleDateString(getLocaleForLanguage(lang), { weekday: 'short' }), value };
     });
 
@@ -264,20 +346,27 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       }));
 
     const monthlyPerformance = [...records]
-      .reduce((acc, invoice) => {
+      .reduce((acc, invoice, index) => {
         const key = invoice.client.name || copy.unknownClient;
-        acc.set(key, (acc.get(key) || 0) + calculateInvoiceTotal(invoice));
+        const sourceEntry = convertedRecords[index];
+        const nextAmount = hasConvertedTotals
+          ? sourceEntry.convertedTotal ?? sourceEntry.rawTotal
+          : 0;
+        acc.set(key, (acc.get(key) || 0) + nextAmount);
         return acc;
       }, new Map<string, number>())
       .entries();
 
-    const topClients = Array.from(monthlyPerformance)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([name, amount]) => ({ name, amount: formatCurrency(amount, latestCurrency, lang) }));
+    const topClients = hasConvertedTotals
+      ? Array.from(monthlyPerformance)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([name, amount]) => ({ name, amount: formatCurrency(amount, displayCurrency, lang) }))
+      : [];
 
     return {
-      latestCurrency,
+      displayCurrency,
+      hasConvertedTotals,
       summary: {
         totalAmount,
         unpaidAmount,
@@ -289,17 +378,54 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       recentActivity,
       topClients
     };
-  }, [records, lang, copy.unnamedClient, copy.unknownClient, copy.draft]);
+  }, [records, lang, displayCurrency, exchangeSnapshot, copy.unnamedClient, copy.unknownClient, copy.draft]);
 
   const summaryCards = [
-    { label: copy.summaryTotal, value: formatCurrency(dashboard.summary.totalAmount, dashboard.latestCurrency, lang), icon: 'fa-chart-line', color: 'bg-blue-600 text-white' },
-    { label: copy.summaryUnpaid, value: formatCurrency(dashboard.summary.unpaidAmount, dashboard.latestCurrency, lang), icon: 'fa-clock', color: 'bg-amber-500 text-white' },
-    { label: copy.summaryPaid, value: formatCurrency(dashboard.summary.paidAmount, dashboard.latestCurrency, lang), sub: copy.paidCount(dashboard.summary.paidCount), icon: 'fa-check', color: 'bg-emerald-500 text-white' },
-    { label: copy.summaryOverdue, value: formatCurrency(dashboard.summary.overdueAmount, dashboard.latestCurrency, lang), icon: 'fa-triangle-exclamation', color: 'bg-rose-500 text-white' },
+    { label: copy.summaryTotal, value: dashboard.summary.totalAmount === null ? '--' : formatCurrency(dashboard.summary.totalAmount, dashboard.displayCurrency, lang), icon: 'fa-chart-line', color: 'bg-blue-600 text-white' },
+    { label: copy.summaryUnpaid, value: dashboard.summary.unpaidAmount === null ? '--' : formatCurrency(dashboard.summary.unpaidAmount, dashboard.displayCurrency, lang), icon: 'fa-clock', color: 'bg-amber-500 text-white' },
+    { label: copy.summaryPaid, value: dashboard.summary.paidAmount === null ? '--' : formatCurrency(dashboard.summary.paidAmount, dashboard.displayCurrency, lang), sub: copy.paidCount(dashboard.summary.paidCount), icon: 'fa-check', color: 'bg-emerald-500 text-white' },
+    { label: copy.summaryOverdue, value: dashboard.summary.overdueAmount === null ? '--' : formatCurrency(dashboard.summary.overdueAmount, dashboard.displayCurrency, lang), icon: 'fa-triangle-exclamation', color: 'bg-rose-500 text-white' },
   ];
+  const exchangeRateTimestamp = formatRateTimestamp(exchangeSnapshot?.lastUpdatedAt || null);
+  const exchangeRateStatus = needsLiveRates
+    ? exchangeSnapshot
+      ? copy.ratesUpdated(exchangeRateTimestamp || exchangeSnapshot.lastUpdatedAt || '')
+      : exchangeRatesLoading
+        ? copy.ratesLoading
+        : copy.ratesUnavailable
+    : null;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-5 md:px-8 md:py-6 space-y-3.5">
+      {needsLiveRates && (
+        <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-2 text-[11px] font-semibold text-slate-500 sm:flex-row sm:flex-wrap sm:items-center">
+            <span>{copy.convertedTo(dashboard.displayCurrency)}</span>
+            <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"></span>
+            <span>{exchangeRateStatus}</span>
+            {exchangeSnapshot && (
+              <>
+                <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"></span>
+                <a
+                  href={exchangeSnapshot.providerDocumentation}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  {copy.ratesBy}
+                </a>
+              </>
+            )}
+            {!exchangeSnapshot && exchangeRatesError && (
+              <>
+                <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"></span>
+                <span className="text-rose-500">{exchangeRatesError}</span>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
         {summaryCards.map(card => (
           <div key={card.label} className="bg-white rounded-[24px] border border-slate-200 px-4 py-4 shadow-sm hover:shadow-md transition-shadow">
@@ -325,13 +451,24 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
           <div className="mt-4 bg-slate-50/70 rounded-[22px] p-5 border border-slate-100">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-[24px] leading-none font-medium tracking-[-0.015em] text-slate-900">{formatCurrency(dashboard.summary.totalAmount, dashboard.latestCurrency, lang)}</div>
+                <div className="text-[24px] leading-none font-medium tracking-[-0.015em] text-slate-900">
+                  {dashboard.summary.totalAmount === null ? '--' : formatCurrency(dashboard.summary.totalAmount, dashboard.displayCurrency, lang)}
+                </div>
                 <div className="text-[10px] font-semibold text-slate-400 mt-1">{copy.trendTotalDesc}</div>
               </div>
               <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">{copy.thisWeek}</div>
             </div>
 
-            <RevenueTrendChart data={dashboard.trend} lang={lang} currency={dashboard.latestCurrency} />
+            {dashboard.hasConvertedTotals ? (
+              <RevenueTrendChart data={dashboard.trend} lang={lang} currency={dashboard.displayCurrency} />
+            ) : (
+              <div className="flex h-[220px] w-full items-center justify-center rounded-[18px] border border-dashed border-slate-200 bg-white text-center">
+                <div>
+                  <div className="text-sm font-bold text-slate-600">{exchangeRateStatus}</div>
+                  <div className="mt-2 text-[11px] font-medium text-slate-400">{copy.convertedTo(dashboard.displayCurrency)}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -360,7 +497,17 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
                 </div>
                 <div className="text-[12px] font-medium tracking-normal text-slate-900">{client.amount}</div>
               </div>
-            )) : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center"><div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-chart-line text-[12px]"></i></div><div className="text-[12px] font-semibold text-slate-500">{copy.noPerformance}</div><div className="text-[10px] text-slate-400 mt-1">{copy.noPerformanceDesc}</div></div>}
+            )) : (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-chart-line text-[12px]"></i></div>
+                <div className="text-[12px] font-semibold text-slate-500">
+                  {needsLiveRates && !dashboard.hasConvertedTotals ? exchangeRateStatus : copy.noPerformance}
+                </div>
+                <div className="text-[10px] text-slate-400 mt-1">
+                  {needsLiveRates && !dashboard.hasConvertedTotals ? copy.convertedTo(dashboard.displayCurrency) : copy.noPerformanceDesc}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

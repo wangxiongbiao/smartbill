@@ -10,13 +10,28 @@ export interface NavItemConfig {
 
 export function getPrimaryNavItems(lang: Language): NavItemConfig[] {
   const t = translations[lang] || translations.en;
+  const labels = lang === 'en'
+    ? {
+        home: 'Dashboard',
+        records: 'Invoice',
+        templates: 'Templates',
+        profile: 'Account',
+        editor: 'New',
+      }
+    : {
+        home: t.home || 'Dashboard',
+        records: t.records || 'Invoices',
+        templates: t.myTemplates || 'Templates',
+        profile: t.profile || t.accountSettingsNav || 'Account',
+        editor: t.make || 'New',
+      };
 
   return [
-    { id: 'home', label: t.home || 'Dashboard', icon: 'fas fa-chart-line', activeIcon: 'fa-chart-line' },
-    { id: 'records', label: t.records || 'Invoices', icon: 'fas fa-folder-open', activeIcon: 'fa-folder-open' },
-    { id: 'editor', label: t.make || 'New', icon: 'fas fa-plus', activeIcon: 'fa-plus' },
-    { id: 'templates', label: t.myTemplates || 'Templates', icon: 'fas fa-layer-group', activeIcon: 'fa-layer-group' },
-    { id: 'profile', label: t.accountSettingsNav || t.profile || 'Settings', icon: 'fas fa-user-gear', activeIcon: 'fa-user-gear' },
+    { id: 'home', label: labels.home, icon: 'fas fa-house', activeIcon: 'fas fa-house' },
+    { id: 'records', label: labels.records, icon: 'fas fa-folder-open', activeIcon: 'fas fa-folder-open' },
+    { id: 'editor', label: labels.editor, icon: 'fas fa-plus', activeIcon: 'fas fa-plus' },
+    { id: 'templates', label: labels.templates, icon: 'fas fa-layer-group', activeIcon: 'fas fa-layer-group' },
+    { id: 'profile', label: labels.profile, icon: 'fas fa-user-tie', activeIcon: 'fas fa-user-tie' },
   ];
 }
 

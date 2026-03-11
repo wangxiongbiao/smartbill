@@ -10,6 +10,7 @@ import { getLocaleForLanguage } from '@/lib/language';
 interface RecordsViewProps {
   records: Invoice[];
   onEdit: (record: Invoice) => void;
+  onDuplicate: (record: Invoice) => void | Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onExport: (record: Invoice) => void;
   lang: Language;
@@ -17,7 +18,7 @@ interface RecordsViewProps {
   isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
@@ -429,6 +430,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDelete, on
                                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
                               >
                                 <i className="fas fa-pen-to-square text-xs"></i>
+                              </button>
+                              <button
+                                onClick={() => onDuplicate(record)}
+                                title={copy.duplicate}
+                                aria-label={copy.duplicate}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                              >
+                                <i className="fas fa-copy text-xs"></i>
                               </button>
                               <button
                                 onClick={() => onExport(record)}

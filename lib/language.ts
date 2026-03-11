@@ -73,7 +73,7 @@ export function getDefaultCurrencyForLanguage(lang: Language) {
     case 'zh-CN':
       return 'CNY';
     case 'zh-TW':
-      return 'TWD';
+      return 'MYR';
     case 'th':
       return 'THB';
     case 'id':

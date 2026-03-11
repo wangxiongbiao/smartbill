@@ -16,6 +16,7 @@ export default function RecordsRoute() {
       lang={app.lang}
       isDeletingId={app.isDeletingId}
       onEdit={app.openInvoice}
+      onDuplicate={app.duplicateInvoice}
       onDelete={app.deleteInvoice}
       onExport={app.exportInvoice}
       onNewDoc={app.createInvoice}
