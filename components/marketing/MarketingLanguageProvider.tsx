@@ -1,14 +1,20 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { Language } from '@/types';
 import {
-  buildLangHref,
   getStoredLanguage,
   persistLanguage,
   resolveLanguage,
 } from '@/lib/marketing';
+import {
+  DEFAULT_LANGUAGE,
+  getDocumentLanguage,
+  getNextLanguage,
+  isSupportedLanguage,
+  resolveBrowserLanguage,
+} from '@/lib/language';
 
 type MarketingLanguageContextValue = {
   lang: Language;
@@ -30,11 +36,25 @@ export function MarketingLanguageProvider({
   const searchParams = useSearchParams();
   const [lang, setLangState] = useState<Language>(initialLang);
 
+  const buildPathWithLang = useCallback((nextLang: Language) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextLang === DEFAULT_LANGUAGE) {
+      params.delete('lang');
+    } else {
+      params.set('lang', nextLang);
+    }
+
+    return params.toString()
+      ? `${pathname || '/'}?${params.toString()}`
+      : (pathname || '/');
+  }, [pathname, searchParams]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const queryLang = searchParams.get('lang');
 
-    if (queryLang === 'en' || queryLang === 'zh-TW') {
+    if (isSupportedLanguage(queryLang)) {
       setLangState(queryLang);
       persistLanguage(queryLang);
       return;
@@ -43,22 +63,22 @@ export function MarketingLanguageProvider({
     const saved = getStoredLanguage();
     if (saved) {
       setLangState(saved);
-      if (saved === 'zh-TW') {
-        router.replace(buildLangHref(pathname || '/', 'zh-TW'), { scroll: false });
+      if (saved !== DEFAULT_LANGUAGE) {
+        router.replace(buildPathWithLang(saved), { scroll: false });
       }
       return;
     }
 
-    const browserLang = window.navigator.language.toLowerCase();
-    if (browserLang.includes('zh')) {
-      setLangState('zh-TW');
-      router.replace(buildLangHref(pathname || '/', 'zh-TW'), { scroll: false });
+    const browserLang = resolveBrowserLanguage(window.navigator.language);
+    if (browserLang !== DEFAULT_LANGUAGE) {
+      setLangState(browserLang);
+      router.replace(buildPathWithLang(browserLang), { scroll: false });
     }
-  }, [pathname, router, searchParams]);
+  }, [buildPathWithLang, pathname, router, searchParams]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    document.documentElement.lang = lang === 'zh-TW' ? 'zh-Hant' : 'en';
+    document.documentElement.lang = getDocumentLanguage(lang);
   }, [lang]);
 
   const updateLang = (nextLang: Language) => {
@@ -67,25 +87,14 @@ export function MarketingLanguageProvider({
     setLangState(resolvedLang);
     persistLanguage(resolvedLang);
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (resolvedLang === 'zh-TW') {
-      params.set('lang', 'zh-TW');
-    } else {
-      params.delete('lang');
-    }
-
-    const nextPath = params.toString()
-      ? `${pathname || '/'}?${params.toString()}`
-      : (pathname || '/');
-
-    router.replace(nextPath, { scroll: false });
+    router.replace(buildPathWithLang(resolvedLang), { scroll: false });
   };
 
   const value = useMemo(
     () => ({
       lang,
       setLang: updateLang,
-      toggleLang: () => updateLang(lang === 'en' ? 'zh-TW' : 'en'),
+      toggleLang: () => updateLang(getNextLanguage(lang)),
     }),
     [lang, updateLang],
   );

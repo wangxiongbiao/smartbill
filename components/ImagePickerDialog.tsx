@@ -29,13 +29,50 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const t = translations[lang] || translations['en'];
 
-    const copy = {
-        uploadFailed: lang === 'zh-TW' ? '上傳圖片失敗' : 'Failed to upload image',
-        readFailed: lang === 'zh-TW' ? '讀取文件失敗' : 'Failed to read file',
-        deleteFailed: lang === 'zh-TW' ? '刪除圖片失敗' : 'Failed to delete image',
-        uploadedImageAlt: lang === 'zh-TW' ? '已上傳圖片' : 'Uploaded image',
-        cancel: t.deleteDialogCancel || (lang === 'zh-TW' ? '取消' : 'Cancel'),
-    };
+    const copyByLang = {
+        en: {
+            uploadFailed: 'Failed to upload image',
+            readFailed: 'Failed to read file',
+            deleteFailed: 'Failed to delete image',
+            uploadedImageAlt: 'Uploaded image',
+            cancel: t.deleteDialogCancel || 'Cancel',
+        },
+        'zh-CN': {
+            uploadFailed: '上传图片失败',
+            readFailed: '读取文件失败',
+            deleteFailed: '删除图片失败',
+            uploadedImageAlt: '已上传图片',
+            cancel: t.deleteDialogCancel || '取消',
+        },
+        'zh-TW': {
+            uploadFailed: '上傳圖片失敗',
+            readFailed: '讀取文件失敗',
+            deleteFailed: '刪除圖片失敗',
+            uploadedImageAlt: '已上傳圖片',
+            cancel: t.deleteDialogCancel || '取消',
+        },
+        th: {
+            uploadFailed: 'อัปโหลดรูปภาพไม่สำเร็จ',
+            readFailed: 'อ่านไฟล์ไม่สำเร็จ',
+            deleteFailed: 'ลบรูปภาพไม่สำเร็จ',
+            uploadedImageAlt: 'รูปภาพที่อัปโหลด',
+            cancel: t.deleteDialogCancel || 'ยกเลิก',
+        },
+        id: {
+            uploadFailed: 'Gagal mengunggah gambar',
+            readFailed: 'Gagal membaca file',
+            deleteFailed: 'Gagal menghapus gambar',
+            uploadedImageAlt: 'Gambar yang diunggah',
+            cancel: t.deleteDialogCancel || 'Batal',
+        },
+    } satisfies Record<Language, {
+        uploadFailed: string;
+        readFailed: string;
+        deleteFailed: string;
+        uploadedImageAlt: string;
+        cancel: string;
+    }>;
+    const copy = copyByLang[lang];
 
     useEffect(() => {
         if (isOpen && currentUserId) {

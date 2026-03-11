@@ -12,13 +12,24 @@ const SortableItem = ({ id, children }: { id: string; children: (props: { listen
 };
 
 export default function ItemsSection({ invoice, t, lang, columns, sortedColumns, sensors, showColumnConfig, setShowColumnConfig, onChange, addItem, removeItem, handleDragEnd, renderCell }: ItemsSectionProps) {
-  const copy = lang === 'zh-TW'
-    ? {
-        hiddenInPreview: '預覽中隱藏',
-      }
-    : {
-        hiddenInPreview: 'Hidden in preview',
-      };
+  const copyByLang = {
+    en: {
+      hiddenInPreview: 'Hidden in preview',
+    },
+    'zh-CN': {
+      hiddenInPreview: '预览中隐藏',
+    },
+    'zh-TW': {
+      hiddenInPreview: '預覽中隱藏',
+    },
+    th: {
+      hiddenInPreview: 'ซ่อนในตัวอย่าง',
+    },
+    id: {
+      hiddenInPreview: 'Disembunyikan di pratinjau',
+    },
+  } satisfies Record<typeof lang, { hiddenInPreview: string }>;
+  const copy = copyByLang[lang];
 
   return (
     <section className="space-y-4 pt-4 border-t border-slate-100">

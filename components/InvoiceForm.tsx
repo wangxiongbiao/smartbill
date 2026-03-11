@@ -84,13 +84,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, l
     () => mergedProfiles.filter((profile) => profile.kind === 'client'),
     [mergedProfiles]
   );
-  const copy = lang === 'zh-TW'
-    ? {
-        bankAddress: '詳細地址',
-      }
-    : {
-        bankAddress: 'Bank Address',
-      };
+  const copyByLang = {
+    en: {
+      bankAddress: 'Bank Address',
+    },
+    'zh-CN': {
+      bankAddress: '详细地址',
+    },
+    'zh-TW': {
+      bankAddress: '詳細地址',
+    },
+    th: {
+      bankAddress: 'ที่อยู่ธนาคาร',
+    },
+    id: {
+      bankAddress: 'Alamat bank',
+    },
+  } satisfies Record<Language, { bankAddress: string }>;
+  const copy = copyByLang[lang];
 
   useEffect(() => {
     if (!invoice.columnConfig) onChange({ columnConfig: DEFAULT_INVOICE_COLUMNS });

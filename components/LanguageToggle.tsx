@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Language } from '@/types';
+import { LANGUAGE_OPTIONS } from '@/lib/language';
 
 interface LanguageToggleProps {
   lang: Language;
@@ -10,24 +11,57 @@ interface LanguageToggleProps {
 }
 
 export default function LanguageToggle({ lang, onChange, ariaLabel }: LanguageToggleProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const currentLanguage = LANGUAGE_OPTIONS.find((option) => option.code === lang) || LANGUAGE_OPTIONS[2];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
-        onClick={() => onChange('en')}
+        onClick={() => setOpen((value) => !value)}
         aria-label={ariaLabel}
-        className={`rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${lang === 'en' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
+        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
       >
-        EN
+        <i className="fas fa-globe text-[11px]"></i>
+        <span className="sm:hidden">{currentLanguage.shortLabel}</span>
+        <span className="hidden sm:inline">{currentLanguage.label}</span>
+        <i className={`fas fa-chevron-down text-[10px] transition-transform ${open ? 'rotate-180' : ''}`}></i>
       </button>
-      <button
-        type="button"
-        onClick={() => onChange('zh-TW')}
-        aria-label={ariaLabel}
-        className={`rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${lang === 'zh-TW' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
-      >
-        繁
-      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-[0_18px_38px_-24px_rgba(15,23,42,0.2)]">
+          {LANGUAGE_OPTIONS.map((option) => (
+            <button
+              key={option.code}
+              type="button"
+              onClick={() => {
+                onChange(option.code);
+                setOpen(false);
+              }}
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-bold transition-colors ${
+                lang === option.code
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <span>{option.label}</span>
+              {lang === option.code && <i className="fas fa-check text-[11px]"></i>}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

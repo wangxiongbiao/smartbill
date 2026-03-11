@@ -9,6 +9,7 @@ import { useMarketingAuth } from '@/components/marketing/MarketingAuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { useMarketingLanguage } from '@/components/marketing/MarketingLanguageProvider';
 import { buildLangHref } from '@/lib/marketing';
+import type { Language } from '@/types';
 
 export function Header() {
   const router = useRouter();
@@ -19,41 +20,110 @@ export function Header() {
   const { isLoggedIn, isGoogleLoading, openProtectedRoute, profile } = useMarketingAuth();
   const { lang, setLang } = useMarketingLanguage();
 
-  const copy = lang === 'zh-TW'
-    ? {
-        navFeatures: '功能特色',
-        navTemplates: '模板',
-        navAudience: '適用對象',
-        navFaq: '常見問題',
-        badge: '開票流程',
-        liveDemo: '查看示範',
-        startFree: '免費開始',
-        openingLogin: '正在開啟登入...',
-        dashboard: '控制台',
-        signOut: '登出',
-        signingOut: '登出中...',
-        user: '使用者',
-        language: '語言切換',
-        home: 'SmartBill 首頁',
-        userMenu: '使用者選單',
-      }
-    : {
-        navFeatures: 'Features',
-        navTemplates: 'Templates',
-        navAudience: 'Who it’s for',
-        navFaq: 'FAQ',
-        badge: 'Invoice workflow',
-        liveDemo: 'Live demo',
-        startFree: 'Start free',
-        openingLogin: 'Opening login...',
-        dashboard: 'Dashboard',
-        signOut: 'Sign out',
-        signingOut: 'Signing out...',
-        user: 'User',
-        language: 'Language switcher',
-        home: 'SmartBill home',
-        userMenu: 'User menu',
-      };
+  const copyByLang: Record<Language, {
+    navFeatures: string;
+    navTemplates: string;
+    navAudience: string;
+    navFaq: string;
+    badge: string;
+    liveDemo: string;
+    startFree: string;
+    openingLogin: string;
+    dashboard: string;
+    signOut: string;
+    signingOut: string;
+    user: string;
+    language: string;
+    home: string;
+    userMenu: string;
+  }> = {
+    en: {
+      navFeatures: 'Features',
+      navTemplates: 'Templates',
+      navAudience: 'Who it’s for',
+      navFaq: 'FAQ',
+      badge: 'Invoice workflow',
+      liveDemo: 'Live demo',
+      startFree: 'Start free',
+      openingLogin: 'Opening login...',
+      dashboard: 'Dashboard',
+      signOut: 'Sign out',
+      signingOut: 'Signing out...',
+      user: 'User',
+      language: 'Language switcher',
+      home: 'SmartBill home',
+      userMenu: 'User menu',
+    },
+    'zh-CN': {
+      navFeatures: '功能特色',
+      navTemplates: '模板',
+      navAudience: '适用对象',
+      navFaq: '常见问题',
+      badge: '开票流程',
+      liveDemo: '查看演示',
+      startFree: '免费开始',
+      openingLogin: '正在打开登录...',
+      dashboard: '控制台',
+      signOut: '退出登录',
+      signingOut: '退出中...',
+      user: '用户',
+      language: '语言切换',
+      home: 'SmartBill 首页',
+      userMenu: '用户菜单',
+    },
+    'zh-TW': {
+      navFeatures: '功能特色',
+      navTemplates: '模板',
+      navAudience: '適用對象',
+      navFaq: '常見問題',
+      badge: '開票流程',
+      liveDemo: '查看示範',
+      startFree: '免費開始',
+      openingLogin: '正在開啟登入...',
+      dashboard: '控制台',
+      signOut: '登出',
+      signingOut: '登出中...',
+      user: '使用者',
+      language: '語言切換',
+      home: 'SmartBill 首頁',
+      userMenu: '使用者選單',
+    },
+    th: {
+      navFeatures: 'ฟีเจอร์',
+      navTemplates: 'เทมเพลต',
+      navAudience: 'เหมาะกับใคร',
+      navFaq: 'คำถามที่พบบ่อย',
+      badge: 'เวิร์กโฟลว์ใบแจ้งหนี้',
+      liveDemo: 'ดูเดโม',
+      startFree: 'เริ่มใช้ฟรี',
+      openingLogin: 'กำลังเปิดหน้าเข้าสู่ระบบ...',
+      dashboard: 'แดชบอร์ด',
+      signOut: 'ออกจากระบบ',
+      signingOut: 'กำลังออกจากระบบ...',
+      user: 'ผู้ใช้',
+      language: 'ตัวสลับภาษา',
+      home: 'หน้าแรก SmartBill',
+      userMenu: 'เมนูผู้ใช้',
+    },
+    id: {
+      navFeatures: 'Fitur',
+      navTemplates: 'Template',
+      navAudience: 'Cocok untuk siapa',
+      navFaq: 'FAQ',
+      badge: 'Alur kerja invoice',
+      liveDemo: 'Lihat demo',
+      startFree: 'Mulai gratis',
+      openingLogin: 'Membuka login...',
+      dashboard: 'Dashboard',
+      signOut: 'Keluar',
+      signingOut: 'Sedang keluar...',
+      user: 'Pengguna',
+      language: 'Pengganti bahasa',
+      home: 'Beranda SmartBill',
+      userMenu: 'Menu pengguna',
+    },
+  };
+  const copy = copyByLang[lang];
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {

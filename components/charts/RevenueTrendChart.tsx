@@ -6,6 +6,7 @@ import { BarChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { Language } from '@/types';
+import { getLocaleForLanguage } from '@/lib/language';
 
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
@@ -22,7 +23,7 @@ interface RevenueTrendChartProps {
 
 function formatCurrency(value: number, currency: string, lang: Language) {
   try {
-    return new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+    return new Intl.NumberFormat(getLocaleForLanguage(lang), {
       style: 'currency',
       currency,
       maximumFractionDigits: 0,
@@ -124,5 +125,13 @@ export default function RevenueTrendChart({ data, lang, currency }: RevenueTrend
     };
   }, [currency, data, lang]);
 
-  return <div ref={containerRef} className="h-[220px] w-full" aria-label={lang === 'zh-TW' ? '營收趨勢圖表' : 'Revenue trend chart'} />;
+  const ariaLabelByLang: Record<Language, string> = {
+    en: 'Revenue trend chart',
+    'zh-CN': '营收趋势图表',
+    'zh-TW': '營收趨勢圖表',
+    th: 'กราฟแนวโน้มรายได้',
+    id: 'Grafik tren pendapatan',
+  };
+
+  return <div ref={containerRef} className="h-[220px] w-full" aria-label={ariaLabelByLang[lang]} />;
 }

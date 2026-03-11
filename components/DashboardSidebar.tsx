@@ -12,7 +12,6 @@ interface DashboardSidebarProps {
     setView: (v: ViewType) => void;
     lang: Language;
     onLogout: () => void;
-    onNewInvoice: () => void;
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
@@ -20,21 +19,37 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     activeView,
     setView,
     lang,
-    onLogout,
-    onNewInvoice
+    onLogout
 }) => {
     const t = translations[lang];
-    const copy = lang === 'zh-TW'
-        ? {
-            returnHome: '返回首頁',
-            logout: '登出',
-            proMember: 'PRO 會員',
-        }
-        : {
+    const copyByLang = {
+        en: {
             returnHome: 'Back Home',
             logout: 'Logout',
             proMember: 'PRO MEMBER',
-        };
+        },
+        'zh-CN': {
+            returnHome: '返回首页',
+            logout: '登出',
+            proMember: 'PRO 会员',
+        },
+        'zh-TW': {
+            returnHome: '返回首頁',
+            logout: '登出',
+            proMember: 'PRO 會員',
+        },
+        th: {
+            returnHome: 'กลับหน้าแรก',
+            logout: 'ออกจากระบบ',
+            proMember: 'สมาชิก PRO',
+        },
+        id: {
+            returnHome: 'Kembali ke beranda',
+            logout: 'Keluar',
+            proMember: 'ANGGOTA PRO',
+        },
+    } satisfies Record<Language, { returnHome: string; logout: string; proMember: string }>;
+    const copy = copyByLang[lang];
 
     const navItems = getPrimaryNavItems(lang).filter((item) => item.id !== 'editor');
 
@@ -62,18 +77,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 </Link>
             </div>
 
-            <div className="px-4 py-5">
-                <button
-                    onClick={onNewInvoice}
-                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-bold shadow-[0_16px_30px_-18px_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-2 group"
-                >
-                    <i className="fas fa-plus group-hover:rotate-90 transition-transform"></i>
-                    <span>{t.newInvoiceShort || 'New Invoice'}</span>
-                </button>
-            </div>
-
             {/* Navigation */}
-            <nav className="flex-1 px-4 space-y-1.5">
+            <nav className="flex-1 px-4 py-5 space-y-1.5">
                 {navItems.map((item) => {
                     const isActive = isNavItemActive(item.id, activeView);
 

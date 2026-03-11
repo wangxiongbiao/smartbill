@@ -9,19 +9,44 @@ interface SEOContentProps {
 
 const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
     const t = translations[lang] || translations['en'];
-    const copy = lang === 'zh-TW'
-        ? {
-            industriesBadge: '適用產業',
-            faqDescription: '關於我們的發票工具，你需要知道的重點都在這裡。',
-            footerTitle: '適合現代商務的專業發票工具',
-            footerBody: 'SmartBill Pro 不只是發票模板，而是一套以 AI 簡化流程的完整計費方案。無論你需要自由工作者發票、顧問服務帳單、工程請款格式或簡單收據，都能用同一套工作流快速完成，建立更專業的品牌形象。',
-        }
-        : {
+    const copyByLang = {
+        en: {
             industriesBadge: 'Industries',
             faqDescription: 'Everything you need to know about our invoice maker.',
             footerTitle: 'Professional Invoice Maker for Modern Business',
             footerBody: 'SmartBill Pro is more than an invoice template. It is a full billing workflow powered by AI to simplify repetitive work. Whether you need freelancer invoices, consulting bills, contractor formats, or simple receipts, SmartBill helps you build a stronger professional brand with polished billing documents.',
-        };
+        },
+        'zh-CN': {
+            industriesBadge: '适用行业',
+            faqDescription: '关于我们的发票工具，你需要知道的重点都在这里。',
+            footerTitle: '适合现代商业的专业发票工具',
+            footerBody: 'SmartBill Pro 不只是发票模板，而是一套以 AI 简化流程的完整计费方案。无论你需要自由职业者发票、顾问服务账单、工程请款格式或简单收据，都能用同一套工作流快速完成，建立更专业的品牌形象。',
+        },
+        'zh-TW': {
+            industriesBadge: '適用產業',
+            faqDescription: '關於我們的發票工具，你需要知道的重點都在這裡。',
+            footerTitle: '適合現代商務的專業發票工具',
+            footerBody: 'SmartBill Pro 不只是發票模板，而是一套以 AI 簡化流程的完整計費方案。無論你需要自由工作者發票、顧問服務帳單、工程請款格式或簡單收據，都能用同一套工作流快速完成，建立更專業的品牌形象。',
+        },
+        th: {
+            industriesBadge: 'อุตสาหกรรม',
+            faqDescription: 'ทุกสิ่งที่คุณควรรู้เกี่ยวกับเครื่องมือออกใบแจ้งหนี้ของเราอยู่ที่นี่',
+            footerTitle: 'เครื่องมือออกใบแจ้งหนี้มืออาชีพสำหรับธุรกิจสมัยใหม่',
+            footerBody: 'SmartBill Pro เป็นมากกว่าเทมเพลตใบแจ้งหนี้ แต่เป็นเวิร์กโฟลว์การเรียกเก็บเงินครบวงจรที่ขับเคลื่อนด้วย AI เพื่อช่วยลดงานซ้ำ ๆ ไม่ว่าคุณจะต้องการใบแจ้งหนี้ฟรีแลนซ์ บิลที่ปรึกษา แบบฟอร์มผู้รับเหมา หรือใบเสร็จแบบง่าย SmartBill จะช่วยให้เอกสารการเรียกเก็บเงินของคุณดูเป็นมืออาชีพยิ่งขึ้น',
+        },
+        id: {
+            industriesBadge: 'Industri',
+            faqDescription: 'Semua yang perlu Anda ketahui tentang pembuat invoice kami ada di sini.',
+            footerTitle: 'Pembuat Invoice Profesional untuk Bisnis Modern',
+            footerBody: 'SmartBill Pro bukan sekadar template invoice. Ini adalah alur kerja penagihan lengkap berbasis AI untuk menyederhanakan pekerjaan berulang. Baik Anda membutuhkan invoice freelancer, tagihan konsultasi, format kontraktor, atau kuitansi sederhana, SmartBill membantu membangun citra profesional yang lebih kuat lewat dokumen penagihan yang rapi.',
+        },
+    } satisfies Record<Language, {
+        industriesBadge: string;
+        faqDescription: string;
+        footerTitle: string;
+        footerBody: string;
+    }>;
+    const copy = copyByLang[lang];
 
     // Simple helper to render bold text from markdown-style **text**
     const renderMarkdown = (text: string) => {

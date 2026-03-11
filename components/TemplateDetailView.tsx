@@ -3,6 +3,7 @@ import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import InvoicePreview from './InvoicePreview';
 import ScalableInvoiceContainer from './ScalableInvoiceContainer';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface TemplateDetailViewProps {
     template: InvoiceTemplate;
@@ -22,10 +23,18 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
     onBack
 }) => {
     const t = translations[lang] || translations['en'];
+    const copyByLang: Record<Language, { sampleClient: string; sampleAddress: string; type: string; currency: string }> = {
+        en: { sampleClient: 'Sample Client', sampleAddress: '123 Client Street', type: 'Type', currency: 'Currency' },
+        'zh-CN': { sampleClient: '示例客户', sampleAddress: '客户地址示例', type: '类型', currency: '币别' },
+        'zh-TW': { sampleClient: '示例客戶', sampleAddress: '客戶地址示例', type: '類型', currency: '幣別' },
+        th: { sampleClient: 'ลูกค้าตัวอย่าง', sampleAddress: 'ที่อยู่ลูกค้าตัวอย่าง', type: 'ประเภท', currency: 'สกุลเงิน' },
+        id: { sampleClient: 'Klien Contoh', sampleAddress: 'Alamat Klien Contoh', type: 'Tipe', currency: 'Mata uang' },
+    };
+    const copy = copyByLang[lang];
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+        return date.toLocaleDateString(getLocaleForLanguage(lang), {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -42,9 +51,9 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
         date: new Date().toISOString().split('T')[0],
         dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         client: template.template_data.client || {
-            name: lang === 'zh-TW' ? '示例客戶' : 'Sample Client',
+            name: copy.sampleClient,
             email: 'client@example.com',
-            address: lang === 'zh-TW' ? '客戶地址示例' : '123 Client Street'
+            address: copy.sampleAddress
         }
     };
 
@@ -106,7 +115,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                             {template.template_data.type && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                                        {lang === 'zh-TW' ? '類型' : 'Type'}
+                                        {copy.type}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700 capitalize">
                                         {template.template_data.type}
@@ -117,7 +126,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                             {template.template_data.currency && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                                        {lang === 'zh-TW' ? '幣別' : 'Currency'}
+                                        {copy.currency}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700">
                                         {template.template_data.currency}

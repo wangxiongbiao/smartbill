@@ -28,8 +28,15 @@ export function useBillingProfiles(params: UseBillingProfilesParams) {
       setProfiles(nextProfiles);
     } catch (error) {
       console.error('Failed to load billing profiles:', error);
+      const errorMessageByLang = {
+        en: 'Failed to load saved billing profiles',
+        'zh-CN': '读取已保存抬头与客户资料失败',
+        'zh-TW': '已保存抬頭與客戶資料讀取失敗',
+        th: 'โหลดข้อมูลผู้วางบิลและลูกค้าที่บันทึกไว้ไม่สำเร็จ',
+        id: 'Gagal memuat profil penagihan yang tersimpan',
+      } satisfies Record<Language, string>;
       showToast?.(
-        lang === 'zh-TW' ? '已保存抬頭與客戶資料讀取失敗' : 'Failed to load saved billing profiles',
+        errorMessageByLang[lang],
         'error'
       );
     } finally {

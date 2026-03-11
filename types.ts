@@ -95,7 +95,7 @@ export interface InvoiceRecord {
 }
 
 export type DocumentType = "invoice" | "receipt";
-export type Language = "zh-TW" | "en";
+export type Language = "zh-CN" | "zh-TW" | "en" | "th" | "id";
 
 export type PaymentFieldType = "text" | "textarea";
 

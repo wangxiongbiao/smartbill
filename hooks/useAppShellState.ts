@@ -14,6 +14,7 @@ import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useAppActions } from '@/hooks/useAppActions';
 import { buildLangHref, getStoredLanguage, persistLanguage, resolveLanguage } from '@/lib/marketing';
 import { getSenderDefaultsFromBillingProfile } from '@/lib/billing-profiles';
+import { getDocumentLanguage, resolveBrowserLanguage } from '@/lib/language';
 import { getViewFromPath } from '@/lib/routes';
 import { getPublicTemplateById } from '@/lib/public-templates';
 import type { DashboardShellProps } from '@/components/app/DashboardShellProps';
@@ -92,14 +93,14 @@ export function useAppShellState() {
       return;
     }
 
-    if (typeof window !== 'undefined' && window.navigator.language.toLowerCase().includes('zh')) {
-      setLang('zh-TW');
+    if (typeof window !== 'undefined') {
+      setLang(resolveBrowserLanguage(window.navigator.language));
     }
   }, [search]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    document.documentElement.lang = lang === 'zh-TW' ? 'zh-Hant' : 'en';
+    document.documentElement.lang = getDocumentLanguage(lang);
   }, [lang]);
 
   const setConsoleLang = useCallback((nextLang: Language) => {

@@ -37,15 +37,29 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     onBack
 }) => {
     const t = translations[lang];
-    const copy = lang === 'zh-TW'
-        ? {
-            share: '分享',
-            language: '語言切換',
-        }
-        : {
+    const copyByLang = {
+        en: {
             share: 'Share',
             language: 'Language switcher',
-        };
+        },
+        'zh-CN': {
+            share: '分享',
+            language: '语言切换',
+        },
+        'zh-TW': {
+            share: '分享',
+            language: '語言切換',
+        },
+        th: {
+            share: 'แชร์',
+            language: 'ตัวสลับภาษา',
+        },
+        id: {
+            share: 'Bagikan',
+            language: 'Pengalih bahasa',
+        },
+    } satisfies Record<Language, { share: string; language: string }>;
+    const copy = copyByLang[lang];
 
     const breadcrumbs = getHeaderBreadcrumbs({
         activeView,

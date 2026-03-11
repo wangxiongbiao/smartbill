@@ -3,52 +3,134 @@
 import React from 'react';
 import { useMarketingAuth } from '@/components/marketing/MarketingAuthProvider';
 import { useMarketingLanguage } from '@/components/marketing/MarketingLanguageProvider';
+import type { Language } from '@/types';
 
 export function Footer() {
   const { openProtectedRoute } = useMarketingAuth();
   const { lang } = useMarketingLanguage();
 
-  const copy = lang === 'zh-TW'
-    ? {
-        badge: '開票流程',
-        description: 'SmartBill 幫助自由工作者與小型企業更快建立專業發票、重用模板、整理記錄，並匯出精緻 PDF。',
-        product: '產品',
-        dashboard: '控制台',
-        createInvoice: '建立發票',
-        templates: '模板',
-        features: '功能特色',
-        useCases: '使用場景',
-        case1: '自由接案開票',
-        case2: '代理商長期合作',
-        case3: '顧問服務計費',
-        case4: '小型企業發票',
-        contact: '聯絡方式',
-        contactText: '產品回饋、支援與商務合作請來信。',
-        rights: '版權所有',
-        keyword1: '發票生成器',
-        keyword2: '模板',
-        keyword3: 'PDF 匯出',
-      }
-    : {
-        badge: 'Invoice workflow',
-        description: 'SmartBill helps freelancers and small businesses create professional invoices, reuse templates, organize records, and export polished PDFs with less manual work.',
-        product: 'Product',
-        dashboard: 'Dashboard',
-        createInvoice: 'Create invoice',
-        templates: 'Templates',
-        features: 'Features',
-        useCases: 'Use cases',
-        case1: 'Freelance invoicing',
-        case2: 'Agency retainers',
-        case3: 'Consulting billing',
-        case4: 'Small business invoices',
-        contact: 'Contact',
-        contactText: 'For product feedback, support, and business inquiries.',
-        rights: 'All rights reserved.',
-        keyword1: 'Invoice generator',
-        keyword2: 'Templates',
-        keyword3: 'PDF export',
-      };
+  const copyByLang: Record<Language, {
+    badge: string;
+    description: string;
+    product: string;
+    dashboard: string;
+    createInvoice: string;
+    templates: string;
+    features: string;
+    useCases: string;
+    case1: string;
+    case2: string;
+    case3: string;
+    case4: string;
+    contact: string;
+    contactText: string;
+    rights: string;
+    keyword1: string;
+    keyword2: string;
+    keyword3: string;
+  }> = {
+    en: {
+      badge: 'Invoice workflow',
+      description: 'SmartBill helps freelancers and small businesses create professional invoices, reuse templates, organize records, and export polished PDFs with less manual work.',
+      product: 'Product',
+      dashboard: 'Dashboard',
+      createInvoice: 'Create invoice',
+      templates: 'Templates',
+      features: 'Features',
+      useCases: 'Use cases',
+      case1: 'Freelance invoicing',
+      case2: 'Agency retainers',
+      case3: 'Consulting billing',
+      case4: 'Small business invoices',
+      contact: 'Contact',
+      contactText: 'For product feedback, support, and business inquiries.',
+      rights: 'All rights reserved.',
+      keyword1: 'Invoice generator',
+      keyword2: 'Templates',
+      keyword3: 'PDF export',
+    },
+    'zh-CN': {
+      badge: '开票流程',
+      description: 'SmartBill 帮助自由职业者与小型企业更快创建专业发票、复用模板、整理记录，并导出精致 PDF。',
+      product: '产品',
+      dashboard: '控制台',
+      createInvoice: '创建发票',
+      templates: '模板',
+      features: '功能特色',
+      useCases: '使用场景',
+      case1: '自由接案开票',
+      case2: '代理商长期合作',
+      case3: '顾问服务计费',
+      case4: '小型企业发票',
+      contact: '联系方式',
+      contactText: '产品反馈、支持与商务合作请来信。',
+      rights: '保留所有权利。',
+      keyword1: '发票生成器',
+      keyword2: '模板',
+      keyword3: 'PDF 导出',
+    },
+    'zh-TW': {
+      badge: '開票流程',
+      description: 'SmartBill 幫助自由工作者與小型企業更快建立專業發票、重用模板、整理記錄，並匯出精緻 PDF。',
+      product: '產品',
+      dashboard: '控制台',
+      createInvoice: '建立發票',
+      templates: '模板',
+      features: '功能特色',
+      useCases: '使用場景',
+      case1: '自由接案開票',
+      case2: '代理商長期合作',
+      case3: '顧問服務計費',
+      case4: '小型企業發票',
+      contact: '聯絡方式',
+      contactText: '產品回饋、支援與商務合作請來信。',
+      rights: '版權所有。',
+      keyword1: '發票生成器',
+      keyword2: '模板',
+      keyword3: 'PDF 匯出',
+    },
+    th: {
+      badge: 'เวิร์กโฟลว์ใบแจ้งหนี้',
+      description: 'SmartBill ช่วยฟรีแลนซ์และธุรกิจขนาดเล็กสร้างใบแจ้งหนี้แบบมืออาชีพ ใช้เทมเพลตซ้ำ จัดระเบียบบันทึก และส่งออก PDF ที่พร้อมใช้งานโดยใช้แรงมือน้อยลง',
+      product: 'ผลิตภัณฑ์',
+      dashboard: 'แดชบอร์ด',
+      createInvoice: 'สร้างใบแจ้งหนี้',
+      templates: 'เทมเพลต',
+      features: 'ฟีเจอร์',
+      useCases: 'กรณีการใช้งาน',
+      case1: 'การออกบิลสำหรับฟรีแลนซ์',
+      case2: 'รีเทนเนอร์สำหรับเอเจนซี',
+      case3: 'การเรียกเก็บเงินงานที่ปรึกษา',
+      case4: 'ใบแจ้งหนี้สำหรับธุรกิจขนาดเล็ก',
+      contact: 'ติดต่อ',
+      contactText: 'สำหรับข้อเสนอแนะสินค้า การสนับสนุน และการติดต่อธุรกิจ',
+      rights: 'สงวนลิขสิทธิ์',
+      keyword1: 'เครื่องมือสร้างใบแจ้งหนี้',
+      keyword2: 'เทมเพลต',
+      keyword3: 'ส่งออก PDF',
+    },
+    id: {
+      badge: 'Alur kerja invoice',
+      description: 'SmartBill membantu freelancer dan bisnis kecil membuat invoice profesional, memakai ulang template, merapikan catatan, dan mengekspor PDF yang rapi dengan lebih sedikit pekerjaan manual.',
+      product: 'Produk',
+      dashboard: 'Dashboard',
+      createInvoice: 'Buat invoice',
+      templates: 'Template',
+      features: 'Fitur',
+      useCases: 'Kasus penggunaan',
+      case1: 'Invoice freelance',
+      case2: 'Retainer agensi',
+      case3: 'Penagihan konsultasi',
+      case4: 'Invoice bisnis kecil',
+      contact: 'Kontak',
+      contactText: 'Untuk masukan produk, dukungan, dan pertanyaan bisnis.',
+      rights: 'Seluruh hak cipta dilindungi.',
+      keyword1: 'Pembuat invoice',
+      keyword2: 'Template',
+      keyword3: 'Ekspor PDF',
+    },
+  };
+  const copy = copyByLang[lang];
 
   return (
     <footer className="border-t border-blue-100 bg-white text-slate-900" data-purpose="footer">

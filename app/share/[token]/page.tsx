@@ -9,6 +9,7 @@ import { translations } from '@/i18n';
 import type { Language } from '@/types';
 import {
     buildAbsoluteLangUrl,
+    buildLanguageAlternates,
     buildLangHref,
     buildOgImageHref,
     resolveLanguage,
@@ -27,25 +28,36 @@ export async function generateMetadata({ params, searchParams }: SharePageProps)
     const sp = (await searchParams) || {};
     const lang = resolveLanguage(sp.lang);
     const path = `/share/${token}`;
-    const copy = lang === 'zh-TW'
-        ? {
-            title: '分享發票',
-            description: '查看透過 SmartBill 分享的專業發票。',
-        }
-        : {
+    const copyByLang: Record<Language, { title: string; description: string }> = {
+        en: {
             title: 'Shared Invoice',
             description: 'View a professional invoice shared through SmartBill.',
-        };
+        },
+        'zh-CN': {
+            title: '分享发票',
+            description: '查看通过 SmartBill 分享的专业发票。',
+        },
+        'zh-TW': {
+            title: '分享發票',
+            description: '查看透過 SmartBill 分享的專業發票。',
+        },
+        th: {
+            title: 'ใบแจ้งหนี้ที่แชร์',
+            description: 'ดูใบแจ้งหนี้มืออาชีพที่แชร์ผ่าน SmartBill',
+        },
+        id: {
+            title: 'Invoice Dibagikan',
+            description: 'Lihat invoice profesional yang dibagikan melalui SmartBill.',
+        },
+    };
+    const copy = copyByLang[lang];
 
     return {
         title: copy.title,
         description: copy.description,
         alternates: {
             canonical: buildLangHref(path, lang),
-            languages: {
-                'en-US': buildLangHref(path, 'en'),
-                'zh-TW': buildLangHref(path, 'zh-TW'),
-            },
+            languages: buildLanguageAlternates(path),
         },
         openGraph: {
             title: copy.title,
@@ -73,17 +85,34 @@ export default async function SharePage({ params, searchParams }: SharePageProps
     const lang: Language = resolveLanguage(sp.lang);
     const t = translations[lang] || translations.en;
     const homeHref = buildLangHref('/', lang);
-    const invalidCopy = lang === 'zh-TW'
-        ? {
-            title: '連結無效或已過期',
-            description: '這個分享連結已失效，請向發送者索取新的連結。',
-            backHome: '前往 SmartBill',
-        }
-        : {
+    const invalidCopyByLang: Record<Language, { title: string; description: string; backHome: string }> = {
+        en: {
             title: 'Invalid or Expired Link',
             description: 'This share link is no longer valid. Please ask the sender for a new link.',
             backHome: 'Go to SmartBill',
-        };
+        },
+        'zh-CN': {
+            title: '链接无效或已过期',
+            description: '这个分享链接已失效，请向发送者索取新的链接。',
+            backHome: '前往 SmartBill',
+        },
+        'zh-TW': {
+            title: '連結無效或已過期',
+            description: '這個分享連結已失效，請向發送者索取新的連結。',
+            backHome: '前往 SmartBill',
+        },
+        th: {
+            title: 'ลิงก์ไม่ถูกต้องหรือหมดอายุแล้ว',
+            description: 'ลิงก์แชร์นี้ใช้ไม่ได้แล้ว โปรดขอลิงก์ใหม่จากผู้ส่ง',
+            backHome: 'ไปที่ SmartBill',
+        },
+        id: {
+            title: 'Tautan Tidak Valid atau Kedaluwarsa',
+            description: 'Tautan berbagi ini sudah tidak berlaku. Silakan minta tautan baru kepada pengirim.',
+            backHome: 'Kembali ke SmartBill',
+        },
+    };
+    const invalidCopy = invalidCopyByLang[lang];
 
     if (!token) notFound();
 

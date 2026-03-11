@@ -1,6 +1,7 @@
 import React from 'react';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface TemplateCardProps {
     template: InvoiceTemplate;
@@ -21,7 +22,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+        return date.toLocaleDateString(getLocaleForLanguage(lang), {
             year: 'numeric',
             month: 'short',
             day: 'numeric'

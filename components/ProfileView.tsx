@@ -5,6 +5,7 @@ import { updateProfile } from '@/lib/api/invoice';
 import { useBillingProfiles } from '@/hooks/useBillingProfiles';
 import { getSenderDefaultsFromBillingProfile } from '@/lib/billing-profiles';
 import { calculateInvoiceTotal } from '@/lib/invoice';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface ProfileViewProps {
   records: Invoice[];
@@ -67,8 +68,56 @@ interface CopySet {
 }
 
 function getCopy(lang: Language): CopySet {
-  if (lang === 'zh-TW') {
-    return {
+  const copyByLang: Record<Language, CopySet> = {
+    'zh-CN': {
+      pageTitle: '账户设置',
+      pageDescription: '管理你的个人资料、开票抬头与控制台订阅展示。',
+      memberSince: '加入时间',
+      accountOwner: '账户所有者',
+      recordsLabel: '发票数量',
+      templatesLabel: '模板数量',
+      billedLabel: '累计开票',
+      paidLabel: '已结清',
+      businessTitle: '企业信息',
+      businessSubtitle: '在这里设置新增发票时自动带入的默认抬头。Bill To 默认为空，从编辑器下拉选择。',
+      companyName: '公司名称',
+      billingEmail: '企业邮箱',
+      website: '官方网站',
+      phone: '联系电话',
+      address: '注册地址',
+      notConfigured: '未设置',
+      subscriptionEyebrow: '当前方案',
+      subscriptionTitle: 'Professional Plus',
+      usageLabel: '本月开票额度',
+      usageReset: '额度会在下个计费周期重置',
+      manageBilling: '管理账单',
+      integrationsTitle: '生态集成',
+      integrationsSubtitle: '预留常用生态插件入口，不额外接入真实逻辑。',
+      connected: '已连接',
+      pending: '待处理',
+      available: '可用',
+      unavailable: '未关联',
+      teamTitle: '企业协作',
+      teamSubtitle: '后续升级团队版后，可以邀请成员共同管理发票、模板与客户资料。',
+      inviteMembers: '邀请成员',
+      securityTitle: '登录安全',
+      securitySubtitle: '目前账号通过第三方授权登录，你可以在这里安全退出当前会话。',
+      logout: '退出登录',
+      editName: '编辑名称',
+      saving: '保存中...',
+      saveButton: '保存',
+      cancelButton: '取消',
+      saveSuccess: '个人资料已更新！',
+      saveError: '更新失败，请重试',
+      businessSaveSuccess: '默认抬头已更新！',
+      businessSaveError: '默认抬头更新失败，请重试',
+      comingSoon: '此功能稍后接入。',
+      syncSettings: '同步设置',
+      editBusiness: '编辑默认',
+      defaultSenderBadge: '默认抬头',
+      activeStatus: '启用中',
+    },
+    'zh-TW': {
       pageTitle: '帳戶設定',
       pageDescription: '管理你的個人資料、開票抬頭與控制台訂閱展示。',
       memberSince: '加入時間',
@@ -115,68 +164,165 @@ function getCopy(lang: Language): CopySet {
       editBusiness: '編輯預設',
       defaultSenderBadge: '預設抬頭',
       activeStatus: '啟用中',
-    };
-  }
-
-  return {
-    pageTitle: 'Account Settings',
-    pageDescription: 'Manage your identity, billing profile preview, and subscription modules from one place.',
-    memberSince: 'Member Since',
-    accountOwner: 'Account Owner',
-    recordsLabel: 'Invoices',
-    templatesLabel: 'Templates',
-    billedLabel: 'Total Billed',
-    paidLabel: 'Paid',
-    businessTitle: 'Business Profile',
-    businessSubtitle: 'Set the default sender used for new invoices here. Bill To stays empty until you choose a saved client in the editor.',
-    companyName: 'Company Name',
-    billingEmail: 'Billing Email',
-    website: 'Website',
-    phone: 'Phone',
-    address: 'Registered Address',
-    notConfigured: 'Not configured',
-    subscriptionEyebrow: 'Current Plan',
-    subscriptionTitle: 'Professional Plus',
-    usageLabel: 'Monthly invoice capacity',
-    usageReset: 'Usage resets at the next billing cycle',
-    manageBilling: 'Manage Billing',
-    integrationsTitle: 'Integrations',
-    integrationsSubtitle: 'Reserved slots for ecosystem plugins without wiring external services yet.',
-    connected: 'Connected',
-    pending: 'Pending',
-    available: 'Available',
-    unavailable: 'Unavailable',
-    teamTitle: 'Team Workspace',
-    teamSubtitle: 'Upgrade to a team tier later to invite coworkers into invoices, templates, and client operations.',
-    inviteMembers: 'Invite Members',
-    securityTitle: 'Security',
-    securitySubtitle: 'This account currently uses federated sign-in. Sign out here when you need to switch users.',
-    logout: 'Logout',
-    editName: 'Edit name',
-    saving: 'Saving...',
-    saveButton: 'Save',
-    cancelButton: 'Cancel',
-    saveSuccess: 'Profile updated successfully!',
-    saveError: 'Update failed, please retry.',
-    businessSaveSuccess: 'Default sender updated successfully!',
-    businessSaveError: 'Failed to update the default sender. Please retry.',
-    comingSoon: 'This action will be connected later.',
-    syncSettings: 'Sync settings',
-    editBusiness: 'Edit Default',
-    defaultSenderBadge: 'Default Sender',
-    activeStatus: 'Active',
+    },
+    en: {
+      pageTitle: 'Account Settings',
+      pageDescription: 'Manage your identity, billing profile preview, and subscription modules from one place.',
+      memberSince: 'Member Since',
+      accountOwner: 'Account Owner',
+      recordsLabel: 'Invoices',
+      templatesLabel: 'Templates',
+      billedLabel: 'Total Billed',
+      paidLabel: 'Paid',
+      businessTitle: 'Business Profile',
+      businessSubtitle: 'Set the default sender used for new invoices here. Bill To stays empty until you choose a saved client in the editor.',
+      companyName: 'Company Name',
+      billingEmail: 'Billing Email',
+      website: 'Website',
+      phone: 'Phone',
+      address: 'Registered Address',
+      notConfigured: 'Not configured',
+      subscriptionEyebrow: 'Current Plan',
+      subscriptionTitle: 'Professional Plus',
+      usageLabel: 'Monthly invoice capacity',
+      usageReset: 'Usage resets at the next billing cycle',
+      manageBilling: 'Manage Billing',
+      integrationsTitle: 'Integrations',
+      integrationsSubtitle: 'Reserved slots for ecosystem plugins without wiring external services yet.',
+      connected: 'Connected',
+      pending: 'Pending',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      teamTitle: 'Team Workspace',
+      teamSubtitle: 'Upgrade to a team tier later to invite coworkers into invoices, templates, and client operations.',
+      inviteMembers: 'Invite Members',
+      securityTitle: 'Security',
+      securitySubtitle: 'This account currently uses federated sign-in. Sign out here when you need to switch users.',
+      logout: 'Logout',
+      editName: 'Edit name',
+      saving: 'Saving...',
+      saveButton: 'Save',
+      cancelButton: 'Cancel',
+      saveSuccess: 'Profile updated successfully!',
+      saveError: 'Update failed, please retry.',
+      businessSaveSuccess: 'Default sender updated successfully!',
+      businessSaveError: 'Failed to update the default sender. Please retry.',
+      comingSoon: 'This action will be connected later.',
+      syncSettings: 'Sync settings',
+      editBusiness: 'Edit Default',
+      defaultSenderBadge: 'Default Sender',
+      activeStatus: 'Active',
+    },
+    th: {
+      pageTitle: 'การตั้งค่าบัญชี',
+      pageDescription: 'จัดการโปรไฟล์ ส่วนหัวใบแจ้งหนี้เริ่มต้น และโมดูลการสมัครสมาชิกของแดชบอร์ดได้จากที่เดียว',
+      memberSince: 'สมาชิกตั้งแต่',
+      accountOwner: 'เจ้าของบัญชี',
+      recordsLabel: 'จำนวนใบแจ้งหนี้',
+      templatesLabel: 'จำนวนเทมเพลต',
+      billedLabel: 'ยอดออกบิลรวม',
+      paidLabel: 'ชำระแล้ว',
+      businessTitle: 'ข้อมูลธุรกิจ',
+      businessSubtitle: 'ตั้งค่าผู้ส่งเริ่มต้นสำหรับใบแจ้งหนี้ใหม่ที่นี่ ส่วน Bill To จะว่างไว้จนกว่าคุณจะเลือกจากรายการในตัวแก้ไข',
+      companyName: 'ชื่อบริษัท',
+      billingEmail: 'อีเมลสำหรับออกบิล',
+      website: 'เว็บไซต์',
+      phone: 'โทรศัพท์',
+      address: 'ที่อยู่จดทะเบียน',
+      notConfigured: 'ยังไม่ได้ตั้งค่า',
+      subscriptionEyebrow: 'แผนปัจจุบัน',
+      subscriptionTitle: 'Professional Plus',
+      usageLabel: 'โควตาออกบิลรายเดือน',
+      usageReset: 'โควตาจะรีเซ็ตในรอบบิลถัดไป',
+      manageBilling: 'จัดการการเรียกเก็บเงิน',
+      integrationsTitle: 'การเชื่อมต่อ',
+      integrationsSubtitle: 'สงวนพื้นที่ไว้สำหรับปลั๊กอินในระบบนิเวศ โดยยังไม่เชื่อมบริการภายนอกจริง',
+      connected: 'เชื่อมต่อแล้ว',
+      pending: 'รอดำเนินการ',
+      available: 'พร้อมใช้',
+      unavailable: 'ยังไม่เชื่อม',
+      teamTitle: 'การทำงานร่วมกัน',
+      teamSubtitle: 'ภายหลังคุณสามารถอัปเกรดเป็นแพ็กเกจทีมเพื่อเชิญสมาชิกมาจัดการใบแจ้งหนี้ เทมเพลต และข้อมูลลูกค้าได้',
+      inviteMembers: 'เชิญสมาชิก',
+      securityTitle: 'ความปลอดภัยในการเข้าสู่ระบบ',
+      securitySubtitle: 'บัญชีนี้ใช้การเข้าสู่ระบบผ่านผู้ให้บริการภายนอก คุณสามารถออกจากระบบได้อย่างปลอดภัยที่นี่',
+      logout: 'ออกจากระบบ',
+      editName: 'แก้ไขชื่อ',
+      saving: 'กำลังบันทึก...',
+      saveButton: 'บันทึก',
+      cancelButton: 'ยกเลิก',
+      saveSuccess: 'อัปเดตโปรไฟล์แล้ว!',
+      saveError: 'อัปเดตไม่สำเร็จ โปรดลองอีกครั้ง',
+      businessSaveSuccess: 'อัปเดตผู้ส่งเริ่มต้นแล้ว!',
+      businessSaveError: 'อัปเดตผู้ส่งเริ่มต้นไม่สำเร็จ โปรดลองอีกครั้ง',
+      comingSoon: 'ฟีเจอร์นี้จะเชื่อมต่อในภายหลัง',
+      syncSettings: 'ซิงก์การตั้งค่า',
+      editBusiness: 'แก้ไขค่าเริ่มต้น',
+      defaultSenderBadge: 'ผู้ส่งเริ่มต้น',
+      activeStatus: 'ใช้งานอยู่',
+    },
+    id: {
+      pageTitle: 'Pengaturan Akun',
+      pageDescription: 'Kelola profil Anda, default billing profile, dan modul langganan dashboard dari satu tempat.',
+      memberSince: 'Menjadi anggota sejak',
+      accountOwner: 'Pemilik akun',
+      recordsLabel: 'Jumlah invoice',
+      templatesLabel: 'Jumlah template',
+      billedLabel: 'Total ditagih',
+      paidLabel: 'Lunas',
+      businessTitle: 'Profil Bisnis',
+      businessSubtitle: 'Atur pengirim default untuk invoice baru di sini. Bill To tetap kosong sampai Anda memilih klien tersimpan di editor.',
+      companyName: 'Nama Perusahaan',
+      billingEmail: 'Email Penagihan',
+      website: 'Situs web',
+      phone: 'Telepon',
+      address: 'Alamat Terdaftar',
+      notConfigured: 'Belum dikonfigurasi',
+      subscriptionEyebrow: 'Paket Saat Ini',
+      subscriptionTitle: 'Professional Plus',
+      usageLabel: 'Kapasitas invoice bulanan',
+      usageReset: 'Kuota akan direset pada siklus penagihan berikutnya',
+      manageBilling: 'Kelola Penagihan',
+      integrationsTitle: 'Integrasi',
+      integrationsSubtitle: 'Slot disiapkan untuk plugin ekosistem tanpa menghubungkan layanan eksternal dulu.',
+      connected: 'Terhubung',
+      pending: 'Menunggu',
+      available: 'Tersedia',
+      unavailable: 'Belum terhubung',
+      teamTitle: 'Kolaborasi Tim',
+      teamSubtitle: 'Nanti Anda bisa upgrade ke paket tim untuk mengundang anggota mengelola invoice, template, dan data klien bersama.',
+      inviteMembers: 'Undang Anggota',
+      securityTitle: 'Keamanan Login',
+      securitySubtitle: 'Akun ini saat ini menggunakan login pihak ketiga. Anda bisa keluar dengan aman di sini saat perlu berganti pengguna.',
+      logout: 'Keluar',
+      editName: 'Edit nama',
+      saving: 'Menyimpan...',
+      saveButton: 'Simpan',
+      cancelButton: 'Batal',
+      saveSuccess: 'Profil berhasil diperbarui!',
+      saveError: 'Pembaruan gagal, silakan coba lagi.',
+      businessSaveSuccess: 'Pengirim default berhasil diperbarui!',
+      businessSaveError: 'Gagal memperbarui pengirim default. Silakan coba lagi.',
+      comingSoon: 'Aksi ini akan disambungkan nanti.',
+      syncSettings: 'Sinkronkan pengaturan',
+      editBusiness: 'Edit Default',
+      defaultSenderBadge: 'Pengirim Default',
+      activeStatus: 'Aktif',
+    },
   };
+
+  return copyByLang[lang];
 }
 
 function formatCurrency(amount: number, currency: string, lang: Language) {
   try {
-    return new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+    return new Intl.NumberFormat(getLocaleForLanguage(lang), {
       style: 'currency',
       currency,
       maximumFractionDigits: 2,
     }).format(amount);
   } catch {
-    return new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+    return new Intl.NumberFormat(getLocaleForLanguage(lang), {
       style: 'decimal',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -189,7 +335,7 @@ function formatMonth(date: string | undefined, lang: Language) {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return '--';
 
-  return new Intl.DateTimeFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+  return new Intl.DateTimeFormat(getLocaleForLanguage(lang), {
     month: 'short',
     year: 'numeric',
   }).format(parsed);
@@ -332,7 +478,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       setIsEditing(false);
       showToast?.(copy.saveSuccess, 'success');
     } catch (error) {
-      console.error(lang === 'zh-TW' ? '更新失敗:' : 'Update failed:', error);
+      console.error(copy.saveError, error);
       showToast?.(copy.saveError, 'error');
     } finally {
       setIsSaving(false);
@@ -350,7 +496,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       setIsBusinessEditing(false);
       showToast?.(copy.businessSaveSuccess, 'success');
     } catch (error) {
-      console.error(lang === 'zh-TW' ? '預設抬頭更新失敗:' : 'Default sender update failed:', error);
+      console.error(copy.businessSaveError, error);
       showToast?.(copy.businessSaveError, 'error');
     } finally {
       setIsBusinessSaving(false);

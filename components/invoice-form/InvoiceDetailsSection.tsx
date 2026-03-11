@@ -2,27 +2,68 @@ import React from 'react';
 import type { InvoiceDetailsSectionProps } from './shared';
 
 export default function InvoiceDetailsSection({ invoice, lang, t, onChange, dateInputRef, dueDateInputRef }: InvoiceDetailsSectionProps) {
-  const copy = lang === 'zh-TW'
-    ? {
-        documentType: t.documentType || '單據類型',
-        currencies: {
-          asia: '亞洲 Asia',
-          sea: '東南亞 Southeast Asia',
-          na: '北美洲 North America',
-          eu: '歐洲 Europe',
-          oceania: '大洋洲 Oceania',
-        },
-      }
-    : {
-        documentType: t.documentType || 'Document Type',
-        currencies: {
-          asia: 'Asia',
-          sea: 'Southeast Asia',
-          na: 'North America',
-          eu: 'Europe',
-          oceania: 'Oceania',
-        },
-      };
+  const copyByLang = {
+    en: {
+      documentType: t.documentType || 'Document Type',
+      currencies: {
+        asia: 'Asia',
+        sea: 'Southeast Asia',
+        na: 'North America',
+        eu: 'Europe',
+        oceania: 'Oceania',
+      },
+    },
+    'zh-CN': {
+      documentType: t.documentType || '单据类型',
+      currencies: {
+        asia: '亚洲 Asia',
+        sea: '东南亚 Southeast Asia',
+        na: '北美洲 North America',
+        eu: '欧洲 Europe',
+        oceania: '大洋洲 Oceania',
+      },
+    },
+    'zh-TW': {
+      documentType: t.documentType || '單據類型',
+      currencies: {
+        asia: '亞洲 Asia',
+        sea: '東南亞 Southeast Asia',
+        na: '北美洲 North America',
+        eu: '歐洲 Europe',
+        oceania: '大洋洲 Oceania',
+      },
+    },
+    th: {
+      documentType: t.documentType || 'ประเภทเอกสาร',
+      currencies: {
+        asia: 'เอเชีย Asia',
+        sea: 'เอเชียตะวันออกเฉียงใต้ Southeast Asia',
+        na: 'อเมริกาเหนือ North America',
+        eu: 'ยุโรป Europe',
+        oceania: 'โอเชียเนีย Oceania',
+      },
+    },
+    id: {
+      documentType: t.documentType || 'Jenis dokumen',
+      currencies: {
+        asia: 'Asia',
+        sea: 'Asia Tenggara',
+        na: 'Amerika Utara',
+        eu: 'Eropa',
+        oceania: 'Oseania',
+      },
+    },
+  } satisfies Record<typeof lang, {
+    documentType: string;
+    currencies: {
+      asia: string;
+      sea: string;
+      na: string;
+      eu: string;
+      oceania: string;
+    };
+  }>;
+  const copy = copyByLang[lang];
 
   return (
     <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-6">

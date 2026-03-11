@@ -27,7 +27,7 @@ interface UseAppActionsParams {
       duplicateInvoice: (record: Invoice) => Promise<Invoice>;
       useTemplate: (template: InvoiceTemplate) => Promise<Invoice>;
       saveCurrentInvoice: () => Promise<void>;
-      removeInvoice: (id: string) => void;
+      removeInvoice: (id: string) => Promise<void>;
       updateInvoice: (updates: Partial<Invoice>) => void;
     };
   };

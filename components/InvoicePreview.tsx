@@ -36,27 +36,68 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   onChange,
 }) => {
   const t = translations[lang] || translations['en'];
-  const copy = lang === 'zh-TW'
-    ? {
-        addPhone: '新增電話',
-        addEmail: '新增電子郵件',
-        addValue: '新增內容',
-        addDisclaimer: '新增免責聲明',
-        paymentQrCode: '付款 QR Code',
-        signatureAlt: '簽名',
-        logoAlt: 'Logo',
-        subtotal: '小計',
-      }
-    : {
-        addPhone: 'Add phone',
-        addEmail: 'Add email',
-        addValue: 'Add value',
-        addDisclaimer: 'Add disclaimer',
-        paymentQrCode: 'Payment QR Code',
-        signatureAlt: 'Signature',
-        logoAlt: 'Logo',
-        subtotal: 'Subtotal',
-      };
+  const copyByLang = {
+    en: {
+      addPhone: 'Add phone',
+      addEmail: 'Add email',
+      addValue: 'Add value',
+      addDisclaimer: 'Add disclaimer',
+      paymentQrCode: 'Payment QR Code',
+      signatureAlt: 'Signature',
+      logoAlt: 'Logo',
+      subtotal: 'Subtotal',
+    },
+    'zh-CN': {
+      addPhone: '添加电话',
+      addEmail: '添加电子邮箱',
+      addValue: '添加内容',
+      addDisclaimer: '添加免责声明',
+      paymentQrCode: '付款 QR Code',
+      signatureAlt: '签名',
+      logoAlt: 'Logo',
+      subtotal: '小计',
+    },
+    'zh-TW': {
+      addPhone: '新增電話',
+      addEmail: '新增電子郵件',
+      addValue: '新增內容',
+      addDisclaimer: '新增免責聲明',
+      paymentQrCode: '付款 QR Code',
+      signatureAlt: '簽名',
+      logoAlt: 'Logo',
+      subtotal: '小計',
+    },
+    th: {
+      addPhone: 'เพิ่มโทรศัพท์',
+      addEmail: 'เพิ่มอีเมล',
+      addValue: 'เพิ่มข้อมูล',
+      addDisclaimer: 'เพิ่มข้อจำกัดความรับผิดชอบ',
+      paymentQrCode: 'คิวอาร์โค้ดชำระเงิน',
+      signatureAlt: 'ลายเซ็น',
+      logoAlt: 'โลโก้',
+      subtotal: 'ยอดรวมย่อย',
+    },
+    id: {
+      addPhone: 'Tambah telepon',
+      addEmail: 'Tambah email',
+      addValue: 'Tambah isi',
+      addDisclaimer: 'Tambah disclaimer',
+      paymentQrCode: 'QR Code pembayaran',
+      signatureAlt: 'Tanda tangan',
+      logoAlt: 'Logo',
+      subtotal: 'Subtotal',
+    },
+  } satisfies Record<Language, {
+    addPhone: string;
+    addEmail: string;
+    addValue: string;
+    addDisclaimer: string;
+    paymentQrCode: string;
+    signatureAlt: string;
+    logoAlt: string;
+    subtotal: string;
+  }>;
+  const copy = copyByLang[lang];
   const previewEditable = editable && !isForPdf;
   const { subtotal, tax, total } = calculateInvoiceTotals(invoice.items, invoice.taxRate);
   const currencyFormatter = new Intl.NumberFormat(lang, {

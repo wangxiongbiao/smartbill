@@ -4,25 +4,62 @@ import type { PaymentInfoSectionProps } from './shared';
 import { updatePaymentInfoFieldValue } from '@/lib/invoice';
 
 export default function PaymentInfoSection({ invoice, lang, t, onChange, autoResizeTextarea, showPaymentFieldConfig, setShowPaymentFieldConfig, isUploadingQRCode, onOpenQRCodePicker, onRemoveQRCode }: PaymentInfoSectionProps) {
-  const copy = lang === 'zh-TW'
-    ? {
-        qrCode: 'QR Code',
-        uploadQr: '上傳 QR Code',
-        qrAdded: '已添加 QR Code',
-        qrHint: '可點擊按鈕更換或移除',
-        change: '更換',
-        remove: '移除',
-        configurePaymentFields: '配置付款欄位',
-      }
-    : {
-        qrCode: 'QR Code',
-        uploadQr: 'Upload QR Code',
-        qrAdded: 'QR Code added',
-        qrHint: 'Click buttons to replace or remove',
-        change: 'Change',
-        remove: 'Remove',
-        configurePaymentFields: 'Configure Payment Fields',
-      };
+  const copyByLang = {
+    en: {
+      qrCode: 'QR Code',
+      uploadQr: 'Upload QR Code',
+      qrAdded: 'QR Code added',
+      qrHint: 'Click buttons to replace or remove',
+      change: 'Change',
+      remove: 'Remove',
+      configurePaymentFields: 'Configure Payment Fields',
+    },
+    'zh-CN': {
+      qrCode: 'QR Code',
+      uploadQr: '上传 QR Code',
+      qrAdded: '已添加 QR Code',
+      qrHint: '可点击按钮更换或移除',
+      change: '更换',
+      remove: '移除',
+      configurePaymentFields: '配置付款字段',
+    },
+    'zh-TW': {
+      qrCode: 'QR Code',
+      uploadQr: '上傳 QR Code',
+      qrAdded: '已添加 QR Code',
+      qrHint: '可點擊按鈕更換或移除',
+      change: '更換',
+      remove: '移除',
+      configurePaymentFields: '配置付款欄位',
+    },
+    th: {
+      qrCode: 'QR Code',
+      uploadQr: 'อัปโหลด QR Code',
+      qrAdded: 'เพิ่ม QR Code แล้ว',
+      qrHint: 'คลิกปุ่มเพื่อเปลี่ยนหรือลบ',
+      change: 'เปลี่ยน',
+      remove: 'ลบ',
+      configurePaymentFields: 'ตั้งค่าฟิลด์การชำระเงิน',
+    },
+    id: {
+      qrCode: 'QR Code',
+      uploadQr: 'Unggah QR Code',
+      qrAdded: 'QR Code ditambahkan',
+      qrHint: 'Klik tombol untuk mengganti atau menghapus',
+      change: 'Ganti',
+      remove: 'Hapus',
+      configurePaymentFields: 'Konfigurasi kolom pembayaran',
+    },
+  } satisfies Record<typeof lang, {
+    qrCode: string;
+    uploadQr: string;
+    qrAdded: string;
+    qrHint: string;
+    change: string;
+    remove: string;
+    configurePaymentFields: string;
+  }>;
+  const copy = copyByLang[lang];
 
   return (
     <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-5">

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface TemplatesViewProps {
     lang: Language;
@@ -30,23 +31,56 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
     const itemsPerPage = 6;
     const [searchQuery, setSearchQuery] = useState('');
 
-    const copy = lang === 'zh-TW'
-        ? {
-            loading: '載入中...',
-            createNew: '建立新發票',
-            prev: '上一頁',
-            next: '下一頁',
-            deleteTitle: '刪除模板？',
-            deleteDesc: '你確定要刪除模板 {item} 嗎？此操作無法復原。',
-        }
-        : {
+    const copyByLang = {
+        en: {
             loading: 'Loading...',
             createNew: 'Create New',
             prev: 'Prev',
             next: 'Next',
             deleteTitle: 'Delete Template?',
             deleteDesc: 'Are you sure you want to delete template {item}? This action cannot be undone.',
-        };
+        },
+        'zh-CN': {
+            loading: '加载中...',
+            createNew: '创建新发票',
+            prev: '上一页',
+            next: '下一页',
+            deleteTitle: '删除模板？',
+            deleteDesc: '你确定要删除模板 {item} 吗？此操作无法恢复。',
+        },
+        'zh-TW': {
+            loading: '載入中...',
+            createNew: '建立新發票',
+            prev: '上一頁',
+            next: '下一頁',
+            deleteTitle: '刪除模板？',
+            deleteDesc: '你確定要刪除模板 {item} 嗎？此操作無法復原。',
+        },
+        th: {
+            loading: 'กำลังโหลด...',
+            createNew: 'สร้างใบแจ้งหนี้ใหม่',
+            prev: 'ก่อนหน้า',
+            next: 'ถัดไป',
+            deleteTitle: 'ลบเทมเพลต?',
+            deleteDesc: 'คุณแน่ใจหรือไม่ว่าต้องการลบเทมเพลต {item} การกระทำนี้ไม่สามารถย้อนกลับได้',
+        },
+        id: {
+            loading: 'Memuat...',
+            createNew: 'Buat invoice baru',
+            prev: 'Sebelumnya',
+            next: 'Berikutnya',
+            deleteTitle: 'Hapus templat?',
+            deleteDesc: 'Apakah Anda yakin ingin menghapus templat {item}? Tindakan ini tidak dapat dibatalkan.',
+        },
+    } satisfies Record<Language, {
+        loading: string;
+        createNew: string;
+        prev: string;
+        next: string;
+        deleteTitle: string;
+        deleteDesc: string;
+    }>;
+    const copy = copyByLang[lang];
 
     const handleUseTemplate = async (template: InvoiceTemplate) => {
         try {
@@ -72,7 +106,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US', {
+        return date.toLocaleDateString(getLocaleForLanguage(lang), {
             year: 'numeric',
             month: 'short',
             day: 'numeric'

@@ -7,6 +7,7 @@ import SEOContent from './SEOContent';
 import { Language } from '../types';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { createClient } from '@/lib/supabase/client';
+import { LANGUAGE_OPTIONS } from '@/lib/language';
 
 const LandingPage: React.FC<{ initialNext?: string; authError?: boolean }> = ({ initialNext, authError }) => {
     const [lang, setLang] = useState<Language>('en');
@@ -38,10 +39,10 @@ const LandingPage: React.FC<{ initialNext?: string; authError?: boolean }> = ({ 
         };
     }, []);
 
-    const languages: { id: Language; label: string }[] = [
-        { id: 'en', label: 'English' },
-        { id: 'zh-TW', label: '繁体中文' },
-    ];
+    const languages: { id: Language; label: string }[] = LANGUAGE_OPTIONS.map((option) => ({
+        id: option.code,
+        label: option.label,
+    }));
 
     const currentLangLabel = languages.find(l => l.id === lang)?.label || 'English';
 

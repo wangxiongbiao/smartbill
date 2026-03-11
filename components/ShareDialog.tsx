@@ -4,6 +4,7 @@ import { Invoice } from '../types';
 import { InvoiceShare, CreateShareOptions } from '../lib/supabase-share';
 import { translations } from '../i18n';
 import { Language } from '../types';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface ShareDialogProps {
     invoice: Invoice;
@@ -93,7 +94,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ invoice, isOpen, onClose, lan
                             </div>
 
                             <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                                <span className="text-xs font-bold text-slate-400">{t.shareCreated}: {new Date(activeShare.created_at).toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US')}</span>
+                                <span className="text-xs font-bold text-slate-400">{t.shareCreated}: {new Date(activeShare.created_at).toLocaleDateString(getLocaleForLanguage(lang))}</span>
                                 <button onClick={() => handleRevoke(activeShare.id)} className="text-red-500 hover:text-red-600 text-sm font-bold flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"><i className="fas fa-ban"></i> {t.revoke}</button>
                             </div>
                         </div>

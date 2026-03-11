@@ -11,7 +11,7 @@ interface BottomNavProps {
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
-  const tabs = getPrimaryNavItems(lang);
+  const tabs = getPrimaryNavItems(lang).filter((tab) => tab.id !== 'editor');
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-[100] px-4 sm:hidden pointer-events-none">

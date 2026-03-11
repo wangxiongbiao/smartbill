@@ -1,8 +1,15 @@
 import { MetadataRoute } from 'next';
+import { buildLangHref } from '@/lib/marketing';
+import { getLocaleForLanguage, SUPPORTED_LANGUAGES } from '@/lib/language';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://smartbillpro.com';
   const now = new Date();
+  const buildAlternates = (path: string) => ({
+    languages: Object.fromEntries(
+      SUPPORTED_LANGUAGES.map((lang) => [getLocaleForLanguage(lang), `${baseUrl}${buildLangHref(path, lang)}`]),
+    ),
+  });
 
   return [
     {
@@ -10,24 +17,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
-      alternates: {
-        languages: {
-          'en-US': `${baseUrl}/`,
-          'zh-TW': `${baseUrl}/?lang=zh-TW`,
-        },
-      },
+      alternates: buildAlternates('/'),
     },
     {
       url: `${baseUrl}/invoice-templates`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
-      alternates: {
-        languages: {
-          'en-US': `${baseUrl}/invoice-templates`,
-          'zh-TW': `${baseUrl}/invoice-templates?lang=zh-TW`,
-        },
-      },
+      alternates: buildAlternates('/invoice-templates'),
     },
   ];
 }

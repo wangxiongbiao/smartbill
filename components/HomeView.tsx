@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import RevenueTrendChart from '@/components/charts/RevenueTrendChart';
 import { Invoice, Language } from '../types';
 import { calculateInvoiceTotal } from '@/lib/invoice';
+import { getLocaleForLanguage } from '@/lib/language';
 
 interface HomeViewProps {
   records: Invoice[];
@@ -15,82 +16,219 @@ interface HomeViewProps {
 
 function formatCurrency(amount: number, currency = 'USD', lang: Language = 'en') {
   try {
-    return new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount || 0);
+    return new Intl.NumberFormat(getLocaleForLanguage(lang), { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount || 0);
   } catch {
     return `${currency} ${amount.toFixed(0)}`;
   }
 }
 
 const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpenRecords, onOpenTemplates, onOpenAI, onExportLatest }) => {
-  const copy = lang === 'zh-TW'
-    ? {
-        unnamedClient: '未命名客戶',
-        unknownClient: '未知客戶',
-        draft: '草稿',
-        summaryTotal: '總帳單金額',
-        summaryUnpaid: '待付款金額',
-        summaryPaid: '已付款金額',
-        summaryOverdue: '逾期金額',
-        paidCount: (count: number) => `${count} 筆`,
-        trendTitle: '營收趨勢',
-        trendDesc: '冷清期或旺季都能看',
-        last7Days: '最近 7 天',
-        trendTotalDesc: '近 7 天累計開票金額',
-        thisWeek: '本週',
-        quickActions: '快捷操作',
-        quickActionsDesc: '高頻動作直接進入',
-        createFast: '快速建立',
-        exportPdf: '匯出 PDF',
-        openRecords: '查看發票列表',
-        openTemplates: '模板中心',
-        performanceTitle: '核心表現',
-        performanceDesc: '按客戶匯總的月度表現',
-        thisMonth: '本月累計',
-        noPerformance: '暫無客戶表現數據',
-        noPerformanceDesc: '建立並保存帳單後，這裡會展示核心客戶表現。',
-        recentTitle: '最近動態',
-        recentDesc: '最近建立和更新的帳單',
-        noRecent: '暫無最近動態',
-        noRecentDesc: '帳單建立、分享、付款後，這裡會自動出現記錄。',
-        aiBadge: 'AI 驅動工作流',
-        aiTitle: '專業 AI 助手',
-        aiDesc: '幫你生成條目、整理收款資訊、潤飾描述，讓帳單編輯更快更順手。',
-        aiCta: '立即體驗',
-      }
-    : {
-        unnamedClient: 'Unnamed client',
-        unknownClient: 'Unknown client',
-        draft: 'Draft',
-        summaryTotal: 'Total billed',
-        summaryUnpaid: 'Unpaid amount',
-        summaryPaid: 'Paid amount',
-        summaryOverdue: 'Overdue amount',
-        paidCount: (count: number) => `${count} paid`,
-        trendTitle: 'Revenue trend',
-        trendDesc: 'See both quiet periods and busy weeks clearly',
-        last7Days: 'Last 7 days',
-        trendTotalDesc: 'Total invoiced over the last 7 days',
-        thisWeek: 'This week',
-        quickActions: 'Quick actions',
-        quickActionsDesc: 'Jump into the most common tasks',
-        createFast: 'Create quickly',
-        exportPdf: 'Export PDF',
-        openRecords: 'Open invoice list',
-        openTemplates: 'Template center',
-        performanceTitle: 'Top performance',
-        performanceDesc: 'Monthly performance grouped by client',
-        thisMonth: 'This month',
-        noPerformance: 'No client performance data yet',
-        noPerformanceDesc: 'Once you create and save invoices, top client performance will appear here.',
-        recentTitle: 'Recent activity',
-        recentDesc: 'Recently created and updated invoices',
-        noRecent: 'No recent activity yet',
-        noRecentDesc: 'Invoice creation, sharing, and payments will show up here automatically.',
-        aiBadge: 'AI POWERED WORKFLOW',
-        aiTitle: 'Smart AI assistant',
-        aiDesc: 'Generate line items, organize payment info, and polish descriptions to speed up invoice editing.',
-        aiCta: 'Try it now',
-      };
+  const copyByLang: Record<Language, {
+    unnamedClient: string;
+    unknownClient: string;
+    draft: string;
+    summaryTotal: string;
+    summaryUnpaid: string;
+    summaryPaid: string;
+    summaryOverdue: string;
+    paidCount: (count: number) => string;
+    trendTitle: string;
+    trendDesc: string;
+    last7Days: string;
+    trendTotalDesc: string;
+    thisWeek: string;
+    quickActions: string;
+    quickActionsDesc: string;
+    createFast: string;
+    exportPdf: string;
+    openRecords: string;
+    openTemplates: string;
+    performanceTitle: string;
+    performanceDesc: string;
+    thisMonth: string;
+    noPerformance: string;
+    noPerformanceDesc: string;
+    recentTitle: string;
+    recentDesc: string;
+    noRecent: string;
+    noRecentDesc: string;
+    aiBadge: string;
+    aiTitle: string;
+    aiDesc: string;
+    aiCta: string;
+  }> = {
+    en: {
+      unnamedClient: 'Unnamed client',
+      unknownClient: 'Unknown client',
+      draft: 'Draft',
+      summaryTotal: 'Total billed',
+      summaryUnpaid: 'Unpaid amount',
+      summaryPaid: 'Paid amount',
+      summaryOverdue: 'Overdue amount',
+      paidCount: (count: number) => `${count} paid`,
+      trendTitle: 'Revenue trend',
+      trendDesc: 'See both quiet periods and busy weeks clearly',
+      last7Days: 'Last 7 days',
+      trendTotalDesc: 'Total invoiced over the last 7 days',
+      thisWeek: 'This week',
+      quickActions: 'Quick actions',
+      quickActionsDesc: 'Jump into the most common tasks',
+      createFast: 'Create quickly',
+      exportPdf: 'Export PDF',
+      openRecords: 'Open invoice list',
+      openTemplates: 'Template center',
+      performanceTitle: 'Top performance',
+      performanceDesc: 'Monthly performance grouped by client',
+      thisMonth: 'This month',
+      noPerformance: 'No client performance data yet',
+      noPerformanceDesc: 'Once you create and save invoices, top client performance will appear here.',
+      recentTitle: 'Recent activity',
+      recentDesc: 'Recently created and updated invoices',
+      noRecent: 'No recent activity yet',
+      noRecentDesc: 'Invoice creation, sharing, and payments will show up here automatically.',
+      aiBadge: 'AI POWERED WORKFLOW',
+      aiTitle: 'Smart AI assistant',
+      aiDesc: 'Generate line items, organize payment info, and polish descriptions to speed up invoice editing.',
+      aiCta: 'Try it now',
+    },
+    'zh-CN': {
+      unnamedClient: '未命名客户',
+      unknownClient: '未知客户',
+      draft: '草稿',
+      summaryTotal: '总账单金额',
+      summaryUnpaid: '待付款金额',
+      summaryPaid: '已付款金额',
+      summaryOverdue: '逾期金额',
+      paidCount: (count: number) => `${count} 笔`,
+      trendTitle: '营收趋势',
+      trendDesc: '淡季或旺季都能看',
+      last7Days: '最近 7 天',
+      trendTotalDesc: '近 7 天累计开票金额',
+      thisWeek: '本周',
+      quickActions: '快捷操作',
+      quickActionsDesc: '高频动作直接进入',
+      createFast: '快速创建',
+      exportPdf: '导出 PDF',
+      openRecords: '查看发票列表',
+      openTemplates: '模板中心',
+      performanceTitle: '核心表现',
+      performanceDesc: '按客户汇总的月度表现',
+      thisMonth: '本月累计',
+      noPerformance: '暂无客户表现数据',
+      noPerformanceDesc: '创建并保存账单后，这里会展示核心客户表现。',
+      recentTitle: '最近动态',
+      recentDesc: '最近创建和更新的账单',
+      noRecent: '暂无最近动态',
+      noRecentDesc: '账单创建、分享、付款后，这里会自动出现记录。',
+      aiBadge: 'AI 驱动工作流',
+      aiTitle: '专业 AI 助手',
+      aiDesc: '帮你生成条目、整理收款信息、润饰描述，让账单编辑更快更顺手。',
+      aiCta: '立即体验',
+    },
+    'zh-TW': {
+      unnamedClient: '未命名客戶',
+      unknownClient: '未知客戶',
+      draft: '草稿',
+      summaryTotal: '總帳單金額',
+      summaryUnpaid: '待付款金額',
+      summaryPaid: '已付款金額',
+      summaryOverdue: '逾期金額',
+      paidCount: (count: number) => `${count} 筆`,
+      trendTitle: '營收趨勢',
+      trendDesc: '冷清期或旺季都能看',
+      last7Days: '最近 7 天',
+      trendTotalDesc: '近 7 天累計開票金額',
+      thisWeek: '本週',
+      quickActions: '快捷操作',
+      quickActionsDesc: '高頻動作直接進入',
+      createFast: '快速建立',
+      exportPdf: '匯出 PDF',
+      openRecords: '查看發票列表',
+      openTemplates: '模板中心',
+      performanceTitle: '核心表現',
+      performanceDesc: '按客戶匯總的月度表現',
+      thisMonth: '本月累計',
+      noPerformance: '暫無客戶表現數據',
+      noPerformanceDesc: '建立並保存帳單後，這裡會展示核心客戶表現。',
+      recentTitle: '最近動態',
+      recentDesc: '最近建立和更新的帳單',
+      noRecent: '暫無最近動態',
+      noRecentDesc: '帳單建立、分享、付款後，這裡會自動出現記錄。',
+      aiBadge: 'AI 驅動工作流',
+      aiTitle: '專業 AI 助手',
+      aiDesc: '幫你生成條目、整理收款資訊、潤飾描述，讓帳單編輯更快更順手。',
+      aiCta: '立即體驗',
+    },
+    th: {
+      unnamedClient: 'ลูกค้าไม่มีชื่อ',
+      unknownClient: 'ลูกค้าไม่ทราบชื่อ',
+      draft: 'ฉบับร่าง',
+      summaryTotal: 'ยอดบิลรวม',
+      summaryUnpaid: 'ยอดค้างชำระ',
+      summaryPaid: 'ยอดที่ชำระแล้ว',
+      summaryOverdue: 'ยอดเกินกำหนด',
+      paidCount: (count: number) => `${count} รายการ`,
+      trendTitle: 'แนวโน้มรายได้',
+      trendDesc: 'มองเห็นทั้งช่วงเงียบและช่วงพีคได้ชัดเจน',
+      last7Days: '7 วันที่ผ่านมา',
+      trendTotalDesc: 'ยอดออกบิลรวมใน 7 วันที่ผ่านมา',
+      thisWeek: 'สัปดาห์นี้',
+      quickActions: 'การดำเนินการด่วน',
+      quickActionsDesc: 'เข้าสู่งานที่ใช้บ่อยได้ทันที',
+      createFast: 'สร้างอย่างรวดเร็ว',
+      exportPdf: 'ส่งออก PDF',
+      openRecords: 'เปิดรายการใบแจ้งหนี้',
+      openTemplates: 'ศูนย์เทมเพลต',
+      performanceTitle: 'ผลงานหลัก',
+      performanceDesc: 'ผลการดำเนินงานรายเดือนแยกตามลูกค้า',
+      thisMonth: 'เดือนนี้',
+      noPerformance: 'ยังไม่มีข้อมูลผลงานลูกค้า',
+      noPerformanceDesc: 'เมื่อคุณสร้างและบันทึกใบแจ้งหนี้แล้ว ผลงานลูกค้าหลักจะแสดงที่นี่',
+      recentTitle: 'กิจกรรมล่าสุด',
+      recentDesc: 'ใบแจ้งหนี้ที่สร้างและอัปเดตล่าสุด',
+      noRecent: 'ยังไม่มีกิจกรรมล่าสุด',
+      noRecentDesc: 'การสร้าง การแชร์ และการชำระเงินของใบแจ้งหนี้จะแสดงที่นี่โดยอัตโนมัติ',
+      aiBadge: 'AI POWERED WORKFLOW',
+      aiTitle: 'ผู้ช่วย AI อัจฉริยะ',
+      aiDesc: 'ช่วยสร้างรายการ จัดข้อมูลการชำระเงิน และปรับคำอธิบายให้คมขึ้น เพื่อให้การแก้ไขใบแจ้งหนี้เร็วขึ้น',
+      aiCta: 'ลองตอนนี้',
+    },
+    id: {
+      unnamedClient: 'Klien tanpa nama',
+      unknownClient: 'Klien tidak dikenal',
+      draft: 'Draf',
+      summaryTotal: 'Total ditagih',
+      summaryUnpaid: 'Jumlah belum dibayar',
+      summaryPaid: 'Jumlah sudah dibayar',
+      summaryOverdue: 'Jumlah jatuh tempo',
+      paidCount: (count: number) => `${count} dibayar`,
+      trendTitle: 'Tren pendapatan',
+      trendDesc: 'Lihat periode sepi dan minggu sibuk dengan jelas',
+      last7Days: '7 hari terakhir',
+      trendTotalDesc: 'Total invoice dalam 7 hari terakhir',
+      thisWeek: 'Minggu ini',
+      quickActions: 'Aksi cepat',
+      quickActionsDesc: 'Masuk ke tugas yang paling sering dipakai',
+      createFast: 'Buat cepat',
+      exportPdf: 'Ekspor PDF',
+      openRecords: 'Buka daftar invoice',
+      openTemplates: 'Pusat template',
+      performanceTitle: 'Performa utama',
+      performanceDesc: 'Performa bulanan yang dikelompokkan per klien',
+      thisMonth: 'Bulan ini',
+      noPerformance: 'Belum ada data performa klien',
+      noPerformanceDesc: 'Setelah Anda membuat dan menyimpan invoice, performa klien utama akan tampil di sini.',
+      recentTitle: 'Aktivitas terbaru',
+      recentDesc: 'Invoice yang baru dibuat dan diperbarui',
+      noRecent: 'Belum ada aktivitas terbaru',
+      noRecentDesc: 'Pembuatan invoice, pembagian, dan pembayaran akan muncul di sini secara otomatis.',
+      aiBadge: 'AI POWERED WORKFLOW',
+      aiTitle: 'Asisten AI cerdas',
+      aiDesc: 'Buat item baris, rapikan info pembayaran, dan poles deskripsi untuk mempercepat pengeditan invoice.',
+      aiCta: 'Coba sekarang',
+    },
+  };
+  const copy = copyByLang[lang];
 
   const dashboard = useMemo(() => {
     const now = new Date();
@@ -110,7 +248,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       const value = records
         .filter(invoice => invoice.date === key)
         .reduce((sum, invoice) => sum + calculateInvoiceTotal(invoice), 0);
-      return { label: day.toLocaleDateString(lang === 'zh-TW' ? 'zh-TW' : 'en-US', { weekday: 'short' }), value };
+      return { label: day.toLocaleDateString(getLocaleForLanguage(lang), { weekday: 'short' }), value };
     });
 
     const recentActivity = [...records]

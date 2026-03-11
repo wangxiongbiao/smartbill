@@ -23,9 +23,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
         {
             id: 'welcome',
             role: 'assistant',
-            content: lang === 'zh-TW'
-                ? (translations['zh-TW'].aiWelcome || '👋 一句話快速創建發票！\n例如：給蘋果公司，網站開發 5 萬元')
-                : (translations[lang]?.aiWelcome || translations['en'].aiWelcome),
+            content: translations[lang]?.aiWelcome || translations['en'].aiWelcome,
             timestamp: Date.now()
         }
     ]);
@@ -103,7 +101,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
             const errorMsg: Message = {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: t.aiError || (lang === 'zh-TW' ? '抱歉，與服務器通信時發生錯誤。' : 'Sorry, I encountered an error communicating with the server.'),
+                content: t.aiError || translations['en'].aiError,
                 timestamp: Date.now()
             };
             setMessages(prev => [...prev, errorMsg]);

@@ -1,13 +1,16 @@
 import { Language } from "./types";
+import zhCnTranslations from './locales/i18n.zh-CN.json';
+import thTranslations from './locales/i18n.th.json';
+import idTranslations from './locales/i18n.id.json';
 
-export const translations: Record<Language, any> = {
+const baseTranslations = {
   en: {
     home: "Home",
     make: "Create",
     makeInvoice: "Make Invoice",
     makeReceipt: "Make Receipt",
     templates: "Invoice Templates",
-    records: "Records",
+    records: "Invoices",
     profile: "Profile",
     accountSettingsNav: "Account Settings",
     heroTitle: "Professional Invoices",
@@ -835,3 +838,20 @@ export const translations: Record<Language, any> = {
     ],
   },
 };
+
+export const translations = {
+  en: baseTranslations.en,
+  "zh-CN": {
+    ...baseTranslations["zh-TW"],
+    ...zhCnTranslations,
+  },
+  "zh-TW": baseTranslations["zh-TW"],
+  th: {
+    ...baseTranslations.en,
+    ...thTranslations,
+  },
+  id: {
+    ...baseTranslations.en,
+    ...idTranslations,
+  },
+} satisfies Record<Language, any>;

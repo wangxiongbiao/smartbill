@@ -10,47 +10,128 @@ interface AboutViewProps {
 }
 
 const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) => {
-  const copy = lang === 'zh-TW'
-    ? {
-        navTitle: 'SmartBill Pro / 全球視野',
-        heroBadge: '區域專業能力',
-        heroDescription: '我們深耕全球市場，透過理解在地商業文化，為不同地區的用戶提供更貼合、更專業的開票解決方案。',
-        invoicesProcessed: '已處理發票',
-        countriesSupported: '支援國家',
-        westernMarket: '歐美市場',
-        westernTag: '標準化且專業',
-        taiwanMarket: '台灣市場',
-        taiwanTag: '細膩在地誠信',
-        southeastAsiaMarket: '東南亞市場',
-        southeastAsiaTag: '快速數位敏捷',
-        builtFor: '專為',
-        collaboration: '協作打造',
-        securityBadge: '全球加密標準',
-        securityTitle: '智慧驅動，安全無界',
-        securityDescription: '不論你身處台北工作室還是倫敦辦公室，SmartBill Pro 都提供同等級的隱私保護與智能生成能力。資料安全始終是我們承諾的核心。',
-        craftedFor: '為現代創業者打造',
-        cta: '開啟您的專業計費之旅',
-      }
-    : {
-        navTitle: 'SmartBill Pro / Global Vision',
-        heroBadge: 'Regional Excellence',
-        heroDescription: 'Deeply rooted in global markets, we provide billing solutions shaped around local business culture and regional expectations.',
-        invoicesProcessed: 'Invoices Processed',
-        countriesSupported: 'Countries Supported',
-        westernMarket: 'Western Market',
-        westernTag: 'Standardized & Professional',
-        taiwanMarket: 'Taiwan Market',
-        taiwanTag: 'Refined Local Integrity',
-        southeastAsiaMarket: 'SE Asia Market',
-        southeastAsiaTag: 'Fast Digital Agility',
-        builtFor: 'Built for',
-        collaboration: 'Collaboration',
-        securityBadge: 'Global Encryption Standard',
-        securityTitle: 'Intelligence Driven, Security Without Borders',
-        securityDescription: 'Whether you work from a Taipei studio or a London office, SmartBill Pro delivers the same level of privacy protection and AI-powered billing support. Data security stays at the core of the promise.',
-        craftedFor: 'Crafted for Modern Entrepreneurs',
-        cta: 'Launch Your Professional Billing',
-      };
+  const copyByLang: Record<Language, {
+    navTitle: string;
+    heroBadge: string;
+    heroDescription: string;
+    invoicesProcessed: string;
+    countriesSupported: string;
+    westernMarket: string;
+    westernTag: string;
+    taiwanMarket: string;
+    taiwanTag: string;
+    southeastAsiaMarket: string;
+    southeastAsiaTag: string;
+    builtFor: string;
+    collaboration: string;
+    securityBadge: string;
+    securityTitle: string;
+    securityDescription: string;
+    craftedFor: string;
+    cta: string;
+  }> = {
+    en: {
+      navTitle: 'SmartBill Pro / Global Vision',
+      heroBadge: 'Regional Excellence',
+      heroDescription: 'Deeply rooted in global markets, we provide billing solutions shaped around local business culture and regional expectations.',
+      invoicesProcessed: 'Invoices Processed',
+      countriesSupported: 'Countries Supported',
+      westernMarket: 'Western Market',
+      westernTag: 'Standardized & Professional',
+      taiwanMarket: 'Taiwan Market',
+      taiwanTag: 'Refined Local Integrity',
+      southeastAsiaMarket: 'SE Asia Market',
+      southeastAsiaTag: 'Fast Digital Agility',
+      builtFor: 'Built for',
+      collaboration: 'Collaboration',
+      securityBadge: 'Global Encryption Standard',
+      securityTitle: 'Intelligence Driven, Security Without Borders',
+      securityDescription: 'Whether you work from a Taipei studio or a London office, SmartBill Pro delivers the same level of privacy protection and AI-powered billing support. Data security stays at the core of the promise.',
+      craftedFor: 'Crafted for Modern Entrepreneurs',
+      cta: 'Launch Your Professional Billing',
+    },
+    'zh-CN': {
+      navTitle: 'SmartBill Pro / 全球视野',
+      heroBadge: '区域专业能力',
+      heroDescription: '我们深耕全球市场，通过理解本地商业文化，为不同地区的用户提供更贴合、更专业的开票解决方案。',
+      invoicesProcessed: '已处理发票',
+      countriesSupported: '支持国家',
+      westernMarket: '欧美市场',
+      westernTag: '标准化且专业',
+      taiwanMarket: '台湾市场',
+      taiwanTag: '细腻在地诚信',
+      southeastAsiaMarket: '东南亚市场',
+      southeastAsiaTag: '快速数字敏捷',
+      builtFor: '专为',
+      collaboration: '协作打造',
+      securityBadge: '全球加密标准',
+      securityTitle: '智能驱动，安全无界',
+      securityDescription: '无论你身处台北工作室还是伦敦办公室，SmartBill Pro 都提供同等级的隐私保护与智能生成能力。数据安全始终是我们的核心承诺。',
+      craftedFor: '为现代创业者打造',
+      cta: '开启你的专业计费之旅',
+    },
+    'zh-TW': {
+      navTitle: 'SmartBill Pro / 全球視野',
+      heroBadge: '區域專業能力',
+      heroDescription: '我們深耕全球市場，透過理解在地商業文化，為不同地區的用戶提供更貼合、更專業的開票解決方案。',
+      invoicesProcessed: '已處理發票',
+      countriesSupported: '支援國家',
+      westernMarket: '歐美市場',
+      westernTag: '標準化且專業',
+      taiwanMarket: '台灣市場',
+      taiwanTag: '細膩在地誠信',
+      southeastAsiaMarket: '東南亞市場',
+      southeastAsiaTag: '快速數位敏捷',
+      builtFor: '專為',
+      collaboration: '協作打造',
+      securityBadge: '全球加密標準',
+      securityTitle: '智慧驅動，安全無界',
+      securityDescription: '不論你身處台北工作室還是倫敦辦公室，SmartBill Pro 都提供同等級的隱私保護與智能生成能力。資料安全始終是我們承諾的核心。',
+      craftedFor: '為現代創業者打造',
+      cta: '開啟您的專業計費之旅',
+    },
+    th: {
+      navTitle: 'SmartBill Pro / มุมมองระดับโลก',
+      heroBadge: 'ความเชี่ยวชาญระดับภูมิภาค',
+      heroDescription: 'เราเข้าใจตลาดทั่วโลกอย่างลึกซึ้ง และออกแบบโซลูชันการออกบิลให้เหมาะกับวัฒนธรรมธุรกิจของแต่ละภูมิภาค',
+      invoicesProcessed: 'จำนวนใบแจ้งหนี้ที่ประมวลผลแล้ว',
+      countriesSupported: 'ประเทศที่รองรับ',
+      westernMarket: 'ตลาดตะวันตก',
+      westernTag: 'มาตรฐานและเป็นมืออาชีพ',
+      taiwanMarket: 'ตลาดไต้หวัน',
+      taiwanTag: 'ละเอียดอ่อนและซื่อสัตย์แบบท้องถิ่น',
+      southeastAsiaMarket: 'ตลาดเอเชียตะวันออกเฉียงใต้',
+      southeastAsiaTag: 'ดิจิทัลรวดเร็วและคล่องตัว',
+      builtFor: 'สร้างมาเพื่อ',
+      collaboration: 'ความร่วมมือ',
+      securityBadge: 'มาตรฐานการเข้ารหัสระดับโลก',
+      securityTitle: 'ขับเคลื่อนด้วยความชาญฉลาด ปลอดภัยไร้พรมแดน',
+      securityDescription: 'ไม่ว่าคุณจะทำงานจากสตูดิโอในไทเปหรือออฟฟิศในลอนดอน SmartBill Pro มอบทั้งการปกป้องความเป็นส่วนตัวและความสามารถ AI ในระดับเดียวกัน ความปลอดภัยของข้อมูลคือหัวใจของคำมั่นสัญญาเรา',
+      craftedFor: 'สร้างเพื่อผู้ประกอบการยุคใหม่',
+      cta: 'เริ่มต้นเส้นทางการวางบิลแบบมืออาชีพ',
+    },
+    id: {
+      navTitle: 'SmartBill Pro / Visi Global',
+      heroBadge: 'Keunggulan Regional',
+      heroDescription: 'Berakar kuat di pasar global, kami menghadirkan solusi penagihan yang dibentuk sesuai budaya bisnis lokal dan ekspektasi tiap wilayah.',
+      invoicesProcessed: 'Invoice Diproses',
+      countriesSupported: 'Negara Didukung',
+      westernMarket: 'Pasar Barat',
+      westernTag: 'TerstAndar & Profesional',
+      taiwanMarket: 'Pasar Taiwan',
+      taiwanTag: 'Integritas Lokal yang Rapi',
+      southeastAsiaMarket: 'Asia Tenggara',
+      southeastAsiaTag: 'Cepat dan Digital-First',
+      builtFor: 'Dibangun untuk',
+      collaboration: 'Kolaborasi',
+      securityBadge: 'Standar Enkripsi Global',
+      securityTitle: 'Didorong Kecerdasan, Aman Tanpa Batas',
+      securityDescription: 'Baik Anda bekerja dari studio di Taipei maupun kantor di London, SmartBill Pro memberikan perlindungan privasi dan dukungan penagihan berbasis AI pada level yang sama. Keamanan data tetap menjadi inti janji kami.',
+      craftedFor: 'Dibuat untuk Pengusaha Modern',
+      cta: 'Mulai Penagihan Profesional Anda',
+    },
+  };
+  const copy = copyByLang[lang];
 
   // 追踪每张图片的加载状态
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
@@ -64,38 +145,139 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
     e.currentTarget.parentElement?.classList.add('bg-opacity-100');
   };
 
-  const marketInsights = [
-    {
-      title: lang === 'zh-TW' ? '歐美市場' : 'Western Markets',
-      focus: lang === 'zh-TW' ? '專業美學與跨國標準' : 'Aesthetics & Global Standards',
-      content: lang === 'zh-TW'
-        ? '針對歐美自由職業者優化，模版風格簡約大氣，完全符合歐美企業對 VAT 與稅務規範的專業預期。'
-        : 'Optimized for Western freelancers with clean, bold styles that meet all professional expectations for VAT and tax compliance.',
-      icon: 'fa-globe-americas',
-      gradient: 'from-blue-600 to-indigo-700',
-      image: '/images/western-market.png'
-    },
-    {
-      title: lang === 'zh-TW' ? '台灣市場' : 'Taiwan Market',
-      focus: lang === 'zh-TW' ? '細膩誠信與在地禮儀' : 'Integrity & Local Etiquette',
-      content: lang === 'zh-TW'
-        ? '專為台灣中小企業打造。支持精確的繁體中文排版，佈局優雅，符合台灣商務往來的禮儀與細節。'
-        : 'Crafted for Taiwan SMEs. Supports precise Traditional Chinese typography with layouts that reflect local business etiquette.',
-      icon: 'fa-landmark',
-      gradient: 'from-emerald-600 to-teal-700',
-      image: '/images/taiwan-market.png'
-    },
-    {
-      title: lang === 'zh-TW' ? '東南亞市場' : 'Southeast Asia',
-      focus: lang === 'zh-TW' ? '敏捷發展與數位領先' : 'Agility & Digital-First',
-      content: lang === 'zh-TW'
-        ? '助力東南亞快速增長的數位轉型。提供靈活的貨幣支持與移動優先操作，讓您的業務跨境順滑。'
-        : 'Powering digital transformation in SE Asia. Flexible currency support and mobile-first operations make your business seamless.',
-      icon: 'fa-rocket',
-      gradient: 'from-orange-500 to-red-600',
-      image: '/images/southeast-asia-market.png'
-    }
-  ];
+  const marketInsightsByLang: Record<Language, { title: string; focus: string; content: string; icon: string; gradient: string; image: string }[]> = {
+    en: [
+      {
+        title: 'Western Markets',
+        focus: 'Aesthetics & Global Standards',
+        content: 'Optimized for Western freelancers with clean, bold styles that meet all professional expectations for VAT and tax compliance.',
+        icon: 'fa-globe-americas',
+        gradient: 'from-blue-600 to-indigo-700',
+        image: '/images/western-market.png',
+      },
+      {
+        title: 'Taiwan Market',
+        focus: 'Integrity & Local Etiquette',
+        content: 'Crafted for Taiwan SMEs. Supports precise Traditional Chinese typography with layouts that reflect local business etiquette.',
+        icon: 'fa-landmark',
+        gradient: 'from-emerald-600 to-teal-700',
+        image: '/images/taiwan-market.png',
+      },
+      {
+        title: 'Southeast Asia',
+        focus: 'Agility & Digital-First',
+        content: 'Powering digital transformation in SE Asia. Flexible currency support and mobile-first operations make your business seamless.',
+        icon: 'fa-rocket',
+        gradient: 'from-orange-500 to-red-600',
+        image: '/images/southeast-asia-market.png',
+      },
+    ],
+    'zh-CN': [
+      {
+        title: '欧美市场',
+        focus: '专业美学与跨国标准',
+        content: '针对欧美自由职业者优化，模板风格简约大气，完全符合欧美企业对 VAT 与税务规范的专业预期。',
+        icon: 'fa-globe-americas',
+        gradient: 'from-blue-600 to-indigo-700',
+        image: '/images/western-market.png',
+      },
+      {
+        title: '台湾市场',
+        focus: '细腻诚信与在地礼仪',
+        content: '专为台湾中小企业打造。支持精确的繁体中文排版，布局优雅，符合台湾商务往来的礼仪与细节。',
+        icon: 'fa-landmark',
+        gradient: 'from-emerald-600 to-teal-700',
+        image: '/images/taiwan-market.png',
+      },
+      {
+        title: '东南亚市场',
+        focus: '敏捷发展与数字领先',
+        content: '助力东南亚快速增长的数字化转型。提供灵活的货币支持与移动优先操作，让你的业务跨境更顺滑。',
+        icon: 'fa-rocket',
+        gradient: 'from-orange-500 to-red-600',
+        image: '/images/southeast-asia-market.png',
+      },
+    ],
+    'zh-TW': [
+      {
+        title: '歐美市場',
+        focus: '專業美學與跨國標準',
+        content: '針對歐美自由職業者優化，模版風格簡約大氣，完全符合歐美企業對 VAT 與稅務規範的專業預期。',
+        icon: 'fa-globe-americas',
+        gradient: 'from-blue-600 to-indigo-700',
+        image: '/images/western-market.png',
+      },
+      {
+        title: '台灣市場',
+        focus: '細膩誠信與在地禮儀',
+        content: '專為台灣中小企業打造。支持精確的繁體中文排版，佈局優雅，符合台灣商務往來的禮儀與細節。',
+        icon: 'fa-landmark',
+        gradient: 'from-emerald-600 to-teal-700',
+        image: '/images/taiwan-market.png',
+      },
+      {
+        title: '東南亞市場',
+        focus: '敏捷發展與數位領先',
+        content: '助力東南亞快速增長的數位轉型。提供靈活的貨幣支持與移動優先操作，讓您的業務跨境順滑。',
+        icon: 'fa-rocket',
+        gradient: 'from-orange-500 to-red-600',
+        image: '/images/southeast-asia-market.png',
+      },
+    ],
+    th: [
+      {
+        title: 'ตลาดตะวันตก',
+        focus: 'สุนทรียะและมาตรฐานระดับสากล',
+        content: 'ปรับให้เหมาะกับฟรีแลนซ์ในตลาดตะวันตก ด้วยสไตล์ที่สะอาด ชัดเจน และสอดคล้องกับความคาดหวังด้าน VAT และภาษี',
+        icon: 'fa-globe-americas',
+        gradient: 'from-blue-600 to-indigo-700',
+        image: '/images/western-market.png',
+      },
+      {
+        title: 'ตลาดไต้หวัน',
+        focus: 'ความซื่อสัตย์และมารยาทท้องถิ่น',
+        content: 'ออกแบบสำหรับ SME ในไต้หวัน รองรับการจัดพิมพ์ภาษาจีนตัวเต็มอย่างแม่นยำ และเลย์เอาต์ที่สะท้อนมารยาททางธุรกิจในท้องถิ่น',
+        icon: 'fa-landmark',
+        gradient: 'from-emerald-600 to-teal-700',
+        image: '/images/taiwan-market.png',
+      },
+      {
+        title: 'เอเชียตะวันออกเฉียงใต้',
+        focus: 'คล่องตัวและดิจิทัลก่อน',
+        content: 'ช่วยขับเคลื่อนการเปลี่ยนผ่านสู่ดิจิทัลในเอเชียตะวันออกเฉียงใต้ ด้วยการรองรับหลายสกุลเงินและการใช้งานบนมือถือเป็นหลัก',
+        icon: 'fa-rocket',
+        gradient: 'from-orange-500 to-red-600',
+        image: '/images/southeast-asia-market.png',
+      },
+    ],
+    id: [
+      {
+        title: 'Pasar Barat',
+        focus: 'Estetika & Standar Global',
+        content: 'Dioptimalkan untuk freelancer di pasar Barat dengan gaya yang bersih dan tegas, serta memenuhi ekspektasi profesional terkait VAT dan kepatuhan pajak.',
+        icon: 'fa-globe-americas',
+        gradient: 'from-blue-600 to-indigo-700',
+        image: '/images/western-market.png',
+      },
+      {
+        title: 'Pasar Taiwan',
+        focus: 'Integritas & Etiket Lokal',
+        content: 'Dibuat untuk UKM Taiwan. Mendukung tipografi Tradisional Tionghoa yang presisi dengan tata letak yang mencerminkan etiket bisnis lokal.',
+        icon: 'fa-landmark',
+        gradient: 'from-emerald-600 to-teal-700',
+        image: '/images/taiwan-market.png',
+      },
+      {
+        title: 'Asia Tenggara',
+        focus: 'Lincah & Digital-First',
+        content: 'Mendukung transformasi digital di Asia Tenggara. Dukungan mata uang yang fleksibel dan alur mobile-first membantu bisnis lintas negara berjalan lebih mulus.',
+        icon: 'fa-rocket',
+        gradient: 'from-orange-500 to-red-600',
+        image: '/images/southeast-asia-market.png',
+      },
+    ],
+  };
+  const marketInsights = marketInsightsByLang[lang];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

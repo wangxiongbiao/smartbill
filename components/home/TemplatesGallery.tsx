@@ -6,11 +6,13 @@ import ScalableInvoiceContainer from '@/components/ScalableInvoiceContainer';
 import { useMarketingAuth } from '@/components/marketing/MarketingAuthProvider';
 import { useMarketingLanguage } from '@/components/marketing/MarketingLanguageProvider';
 import { calculateInvoiceTotals } from '@/lib/invoice';
+import { getLocaleForLanguage, isChineseLanguage } from '@/lib/language';
 import {
   PUBLIC_TEMPLATE_ITEMS,
   buildPublicTemplatePreviewInvoice,
   type PublicTemplateItem,
 } from '@/lib/public-templates';
+import type { Language } from '@/types';
 
 function TemplatePreviewCard({
   item,
@@ -20,27 +22,50 @@ function TemplatePreviewCard({
 }: {
   item: PublicTemplateItem;
   isLoggedIn: boolean;
-  lang: 'en' | 'zh-TW';
+  lang: Language;
   onOpenTemplate: () => void;
 }) {
   const previewInvoice = buildPublicTemplatePreviewInvoice(item.template);
   const { total } = calculateInvoiceTotals(previewInvoice.items, previewInvoice.taxRate);
 
-  const copy = lang === 'zh-TW'
-    ? {
-        use: '使用',
-        signInToUse: '登入後使用',
-        usedTimes: `已使用 ${item.template.usage_count || 0} 次`,
-        typicalTotal: '典型總額',
-        cta: isLoggedIn ? '使用此模板' : '登入後使用',
-      }
-    : {
-        use: 'Use',
-        signInToUse: 'Sign in to use',
-        usedTimes: `Used ${item.template.usage_count || 0} times`,
-        typicalTotal: 'Typical total',
-        cta: isLoggedIn ? 'Use this template' : 'Sign in to use',
-      };
+  const copyByLang: Record<Language, { use: string; signInToUse: string; usedTimes: string; typicalTotal: string; cta: string }> = {
+    en: {
+      use: 'Use',
+      signInToUse: 'Sign in to use',
+      usedTimes: `Used ${item.template.usage_count || 0} times`,
+      typicalTotal: 'Typical total',
+      cta: isLoggedIn ? 'Use this template' : 'Sign in to use',
+    },
+    'zh-CN': {
+      use: '使用',
+      signInToUse: '登录后使用',
+      usedTimes: `已使用 ${item.template.usage_count || 0} 次`,
+      typicalTotal: '典型总额',
+      cta: isLoggedIn ? '使用此模板' : '登录后使用',
+    },
+    'zh-TW': {
+      use: '使用',
+      signInToUse: '登入後使用',
+      usedTimes: `已使用 ${item.template.usage_count || 0} 次`,
+      typicalTotal: '典型總額',
+      cta: isLoggedIn ? '使用此模板' : '登入後使用',
+    },
+    th: {
+      use: 'ใช้',
+      signInToUse: 'เข้าสู่ระบบเพื่อใช้',
+      usedTimes: `ใช้งานแล้ว ${item.template.usage_count || 0} ครั้ง`,
+      typicalTotal: 'ยอดรวมทั่วไป',
+      cta: isLoggedIn ? 'ใช้เทมเพลตนี้' : 'เข้าสู่ระบบเพื่อใช้',
+    },
+    id: {
+      use: 'Gunakan',
+      signInToUse: 'Masuk untuk menggunakan',
+      usedTimes: `Dipakai ${item.template.usage_count || 0} kali`,
+      typicalTotal: 'Total umum',
+      cta: isLoggedIn ? 'Gunakan template ini' : 'Masuk untuk menggunakan',
+    },
+  };
+  const copy = copyByLang[lang];
 
   return (
     <article
@@ -83,7 +108,7 @@ function TemplatePreviewCard({
         <div>
           <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{copy.typicalTotal}</div>
           <div className="mt-1 text-lg font-black text-slate-950">
-            {new Intl.NumberFormat(lang === 'zh-TW' ? 'zh-TW' : 'en-US', { style: 'currency', currency: previewInvoice.currency }).format(total)}
+            {new Intl.NumberFormat(getLocaleForLanguage(lang), { style: 'currency', currency: previewInvoice.currency }).format(total)}
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
@@ -101,17 +126,34 @@ export function TemplatesGallery() {
   const { isLoggedIn, openProtectedRoute } = useMarketingAuth();
   const { lang } = useMarketingLanguage();
 
-  const copy = lang === 'zh-TW'
-    ? {
-        badge: '以 SmartBill 真實發票資料構建的模板預覽',
-        title: '從接近真實使用情境的發票模板開始，而不是抽象的佔位卡片。',
-        desc: '這些預覽直接使用 SmartBill 的真實發票結構——寄件人、客戶、明細、總額、付款資訊、幣別與到期日——所以這個區塊看起來更像真正的產品模板庫。',
-      }
-    : {
-        badge: 'Real template previews built from SmartBill invoice data',
-        title: 'Start from realistic invoice templates instead of abstract placeholder cards.',
-        desc: 'These previews now use real SmartBill invoice structures — sender, client, items, totals, payment info, currency, and due date — so the section looks like an actual product template gallery.',
-      };
+  const copyByLang: Record<Language, { badge: string; title: string; desc: string }> = {
+    en: {
+      badge: 'Real template previews built from SmartBill invoice data',
+      title: 'Start from realistic invoice templates instead of abstract placeholder cards.',
+      desc: 'These previews now use real SmartBill invoice structures — sender, client, items, totals, payment info, currency, and due date — so the section looks like an actual product template gallery.',
+    },
+    'zh-CN': {
+      badge: '以 SmartBill 真实发票数据构建的模板预览',
+      title: '从接近真实使用情境的发票模板开始，而不是抽象的占位卡片。',
+      desc: '这些预览直接使用 SmartBill 的真实发票结构，包括寄件人、客户、明细、总额、付款信息、币别与到期日，所以这个区块看起来更像真正的产品模板库。',
+    },
+    'zh-TW': {
+      badge: '以 SmartBill 真實發票資料構建的模板預覽',
+      title: '從接近真實使用情境的發票模板開始，而不是抽象的佔位卡片。',
+      desc: '這些預覽直接使用 SmartBill 的真實發票結構——寄件人、客戶、明細、總額、付款資訊、幣別與到期日——所以這個區塊看起來更像真正的產品模板庫。',
+    },
+    th: {
+      badge: 'พรีวิวเทมเพลตจริงที่สร้างจากข้อมูลใบแจ้งหนี้ของ SmartBill',
+      title: 'เริ่มจากเทมเพลตใบแจ้งหนี้ที่ใกล้เคียงการใช้งานจริง แทนการ์ดตัวอย่างแบบนามธรรม',
+      desc: 'พรีวิวเหล่านี้ใช้โครงสร้างใบแจ้งหนี้จริงของ SmartBill ทั้งผู้ส่ง ลูกค้า รายการ ยอดรวม ข้อมูลการชำระเงิน สกุลเงิน และวันครบกำหนด จึงดูเหมือนคลังเทมเพลตของผลิตภัณฑ์จริงมากกว่า',
+    },
+    id: {
+      badge: 'Pratinjau template nyata yang dibangun dari data invoice SmartBill',
+      title: 'Mulai dari template invoice yang realistis, bukan kartu placeholder yang abstrak.',
+      desc: 'Pratinjau ini memakai struktur invoice SmartBill yang nyata — pengirim, klien, item, total, info pembayaran, mata uang, dan jatuh tempo — sehingga bagian ini terlihat seperti galeri template produk sungguhan.',
+    },
+  };
+  const copy = copyByLang[lang];
 
   return (
     <section id="templates" className="bg-white py-14 md:py-20" data-purpose="templates">

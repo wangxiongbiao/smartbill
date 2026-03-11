@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { translations } from '@/i18n';
 import { batchSaveInvoiceRecords, deleteInvoiceRecord, listInvoices, saveInvoiceRecord } from '@/lib/api/invoice';
 import { createTemplate } from '@/lib/api/template';
+import { getDefaultCurrencyForLanguage } from '@/lib/language';
 import type { Invoice, InvoiceTemplate, Language, TemplateType, User, ViewType } from '@/types';
 
 export const INITIAL_INVOICE: Invoice = {
@@ -99,7 +100,7 @@ export function useInvoiceWorkspace(params: {
 
   const createInvoice = useCallback(async (preset?: Partial<Invoice>) => {
     const newId = Date.now().toString();
-    const defaultCurrency = lang === 'zh-TW' ? 'TWD' : 'USD';
+    const defaultCurrency = getDefaultCurrencyForLanguage(lang);
     const nextInvoice: Invoice = {
       ...INITIAL_INVOICE,
       currency: defaultCurrency,
@@ -136,13 +137,9 @@ export function useInvoiceWorkspace(params: {
   const removeInvoice = useCallback(async (invoiceId: string) => {
     if (user?.id) {
       setIsDeletingId(invoiceId);
-      const previousRecords = records;
-      setRecords(prev => prev.filter(record => record.id !== invoiceId));
       try {
         await deleteInvoiceRecord(invoiceId);
-      } catch (error) {
-        setRecords(previousRecords);
-        throw error;
+        setRecords(prev => prev.filter(record => record.id !== invoiceId));
       } finally {
         setIsDeletingId(null);
       }
@@ -150,7 +147,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     setRecords(prev => prev.filter(record => record.id !== invoiceId));
-  }, [records, setRecords, user?.id]);
+  }, [setRecords, user?.id]);
 
   const useTemplate = useCallback(async (templateRecord: InvoiceTemplate) => {
     const newId = Date.now().toString();

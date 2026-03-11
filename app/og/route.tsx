@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { resolveLanguage } from '@/lib/marketing';
+import { getFallbackTranslationLanguage } from '@/lib/language';
 
 export const runtime = 'edge';
 
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
     },
   };
 
-  const preset = (presets[view] || presets.home)[lang];
+  const preset = (presets[view] || presets.home)[getFallbackTranslationLanguage(lang)];
 
   return new ImageResponse(
     (

@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import type { Language } from '@/types';
+import {
+  DEFAULT_LANGUAGE,
+  getFallbackTranslationLanguage,
+  getLocaleForLanguage,
+  isSupportedLanguage,
+  SUPPORTED_LANGUAGES,
+} from '@/lib/language';
 
 const SITE_URL = 'https://smartbillpro.com';
 export const LANGUAGE_STORAGE_KEY = 'smartbill-marketing-lang';
 
 type PublicPageKey = 'home' | 'templates' | 'share';
+type PublicCopyLanguage = 'en' | 'zh-TW';
 
 type PublicPageCopy = {
   path: string;
@@ -15,7 +23,7 @@ type PublicPageCopy = {
   ogView?: string;
 };
 
-const PUBLIC_PAGE_COPY: Record<PublicPageKey, Record<Language, PublicPageCopy>> = {
+const PUBLIC_PAGE_COPY: Record<PublicPageKey, Record<PublicCopyLanguage, PublicPageCopy>> = {
   home: {
     en: {
       path: '/',
@@ -81,16 +89,16 @@ const PUBLIC_PAGE_COPY: Record<PublicPageKey, Record<Language, PublicPageCopy>> 
 };
 
 export function resolveLanguage(value?: string | null): Language {
-  return value === 'zh-TW' ? 'zh-TW' : 'en';
+  return isSupportedLanguage(value) ? value : DEFAULT_LANGUAGE;
 }
 
 export function buildLangHref(href: string, lang: Language) {
   const url = new URL(href, SITE_URL);
 
-  if (lang === 'zh-TW') {
-    url.searchParams.set('lang', 'zh-TW');
-  } else {
+  if (lang === DEFAULT_LANGUAGE) {
     url.searchParams.delete('lang');
+  } else {
+    url.searchParams.set('lang', lang);
   }
 
   return `${url.pathname}${url.search}${url.hash}`;
@@ -103,8 +111,8 @@ export function buildAbsoluteLangUrl(href: string, lang: Language) {
 export function buildOgImageHref(view: string, lang: Language) {
   const params = new URLSearchParams({ view });
 
-  if (lang === 'zh-TW') {
-    params.set('lang', 'zh-TW');
+  if (lang !== DEFAULT_LANGUAGE) {
+    params.set('lang', lang);
   }
 
   return `/og?${params.toString()}`;
@@ -113,7 +121,7 @@ export function buildOgImageHref(view: string, lang: Language) {
 export function getStoredLanguage(): Language | null {
   if (typeof window === 'undefined') return null;
   const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  return saved === 'en' || saved === 'zh-TW' ? saved : null;
+  return isSupportedLanguage(saved) ? saved : null;
 }
 
 export function persistLanguage(lang: Language) {
@@ -121,8 +129,14 @@ export function persistLanguage(lang: Language) {
   window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
 }
 
+export function buildLanguageAlternates(path: string) {
+  return Object.fromEntries(
+    SUPPORTED_LANGUAGES.map((lang) => [getLocaleForLanguage(lang), buildLangHref(path, lang)]),
+  );
+}
+
 export function getPublicPageMetadata(page: PublicPageKey, lang: Language): Metadata {
-  const copy = PUBLIC_PAGE_COPY[page][lang];
+  const copy = PUBLIC_PAGE_COPY[page][getFallbackTranslationLanguage(lang)];
   const image = copy.ogView ? [buildOgImageHref(copy.ogView, lang)] : undefined;
 
   return {
@@ -130,10 +144,7 @@ export function getPublicPageMetadata(page: PublicPageKey, lang: Language): Meta
     description: copy.description,
     alternates: {
       canonical: buildLangHref(copy.path, lang),
-      languages: {
-        'en-US': buildLangHref(copy.path, 'en'),
-        'zh-TW': buildLangHref(copy.path, 'zh-TW'),
-      },
+      languages: buildLanguageAlternates(copy.path),
     },
     openGraph: {
       title: copy.openGraphTitle,

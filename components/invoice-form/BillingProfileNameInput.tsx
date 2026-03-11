@@ -16,21 +16,45 @@ interface BillingProfileNameInputProps {
 }
 
 function getCopy(lang: Language, kind: BillingProfileKind) {
-  if (lang === 'zh-TW') {
-    return {
+  const copyByLang = {
+    en: {
+      title: kind === 'sender' ? 'Saved bill-from profiles' : 'Saved bill-to profiles',
+      empty: kind === 'sender' ? 'No saved bill-from profiles yet' : 'No saved bill-to profiles yet',
+      loading: 'Loading...',
+      defaultBadge: 'Default',
+    },
+    'zh-CN': {
+      title: kind === 'sender' ? '已保存抬头' : '已保存客户',
+      empty: kind === 'sender' ? '暂无已保存抬头' : '暂无已保存客户',
+      loading: '加载中...',
+      defaultBadge: '默认',
+    },
+    'zh-TW': {
       title: kind === 'sender' ? '已保存抬頭' : '已保存客戶',
       empty: kind === 'sender' ? '暫無已保存抬頭' : '暫無已保存客戶',
       loading: '載入中...',
       defaultBadge: '預設',
-    };
-  }
+    },
+    th: {
+      title: kind === 'sender' ? 'ข้อมูลผู้วางบิลที่บันทึกไว้' : 'ข้อมูลลูกค้าที่บันทึกไว้',
+      empty: kind === 'sender' ? 'ยังไม่มีข้อมูลผู้วางบิลที่บันทึกไว้' : 'ยังไม่มีข้อมูลลูกค้าที่บันทึกไว้',
+      loading: 'กำลังโหลด...',
+      defaultBadge: 'ค่าเริ่มต้น',
+    },
+    id: {
+      title: kind === 'sender' ? 'Profil penagih tersimpan' : 'Profil klien tersimpan',
+      empty: kind === 'sender' ? 'Belum ada profil penagih tersimpan' : 'Belum ada profil klien tersimpan',
+      loading: 'Memuat...',
+      defaultBadge: 'Default',
+    },
+  } satisfies Record<Language, {
+    title: string;
+    empty: string;
+    loading: string;
+    defaultBadge: string;
+  }>;
 
-  return {
-    title: kind === 'sender' ? 'Saved bill-from profiles' : 'Saved bill-to profiles',
-    empty: kind === 'sender' ? 'No saved bill-from profiles yet' : 'No saved bill-to profiles yet',
-    loading: 'Loading...',
-    defaultBadge: 'Default',
-  };
+  return copyByLang[lang];
 }
 
 export default function BillingProfileNameInput(props: BillingProfileNameInputProps) {

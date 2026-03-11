@@ -20,10 +20,39 @@ const EmailDialog: React.FC<EmailDialogProps> = ({ invoice, isOpen, onClose, lan
     const [sendingEmail, setSendingEmail] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const copyByLang = {
+        en: {
+            emailPlaceholder: 'client@example.com',
+            createShareFailed: 'Could not generate share link for email',
+            genericError: t.emailError || 'Failed to send email. Please try again.',
+        },
+        'zh-CN': {
+            emailPlaceholder: 'client@example.com',
+            createShareFailed: '无法为邮件生成分享链接',
+            genericError: t.emailError || '发送邮件失败，请重试。',
+        },
+        'zh-TW': {
+            emailPlaceholder: 'client@example.com',
+            createShareFailed: '無法為郵件生成分享連結',
+            genericError: t.emailError || '發送郵件失敗，請重試。',
+        },
+        th: {
+            emailPlaceholder: 'client@example.com',
+            createShareFailed: 'ไม่สามารถสร้างลิงก์แชร์สำหรับอีเมลได้',
+            genericError: t.emailError || 'ส่งอีเมลไม่สำเร็จ โปรดลองอีกครั้ง',
+        },
+        id: {
+            emailPlaceholder: 'client@example.com',
+            createShareFailed: 'Tidak dapat membuat tautan bagikan untuk email',
+            genericError: t.emailError || 'Gagal mengirim email. Silakan coba lagi.',
+        },
+    } satisfies Record<Language, {
+        emailPlaceholder: string;
+        createShareFailed: string;
+        genericError: string;
+    }>;
     const copy = {
-        emailPlaceholder: 'client@example.com',
-        createShareFailed: lang === 'zh-TW' ? '無法為郵件生成分享連結' : 'Could not generate share link for email',
-        genericError: t.emailError || (lang === 'zh-TW' ? '發送郵件失敗，請重試。' : 'Failed to send email. Please try again.'),
+        ...copyByLang[lang],
         testLimit: `${t.emailError}: ${t.resendTestLimit}`,
     };
 
