@@ -53,7 +53,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
           <span>{translations[props.lang].backToRecords || 'Back to invoices'}</span>
         </button>
       </div>
-      <div className="lg:flex gap-4" style={{ zoom: 0.9 } as React.CSSProperties}>
+      <div className="lg:flex gap-4">
         <div className="lg:w-1/2 flex flex-col gap-6">
           <InvoiceForm invoice={props.invoice} records={props.records} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} showToast={props.showToast} />
           <div className="sm:hidden mt-10 mb-16 px-2">
