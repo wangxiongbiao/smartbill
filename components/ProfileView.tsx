@@ -593,7 +593,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             <div className="border-t border-slate-200 bg-slate-50/70 p-6 md:p-8 xl:border-l xl:border-t-0 xl:p-10">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2">
                 <StatCard value={String(records.length)} label={copy.recordsLabel} accent="text-slate-900" />
                 <StatCard value={String(templatesCount)} label={copy.templatesLabel} accent="text-slate-900" />
                 <StatCard value={formatCurrency(totalBilled, latestCurrency, lang)} label={copy.billedLabel} accent="text-blue-600" />
@@ -606,14 +606,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_minmax(22.5rem,0.88fr)]">
           <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_1.75rem_3.75rem_-2.5rem_rgba(15,23,42,0.4)] md:p-8">
             <div className="mb-6 flex items-start justify-between gap-4">
-              <div>
-                <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.businessTitle}</div>
+              <div className='flex-1'>
+                <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.businessTitle}  <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  {copy.defaultSenderBadge}
+                </span></div>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{copy.businessSubtitle}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                  {copy.defaultSenderBadge}
-                </span>
+
                 {isBusinessEditing ? (
                   <>
                     <button

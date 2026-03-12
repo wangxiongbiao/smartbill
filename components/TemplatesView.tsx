@@ -153,20 +153,20 @@ function TemplatePreviewCard({
                 onUse();
               }}
               disabled={using}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-slate-900 shadow-[0_1.25rem_2.8125rem_-1.5rem_rgba(15,23,42,0.55)] transition-all hover:scale-[1.01] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 text-sm font-semibold text-white shadow-[0_1.25rem_2.8125rem_-1.5rem_rgba(37,99,235,0.52)] transition-all hover:scale-[1.01] hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {using ? <i className="fas fa-spinner animate-spin text-[0.75rem]"></i> : <i className="fas fa-plus text-[0.75rem]"></i>}
               <span>{useLabel}</span>
             </button>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] bg-slate-950/58 p-2 shadow-[0_1rem_2.5rem_-1.75rem_rgba(15,23,42,0.7)] backdrop-blur-md">
               <button
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
                   onOpen();
                 }}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900/78 text-sm font-semibold text-white shadow-[0_1.125rem_2.5rem_-1.625rem_rgba(15,23,42,0.6)] backdrop-blur-sm transition-all hover:bg-slate-900/88"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-slate-900 shadow-[0_0.875rem_2rem_-1.5rem_rgba(255,255,255,0.95)] transition-all hover:bg-white"
               >
                 <i className="fas fa-eye text-[0.6875rem]"></i>
                 <span>{viewLabel}</span>
@@ -178,7 +178,7 @@ function TemplatePreviewCard({
                   onDelete();
                 }}
                 disabled={deleting}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600/92 text-sm font-semibold text-white shadow-[0_1.125rem_2.5rem_-1.625rem_rgba(225,29,72,0.45)] backdrop-blur-sm transition-all hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600 text-sm font-semibold text-white shadow-[0_1rem_2.25rem_-1.5rem_rgba(225,29,72,0.52)] transition-all hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
                 title={deleteLabel}
               >
                 {deleting ? <i className="fas fa-spinner animate-spin text-[0.6875rem]"></i> : <i className="fas fa-trash text-[0.6875rem]"></i>}
