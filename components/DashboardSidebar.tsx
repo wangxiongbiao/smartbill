@@ -68,7 +68,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         }));
 
     return (
-        <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0 left-0 transition-all duration-300 z-50">
+        <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0 left-0 transition-all duration-300 z-50" data-ui-sidebar>
             {/* Brand */}
             <div className="h-[72px] px-5 border-b border-slate-100 flex items-center justify-between gap-3">
                 <div className="min-w-0 flex items-center gap-3">

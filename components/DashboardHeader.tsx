@@ -71,7 +71,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     });
 
     return (
-        <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-[72px] flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+        <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-[72px] flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]" data-ui-header>
             {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
                 {breadcrumbs}

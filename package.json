@@ -8,6 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "next start",
     "lint": "eslint app components contexts hooks lib services i18n.ts middleware.ts types.ts --max-warnings=0 --no-error-on-unmatched-pattern"
   },
   "dependencies": {
