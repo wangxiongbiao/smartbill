@@ -65,7 +65,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
     <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-5">
       <div className="flex justify-between items-center mb-1 relative">
         <div className="flex items-center gap-2">
-          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">{t.paymentInfo}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t.paymentInfo}</h3>
           <button type="button" onClick={() => onChange({ visibility: { ...invoice.visibility, paymentInfo: !invoice.visibility?.paymentInfo } })} className={`text-xs ${invoice.visibility?.paymentInfo === true ? 'text-blue-600' : 'text-slate-300'}`} title={t.visibility}><i className={`fas fa-toggle-${invoice.visibility?.paymentInfo === true ? 'on' : 'off'} text-lg`}></i></button>
         </div>
         {invoice.visibility?.paymentInfo === true && <button type="button" onClick={() => setShowPaymentFieldConfig(!showPaymentFieldConfig)} className="text-slate-400 hover:text-blue-600 transition-colors" title={t.configurePaymentFields || copy.configurePaymentFields}><i className="fas fa-cog"></i></button>}
@@ -75,7 +75,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
       {invoice.visibility?.paymentInfo === true && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase ml-1">{copy.qrCode}</label>
+            <label className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{copy.qrCode}</label>
             {isUploadingQRCode ? (
               <div className="w-full h-[76px] px-4 border-2 border-dashed border-blue-300 rounded-2xl bg-blue-50 flex items-center justify-center">
                 <div className="flex items-center gap-2 text-blue-600">
@@ -118,7 +118,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
 
             return (
               <div key={field.id} className={`space-y-1.5 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
-                <label className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase ml-1">{field.label}</label>
+                <label className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea
                     ref={autoResizeTextarea}

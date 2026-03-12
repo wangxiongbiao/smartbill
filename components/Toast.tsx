@@ -67,7 +67,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, isVisible, onClose, durati
                 <div className={`w-10 h-10 rounded-full ${getColors()} flex items-center justify-center flex-shrink-0`}>
                     <i className={`fas ${getIcon()} ${getIconColor()} text-xl`}></i>
                 </div>
-                <p className="font-bold text-sm flex-1 leading-relaxed">{message}</p>
+                <p className="font-semibold text-sm flex-1 leading-relaxed">{message}</p>
                 <button
                     onClick={onClose}
                     className="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors flex-shrink-0"

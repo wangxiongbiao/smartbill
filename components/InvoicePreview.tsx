@@ -177,7 +177,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             placeholder="0.00"
             editable={previewEditable}
             className="inline-block min-w-[64px]"
-            inputClassName="text-right text-sm font-bold"
+            inputClassName="text-right text-sm font-semibold"
             onChange={(value) => {
               const nextValue = parseEditableNumberInput(value);
               if (nextValue !== null) updateItemAmount(item.id, nextValue);
@@ -211,13 +211,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
       <div className={styles.header}>
         <div className={`flex justify-between items-start gap-6 ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
           <div>
-            <h1 className="text-2xl font-black mb-1">
+            <h1 className="text-2xl font-semibold mb-1">
               <EditableTextValue
                 value={docTitle}
                 placeholder={invoice.type === 'invoice' ? 'INVOICE' : 'RECEIPT'}
                 editable={previewEditable}
                 className="inline"
-                inputClassName="text-2xl font-black"
+                inputClassName="text-2xl font-semibold"
                 onChange={(value) => onChange?.({ customStrings: { ...invoice.customStrings, invoiceTitle: value } })}
               />
             </h1>
@@ -238,13 +238,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className={`flex gap-2 ${isHeaderReversed ? 'flex-row text-left' : 'flex-row-reverse text-right'}`}>
             {invoice.sender.logo && <img src={invoice.sender.logo} alt={copy.logoAlt} className="max-h-20 object-contain" />}
             <div>
-              <h2 className="text-base font-bold">
+              <h2 className="text-base font-semibold">
                 <EditableTextValue
                   value={invoice.sender.name}
                   placeholder={t.namePlaceholder}
                   editable={previewEditable}
                   className="inline"
-                  inputClassName="text-base font-bold"
+                  inputClassName="text-base font-semibold"
                   onChange={(value) => onChange?.({ sender: { ...invoice.sender, name: value } })}
                 />
               </h2>
@@ -297,13 +297,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         <div className="grid grid-cols-2 gap-12 mb-10">
           <div>
             <div className="border-l-4 border-slate-200 pl-4">
-              <p className="font-bold text-base">
+              <p className="font-semibold text-base">
                 <EditableTextValue
                   value={invoice.client.name}
                   placeholder={t.clientName}
                   editable={previewEditable}
                   className="inline"
-                  inputClassName="text-base font-bold"
+                  inputClassName="text-base font-semibold"
                   onChange={(value) => onChange?.({ client: { ...invoice.client, name: value } })}
                 />
               </p>
@@ -352,14 +352,14 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div className="text-right">
             {invoice.visibility?.date !== false && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{invoice.customStrings?.dateLabel ?? t.invoiceDate}</p>
+                <p className="text-[10px] font-semibold text-slate-400 mb-1">{invoice.customStrings?.dateLabel ?? t.invoiceDate}</p>
                 <p className="text-sm font-medium mb-4"><EditableDateValue value={invoice.date} editable={previewEditable} className="inline" inputClassName="text-sm" onChange={(value) => onChange?.({ date: value })} /></p>
               </>
             )}
             {invoice.visibility?.dueDate !== false && (
               <>
-                <p className="text-[10px] font-bold text-slate-400 mb-1">{invoice.customStrings?.dueDateLabel ?? t.dueDate}</p>
-                <p className={`text-sm font-bold text-${styles.accentColor}`}><EditableDateValue value={invoice.dueDate} editable={previewEditable} className="inline" inputClassName="text-sm font-bold" onChange={(value) => onChange?.({ dueDate: value })} /></p>
+                <p className="text-[10px] font-semibold text-slate-400 mb-1">{invoice.customStrings?.dueDateLabel ?? t.dueDate}</p>
+                <p className={`text-sm font-semibold text-${styles.accentColor}`}><EditableDateValue value={invoice.dueDate} editable={previewEditable} className="inline" inputClassName="text-sm font-semibold" onChange={(value) => onChange?.({ dueDate: value })} /></p>
               </>
             )}
           </div>
@@ -367,7 +367,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
 
         <table className="w-full text-left mb-8">
           <thead>
-            <tr className={`${styles.tableHeader} text-[10px] font-bold`}>
+            <tr className={`${styles.tableHeader} text-[10px] font-semibold`}>
               {visibleColumns.map(col => (
                 <th key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : '')}`}>
                   {col.label}
@@ -379,7 +379,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             {invoice.items.map((item) => (
               <tr key={item.id} className="text-xs">
                 {visibleColumns.map(col => (
-                  <td key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-bold' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium')} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap' : ''}`}>
+                  <td key={col.id} className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-semibold' : (col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium')} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap' : ''}`}>
                     {renderCell(item, col)}
                   </td>
                 ))}
@@ -398,8 +398,8 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                   </div>
                 )}
                 <div className={`border-t ${styles.signatureBorder} pt-2 min-w-[180px]`}>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.authorizedSignature}</p>
-                  <p className="text-xs font-bold text-slate-900 mt-1">{invoice.sender.name}</p>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{t.authorizedSignature}</p>
+                  <p className="text-xs font-semibold text-slate-900 mt-1">{invoice.sender.name}</p>
                 </div>
               </>
             )}
@@ -414,7 +414,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               <span>{t.taxRate} ({invoice.taxRate}%)</span>
               <span>{currencyFormatter.format(tax)}</span>
             </div>
-            <div className="flex justify-between text-lg font-black text-slate-900 pt-2 border-t border-slate-200">
+            <div className="flex justify-between text-lg font-semibold text-slate-900 pt-2 border-t border-slate-200">
               <span>{t.total}</span>
               <span>{currencyFormatter.format(total)}</span>
             </div>
@@ -431,7 +431,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                   ?.map(field => (
                     <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
                       <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
-                      <span className={`font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>
+                      <span className={`font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>
                         <EditableTextValue
                           value={field.value}
                           placeholder={copy.addValue}
@@ -452,31 +452,31 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                     {invoice.paymentInfo?.bankName && (
                       <div className="flex justify-between sm:justify-start gap-4 items-baseline">
                         <span className="font-medium text-slate-400 min-w-[100px]">{t.bankName}:</span>
-                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.bankName}</span>
+                        <span className="font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.bankName}</span>
                       </div>
                     )}
                     {invoice.paymentInfo?.accountName && (
                       <div className="flex justify-between sm:justify-start gap-4 items-baseline">
                         <span className="font-medium text-slate-400 min-w-[100px]">{t.accountName}:</span>
-                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountName}</span>
+                        <span className="font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountName}</span>
                       </div>
                     )}
                     {invoice.paymentInfo?.accountNumber && (
                       <div className="flex justify-between sm:justify-start gap-4 items-baseline">
                         <span className="font-medium text-slate-400 min-w-[100px]">{t.accountNumber}:</span>
-                        <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountNumber}</span>
+                        <span className="font-semibold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.accountNumber}</span>
                       </div>
                     )}
                     {invoice.paymentInfo?.extraInfo && (
                       <div className="flex justify-between sm:justify-start gap-4 items-baseline">
                         <span className="font-medium text-slate-400 min-w-[100px]">{t.extraInfo}:</span>
-                        <span className="font-bold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.extraInfo}</span>
+                        <span className="font-semibold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.extraInfo}</span>
                       </div>
                     )}
                     {invoice.paymentInfo?.customFields?.map(field => (
                       <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
                         <span className="font-medium text-slate-400 min-w-[100px]">{field.label}:</span>
-                        <span className="font-bold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{field.value}</span>
+                        <span className="font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{field.value}</span>
                       </div>
                     ))}
                   </>

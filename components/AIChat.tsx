@@ -126,7 +126,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
                     </div>
                     <div>
-                        <h3 className="font-bold text-[14px]">{t.aiHeaderTitle}</h3>
+                        <h3 className="font-semibold text-[14px]">{t.aiHeaderTitle}</h3>
                         <p className="text-[12px] text-white/60">{t.aiHeaderSub}</p>
                     </div>
                 </div>

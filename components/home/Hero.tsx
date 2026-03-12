@@ -8,8 +8,8 @@ import type { Language } from '@/types';
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_20px_44px_-34px_rgba(37,99,235,0.16)]">
-      <div className="text-xs font-bold uppercase tracking-[0.2em] text-blue-500">{label}</div>
-      <div className="mt-2 text-xl font-black tracking-tight text-slate-950">{value}</div>
+      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">{label}</div>
+      <div className="mt-2 text-xl font-semibold tracking-tight text-slate-950">{value}</div>
     </div>
   );
 }
@@ -198,7 +198,7 @@ export function Hero() {
       <div className="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.16),transparent_34%),radial-gradient(circle_at_top_left,rgba(219,234,254,0.9),transparent_28%),radial-gradient(circle_at_center,rgba(125,211,252,0.12),transparent_40%)]" />
       <div className="grid gap-12 px-4 pb-10 pt-2 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-10 lg:pb-24 lg:pt-16 2xl:px-14">
         <div className="relative z-10 flex flex-col justify-center">
-          <h1 className="max-w-4xl text-4xl font-black leading-[1.02] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+          <h1 className="max-w-4xl text-4xl font-semibold leading-[1.02] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
             {copy.title}
           </h1>
           <p className="mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
@@ -209,14 +209,14 @@ export function Hero() {
             <button
               onClick={handleCTA}
               disabled={isGoogleLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-70 shadow-[0_18px_35px_-24px_rgba(37,99,235,0.5)]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-70 shadow-[0_18px_35px_-24px_rgba(37,99,235,0.5)]"
             >
               <i className={`fas ${isGoogleLoading ? 'fa-circle-notch fa-spin' : 'fa-plus'}`}></i>
               {isLoggedIn ? copy.primaryLoggedIn : copy.primaryLoggedOut}
             </button>
             <button
               onClick={() => openProtectedRoute('/templates')}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
             >
               <i className="fas fa-layer-group"></i>
               {copy.secondary}
@@ -234,18 +234,18 @@ export function Hero() {
           <div className="relative overflow-hidden rounded-[32px] border border-blue-100 bg-white p-4 shadow-[0_28px_90px_-46px_rgba(37,99,235,0.2)] sm:p-6">
             <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
               <div>
-                <div className="text-xs font-bold uppercase tracking-[0.22em] text-blue-500">{copy.preview}</div>
-                <div className="mt-1 text-lg font-black text-slate-950">Invoice #INV-2048</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-500">{copy.preview}</div>
+                <div className="mt-1 text-lg font-semibold text-slate-950">Invoice #INV-2048</div>
               </div>
-              <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{copy.autosaved}</div>
+              <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{copy.autosaved}</div>
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
               <div className="rounded-[28px] border border-blue-100 bg-white p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-blue-500">{copy.editor}</div>
-                    <div className="mt-1 text-base font-black text-slate-900">{copy.billingDetails}</div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-500">{copy.editor}</div>
+                    <div className="mt-1 text-base font-semibold text-slate-900">{copy.billingDetails}</div>
                   </div>
                   <div className="flex gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
@@ -257,7 +257,7 @@ export function Hero() {
                 <div className="mt-4 space-y-3">
                   {copy.editorFields.map((label, index) => (
                     <div key={label} className="rounded-2xl bg-blue-50 p-3">
-                      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-500">{label}</div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-500">{label}</div>
                       <div className="mt-2 h-2.5 rounded-full bg-blue-200" style={{ width: `${88 - index * 10}%` }} />
                     </div>
                   ))}
@@ -274,23 +274,23 @@ export function Hero() {
               <div className="rounded-[28px] bg-[linear-gradient(145deg,#1d4ed8_0%,#3b82f6_54%,#93c5fd_100%)] p-5 text-white shadow-[0_28px_56px_-34px_rgba(37,99,235,0.46)]">
                 <div className="flex items-start justify-between gap-4 border-b border-white/15 pb-4">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/55">{copy.invoicePdf}</div>
-                    <div className="mt-2 text-2xl font-black">SmartBill Studio</div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/55">{copy.invoicePdf}</div>
+                    <div className="mt-2 text-2xl font-semibold">SmartBill Studio</div>
                     <div className="mt-1 text-sm text-white/80">{copy.brandForward}</div>
                   </div>
                   <div className="rounded-2xl bg-white/15 px-3 py-2 text-right backdrop-blur-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">{copy.due}</div>
-                    <div className="mt-1 text-sm font-black">2026-03-24</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">{copy.due}</div>
+                    <div className="mt-1 text-sm font-semibold">2026-03-24</div>
                   </div>
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-2xl bg-white/12 p-3 backdrop-blur-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">{copy.billTo}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{copy.billTo}</div>
                     <div className="mt-2 font-semibold leading-6">Acme Creative Ltd.<br />finance@acme.co</div>
                   </div>
                   <div className="rounded-2xl bg-white/12 p-3 backdrop-blur-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">{copy.payment}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{copy.payment}</div>
                     <div className="mt-2 whitespace-pre-line font-semibold leading-6">{copy.paymentValue}</div>
                   </div>
                 </div>
@@ -299,17 +299,17 @@ export function Hero() {
                   {copy.items.map((item, index) => (
                     <div key={item} className="flex items-center justify-between rounded-2xl bg-white/12 px-4 py-3 text-sm backdrop-blur-sm">
                       <span className="font-medium text-white/90">{item}</span>
-                      <span className="font-black">{index === 0 ? '$1,600' : index === 1 ? '$480' : '$220'}</span>
+                      <span className="font-semibold">{index === 0 ? '$1,600' : index === 1 ? '$480' : '$220'}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-5 flex items-center justify-between rounded-2xl bg-white/18 px-4 py-4 backdrop-blur-sm">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">{copy.totalDue}</div>
-                    <div className="mt-1 text-3xl font-black">$2,300</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/65">{copy.totalDue}</div>
+                    <div className="mt-1 text-3xl font-semibold">$2,300</div>
                   </div>
-                  <div className="rounded-xl bg-white px-3 py-2 text-xs font-black text-blue-700">{copy.pdfReady}</div>
+                  <div className="rounded-xl bg-white px-3 py-2 text-xs font-semibold text-blue-700">{copy.pdfReady}</div>
                 </div>
               </div>
             </div>

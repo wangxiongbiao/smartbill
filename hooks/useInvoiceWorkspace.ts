@@ -149,6 +149,29 @@ export function useInvoiceWorkspace(params: {
     setRecords(prev => prev.filter(record => record.id !== invoiceId));
   }, [setRecords, user?.id]);
 
+  const updateInvoiceStatus = useCallback(async (invoiceId: string, nextStatus: Invoice['status']) => {
+    const targetInvoice = records.find((record) => record.id === invoiceId);
+    if (!targetInvoice) return;
+
+    const nextInvoice = {
+      ...targetInvoice,
+      status: nextStatus,
+    };
+
+    setRecords((prev) => prev.map((record) => (record.id === invoiceId ? nextInvoice : record)));
+    setInvoice((prev) => (prev.id === invoiceId ? nextInvoice : prev));
+
+    if (!user?.id) return;
+
+    try {
+      await saveInvoiceRecord(nextInvoice);
+    } catch (error) {
+      setRecords((prev) => prev.map((record) => (record.id === invoiceId ? targetInvoice : record)));
+      setInvoice((prev) => (prev.id === invoiceId ? targetInvoice : prev));
+      throw error;
+    }
+  }, [records, saveInvoiceRecord, setRecords, user?.id]);
+
   const useTemplate = useCallback(async (templateRecord: InvoiceTemplate) => {
     const newId = Date.now().toString();
     const nextInvoice: Invoice = {
@@ -230,13 +253,14 @@ export function useInvoiceWorkspace(params: {
     useTemplate,
     duplicateInvoice,
     removeInvoice,
+    updateInvoiceStatus,
     refreshRecords,
     setInvoice,
     updateInvoice,
     setTemplate,
     setIsHeaderReversed,
     setIsExporting
-  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, updateInvoice, useTemplate]);
+  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, updateInvoice, updateInvoiceStatus, useTemplate]);
 
   return {
     invoice,

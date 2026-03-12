@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import RevenueTrendChart from '@/components/charts/RevenueTrendChart';
 import { Invoice, Language } from '../types';
 import { calculateInvoiceTotal } from '@/lib/invoice';
+import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
 import { getDefaultCurrencyForLanguage, getLocaleForLanguage } from '@/lib/language';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { convertAmountWithRates } from '@/lib/exchange-rates';
@@ -24,11 +25,18 @@ function formatCurrency(amount: number, currency = 'USD', lang: Language = 'en')
   }
 }
 
+function isBillingRecord(invoice: Pick<Invoice, 'status'>) {
+  return invoice.status === 'Sent' || invoice.status === 'Paid';
+}
+
 const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpenRecords, onOpenTemplates, onOpenAI, onExportLatest }) => {
   const copyByLang: Record<Language, {
     unnamedClient: string;
     unknownClient: string;
-    draft: string;
+    draftStatus: string;
+    pending: string;
+    overdue: string;
+    paidStatus: string;
     summaryTotal: string;
     summaryUnpaid: string;
     summaryPaid: string;
@@ -67,7 +75,10 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     en: {
       unnamedClient: 'Unnamed client',
       unknownClient: 'Unknown client',
-      draft: 'Draft',
+      draftStatus: 'Draft',
+      pending: 'Pending',
+      overdue: 'Overdue',
+      paidStatus: 'Paid',
       summaryTotal: 'Total billed',
       summaryUnpaid: 'Unpaid amount',
       summaryPaid: 'Paid amount',
@@ -106,7 +117,10 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     'zh-CN': {
       unnamedClient: '未命名客户',
       unknownClient: '未知客户',
-      draft: '草稿',
+      draftStatus: '草稿',
+      pending: '待付',
+      overdue: '逾期',
+      paidStatus: '已付',
       summaryTotal: '总账单金额',
       summaryUnpaid: '待付款金额',
       summaryPaid: '已付款金额',
@@ -145,7 +159,10 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     'zh-TW': {
       unnamedClient: '未命名客戶',
       unknownClient: '未知客戶',
-      draft: '草稿',
+      draftStatus: '草稿',
+      pending: '待付',
+      overdue: '逾期',
+      paidStatus: '已付',
       summaryTotal: '總帳單金額',
       summaryUnpaid: '待付款金額',
       summaryPaid: '已付款金額',
@@ -184,7 +201,10 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     th: {
       unnamedClient: 'ลูกค้าไม่มีชื่อ',
       unknownClient: 'ลูกค้าไม่ทราบชื่อ',
-      draft: 'ฉบับร่าง',
+      draftStatus: 'ฉบับร่าง',
+      pending: 'ค้างชำระ',
+      overdue: 'เกินกำหนด',
+      paidStatus: 'ชำระแล้ว',
       summaryTotal: 'ยอดบิลรวม',
       summaryUnpaid: 'ยอดค้างชำระ',
       summaryPaid: 'ยอดที่ชำระแล้ว',
@@ -223,7 +243,10 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     id: {
       unnamedClient: 'Klien tanpa nama',
       unknownClient: 'Klien tidak dikenal',
-      draft: 'Draf',
+      draftStatus: 'Draf',
+      pending: 'Belum bayar',
+      overdue: 'Terlambat',
+      paidStatus: 'Lunas',
       summaryTotal: 'Total ditagih',
       summaryUnpaid: 'Jumlah belum dibayar',
       summaryPaid: 'Jumlah sudah dibayar',
@@ -306,18 +329,20 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     const hasConvertedTotals = convertedRecords.every(({ invoice, convertedTotal }) => (
       invoice.currency === displayCurrency || convertedTotal !== null
     ));
+    const billableRecords = convertedRecords.filter(({ invoice }) => isBillingRecord(invoice));
+
     const totalAmount = hasConvertedTotals
-      ? convertedRecords.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
+      ? billableRecords.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
       : null;
-    const unpaid = convertedRecords.filter(({ invoice }) => invoice.status !== 'Paid');
+    const unpaid = billableRecords.filter(({ invoice }) => getInvoiceDisplayStatus(invoice, now) !== 'paid');
     const unpaidAmount = hasConvertedTotals
       ? unpaid.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
       : null;
-    const paidInvoices = convertedRecords.filter(({ invoice }) => invoice.status === 'Paid');
+    const paidInvoices = billableRecords.filter(({ invoice }) => getInvoiceDisplayStatus(invoice, now) === 'paid');
     const paidAmount = hasConvertedTotals
       ? paidInvoices.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
       : null;
-    const overdue = convertedRecords.filter(({ invoice }) => invoice.status !== 'Paid' && invoice.dueDate && new Date(invoice.dueDate) < now);
+    const overdue = billableRecords.filter(({ invoice }) => getInvoiceDisplayStatus(invoice, now) === 'overdue');
     const overdueAmount = hasConvertedTotals
       ? overdue.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
       : null;
@@ -326,7 +351,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       const day = new Date();
       day.setDate(day.getDate() - (6 - index));
       const key = day.toISOString().split('T')[0];
-      const dayEntries = convertedRecords.filter(({ invoice }) => invoice.date === key);
+      const dayEntries = billableRecords.filter(({ invoice }) => invoice.date === key);
       const value = hasConvertedTotals
         ? dayEntries.reduce((sum, entry) => sum + (entry.convertedTotal ?? entry.rawTotal), 0)
         : 0;
@@ -336,21 +361,30 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     const recentActivity = [...records]
       .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
       .slice(0, 3)
-      .map((invoice) => ({
-        id: invoice.id,
-        title: invoice.invoiceNumber,
-        subtitle: invoice.client.name || copy.unnamedClient,
-        status: invoice.status || copy.draft,
-        amount: formatCurrency(calculateInvoiceTotal(invoice), invoice.currency, lang),
-        date: invoice.date
-      }));
+      .map((invoice) => {
+        const displayStatus = getInvoiceDisplayStatus(invoice, now);
 
-    const monthlyPerformance = [...records]
-      .reduce((acc, invoice, index) => {
-        const key = invoice.client.name || copy.unknownClient;
-        const sourceEntry = convertedRecords[index];
+        return {
+          id: invoice.id,
+          title: invoice.invoiceNumber,
+          subtitle: invoice.client.name || copy.unnamedClient,
+          status: invoice.status === 'Draft'
+            ? copy.draftStatus
+            : displayStatus === 'paid'
+              ? copy.paidStatus
+              : displayStatus === 'overdue'
+                ? copy.overdue
+                : copy.pending,
+          amount: formatCurrency(calculateInvoiceTotal(invoice), invoice.currency, lang),
+          date: invoice.date
+        };
+      });
+
+    const monthlyPerformance = billableRecords
+      .reduce((acc, entry) => {
+        const key = entry.invoice.client.name || copy.unknownClient;
         const nextAmount = hasConvertedTotals
-          ? sourceEntry.convertedTotal ?? sourceEntry.rawTotal
+          ? entry.convertedTotal ?? entry.rawTotal
           : 0;
         acc.set(key, (acc.get(key) || 0) + nextAmount);
         return acc;
@@ -378,7 +412,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
       recentActivity,
       topClients
     };
-  }, [records, lang, displayCurrency, exchangeSnapshot, copy.unnamedClient, copy.unknownClient, copy.draft]);
+  }, [records, lang, displayCurrency, exchangeSnapshot, copy.unnamedClient, copy.unknownClient, copy.overdue, copy.paidStatus, copy.pending]);
 
   const summaryCards = [
     { label: copy.summaryTotal, value: dashboard.summary.totalAmount === null ? '--' : formatCurrency(dashboard.summary.totalAmount, dashboard.displayCurrency, lang), icon: 'fa-chart-line', color: 'bg-blue-600 text-white' },
@@ -443,7 +477,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
         <div className="xl:col-span-2 bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-[16px] font-bold tracking-[-0.02em] text-slate-900">{copy.trendTitle}</h2>
+              <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900">{copy.trendTitle}</h2>
               <p className="text-[11px] text-slate-500">{copy.trendDesc}</p>
             </div>
             <div className="text-[10px] font-semibold text-slate-400">{copy.last7Days}</div>
@@ -456,7 +490,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
                 </div>
                 <div className="text-[10px] font-semibold text-slate-400 mt-1">{copy.trendTotalDesc}</div>
               </div>
-              <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">{copy.thisWeek}</div>
+              <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-semibold">{copy.thisWeek}</div>
             </div>
 
             {dashboard.hasConvertedTotals ? (
@@ -464,7 +498,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
             ) : (
               <div className="flex h-[220px] w-full items-center justify-center rounded-[18px] border border-dashed border-slate-200 bg-white text-center">
                 <div>
-                  <div className="text-sm font-bold text-slate-600">{exchangeRateStatus}</div>
+                  <div className="text-sm font-semibold text-slate-600">{exchangeRateStatus}</div>
                   <div className="mt-2 text-[11px] font-medium text-slate-400">{copy.convertedTo(dashboard.displayCurrency)}</div>
                 </div>
               </div>
@@ -473,7 +507,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
         </div>
 
         <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-[16px] font-bold tracking-[-0.02em] text-slate-900 mb-1">{copy.quickActions}</h2>
+          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.quickActions}</h2>
           <p className="text-[11px] text-slate-500 mb-4">{copy.quickActionsDesc}</p>
           <div className="space-y-2">
             <button onClick={onCreateEmpty} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-blue-600 text-white text-[12px] font-semibold hover:bg-blue-700 transition-colors shadow-[0_14px_26px_-18px_rgba(37,99,235,0.52)]"><span>{copy.createFast}</span><i className="fas fa-plus text-[11px]"></i></button>
@@ -486,7 +520,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
 
       <section className="grid grid-cols-1 xl:grid-cols-3 gap-3.5">
         <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-[16px] font-bold tracking-[-0.02em] text-slate-900 mb-1">{copy.performanceTitle}</h2>
+          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.performanceTitle}</h2>
           <p className="text-[11px] text-slate-500 mb-4">{copy.performanceDesc}</p>
           <div className="space-y-3.5">
             {dashboard.topClients.length > 0 ? dashboard.topClients.map(client => (
@@ -512,7 +546,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
         </div>
 
         <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm xl:col-span-1">
-          <h2 className="text-[16px] font-bold tracking-[-0.02em] text-slate-900 mb-1">{copy.recentTitle}</h2>
+          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.recentTitle}</h2>
           <p className="text-[11px] text-slate-500 mb-4">{copy.recentDesc}</p>
           <div className="space-y-3.5">
             {dashboard.recentActivity.length > 0 ? dashboard.recentActivity.map(item => (
@@ -537,7 +571,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
               <i className="fas fa-wand-magic-sparkles text-[10px]"></i>
               {copy.aiBadge}
             </div>
-            <h2 className="text-[20px] leading-none font-bold tracking-[-0.025em] mb-2.5">{copy.aiTitle}</h2>
+            <h2 className="text-[20px] leading-none font-semibold tracking-[-0.025em] mb-2.5">{copy.aiTitle}</h2>
             <p className="max-w-[240px] text-white/72 text-[12px] leading-5 mb-5">{copy.aiDesc}</p>
             <button onClick={onOpenAI} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 h-11 text-[12px] font-semibold text-slate-900 hover:bg-slate-100 transition-colors shadow-[0_12px_24px_-16px_rgba(255,255,255,0.9)]">
               <span>{copy.aiCta}</span>

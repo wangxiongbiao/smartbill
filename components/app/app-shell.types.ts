@@ -57,6 +57,7 @@ export interface AppShellContextValue {
   saveAsTemplate: (name: string, description: string) => Promise<void>;
   confirmCreateInvoice: () => Promise<void>;
   deleteInvoice: (id: string) => Promise<void>;
+  updateInvoiceStatus: (id: string, status: Invoice['status']) => Promise<void>;
   exportInvoice: (record: Invoice) => void;
   exportLatest: () => void;
   exportPdf: () => void;

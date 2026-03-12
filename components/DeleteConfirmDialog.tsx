@@ -101,7 +101,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         <div className="min-w-0 flex-1">
                             <h2
                                 id="delete-dialog-title"
-                                className="text-[1.35rem] font-black text-slate-900 tracking-tight"
+                                className="text-[1.35rem] font-semibold text-slate-900 tracking-tight"
                             >
                                 {title}
                             </h2>
@@ -117,7 +117,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         ref={cancelButtonRef}
                         onClick={onClose}
                         disabled={isDeleting}
-                        className={`min-w-[132px] rounded-xl px-5 py-3 text-sm font-bold transition-colors ${isDeleting
+                        className={`min-w-[132px] rounded-xl px-5 py-3 text-sm font-semibold transition-colors ${isDeleting
                                 ? 'cursor-not-allowed bg-slate-100 text-slate-400'
                                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
@@ -129,7 +129,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         ref={confirmButtonRef}
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className={`min-w-[148px] rounded-xl px-5 py-3 text-sm font-bold transition-colors flex items-center justify-center gap-2 ${isDeleting
+                        className={`min-w-[148px] rounded-xl px-5 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${isDeleting
                                 ? 'cursor-not-allowed bg-red-500 text-white'
                                 : 'bg-red-600 text-white hover:bg-red-700'
                             }`}

@@ -125,9 +125,9 @@ export default async function SharePage({ params, searchParams }: SharePageProps
                     <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
                         <i className="fas fa-exclamation-triangle"></i>
                     </div>
-                    <h1 className="text-2xl font-black text-slate-900 mb-2">{invalidCopy.title}</h1>
+                    <h1 className="text-2xl font-semibold text-slate-900 mb-2">{invalidCopy.title}</h1>
                     <p className="text-slate-500 mb-8 font-medium">{invalidCopy.description}</p>
-                    <Link href={homeHref} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all inline-block">
+                    <Link href={homeHref} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all inline-block">
                         {invalidCopy.backHome}
                     </Link>
                 </div>
@@ -144,10 +144,10 @@ export default async function SharePage({ params, searchParams }: SharePageProps
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                     <Link href={homeHref} className="flex items-center gap-2 group">
                         <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform"><i className="fas fa-file-invoice"></i></div>
-                        <span className="text-2xl font-black bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">SmartBill</span>
+                        <span className="text-2xl font-semibold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">SmartBill</span>
                     </Link>
                     <div>
-                        <Link href={homeHref} className="hidden sm:inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">
+                        <Link href={homeHref} className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">
                             {t.createYourOwn} <i className="fas fa-arrow-right"></i>
                         </Link>
                     </div>
@@ -169,9 +169,9 @@ export default async function SharePage({ params, searchParams }: SharePageProps
 
             <footer className="bg-white border-t border-slate-200 py-12 print:hidden">
                 <div className="max-w-2xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{t.createYourOwn}</h2>
+                    <h2 className="text-3xl font-semibold text-slate-900 mb-3 tracking-tight">{t.createYourOwn}</h2>
                     <p className="text-slate-500 text-lg mb-8 font-medium">{t.heroSub}</p>
-                    <Link href={homeHref} className="inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all">
+                    <Link href={homeHref} className="inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all">
                         {t.startFree} <i className="fas fa-rocket"></i>
                     </Link>
                 </div>

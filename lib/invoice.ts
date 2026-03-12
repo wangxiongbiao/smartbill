@@ -24,7 +24,13 @@ export function getSortedInvoiceColumns(columnConfig?: InvoiceColumn[]) {
 }
 
 export function calculateInvoiceTotals(items: InvoiceItem[], taxRate = 0) {
-  const subtotal = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.rate || 0), 0);
+  const subtotal = items.reduce((sum, item) => {
+    const hasExplicitAmount = item.amount !== undefined && item.amount !== '' && !Number.isNaN(Number(item.amount));
+    const lineTotal = hasExplicitAmount
+      ? Number(item.amount)
+      : Number(item.quantity || 0) * Number(item.rate || 0);
+    return sum + lineTotal;
+  }, 0);
   const tax = subtotal * (Number(taxRate || 0) / 100);
 
   return {

@@ -5,6 +5,7 @@ import ShareDialog from './ShareDialog';
 import EmailDialog from './EmailDialog';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import { calculateInvoiceTotal } from '@/lib/invoice';
+import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
 import { getLocaleForLanguage } from '@/lib/language';
 
 interface RecordsViewProps {
@@ -12,17 +13,20 @@ interface RecordsViewProps {
   onEdit: (record: Invoice) => void;
   onDuplicate: (record: Invoice) => void | Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onUpdateStatus: (id: string, status: Invoice['status']) => Promise<void>;
   onExport: (record: Invoice) => void;
   lang: Language;
   onNewDoc: () => void;
   isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate, onDelete, onExport, lang, onNewDoc, isDeletingId }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate, onDelete, onUpdateStatus, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
+  const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,14 +48,19 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       idLabel: 'ID',
       statusLabel: 'Status',
       actionsLabel: 'Actions',
-      draft: 'Draft',
-      sent: 'Sent',
+      pending: 'Pending',
+      overdue: 'Overdue',
       paid: 'Paid',
+      markPaid: 'Mark as paid',
+      cancelPaid: 'Cancel paid',
       share: 'Share',
       email: 'Email',
       editAction: 'Edit',
       exportAction: 'Export',
       deleteAction: 'Delete',
+      chooseStatus: 'Choose status',
+      statusPendingHint: 'Waiting for payment',
+      statusPaidHint: 'Payment received',
     },
     'zh-CN': {
       createNew: '创建新发票',
@@ -68,9 +77,11 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       idLabel: '编号',
       statusLabel: '状态',
       actionsLabel: '操作',
-      draft: '草稿',
-      sent: '已发送',
-      paid: '已支付',
+      pending: '待付',
+      overdue: '逾期',
+      paid: '已付',
+      markPaid: '标记为已付',
+      cancelPaid: '取消已付',
       share: '分享',
       email: '邮件',
       editAction: '编辑',
@@ -92,14 +103,19 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       idLabel: '編號',
       statusLabel: '狀態',
       actionsLabel: '操作',
-      draft: '草稿',
-      sent: '已發送',
-      paid: '已支付',
+      pending: '待付',
+      overdue: '逾期',
+      paid: '已付',
+      markPaid: '標記為已付',
+      cancelPaid: '取消已付',
       share: '分享',
       email: '郵件',
       editAction: '編輯',
       exportAction: '匯出',
       deleteAction: '刪除',
+      chooseStatus: '選擇狀態',
+      statusPendingHint: '等待收款',
+      statusPaidHint: '已收到款項',
     },
     th: {
       createNew: 'สร้างใหม่',
@@ -116,9 +132,11 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       idLabel: 'รหัส',
       statusLabel: 'สถานะ',
       actionsLabel: 'การทำงาน',
-      draft: 'ฉบับร่าง',
-      sent: 'ส่งแล้ว',
+      pending: 'ค้างชำระ',
+      overdue: 'เกินกำหนด',
       paid: 'ชำระแล้ว',
+      markPaid: 'ทำเครื่องหมายว่าชำระแล้ว',
+      cancelPaid: 'ยกเลิกสถานะชำระแล้ว',
       share: 'แชร์',
       email: 'อีเมล',
       editAction: 'แก้ไข',
@@ -140,9 +158,11 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       idLabel: 'ID',
       statusLabel: 'Status',
       actionsLabel: 'Aksi',
-      draft: 'Draft',
-      sent: 'Terkirim',
+      pending: 'Belum bayar',
+      overdue: 'Terlambat',
       paid: 'Lunas',
+      markPaid: 'Tandai lunas',
+      cancelPaid: 'Batalkan lunas',
       share: 'Bagikan',
       email: 'Email',
       editAction: 'Edit',
@@ -164,9 +184,11 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
     idLabel: string;
     statusLabel: string;
     actionsLabel: string;
-    draft: string;
-    sent: string;
+    pending: string;
+    overdue: string;
     paid: string;
+    markPaid: string;
+    cancelPaid: string;
     share: string;
     email: string;
     editAction: string;
@@ -244,23 +266,42 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
     return parsedDate.toLocaleDateString('en-CA');
   };
 
-  const getStatusMeta = (status?: Invoice['status']) => {
-    switch (status) {
-      case 'Paid':
+  const getStatusMeta = (record: Invoice) => {
+    const displayStatus = getInvoiceDisplayStatus(record);
+
+    switch (displayStatus) {
+      case 'paid':
         return {
+          key: displayStatus,
           label: copy.paid,
           className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
         };
-      case 'Sent':
+      case 'overdue':
         return {
-          label: copy.sent,
-          className: 'bg-sky-50 text-sky-700 ring-1 ring-sky-100',
+          key: displayStatus,
+          label: copy.overdue,
+          className: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100',
         };
       default:
         return {
-          label: copy.draft,
+          key: displayStatus,
+          label: copy.pending,
           className: 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
         };
+    }
+  };
+
+  const handleStatusUpdate = async (record: Invoice, nextStatus: Invoice['status']) => {
+    if (statusUpdatingId === record.id) return;
+
+    setStatusUpdatingId(record.id);
+    setOpenStatusMenuId(null);
+    try {
+      await onUpdateStatus(record.id, nextStatus);
+    } catch (error) {
+      console.error('Error updating invoice status:', error);
+    } finally {
+      setStatusUpdatingId(null);
     }
   };
 
@@ -271,16 +312,33 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
     });
   }, [totalPages]);
 
+  useEffect(() => {
+    if (!openStatusMenuId) return;
+
+    const handleClose = () => setOpenStatusMenuId(null);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpenStatusMenuId(null);
+    };
+
+    document.addEventListener('click', handleClose);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('click', handleClose);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openStatusMenuId]);
+
   if (records.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-40 text-center">
         <div className="bg-slate-100 w-28 h-28 rounded-[2rem] flex items-center justify-center text-slate-300 text-5xl mb-8 shadow-inner rotate-3">
           <i className="fas fa-folder-open"></i>
         </div>
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.emptyTitle}</h2>
+        <h2 className="text-3xl font-semibold text-slate-800 tracking-tight">{t.emptyTitle}</h2>
         <p className="text-slate-500 mt-3 text-lg font-medium">{t.emptySub}</p>
         <button
-          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] hover:bg-blue-700 transition-all active:scale-95"
+          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] hover:bg-blue-700 transition-all active:scale-95"
           onClick={() => onNewDoc()}
         >
           {t.newInvoice || copy.createNew}
@@ -296,7 +354,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={() => onNewDoc()}
-              className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_20px_34px_-22px_rgba(37,99,235,0.62)] transition-all hover:bg-blue-700 sm:w-auto"
+              className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_34px_-22px_rgba(37,99,235,0.62)] transition-all hover:bg-blue-700 sm:w-auto"
             >
               <i className="fas fa-plus mr-2 text-xs"></i>
               <span>{t.newInvoice || copy.createNew}</span>
@@ -325,7 +383,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                     setSelectedMonth(nextValue);
                     setCurrentPage(1);
                   }}
-                  className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-bold text-slate-700 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                  className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-semibold text-slate-700 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-50"
                   aria-label={copy.monthFilter}
                 >
                   <option value="all">{copy.allMonths}</option>
@@ -346,7 +404,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                   <i className="fas fa-calendar-days text-lg"></i>
                 </div>
-                <h3 className="mt-5 text-xl font-black tracking-tight text-slate-900">{copy.emptyFilteredTitle}</h3>
+                <h3 className="mt-5 text-xl font-semibold tracking-tight text-slate-900">{copy.emptyFilteredTitle}</h3>
                 <p className="mt-2 text-sm font-medium text-slate-500">{copy.emptyFilteredDesc}</p>
               </div>
             ) : (
@@ -354,59 +412,134 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <table className="min-w-[980px] w-full border-separate border-spacing-0">
                   <thead>
                     <tr className="bg-slate-50/90">
-                      <th className="px-7 py-5 text-left text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-7 py-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {t.colClient || 'CLIENT'}
                       </th>
-                      <th className="px-6 py-5 text-right text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {t.colAmount || 'TOTAL AMOUNT'}
                       </th>
-                      <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {copy.idLabel}
                       </th>
-                      <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {t.colDate || 'ISSUE DATE'}
                       </th>
-                      <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {copy.statusLabel}
                       </th>
-                      <th className="px-7 py-5 text-right text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <th className="px-7 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                         {copy.actionsLabel}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentRecords.map((record) => {
-                      const statusMeta = getStatusMeta(record.status);
+                      const statusMeta = getStatusMeta(record);
+                      const isStatusMenuOpen = openStatusMenuId === record.id;
+                      const isStatusUpdating = statusUpdatingId === record.id;
+                      const statusOptions = [
+                        {
+                          key: 'pending',
+                          label: copy.pending,
+                          hint: copy.statusPendingHint,
+                          nextStatus: 'Sent' as Invoice['status'],
+                          icon: 'fa-clock',
+                          className: 'border-amber-200 bg-amber-50/80 text-amber-700',
+                          active: statusMeta.key === 'pending' || statusMeta.key === 'overdue',
+                        },
+                        {
+                          key: 'paid',
+                          label: copy.paid,
+                          hint: copy.statusPaidHint,
+                          nextStatus: 'Paid' as Invoice['status'],
+                          icon: 'fa-circle-check',
+                          className: 'border-emerald-200 bg-emerald-50/80 text-emerald-700',
+                          active: statusMeta.key === 'paid',
+                        },
+                      ];
 
                       return (
                         <tr key={record.id} className="transition-colors hover:bg-slate-50/70">
                           <td className="border-t border-slate-100 px-7 py-6">
-                            <div className="max-w-[22rem] truncate text-[15px] font-bold text-slate-900">
+                            <div className="max-w-[22rem] truncate text-[15px] font-semibold text-slate-900">
                               {record.client.name || copy.untitledClient}
                             </div>
                           </td>
-                          <td className="border-t border-slate-100 px-6 py-6 text-right">
-                            <span className="text-[15px] font-black tracking-tight text-slate-900">
+                          <td className="border-t border-slate-100 px-6 py-6 text-center">
+                            <span className="text-[15px] font-semibold tracking-tight text-slate-900">
                               {formatAmount(record)}
                             </span>
                           </td>
-                          <td className="border-t border-slate-100 px-6 py-6">
-                            <span className="text-[15px] font-black tracking-tight text-slate-800">
+                          <td className="border-t border-slate-100 px-6 py-6 text-center">
+                            <span className="text-[15px] font-semibold tracking-tight text-slate-800">
                               {record.invoiceNumber}
                             </span>
                           </td>
-                          <td className="border-t border-slate-100 px-6 py-6">
-                            <span className="text-sm font-bold text-slate-500">
+                          <td className="border-t border-slate-100 px-6 py-6 text-center">
+                            <span className="text-sm font-semibold text-slate-500">
                               {formatDate(record.date)}
                             </span>
                           </td>
-                          <td className="border-t border-slate-100 px-6 py-6">
-                            <span className={`inline-flex min-w-[4.75rem] items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${statusMeta.className}`}>
-                              {statusMeta.label}
-                            </span>
+                          <td className="border-t border-slate-100 px-6 py-6 text-center align-top">
+                            <div className="relative inline-flex flex-col items-center" onClick={(event) => event.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  if (isStatusUpdating) return;
+                                  setOpenStatusMenuId((prev) => (prev === record.id ? null : record.id));
+                                }}
+                                disabled={isStatusUpdating}
+                                aria-haspopup="menu"
+                                aria-expanded={isStatusMenuOpen}
+                                className={`group inline-flex min-w-[8.75rem] items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-70 ${statusMeta.className}`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  {isStatusUpdating ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <span className="h-2 w-2 rounded-full bg-current opacity-80"></span>}
+                                  <span>{statusMeta.label}</span>
+                                </span>
+                                <i className={`fas fa-chevron-down text-[9px] transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}></i>
+                              </button>
+
+                              {isStatusMenuOpen ? (
+                                <div
+                                  role="menu"
+                                  className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 overflow-hidden rounded-[20px] border border-slate-200 bg-white p-2 text-left shadow-[0_22px_42px_-24px_rgba(15,23,42,0.28)]"
+                                >
+                                  <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                    {copy.chooseStatus}
+                                  </div>
+                                  <div className="space-y-1">
+                                    {statusOptions.map((option) => (
+                                      <button
+                                        key={option.key}
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          void handleStatusUpdate(record, option.nextStatus);
+                                        }}
+                                        role="menuitem"
+                                        className={`flex w-full items-center justify-between rounded-2xl border px-3 py-3 transition-all ${option.active ? option.className : 'border-transparent bg-slate-50 text-slate-700 hover:border-slate-200 hover:bg-slate-100'}`}
+                                      >
+                                        <span className="flex items-center gap-3">
+                                          <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${option.active ? 'bg-white/80' : 'bg-white'} shadow-sm`}>
+                                            <i className={`fas ${option.icon} text-[13px]`}></i>
+                                          </span>
+                                          <span className="flex flex-col items-start">
+                                            <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">{option.label}</span>
+                                            <span className="text-[11px] font-medium normal-case tracking-normal opacity-70">{option.hint}</span>
+                                          </span>
+                                        </span>
+                                        {option.active ? <i className="fas fa-check text-[11px]"></i> : null}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : null}
+                            </div>
                           </td>
                           <td className="border-t border-slate-100 px-7 py-6">
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="flex items-center justify-center gap-1.5">
                               <button
                                 onClick={() => setShareInvoice(record)}
                                 title={copy.share}
@@ -488,7 +621,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <i className="fas fa-chevron-left text-xs"></i>
                 </button>
@@ -497,7 +630,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold transition-all ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold transition-all ${
                       currentPage === page
                         ? 'border-blue-600 bg-blue-600 text-white shadow-[0_14px_26px_-18px_rgba(37,99,235,0.52)]'
                         : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
@@ -510,7 +643,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <i className="fas fa-chevron-right text-xs"></i>
                 </button>

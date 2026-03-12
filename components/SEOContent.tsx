@@ -54,7 +54,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
         const parts = text.split(/(\*\*.*?\*\*)/g);
         return parts.map((part, index) => {
             if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={index} className="text-slate-900 font-bold">{part.slice(2, -2)}</strong>;
+                return <strong key={index} className="text-slate-900 font-semibold">{part.slice(2, -2)}</strong>;
             }
             return part;
         });
@@ -65,7 +65,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
             {/* Features Section - Why SmartBill */}
             <section className="bg-slate-50 rounded-[3rem] p-12 sm:p-20 border border-slate-100">
                 <div className="max-w-4xl mx-auto text-center space-y-12">
-                    <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    <h2 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
                         {t.whySmartBill}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
@@ -74,7 +74,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                                 <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-100">
                                     <i className={`fas ${idx === 0 ? 'fa-bolt' : idx === 1 ? 'fa-th-large' : 'fa-check-circle'}`}></i>
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 leading-tight">{feature.title}</h3>
+                                <h3 className="text-xl font-semibold text-slate-900 leading-tight">{feature.title}</h3>
                                 <p className="text-slate-500 font-medium leading-relaxed text-sm">{feature.desc}</p>
                             </div>
                         ))}
@@ -85,11 +85,11 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
             {/* Industries / Use Cases Section [NEW] */}
             <section className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-semibold uppercase tracking-widest">
                         <i className="fas fa-briefcase"></i>
                         <span>{copy.industriesBadge}</span>
                     </div>
-                    <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    <h2 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
                         {t.industriesTitle}
                     </h2>
                 </div>
@@ -99,7 +99,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                             <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
                                 <i className={`fas ${ind.icon || 'fa-briefcase'}`}></i>
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 mb-3">{ind.title}</h3>
+                            <h3 className="text-xl font-semibold text-slate-900 mb-3">{ind.title}</h3>
                             <p className="text-slate-500 text-sm font-medium leading-relaxed">{ind.desc}</p>
                         </div>
                     ))}
@@ -114,7 +114,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                         <div className="flex justify-center gap-1 text-amber-400 text-sm mb-4">
                             <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
                         </div>
-                        <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                        <h2 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
                             {t.testimonialsTitle}
                         </h2>
                     </div>
@@ -130,12 +130,12 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                                     </p>
                                 </div>
                                 <div className="pt-6 mt-6 border-t border-slate-50 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs">
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-semibold text-xs">
                                         {review.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <div className="text-xs font-black text-slate-900">{review.name}</div>
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{review.role}</div>
+                                        <div className="text-xs font-semibold text-slate-900">{review.name}</div>
+                                        <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{review.role}</div>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +147,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
             {/* FAQ Section */}
             <section className="max-w-4xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    <h2 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
                         {t.faqTitle}
                     </h2>
                     <p className="text-slate-500 font-medium">{copy.faqDescription}</p>
@@ -155,7 +155,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                 <div className="grid grid-cols-1 gap-6">
                     {(t.faqs || []).map((faq: any, idx: number) => (
                         <div key={idx} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <h3 className="text-lg font-black text-slate-900 mb-3">{faq.q}</h3>
+                            <h3 className="text-lg font-semibold text-slate-900 mb-3">{faq.q}</h3>
                             <p className="text-slate-500 font-medium leading-relaxed">{faq.a}</p>
                         </div>
                     ))}
@@ -166,7 +166,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
             <section className="text-center max-w-3xl mx-auto space-y-8 pb-12">
                 <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
                 <div className="prose prose-slate mx-auto">
-                    <h2 className="text-2xl font-black text-slate-900">
+                    <h2 className="text-2xl font-semibold text-slate-900">
                         {copy.footerTitle}
                     </h2>
                     <p className="text-slate-500 font-medium leading-relaxed">

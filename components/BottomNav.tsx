@@ -28,7 +28,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
               <div className="flex flex-col items-center gap-1">
                 <i className={`${isActive ? tab.activeIcon || tab.icon : tab.icon} text-lg transition-all duration-300 ${isActive ? 'text-blue-500 scale-110' : 'text-slate-500'
                   }`}></i>
-                <span className={`text-[8px] font-black tracking-tighter uppercase transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'
+                <span className={`text-[8px] font-semibold tracking-tighter uppercase transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'
                   }`}>
                   {tab.label}
                 </span>

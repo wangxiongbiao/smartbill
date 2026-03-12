@@ -32,7 +32,7 @@ export default function LanguageToggle({ lang, onChange, ariaLabel }: LanguageTo
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label={ariaLabel}
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
       >
         <i className="fas fa-globe text-[11px]"></i>
         <span className="sm:hidden">{currentLanguage.shortLabel}</span>
@@ -50,7 +50,7 @@ export default function LanguageToggle({ lang, onChange, ariaLabel }: LanguageTo
                 onChange(option.code);
                 setOpen(false);
               }}
-              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-bold transition-colors ${
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-semibold transition-colors ${
                 lang === option.code
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'

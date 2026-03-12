@@ -28,6 +28,7 @@ interface UseAppActionsParams {
       useTemplate: (template: InvoiceTemplate) => Promise<Invoice>;
       saveCurrentInvoice: () => Promise<void>;
       removeInvoice: (id: string) => Promise<void>;
+      updateInvoiceStatus: (id: string, status: Invoice['status']) => Promise<void>;
       updateInvoice: (updates: Partial<Invoice>) => void;
     };
   };
@@ -141,6 +142,7 @@ export function useAppActions(params: UseAppActionsParams) {
     exportLatest,
     logout,
     deleteInvoice: workspace.actions.removeInvoice,
+    updateInvoiceStatus: workspace.actions.updateInvoiceStatus,
     updateInvoice: workspace.actions.updateInvoice,
   };
 }

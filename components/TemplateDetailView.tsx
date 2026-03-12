@@ -74,7 +74,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                     <div className="bg-white rounded-2xl border border-slate-200 p-8 sticky top-8">
                         {/* Header */}
                         <div className="mb-6">
-                            <h1 className="text-3xl font-black text-slate-900 mb-3">{template.name}</h1>
+                            <h1 className="text-3xl font-semibold text-slate-900 mb-3">{template.name}</h1>
                             <p className="text-slate-600 leading-relaxed">
                                 {template.description || t.noTemplatesDesc}
                             </p>
@@ -83,7 +83,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                         {/* Metadata */}
                         <div className="space-y-4 mb-8 pb-8 border-b border-slate-100">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                                <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                                     {t.createdAt}
                                 </span>
                                 <span className="text-sm font-medium text-slate-700">
@@ -92,7 +92,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                             </div>
 
                             <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                                <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                                     {t.updatedAt}
                                 </span>
                                 <span className="text-sm font-medium text-slate-700">
@@ -102,10 +102,10 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                             {template.usage_count !== undefined && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                                         {t.usageCount}
                                     </span>
-                                    <div className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg flex items-center gap-2">
+                                    <div className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg flex items-center gap-2">
                                         <i className="fas fa-sync-alt text-xs"></i>
                                         <span>{t.usageTimes?.replace('{count}', template.usage_count.toString()) || `${template.usage_count} times`}</span>
                                     </div>
@@ -114,7 +114,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                             {template.template_data.type && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                                         {copy.type}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700 capitalize">
@@ -125,7 +125,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                             {template.template_data.currency && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                                         {copy.currency}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700">
@@ -139,7 +139,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                         <div className="space-y-3">
                             <button
                                 onClick={onUseTemplate}
-                                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-3"
                             >
                                 <i className="fas fa-plus"></i>
                                 <span>{t.useTemplate}</span>
@@ -147,7 +147,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                             <button
                                 onClick={onEdit}
-                                className="w-full py-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-4 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-3"
                             >
                                 <i className="fas fa-edit"></i>
                                 <span>{t.editTemplate}</span>
@@ -155,7 +155,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                             <button
                                 onClick={onDelete}
-                                className="w-full py-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-4 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                             >
                                 <i className="fas fa-trash"></i>
                                 <span>{t.deleteTemplate}</span>

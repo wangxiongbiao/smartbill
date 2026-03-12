@@ -39,11 +39,11 @@ export function TemplatesLandingHero() {
   return (
     <section className="bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_55%,#f8fafc_100%)] py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">
+        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
           <i className="fas fa-layer-group"></i>
           {copy.badge}
         </div>
-        <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
+        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-950 md:text-6xl">
           {copy.title}
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 md:text-lg">

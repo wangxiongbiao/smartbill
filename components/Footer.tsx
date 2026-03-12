@@ -142,8 +142,8 @@ export function Footer() {
                 <i className="fas fa-file-invoice"></i>
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight">SmartBill</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#60a5fa]">{copy.badge}</div>
+                <div className="text-xl font-semibold tracking-tight">SmartBill</div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#60a5fa]">{copy.badge}</div>
               </div>
             </div>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-600">
@@ -152,7 +152,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-[#60a5fa]">{copy.product}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#60a5fa]">{copy.product}</h4>
             <ul className="mt-5 space-y-3 text-sm font-medium text-slate-600">
               <li>
                 <button type="button" onClick={() => openProtectedRoute('/dashboard')} className="transition-colors hover:text-[#1d4ed8]">
@@ -174,7 +174,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-[#60a5fa]">{copy.useCases}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#60a5fa]">{copy.useCases}</h4>
             <ul className="mt-5 space-y-3 text-sm font-medium text-slate-600">
               <li>{copy.case1}</li>
               <li>{copy.case2}</li>
@@ -184,7 +184,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-[#60a5fa]">{copy.contact}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#60a5fa]">{copy.contact}</h4>
             <div className="mt-5 rounded-[24px] border border-[#dbeafe] bg-white p-5 text-sm text-slate-600 shadow-sm">
               <div className="flex items-start gap-3">
                 <i className="fas fa-envelope mt-1 text-[#60a5fa]"></i>

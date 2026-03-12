@@ -157,7 +157,7 @@ const ImagePickerDialog: React.FC<ImagePickerDialogProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-slate-800">{dialogTitle}</h2>
+                    <h2 className="text-xl font-semibold text-slate-800">{dialogTitle}</h2>
                     <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-slate-600 transition-colors"

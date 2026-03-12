@@ -82,13 +82,13 @@ function TemplatePreviewCard({
       aria-label={`${isLoggedIn ? copy.use : copy.signInToUse} ${item.template.name}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
           {item.category}
         </span>
-        <span className="text-xs font-bold text-slate-400">{copy.usedTimes}</span>
+        <span className="text-xs font-semibold text-slate-400">{copy.usedTimes}</span>
       </div>
 
-      <h3 className="mt-4 text-xl font-black tracking-tight text-slate-950">{item.template.name}</h3>
+      <h3 className="mt-4 text-xl font-semibold tracking-tight text-slate-950">{item.template.name}</h3>
       <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">{item.template.description}</p>
 
       <div className="mt-5 overflow-hidden rounded-[24px] border border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-3">
@@ -106,12 +106,12 @@ function TemplatePreviewCard({
 
       <div className="mt-5 flex items-center justify-between gap-4">
         <div>
-          <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{copy.typicalTotal}</div>
-          <div className="mt-1 text-lg font-black text-slate-950">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{copy.typicalTotal}</div>
+          <div className="mt-1 text-lg font-semibold text-slate-950">
             {new Intl.NumberFormat(getLocaleForLanguage(lang), { style: 'currency', currency: previewInvoice.currency }).format(total)}
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
           <span>{copy.cta}</span>
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-600 group-hover:text-white">
             <i className="fas fa-arrow-right"></i>
@@ -159,11 +159,11 @@ export function TemplatesGallery() {
     <section id="templates" className="bg-white py-14 md:py-20" data-purpose="templates">
       <div className="px-4 sm:px-6 lg:px-10 2xl:px-14">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
             <i className="fas fa-clone"></i>
             {copy.badge}
           </div>
-          <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+          <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
             {copy.title}
           </h2>
           <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">

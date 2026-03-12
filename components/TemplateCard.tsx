@@ -38,7 +38,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
             <div className="p-6 pb-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-lg font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                             {template.name}
                         </h3>
                         <p className="text-sm text-slate-500 mt-1 line-clamp-2">
@@ -48,7 +48,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
                     {/* Usage Badge */}
                     {template.usage_count !== undefined && template.usage_count > 0 && (
-                        <div className="flex-shrink-0 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg flex items-center gap-1">
+                        <div className="flex-shrink-0 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg flex items-center gap-1">
                             <i className="fas fa-sync-alt text-[10px]"></i>
                             <span>{template.usage_count}</span>
                         </div>
@@ -83,7 +83,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                         e.stopPropagation();
                         onUse();
                     }}
-                    className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-sm shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-sm shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
                 >
                     <i className="fas fa-plus text-xs"></i>
                     <span>{t.useTemplate}</span>
@@ -93,7 +93,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                         e.stopPropagation();
                         onDelete();
                     }}
-                    className="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+                    className="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-semibold rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
                 >
                     <i className="fas fa-trash text-xs"></i>
                 </button>

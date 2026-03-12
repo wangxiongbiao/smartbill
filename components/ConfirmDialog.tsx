@@ -168,7 +168,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         {/* Title */}
         <h2
           id="confirm-dialog-title"
-          className="text-2xl font-black text-slate-900 text-center mb-3 tracking-tight"
+          className="text-2xl font-semibold text-slate-900 text-center mb-3 tracking-tight"
         >
           {title}
         </h2>
@@ -184,7 +184,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             ref={cancelButtonRef}
             onClick={handleClose}
             disabled={isProcessing}
-            className={`flex-1 px-6 py-3.5 rounded-xl font-bold transition-all duration-200 ${isProcessing
+            className={`flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 ${isProcessing
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-slate-300 focus:ring-offset-2'
               }`}
@@ -196,7 +196,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             ref={confirmButtonRef}
             onClick={handleConfirm}
             disabled={isProcessing}
-            className={`relative overflow-hidden flex-1 px-6 py-3.5 rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 ${isProcessing
+            className={`relative overflow-hidden flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${isProcessing
               ? 'opacity-70 cursor-not-allowed'
               : `${config.buttonBg} text-white hover:scale-105 active:scale-95 ${config.buttonShadow} focus:ring-2 focus:ring-offset-2 ${variant === 'info'
                 ? 'focus:ring-blue-500'

@@ -76,7 +76,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         <i className="fas fa-file-lines text-[14px]"></i>
                     </div>
                     <div className="flex flex-col select-none min-w-0">
-                        <span className="text-[18px] font-bold text-slate-900 leading-none tracking-[-0.02em]">
+                        <span className="text-[18px] font-semibold text-slate-900 leading-none tracking-[-0.02em]">
                             SmartBill Pro
                         </span>
                     </div>
@@ -124,7 +124,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-3">
                         <div className="flex items-center gap-3 px-1">
                             <div className="relative">
-                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-50 to-sky-100 flex items-center justify-center text-blue-700 text-[12px] font-bold shadow-sm ring-2 ring-white overflow-hidden">
+                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-50 to-sky-100 flex items-center justify-center text-blue-700 text-[12px] font-semibold shadow-sm ring-2 ring-white overflow-hidden">
                                     {user.avatar ? (
                                         <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                     ) : (
@@ -134,7 +134,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 <span className="absolute -right-0.5 -bottom-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-bold text-slate-800 truncate leading-none">{user.name}</p>
+                                <p className="text-[13px] font-semibold text-slate-800 truncate leading-none">{user.name}</p>
                                 <p className="text-[10px] text-slate-400 truncate font-semibold mt-1 uppercase tracking-[0.12em]">
                                     {copy.proMember}
                                 </p>
@@ -143,7 +143,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
                         <button
                             onClick={onLogout}
-                            className="mt-3 w-full h-10 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all text-[11px] font-black uppercase tracking-[0.18em]"
+                            className="mt-3 w-full h-10 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all text-[11px] font-semibold uppercase tracking-[0.18em]"
                         >
                             {copy.logout}
                         </button>
@@ -151,7 +151,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 ) : (
                     <button
                         onClick={() => setView('records')} // Trigger auth view
-                        className="w-full py-3 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all active:scale-95 border border-blue-100"
+                        className="w-full py-3 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-95 border border-blue-100"
                     >
                         {t.login}
                     </button>

@@ -46,7 +46,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
         <div className="lg:w-1/2 flex flex-col gap-6">
           <InvoiceForm invoice={props.invoice} records={props.records} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} showToast={props.showToast} />
           <div className="sm:hidden mt-10 mb-16 px-2">
-            <button onClick={props.onExportPdf} disabled={props.isExporting} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner">
+            <button onClick={props.onExportPdf} disabled={props.isExporting} className="w-full py-5 bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner">
               <span className="text-lg">{props.isExporting ? translations[props.lang].generating : translations[props.lang].exportPdf}</span>
             </button>
           </div>

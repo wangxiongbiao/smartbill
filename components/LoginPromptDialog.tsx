@@ -53,7 +53,7 @@ export default function LoginPromptDialog({
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_20px_40px_-24px_rgba(37,99,235,0.8)]">
             <i className="fab fa-google text-lg"></i>
           </div>
-          <h2 id="marketing-login-title" className="mt-5 text-2xl font-black tracking-tight text-slate-950">
+          <h2 id="marketing-login-title" className="mt-5 text-2xl font-semibold tracking-tight text-slate-950">
             {t.loginPromptTitle || 'Sign in to continue'}
           </h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">
@@ -76,14 +76,14 @@ export default function LoginPromptDialog({
             <button
               onClick={onClose}
               disabled={isProcessing}
-              className="h-12 flex-1 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-12 flex-1 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {t.loginPromptCancel || 'Cancel'}
             </button>
             <button
               onClick={onContinue}
               disabled={isProcessing}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-bold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <i className={`${isProcessing ? 'fas fa-circle-notch fa-spin' : 'fab fa-google'} text-sm`}></i>
               {isProcessing ? (t.loginPromptOpeningGoogle || 'Opening Google...') : (t.loginPromptContinueGoogle || 'Continue with Google')}

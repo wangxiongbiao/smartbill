@@ -82,7 +82,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
             >
                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                        <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">
                             {isUpdating ? t.updateTemplate : t.saveAsTemplate}
                         </h3>
                         <p className="text-slate-500 text-sm font-medium mt-1">
@@ -100,7 +100,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div>
-                        <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2 block">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
                             {t.templateName} <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -115,7 +115,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                     </div>
 
                     <div>
-                        <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2 block">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
                             {t.templateDescription}
                         </label>
                         <textarea
@@ -144,14 +144,14 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                             type="button"
                             onClick={handleClose}
                             disabled={loading}
-                            className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50"
+                            className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50"
                         >
                             {copy.cancel}
                         </button>
                         <button
                             type="submit"
                             disabled={loading || !name.trim()}
-                            className="flex-1 py-3 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>

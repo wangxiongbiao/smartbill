@@ -224,6 +224,7 @@ export function useAppShellState() {
         useTemplate: workspace.actions.useTemplate,
         saveCurrentInvoice: workspace.actions.saveCurrentInvoice,
         removeInvoice: workspace.actions.removeInvoice,
+        updateInvoiceStatus: workspace.actions.updateInvoiceStatus,
         updateInvoice: workspace.actions.updateInvoice,
       },
     },
@@ -284,6 +285,7 @@ export function useAppShellState() {
     saveAsTemplate: actions.saveAsTemplate,
     confirmCreateInvoice: actions.confirmCreateInvoice,
     deleteInvoice: actions.deleteInvoice,
+    updateInvoiceStatus: actions.updateInvoiceStatus,
     exportInvoice: actions.exportInvoice,
     exportLatest: actions.exportLatest,
     exportPdf: pdfExport.handleExportPdf,
@@ -351,6 +353,7 @@ export function useAppShellState() {
     workspace.saveStatus,
     workspace.template,
     workspace.actions.removeInvoice,
+    workspace.actions.updateInvoiceStatus,
     workspace.actions.updateInvoice,
   ]);
 

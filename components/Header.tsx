@@ -157,8 +157,8 @@ export function Header() {
               <i className="fas fa-file-invoice text-sm"></i>
             </div>
             <div className="leading-none">
-              <div className="text-lg font-black tracking-tight text-slate-950">SmartBill</div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#60a5fa]">{copy.badge}</div>
+              <div className="text-lg font-semibold tracking-tight text-slate-950">SmartBill</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#60a5fa]">{copy.badge}</div>
             </div>
           </Link>
 
@@ -187,7 +187,7 @@ export function Header() {
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563eb] text-xs font-bold text-white">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563eb] text-xs font-semibold text-white">
                     {(profile.name || profile.email || 'U').slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -237,7 +237,7 @@ export function Header() {
               <button
                 onClick={() => openProtectedRoute('/dashboard')}
                 disabled={isGoogleLoading}
-                className="rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-70 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.5)]"
+                className="rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-70 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.5)]"
               >
                 {isGoogleLoading ? copy.openingLogin : copy.startFree}
               </button>

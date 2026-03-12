@@ -253,7 +253,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, l
           if (nextValue !== null) updateItem(item.id, { rate: nextValue });
         }} placeholder="0.00" />;
       case 'system-amount':
-        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm font-bold " value={item.amount !== undefined && item.amount !== '' ? item.amount : ''} onChange={(e) => {
+        return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm font-semibold " value={item.amount !== undefined && item.amount !== '' ? item.amount : ''} onChange={(e) => {
           const nextValue = parseEditableNumberInput(e.target.value);
           if (nextValue !== null) updateItemAmount(item.id, nextValue);
         }} placeholder="0.00" />;

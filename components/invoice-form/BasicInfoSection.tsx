@@ -8,14 +8,14 @@ export default function BasicInfoSection({ invoice, lang, t, onChange, dateInput
     <>
       <div className="flex bg-slate-100 p-1 rounded-xl">
         {(['invoice', 'receipt'] as const).map((type) => (
-          <button key={type} onClick={() => onChange({ type })} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button key={type} onClick={() => onChange({ type })} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${invoice.type === type ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             {type === 'invoice' ? t.invoiceMode : t.receiptMode}
           </button>
         ))}
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.invoiceMode.replace('Mode', 'Title') || 'Document Title'}</label>
+        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.invoiceMode.replace('Mode', 'Title') || 'Document Title'}</label>
         <div className="relative">
           <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder={invoice.type === 'invoice' ? (t.invoiceMode?.split(' ')[0] || 'INVOICE') : (t.receiptMode?.split(' ')[0] || 'RECEIPT')} value={invoice.customStrings?.invoiceTitle ?? ''} onChange={(e) => onChange({ customStrings: { ...invoice.customStrings, invoiceTitle: e.target.value } })} />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><i className="fas fa-pen text-xs"></i></div>
@@ -47,7 +47,7 @@ export default function BasicInfoSection({ invoice, lang, t, onChange, dateInput
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 border-t border-slate-100">
         <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t.billFrom}</h3>
           {isUploadingLogo ? <div className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50"><div className="flex flex-col items-center gap-2 text-blue-600"><i className="fas fa-circle-notch fa-spin text-2xl"></i><span className="text-xs font-medium">{t.uploadingImage}</span></div></div> : !invoice.sender.logo ? <button onClick={onOpenLogoPicker} className="w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"><div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-600"><i className="fas fa-image text-2xl"></i><span className="text-xs font-medium">{t.logoUp}</span></div></button> : <div className="relative group"><div className="w-full flex justify-center items-center border-2 border-slate-200 h-[140px] rounded-lg bg-slate-50"><img src={invoice.sender.logo} alt="Logo" className="w-full h-24 object-contain" /></div><div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100"><button onClick={onOpenLogoPicker} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"><i className="fas fa-sync-alt mr-1"></i>{t.logoUp?.replace('上傳', '更換').replace('Upload', 'Change') || 'Change'}</button><button onClick={onRemoveLogo} className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"><i className="fas fa-trash mr-1"></i>{t.removeLogo?.split(' ')[0] || 'Remove'}</button></div></div>}
           <input placeholder={t.namePlaceholder} value={invoice.sender.name} onChange={(e) => onChange({ sender: { ...invoice.sender, name: e.target.value } })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg" />
           <textarea placeholder={t.addrPlaceholder} value={invoice.sender.address} onChange={(e) => onChange({ sender: { ...invoice.sender, address: e.target.value } })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none" />
@@ -57,7 +57,7 @@ export default function BasicInfoSection({ invoice, lang, t, onChange, dateInput
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t.billTo}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t.billTo}</h3>
           <input placeholder={t.clientName} value={invoice.client.name} onChange={(e) => onChange({ client: { ...invoice.client, name: e.target.value } })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg" />
           <textarea placeholder={t.clientAddr} value={invoice.client.address} onChange={(e) => onChange({ client: { ...invoice.client, address: e.target.value } })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg h-20 text-sm resize-none" />
           <input placeholder="Phone (Optional)" value={invoice.client.phone || ''} onChange={(e) => onChange({ client: { ...invoice.client, phone: e.target.value } })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg" />

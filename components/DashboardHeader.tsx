@@ -83,14 +83,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     <>
                         <button
                             onClick={onSendEmail}
-                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
+                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-semibold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
                         >
                             <i className="fas fa-envelope"></i>
                             <span>{t.sendEmail || 'Send'}</span>
                         </button>
                         <button
                             onClick={onShare}
-                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
+                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-semibold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
                         >
                             <i className="fas fa-share-alt"></i>
                             <span>{copy.share}</span>
@@ -98,7 +98,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
                         <button
                             onClick={onSaveTemplate}
-                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
+                            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-semibold text-xs rounded-lg hover:border-blue-200 hover:text-blue-700 transition-all flex items-center gap-2"
                         >
                             <i className="fas fa-bookmark"></i>
                             <span>{t.saveAsTemplate || 'Save Template'}</span>
@@ -107,7 +107,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         <button
                             onClick={onExportPdf}
                             disabled={isExporting}
-                            className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.58)] disabled:opacity-70"
+                            className="px-4 py-2 bg-blue-600 text-white font-semibold text-xs rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.58)] disabled:opacity-70"
                         >
                             {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-pdf"></i>}
                             <span>{isExporting ? t.generating : t.exportPdf}</span>

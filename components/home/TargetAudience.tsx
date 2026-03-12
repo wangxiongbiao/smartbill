@@ -125,7 +125,7 @@ export function TargetAudience() {
     <section id="audience" className="bg-white py-14 md:py-20" data-purpose="audience-segments">
       <div className="px-4 sm:px-6 lg:px-10 2xl:px-14">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
             {copy.title}
           </h2>
           <p className="mt-5 text-base leading-8 text-slate-600">
@@ -139,7 +139,7 @@ export function TargetAudience() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 shadow-sm">
                 <i className={`fas ${item.icon}`}></i>
               </div>
-              <h3 className="mt-5 text-xl font-black text-slate-950">{item.title}</h3>
+              <h3 className="mt-5 text-xl font-semibold text-slate-950">{item.title}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{item.desc}</p>
             </div>
           ))}
