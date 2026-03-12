@@ -152,6 +152,7 @@ const baseTranslations = {
     breadcrumbRecords: "Records",
     breadcrumbProfile: "Account Settings",
     breadcrumbTemplates: "Templates",
+    backToRecords: "Back to invoices",
     editing: "Editing",
     // Footer
     footerDesc:
@@ -571,6 +572,7 @@ const baseTranslations = {
     breadcrumbRecords: "發票",
     breadcrumbProfile: "账户设置",
     breadcrumbTemplates: "模板",
+    backToRecords: "返回發票列表",
     editing: "編輯中",
     // Footer
     footerDesc:

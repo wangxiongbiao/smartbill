@@ -8,51 +8,109 @@ interface AboutViewProps {
   onCreateInvoice: () => void;
 }
 
+type AboutCopy = {
+  navTitle: string;
+  heroBadge: string;
+  heroDescription: string;
+  invoicesProcessed: string;
+  countriesSupported: string;
+  builtFor: string;
+  collaboration: string;
+  securityBadge: string;
+  securityTitle: string;
+  securityDescription: string;
+  craftedFor: string;
+  cta: string;
+};
+
+type MarketInsight = {
+  title: string;
+  focus: string;
+  content: string;
+  icon: string;
+  gradient: string;
+  image: string;
+};
+
 const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) => {
-  const copyByLang: Record<Language, {
-    navTitle: string;
-    heroBadge: string;
-    heroDescription: string;
-    invoicesProcessed: string;
-    countriesSupported: string;
-    builtFor: string;
-    collaboration: string;
-    securityBadge: string;
-    securityTitle: string;
-    securityDescription: string;
-    craftedFor: string;
-    cta: string;
-  }> = {
-    en: {
-      navTitle: 'SmartBill / Global Vision',
-      heroBadge: 'Regional Excellence',
-      heroDescription: 'Deeply rooted in global markets, we provide billing solutions shaped around local business culture and regional expectations.',
-      invoicesProcessed: 'Invoices Processed',
-      countriesSupported: 'Countries Supported',
-      builtFor: 'Built for',
-      collaboration: 'Collaboration',
-      securityBadge: 'Global Encryption Standard',
-      securityTitle: 'Intelligence Driven, Security Without Borders',
-      securityDescription: 'Whether you work from a Taipei studio or a London office, SmartBill delivers the same level of privacy protection and AI-powered billing support.',
-      craftedFor: 'Crafted for Modern Entrepreneurs',
-      cta: 'Launch Your Professional Billing',
-    },
-    'zh-TW': {
-      navTitle: 'SmartBill / 全球視野',
-      heroBadge: '區域專業能力',
-      heroDescription: '我們深耕全球市場，透過理解在地商業文化，為不同地區的用戶提供更貼合、更專業的開票解決方案。',
-      invoicesProcessed: '已處理發票',
-      countriesSupported: '支援國家',
-      builtFor: '專為',
-      collaboration: '協作打造',
-      securityBadge: '全球加密標準',
-      securityTitle: '智慧驅動，安全無界',
-      securityDescription: '不論你身處台北工作室還是倫敦辦公室，SmartBill 都提供同等級的隱私保護與智能生成能力。',
-      craftedFor: '為現代創業者打造',
-      cta: '開啟您的專業計費之旅',
-    },
+  const englishCopy: AboutCopy = {
+    navTitle: 'SmartBill / Global Vision',
+    heroBadge: 'Regional Excellence',
+    heroDescription: 'Deeply rooted in global markets, we provide billing solutions shaped around local business culture and regional expectations.',
+    invoicesProcessed: 'Invoices Processed',
+    countriesSupported: 'Countries Supported',
+    builtFor: 'Built for',
+    collaboration: 'Collaboration',
+    securityBadge: 'Global Encryption Standard',
+    securityTitle: 'Intelligence Driven, Security Without Borders',
+    securityDescription: 'Whether you work from a Taipei studio or a London office, SmartBill delivers the same level of privacy protection and AI-powered billing support.',
+    craftedFor: 'Crafted for Modern Entrepreneurs',
+    cta: 'Launch Your Professional Billing',
   };
-  const copy = copyByLang[lang];
+  const traditionalChineseCopy: AboutCopy = {
+    navTitle: 'SmartBill / 全球視野',
+    heroBadge: '區域專業能力',
+    heroDescription: '我們深耕全球市場，透過理解在地商業文化，為不同地區的用戶提供更貼合、更專業的開票解決方案。',
+    invoicesProcessed: '已處理發票',
+    countriesSupported: '支援國家',
+    builtFor: '專為',
+    collaboration: '協作打造',
+    securityBadge: '全球加密標準',
+    securityTitle: '智慧驅動，安全無界',
+    securityDescription: '不論你身處台北工作室還是倫敦辦公室，SmartBill 都提供同等級的隱私保護與智能生成能力。',
+    craftedFor: '為現代創業者打造',
+    cta: '開啟您的專業計費之旅',
+  };
+  const simplifiedChineseCopy: AboutCopy = {
+    navTitle: 'SmartBill / 全球视野',
+    heroBadge: '区域专业能力',
+    heroDescription: '我们深耕全球市场，理解不同地区的商业文化与合作方式，为本地与跨境业务提供更贴合的开票体验。',
+    invoicesProcessed: '已处理发票',
+    countriesSupported: '支持国家',
+    builtFor: '专为',
+    collaboration: '协作打造',
+    securityBadge: '全球加密标准',
+    securityTitle: '智能驱动，安全无界',
+    securityDescription: '无论你在上海工作室还是伦敦办公室，SmartBill 都提供一致的隐私保护和 AI 开票能力。',
+    craftedFor: '为现代创业者打造',
+    cta: '开启你的专业计费之旅',
+  };
+  const thaiCopy: AboutCopy = {
+    navTitle: 'SmartBill / มุมมองระดับโลก',
+    heroBadge: 'ความเชี่ยวชาญตามภูมิภาค',
+    heroDescription: 'เราออกแบบประสบการณ์การวางบิลให้สอดคล้องกับวัฒนธรรมธุรกิจในแต่ละพื้นที่ เพื่อช่วยให้ทั้งงานในประเทศและข้ามพรมแดนดูเป็นมืออาชีพมากขึ้น',
+    invoicesProcessed: 'ใบแจ้งหนี้ที่ประมวลผลแล้ว',
+    countriesSupported: 'ประเทศที่รองรับ',
+    builtFor: 'สร้างขึ้นเพื่อ',
+    collaboration: 'การทำงานร่วมกัน',
+    securityBadge: 'มาตรฐานการเข้ารหัสระดับโลก',
+    securityTitle: 'ขับเคลื่อนด้วยความฉลาด ปลอดภัยไร้พรมแดน',
+    securityDescription: 'ไม่ว่าคุณจะทำงานจากสตูดิโอในไทเปหรือออฟฟิศในลอนดอน SmartBill มอบทั้งความเป็นส่วนตัวและความช่วยเหลือด้านการออกใบแจ้งหนี้ด้วย AI ในระดับเดียวกัน',
+    craftedFor: 'สร้างเพื่อผู้ประกอบการยุคใหม่',
+    cta: 'เริ่มต้นงานวางบิลอย่างมืออาชีพ',
+  };
+  const indonesianCopy: AboutCopy = {
+    navTitle: 'SmartBill / Visi Global',
+    heroBadge: 'Keahlian Regional',
+    heroDescription: 'Kami membangun pengalaman penagihan yang selaras dengan budaya bisnis setempat, sehingga pekerjaan lokal maupun lintas negara terasa lebih profesional.',
+    invoicesProcessed: 'Faktur Diproses',
+    countriesSupported: 'Negara Didukung',
+    builtFor: 'Dibangun untuk',
+    collaboration: 'Kolaborasi',
+    securityBadge: 'Standar Enkripsi Global',
+    securityTitle: 'Didorong Kecerdasan, Aman Tanpa Batas',
+    securityDescription: 'Baik Anda bekerja dari studio di Taipei maupun kantor di London, SmartBill menghadirkan perlindungan privasi dan bantuan penagihan AI dengan standar yang sama.',
+    craftedFor: 'Dibuat untuk Pengusaha Modern',
+    cta: 'Mulai Penagihan Profesional Anda',
+  };
+  const localizedCopyByLang = {
+    en: englishCopy,
+    'zh-CN': simplifiedChineseCopy,
+    'zh-TW': traditionalChineseCopy,
+    th: thaiCopy,
+    id: indonesianCopy,
+  } satisfies Record<Language, AboutCopy>;
+  const copy = localizedCopyByLang[lang];
 
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
   const handleImageLoad = (idx: number) => setLoadedImages(prev => ({ ...prev, [idx]: true }));
@@ -61,18 +119,38 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
     e.currentTarget.parentElement?.classList.add('bg-opacity-100');
   };
 
-  const marketInsightsByLang: Record<Language, { title: string; focus: string; content: string; icon: string; gradient: string; image: string }[]> = {
-    en: [
+  const englishMarketInsights: MarketInsight[] = [
       { title: 'Western Markets', focus: 'Aesthetics & Global Standards', content: 'Optimized for Western freelancers with clean, bold styles that meet all professional expectations for VAT and tax compliance.', icon: 'fa-globe-americas', gradient: 'from-blue-600 to-indigo-700', image: '/images/western-market.png' },
       { title: 'Taiwan Market', focus: 'Integrity & Local Etiquette', content: 'Crafted for Taiwan SMEs. Supports precise Traditional Chinese typography with layouts that reflect local business etiquette.', icon: 'fa-landmark', gradient: 'from-emerald-600 to-teal-700', image: '/images/taiwan-market.png' },
       { title: 'Southeast Asia', focus: 'Agility & Digital-First', content: 'Powering digital transformation in SE Asia. Flexible currency support and mobile-first operations make your business seamless.', icon: 'fa-rocket', gradient: 'from-orange-500 to-red-600', image: '/images/southeast-asia-market.png' },
-    ],
-    'zh-TW': [
+    ];
+  const traditionalChineseMarketInsights: MarketInsight[] = [
       { title: '歐美市場', focus: '專業美學與跨國標準', content: '針對歐美自由工作者優化，模板風格簡約大氣，完全符合歐美企業對 VAT 與稅務規範的專業預期。', icon: 'fa-globe-americas', gradient: 'from-blue-600 to-indigo-700', image: '/images/western-market.png' },
       { title: '台灣市場', focus: '細膩誠信與在地禮儀', content: '專為台灣中小企業打造。支援精確的繁體中文排版，佈局優雅，符合台灣商務往來的禮儀與細節。', icon: 'fa-landmark', gradient: 'from-emerald-600 to-teal-700', image: '/images/taiwan-market.png' },
       { title: '東南亞市場', focus: '敏捷發展與數位領先', content: '助力東南亞快速增長的數位轉型。提供靈活的貨幣支援與移動優先操作，讓您的業務跨境順滑。', icon: 'fa-rocket', gradient: 'from-orange-500 to-red-600', image: '/images/southeast-asia-market.png' },
-    ],
-  };
+    ];
+  const simplifiedChineseMarketInsights: MarketInsight[] = [
+      { title: '欧美市场', focus: '专业美学与国际标准', content: '面向欧美自由职业者与团队优化，版式简洁有力，能够自然满足 VAT 与税务信息展示需求。', icon: 'fa-globe-americas', gradient: 'from-blue-600 to-indigo-700', image: '/images/western-market.png' },
+      { title: '台湾市场', focus: '细腻诚信与本地礼仪', content: '为台湾中小企业设计，支持繁体中文排版与更贴近本地商务礼仪的视觉结构。', icon: 'fa-landmark', gradient: 'from-emerald-600 to-teal-700', image: '/images/taiwan-market.png' },
+      { title: '东南亚市场', focus: '敏捷增长与数字优先', content: '适配东南亚快速发展的数字业务场景，支持多币种与移动端优先流程，让跨境协作更顺手。', icon: 'fa-rocket', gradient: 'from-orange-500 to-red-600', image: '/images/southeast-asia-market.png' },
+    ];
+  const thaiMarketInsights: MarketInsight[] = [
+      { title: 'ตลาดตะวันตก', focus: 'สุนทรียะระดับมืออาชีพและมาตรฐานสากล', content: 'ปรับให้เหมาะกับฟรีแลนซ์และธุรกิจในตลาดตะวันตก ด้วยเลย์เอาต์ที่เรียบ คม และพร้อมสำหรับข้อมูลภาษีอย่างเป็นระบบ', icon: 'fa-globe-americas', gradient: 'from-blue-600 to-indigo-700', image: '/images/western-market.png' },
+      { title: 'ตลาดไต้หวัน', focus: 'ความพิถีพิถันและมารยาททางธุรกิจท้องถิ่น', content: 'ออกแบบสำหรับธุรกิจ SME ในไต้หวัน รองรับงานจัดวางอักษรจีนตัวเต็มและรายละเอียดที่สอดคล้องกับการสื่อสารทางธุรกิจในท้องถิ่น', icon: 'fa-landmark', gradient: 'from-emerald-600 to-teal-700', image: '/images/taiwan-market.png' },
+      { title: 'เอเชียตะวันออกเฉียงใต้', focus: 'เติบโตไวและขับเคลื่อนด้วยดิจิทัล', content: 'รองรับธุรกิจดิจิทัลที่เติบโตเร็วในภูมิภาค ด้วยหลายสกุลเงินและการใช้งานบนมือถือที่ลื่นไหล', icon: 'fa-rocket', gradient: 'from-orange-500 to-red-600', image: '/images/southeast-asia-market.png' },
+    ];
+  const indonesianMarketInsights: MarketInsight[] = [
+      { title: 'Pasar Barat', focus: 'Estetika Profesional dan Standar Global', content: 'Dioptimalkan untuk freelancer dan bisnis di pasar Barat dengan tata letak yang bersih, tegas, dan siap menampilkan informasi pajak secara rapi.', icon: 'fa-globe-americas', gradient: 'from-blue-600 to-indigo-700', image: '/images/western-market.png' },
+      { title: 'Pasar Taiwan', focus: 'Ketelitian dan Etika Bisnis Lokal', content: 'Dirancang untuk UKM Taiwan, mendukung tipografi Mandarin tradisional dan struktur yang terasa dekat dengan etika bisnis setempat.', icon: 'fa-landmark', gradient: 'from-emerald-600 to-teal-700', image: '/images/taiwan-market.png' },
+      { title: 'Asia Tenggara', focus: 'Pertumbuhan Cepat dan Digital-First', content: 'Cocok untuk bisnis digital yang berkembang pesat di Asia Tenggara, dengan dukungan multi-mata uang dan alur kerja mobile-first.', icon: 'fa-rocket', gradient: 'from-orange-500 to-red-600', image: '/images/southeast-asia-market.png' },
+    ];
+  const marketInsightsByLang = {
+    en: englishMarketInsights,
+    'zh-CN': simplifiedChineseMarketInsights,
+    'zh-TW': traditionalChineseMarketInsights,
+    th: thaiMarketInsights,
+    id: indonesianMarketInsights,
+  } satisfies Record<Language, MarketInsight[]>;
   const marketInsights = marketInsightsByLang[lang];
 
   return (
