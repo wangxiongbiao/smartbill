@@ -37,7 +37,7 @@ const SortableFieldItem = ({ field, onToggleVisibility, onRename, onDelete, t }:
             <button onClick={() => onToggleVisibility(field.id)} className={`p-1 rounded ${field.visible ? 'text-blue-600' : 'text-slate-300'}`} title={field.visible ? t.visible : t.hidden}><i className={`fas fa-eye${field.visible ? '' : '-slash'}`}></i></button>
             <input value={field.label} onChange={(e) => onRename(field.id, e.target.value)} className="flex-1 text-sm border-none focus:ring-0 bg-transparent font-medium text-slate-700" placeholder={t.fieldName || 'Field Name'} />
             {!field.required && <button onClick={() => onDelete(field.id)} className="text-slate-300 hover:text-red-500 p-1" title={t.deleteField || 'Delete Field'}><i className="fas fa-trash-alt"></i></button>}
-            {field.required && <span className="text-xs text-slate-300 px-1 select-none" title={t.systemField || 'System Field'}><i className="fas fa-lock text-[10px] opacity-70"></i></span>}
+            {field.required && <span className="text-xs text-slate-300 px-1 select-none" title={t.systemField || 'System Field'}><i className="fas fa-lock text-[0.625rem] opacity-70"></i></span>}
         </div>
     );
 };
@@ -86,7 +86,7 @@ const PaymentFieldConfigurator: React.FC<PaymentFieldConfiguratorProps> = ({ fie
                 <h3 className="font-semibold text-slate-700">{t.configurePaymentFields || 'Configure Payment Fields'}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><i className="fas fa-times"></i></button>
             </div>
-            <div className="max-h-[600px] overflow-y-auto mb-4 pr-1">
+            <div className="max-h-[37.5rem] overflow-y-auto mb-4 pr-1">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
                         {fields.map((f) => (<SortableFieldItem key={f.id} field={f} onToggleVisibility={toggleVisibility} onRename={renameField} onDelete={deleteField} t={t} />))}

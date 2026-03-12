@@ -78,22 +78,22 @@ function TemplatePreviewCard({
           onOpenTemplate();
         }
       }}
-      className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+      className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
       aria-label={`${isLoggedIn ? copy.use : copy.signInToUse} ${item.template.name}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
           {item.category}
         </span>
         <span className="text-xs font-semibold text-slate-400">{copy.usedTimes}</span>
       </div>
 
       <h3 className="mt-4 text-xl font-semibold tracking-tight text-slate-950">{item.template.name}</h3>
-      <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">{item.template.description}</p>
+      <p className="mt-2 min-h-[3rem] text-sm leading-6 text-slate-500">{item.template.description}</p>
 
-      <div className="mt-5 overflow-hidden rounded-[24px] border border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-3">
+      <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-3">
         <ScalableInvoiceContainer baseWidth={794} className="pointer-events-none">
-          <div className="w-[794px]">
+          <div className="w-[49.625rem]">
             <InvoicePreview
               invoice={previewInvoice}
               template={previewInvoice.template || 'minimalist'}
@@ -106,7 +106,7 @@ function TemplatePreviewCard({
 
       <div className="mt-5 flex items-center justify-between gap-4">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{copy.typicalTotal}</div>
+          <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-slate-400">{copy.typicalTotal}</div>
           <div className="mt-1 text-lg font-semibold text-slate-950">
             {new Intl.NumberFormat(getLocaleForLanguage(lang), { style: 'currency', currency: previewInvoice.currency }).format(total)}
           </div>
@@ -159,7 +159,7 @@ export function TemplatesGallery() {
     <section id="templates" className="bg-white py-14 md:py-20" data-purpose="templates">
       <div className="px-4 sm:px-6 lg:px-10 2xl:px-14">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
             <i className="fas fa-clone"></i>
             {copy.badge}
           </div>

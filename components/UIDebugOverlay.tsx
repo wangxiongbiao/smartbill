@@ -105,19 +105,19 @@ export default function UIDebugOverlay() {
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 z-[300] w-[340px] rounded-2xl border border-white/20 bg-black p-4 text-[11px] text-white shadow-[0_24px_50px_-24px_rgba(0,0,0,0.9)]">
+    <div className="fixed bottom-4 right-4 z-[300] w-[21.25rem] rounded-2xl border border-white/20 bg-black p-4 text-[0.6875rem] text-white shadow-[0_1.5rem_3.125rem_-1.5rem_rgba(0,0,0,0.9)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <span className="font-semibold tracking-[0.18em] text-white uppercase">
           UI Debug
         </span>
-        <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-medium text-white">
+        <span className="rounded-full bg-white/10 px-2 py-1 text-[0.625rem] font-medium text-white">
           ?ui-debug=1
         </span>
       </div>
       <div className="space-y-1.5 font-mono">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-start justify-between gap-3">
-            <span className="min-w-[108px] text-white/70">{label}</span>
+            <span className="min-w-[6.75rem] text-white/70">{label}</span>
             <span className="break-all text-right text-white">{value}</span>
           </div>
         ))}

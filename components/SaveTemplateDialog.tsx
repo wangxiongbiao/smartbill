@@ -100,7 +100,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div>
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
+                        <label className="text-[0.625rem] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
                             {t.templateName} <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -115,7 +115,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                     </div>
 
                     <div>
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
+                        <label className="text-[0.625rem] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
                             {t.templateDescription}
                         </label>
                         <textarea

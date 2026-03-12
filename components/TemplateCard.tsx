@@ -49,7 +49,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                     {/* Usage Badge */}
                     {template.usage_count !== undefined && template.usage_count > 0 && (
                         <div className="flex-shrink-0 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg flex items-center gap-1">
-                            <i className="fas fa-sync-alt text-[10px]"></i>
+                            <i className="fas fa-sync-alt text-[0.625rem]"></i>
                             <span>{template.usage_count}</span>
                         </div>
                     )}
@@ -58,18 +58,18 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                 {/* Metadata */}
                 <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
                     <div className="flex items-center gap-1.5">
-                        <i className="fas fa-calendar text-[10px]"></i>
+                        <i className="fas fa-calendar text-[0.625rem]"></i>
                         <span>{formatDate(template.created_at)}</span>
                     </div>
                     {template.template_data.type && (
                         <div className="flex items-center gap-1.5">
-                            <i className="fas fa-file-invoice text-[10px]"></i>
+                            <i className="fas fa-file-invoice text-[0.625rem]"></i>
                             <span className="capitalize">{template.template_data.type}</span>
                         </div>
                     )}
                     {template.template_data.currency && (
                         <div className="flex items-center gap-1.5">
-                            <i className="fas fa-dollar-sign text-[10px]"></i>
+                            <i className="fas fa-dollar-sign text-[0.625rem]"></i>
                             <span>{template.template_data.currency}</span>
                         </div>
                     )}

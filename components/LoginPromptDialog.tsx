@@ -48,9 +48,9 @@ export default function LoginPromptDialog({
         aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_40px_120px_-40px_rgba(15,23,42,0.45)]">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_2.5rem_7.5rem_-2.5rem_rgba(15,23,42,0.45)]">
         <div className="bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_100%)] px-6 pb-4 pt-6 sm:px-7">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_20px_40px_-24px_rgba(37,99,235,0.8)]">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_1.25rem_2.5rem_-1.5rem_rgba(37,99,235,0.8)]">
             <i className="fab fa-google text-lg"></i>
           </div>
           <h2 id="marketing-login-title" className="mt-5 text-2xl font-semibold tracking-tight text-slate-950">

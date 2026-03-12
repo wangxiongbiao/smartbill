@@ -390,7 +390,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
         <h2 className="text-3xl font-semibold text-slate-800 tracking-tight">{t.emptyTitle}</h2>
         <p className="text-slate-500 mt-3 text-lg font-medium">{t.emptySub}</p>
         <button
-          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] hover:bg-blue-700 transition-all active:scale-95"
+          className="mt-10 bg-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-[0_1.125rem_2.125rem_-1.25rem_rgba(37,99,235,0.52)] hover:bg-blue-700 transition-all active:scale-95"
           onClick={() => onNewDoc()}
         >
           {t.newInvoice || copy.createNew}
@@ -402,11 +402,11 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
   return (
     <>
       <div className="flex h-full min-h-0 flex-col overflow-hidden px-6 py-6 md:px-8 md:py-8">
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-[86.25rem] flex-col">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={() => onNewDoc()}
-              className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_34px_-22px_rgba(37,99,235,0.62)] transition-all hover:bg-blue-700 sm:w-auto"
+              className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_1.25rem_2.125rem_-1.375rem_rgba(37,99,235,0.62)] transition-all hover:bg-blue-700 sm:w-auto"
             >
               <i className="fas fa-plus mr-2 text-xs"></i>
               <span>{t.newInvoice || copy.createNew}</span>
@@ -445,12 +445,12 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                     </option>
                   ))}
                 </select>
-                <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[0.625rem] text-slate-400 pointer-events-none"></i>
               </div>
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_22px_50px_-36px_rgba(15,23,42,0.28)]">
+          <div className="min-h-0 flex-1 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_1.375rem_3.125rem_-2.25rem_rgba(15,23,42,0.28)]">
             {filteredRecords.length === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
@@ -472,25 +472,25 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                   }}
                   className="min-h-0 flex-1 overflow-auto"
                 >
-                  <table className="min-w-[980px] w-full border-separate border-spacing-0">
+                  <table className="min-w-[61.25rem] w-full border-separate border-spacing-0">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-slate-50/95 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80">
-                        <th className="px-7 py-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-7 py-5 text-left text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {t.colClient || 'CLIENT'}
                         </th>
-                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-6 py-5 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {t.colAmount || 'TOTAL AMOUNT'}
                         </th>
-                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-6 py-5 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {copy.idLabel}
                         </th>
-                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-6 py-5 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {t.colDate || 'ISSUE DATE'}
                         </th>
-                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-6 py-5 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {copy.statusLabel}
                         </th>
-                        <th className="px-7 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <th className="px-7 py-5 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {copy.actionsLabel}
                         </th>
                       </tr>
@@ -524,17 +524,17 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                         return (
                           <tr key={record.id} className="transition-colors hover:bg-slate-50/70">
                             <td className="border-t border-slate-100 px-7 py-6">
-                              <div className="max-w-[22rem] truncate text-[15px] font-semibold text-slate-900">
+                              <div className="max-w-[22rem] truncate text-[0.9375rem] font-semibold text-slate-900">
                                 {record.client.name || copy.untitledClient}
                               </div>
                             </td>
                             <td className="border-t border-slate-100 px-6 py-6 text-center">
-                              <span className="text-[15px] font-semibold tracking-tight text-slate-900">
+                              <span className="text-[0.9375rem] font-semibold tracking-tight text-slate-900">
                                 {formatAmount(record)}
                               </span>
                             </td>
                             <td className="border-t border-slate-100 px-6 py-6 text-center">
-                              <span className="text-[15px] font-semibold tracking-tight text-slate-800">
+                              <span className="text-[0.9375rem] font-semibold tracking-tight text-slate-800">
                                 {record.invoiceNumber}
                               </span>
                             </td>
@@ -555,21 +555,21 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                                   disabled={isStatusUpdating}
                                   aria-haspopup="menu"
                                   aria-expanded={isStatusMenuOpen}
-                                  className={`group inline-flex min-w-[8.75rem] items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-70 ${statusMeta.className}`}
+                                  className={`group inline-flex min-w-[8.75rem] items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-70 ${statusMeta.className}`}
                                 >
                                   <span className="flex items-center gap-2">
-                                    {isStatusUpdating ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <span className="h-2 w-2 rounded-full bg-current opacity-80"></span>}
+                                    {isStatusUpdating ? <i className="fas fa-spinner animate-spin text-[0.6875rem]"></i> : <span className="h-2 w-2 rounded-full bg-current opacity-80"></span>}
                                     <span>{statusMeta.label}</span>
                                   </span>
-                                  <i className={`fas fa-chevron-down text-[9px] transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}></i>
+                                  <i className={`fas fa-chevron-down text-[0.5625rem] transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}></i>
                                 </button>
 
                                 {isStatusMenuOpen ? (
                                   <div
                                     role="menu"
-                                    className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 overflow-hidden rounded-[20px] border border-slate-200 bg-white p-2 text-left shadow-[0_22px_42px_-24px_rgba(15,23,42,0.28)]"
+                                    className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-2 text-left shadow-[0_1.375rem_2.625rem_-1.5rem_rgba(15,23,42,0.28)]"
                                   >
-                                    <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                    <div className="px-2 pb-2 pt-1 text-[0.625rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                                       {copy.chooseStatus}
                                     </div>
                                     <div className="space-y-1">
@@ -586,14 +586,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                                         >
                                           <span className="flex items-center gap-3">
                                             <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${option.active ? 'bg-white/80' : 'bg-white'} shadow-sm`}>
-                                              <i className={`fas ${option.icon} text-[13px]`}></i>
+                                              <i className={`fas ${option.icon} text-[0.8125rem]`}></i>
                                             </span>
                                             <span className="flex flex-col items-start">
-                                              <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">{option.label}</span>
-                                              <span className="text-[11px] font-medium normal-case tracking-normal opacity-70">{option.hint}</span>
+                                              <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em]">{option.label}</span>
+                                              <span className="text-[0.6875rem] font-medium normal-case tracking-normal opacity-70">{option.hint}</span>
                                             </span>
                                           </span>
-                                          {option.active ? <i className="fas fa-check text-[11px]"></i> : null}
+                                          {option.active ? <i className="fas fa-check text-[0.6875rem]"></i> : null}
                                         </button>
                                       ))}
                                     </div>
@@ -673,7 +673,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
 
           {filteredRecords.length > 0 && (
             <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-[16px] text-slate-500">
+              <span className="text-[1rem] text-slate-500">
                 {t.showingRecords
                   .replace('{start}', startRecord.toString())
                   .replace('{end}', endRecord.toString())
@@ -696,7 +696,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                     onClick={() => setCurrentPage(page)}
                     className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold transition-all ${
                       currentPage === page
-                        ? 'border-blue-600 bg-blue-600 text-white shadow-[0_14px_26px_-18px_rgba(37,99,235,0.52)]'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.52)]'
                         : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                     }`}
                   >

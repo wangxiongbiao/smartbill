@@ -212,7 +212,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
     return (
       <div className="flex-1 relative group">
         <div className={`absolute -inset-4 ${gradient.replace('from-', 'bg-').split(' ')[0]}/20 rounded-[3rem] blur-2xl group-hover:blur-3xl transition-all`}></div>
-        <div className="relative rounded-[2.5rem] shadow-2xl border-[12px] border-white w-full h-[350px] overflow-hidden bg-slate-50 flex items-center justify-center">
+        <div className="relative rounded-[2.5rem] shadow-2xl border-[0.75rem] border-white w-full h-[21.875rem] overflow-hidden bg-slate-50 flex items-center justify-center">
           {!isLoaded && !isFailed && <div className="absolute inset-0 bg-slate-100 animate-pulse flex items-center justify-center"><i className="fas fa-circle-notch fa-spin text-slate-300 text-3xl"></i></div>}
           {isFailed ? (
             <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex flex-col items-center justify-center text-white p-10 text-center`}>
@@ -231,7 +231,7 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
     <div className="min-h-screen bg-slate-50 pb-20">
       <nav className="sticky top-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
         <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-90"><i className="fas fa-arrow-left"></i></button>
-        <div className="flex flex-col items-center"><span className="text-[10px] font-semibold text-blue-600 uppercase tracking-widest mb-0.5">{copy.supportBadge}</span><span className="text-sm font-semibold text-slate-900 uppercase tracking-widest">{t.helpCenter}</span></div>
+        <div className="flex flex-col items-center"><span className="text-[0.625rem] font-semibold text-blue-600 uppercase tracking-widest mb-0.5">{copy.supportBadge}</span><span className="text-sm font-semibold text-slate-900 uppercase tracking-widest">{t.helpCenter}</span></div>
         <div className="w-10"></div>
       </nav>
 
@@ -246,10 +246,10 @@ const HelpView: React.FC<HelpViewProps> = ({ lang, onBack }) => {
 
       <div className="max-w-6xl mx-auto px-6 -mt-16 grid grid-cols-1 md:grid-cols-4 gap-6 mb-20 relative z-30">
         {[{ icon: 'fa-play', title: copy.cards[0], color: 'bg-emerald-500' }, { icon: 'fa-brain', title: copy.cards[1], color: 'bg-blue-600' }, { icon: 'fa-palette', title: copy.cards[2], color: 'bg-indigo-600' }, { icon: 'fa-file-pdf', title: copy.cards[3], color: 'bg-blue-600' }].map((item, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center group hover:-translate-y-2 transition-all cursor-pointer">
+          <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-[0_1.25rem_3.125rem_-0.75rem_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center group hover:-translate-y-2 transition-all cursor-pointer">
             <div className={`${item.color} w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl mb-4 shadow-lg group-hover:rotate-12 transition-transform`}><i className={`fas ${item.icon}`}></i></div>
             <h3 className="font-semibold text-slate-900 mb-1">{item.title}</h3>
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{copy.learnMore}</span>
+            <span className="text-[0.625rem] font-semibold text-slate-400 uppercase tracking-widest">{copy.learnMore}</span>
           </div>
         ))}
       </div>

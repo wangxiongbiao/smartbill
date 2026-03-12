@@ -62,7 +62,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
   const copy = copyByLang[lang];
 
   return (
-    <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-5">
+    <div className="bg-white rounded-[1.5rem] border border-slate-200 p-6 shadow-sm space-y-5">
       <div className="flex justify-between items-center mb-1 relative">
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t.paymentInfo}</h3>
@@ -75,16 +75,16 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
       {invoice.visibility?.paymentInfo === true && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{copy.qrCode}</label>
+            <label className="text-[0.6875rem] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{copy.qrCode}</label>
             {isUploadingQRCode ? (
-              <div className="w-full h-[76px] px-4 border-2 border-dashed border-blue-300 rounded-2xl bg-blue-50 flex items-center justify-center">
+              <div className="w-full h-[4.75rem] px-4 border-2 border-dashed border-blue-300 rounded-2xl bg-blue-50 flex items-center justify-center">
                 <div className="flex items-center gap-2 text-blue-600">
                   <i className="fas fa-circle-notch fa-spin"></i>
                   <span className="text-xs font-medium">{t.uploadingImage}</span>
                 </div>
               </div>
             ) : !invoice.paymentInfo?.qrCode ? (
-              <button type="button" onClick={onOpenQRCodePicker} className="w-full h-[76px] px-4 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group flex items-center justify-center">
+              <button type="button" onClick={onOpenQRCodePicker} className="w-full h-[4.75rem] px-4 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group flex items-center justify-center">
                 <div className="flex items-center gap-3 text-slate-400 group-hover:text-blue-600">
                   <i className="fas fa-qrcode text-lg"></i>
                   <span className="text-sm font-medium">{t.uploadQR || copy.uploadQr}</span>
@@ -92,7 +92,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
               </button>
             ) : (
               <div className="relative group">
-                <div className="w-full h-[76px] px-4 border border-slate-200 rounded-2xl bg-slate-50 flex items-center justify-between overflow-hidden">
+                <div className="w-full h-[4.75rem] px-4 border border-slate-200 rounded-2xl bg-slate-50 flex items-center justify-between overflow-hidden">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="h-12 w-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                       <img src={invoice.paymentInfo.qrCode} alt="QR Code" className="w-full h-full object-contain p-1" />
@@ -118,7 +118,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
 
             return (
               <div key={field.id} className={`space-y-1.5 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
-                <label className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{field.label}</label>
+                <label className="text-[0.6875rem] font-semibold tracking-[0.18em] text-slate-400 uppercase ml-1">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea
                     ref={autoResizeTextarea}
@@ -137,7 +137,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
                     placeholder={field.label}
                     value={field.value}
                     onChange={(e) => updateFieldValue(e.target.value)}
-                    className={`w-full h-[76px] px-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
+                    className={`w-full h-[4.75rem] px-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm ${field.id === 'accountNumber' ? 'font-mono' : ''}`}
                   />
                 )}
               </div>

@@ -59,7 +59,7 @@ export function SocialProof() {
   return (
     <section className="border-y border-blue-100 bg-white py-5" data-purpose="trust-badges">
       <div className="px-4 sm:px-6 lg:px-10 2xl:px-14">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-500">
+        <p className="text-center text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-blue-500">
           {copy.headline}
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">

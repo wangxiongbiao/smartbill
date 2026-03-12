@@ -130,7 +130,7 @@ const EmailDialog: React.FC<EmailDialogProps> = ({ invoice, isOpen, onClose, lan
                     <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center transition-colors"><i className="fas fa-times text-lg"></i></button>
                 </div>
 
-                <div className="p-8 space-y-8 min-h-[300px]">
+                <div className="p-8 space-y-8 min-h-[18.75rem]">
                     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-300">
                         {emailSent ? (
                             <div className="bg-emerald-50 rounded-3xl p-8 text-center border border-emerald-100">

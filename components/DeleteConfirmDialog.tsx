@@ -92,7 +92,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             />
 
             {/* Dialog */}
-            <div className="relative w-full max-w-xl overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_28px_60px_-32px_rgba(15,23,42,0.3)] animate-scaleIn">
+            <div className="relative w-full max-w-xl overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_1.75rem_3.75rem_-2rem_rgba(15,23,42,0.3)] animate-scaleIn">
                 <div className="border-b border-slate-100 px-6 py-5 sm:px-7">
                     <div className="flex items-start gap-4">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
@@ -117,7 +117,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         ref={cancelButtonRef}
                         onClick={onClose}
                         disabled={isDeleting}
-                        className={`min-w-[132px] rounded-xl px-5 py-3 text-sm font-semibold transition-colors ${isDeleting
+                        className={`min-w-[8.25rem] rounded-xl px-5 py-3 text-sm font-semibold transition-colors ${isDeleting
                                 ? 'cursor-not-allowed bg-slate-100 text-slate-400'
                                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
@@ -129,7 +129,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         ref={confirmButtonRef}
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className={`min-w-[148px] rounded-xl px-5 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${isDeleting
+                        className={`min-w-[9.25rem] rounded-xl px-5 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${isDeleting
                                 ? 'cursor-not-allowed bg-red-500 text-white'
                                 : 'bg-red-600 text-white hover:bg-red-700'
                             }`}

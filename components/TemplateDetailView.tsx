@@ -139,7 +139,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                         <div className="space-y-3">
                             <button
                                 onClick={onUseTemplate}
-                                className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-[0_1.125rem_2.125rem_-1.25rem_rgba(37,99,235,0.52)] transition-all active:scale-95 flex items-center justify-center gap-3"
                             >
                                 <i className="fas fa-plus"></i>
                                 <span>{t.useTemplate}</span>
@@ -166,7 +166,7 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
 
                 {/* Right Panel - Preview */}
                 <div className="lg:w-3/5">
-                    <div className="min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
+                    <div className="min-h-[28.125rem] sm:min-h-[31.25rem] flex justify-center items-start overflow-x-hidden overflow-y-auto">
                         <ScalableInvoiceContainer>
                             <InvoicePreview
                                 invoice={previewInvoice as any}

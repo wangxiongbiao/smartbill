@@ -77,11 +77,11 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ invoice, isOpen, onClose, lan
                     <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center transition-colors"><i className="fas fa-times text-lg"></i></button>
                 </div>
 
-                <div className="p-8 space-y-8 min-h-[350px]">
+                <div className="p-8 space-y-8 min-h-[21.875rem]">
                     {activeShare ? (
                         <div className="space-y-6 animate-in slide-in-from-left-4 duration-300">
                             <div>
-                                <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">{t.shareLink}</label>
+                                <label className="text-[0.625rem] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">{t.shareLink}</label>
                                 <div className="flex gap-3">
                                     <div className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 flex items-center text-slate-600 font-medium overflow-hidden"><span className="truncate">{shareUrl}</span></div>
                                     <button onClick={() => copyToClipboard(shareUrl)} className={`px-6 py-3 rounded-2xl font-semibold text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 ${copied ? 'bg-emerald-500 shadow-emerald-200' : 'bg-blue-600 shadow-blue-200 hover:bg-blue-700'}`}><i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>{copied ? t.copied : t.copy}</button>
@@ -110,7 +110,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ invoice, isOpen, onClose, lan
                                         <span className="text-slate-700 font-semibold text-sm flex items-center gap-2"><i className="fas fa-file-pdf text-red-400"></i> {t.allowPdfDownload}</span>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input type="checkbox" checked={allowDownload} onChange={e => setAllowDownload(e.target.checked)} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0.125rem] after:left-[0.125rem] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                         </label>
                                     </div>
                                     <div className="flex items-center justify-between">

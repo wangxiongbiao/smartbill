@@ -153,12 +153,12 @@ export function Header() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-14">
         <div className="flex items-center gap-8">
           <Link className="flex items-center gap-3" href={buildLangHref('/', lang)} aria-label={copy.home}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#2563eb] text-white shadow-[0_12px_26px_-16px_rgba(37,99,235,0.55)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#2563eb] text-white shadow-[0_0.75rem_1.625rem_-1rem_rgba(37,99,235,0.55)]">
               <i className="fas fa-file-invoice text-sm"></i>
             </div>
             <div className="leading-none">
               <div className="text-lg font-semibold tracking-tight text-slate-950">SmartBill</div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#60a5fa]">{copy.badge}</div>
+              <div className="text-[0.625rem] font-semibold uppercase tracking-[0.24em] text-[#60a5fa]">{copy.badge}</div>
             </div>
           </Link>
 
@@ -191,14 +191,14 @@ export function Header() {
                     {(profile.name || profile.email || 'U').slice(0, 1).toUpperCase()}
                   </div>
                 )}
-                <span className="hidden max-w-[130px] truncate text-sm font-semibold text-slate-700 sm:block">
+                <span className="hidden max-w-[8.125rem] truncate text-sm font-semibold text-slate-700 sm:block">
                   {profile.name ?? profile.email}
                 </span>
                 <i className="fas fa-chevron-down text-xs text-slate-400"></i>
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_45px_-24px_rgba(37,99,235,0.2)]">
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_1.25rem_2.8125rem_-1.5rem_rgba(37,99,235,0.2)]">
                   <div className="border-b border-slate-100 px-3 py-2">
                     <p className="truncate text-sm font-semibold text-slate-900">{profile.name ?? copy.user}</p>
                     <p className="truncate text-xs text-slate-400">{profile.email}</p>
@@ -237,7 +237,7 @@ export function Header() {
               <button
                 onClick={() => openProtectedRoute('/dashboard')}
                 disabled={isGoogleLoading}
-                className="rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-70 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.5)]"
+                className="rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-70 shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.5)]"
               >
                 {isGoogleLoading ? copy.openingLogin : copy.startFree}
               </button>

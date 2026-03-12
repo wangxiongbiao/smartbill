@@ -63,7 +63,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, isVisible, onClose, durati
 
     return (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-top-4 fade-in duration-300">
-            <div className={`${getColors()} border-2 rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-4 min-w-[320px] max-w-md`}>
+            <div className={`${getColors()} border-2 rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-4 min-w-[20rem] max-w-md`}>
                 <div className={`w-10 h-10 rounded-full ${getColors()} flex items-center justify-center flex-shrink-0`}>
                     <i className={`fas ${getIcon()} ${getIconColor()} text-xl`}></i>
                 </div>

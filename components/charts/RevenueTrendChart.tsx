@@ -70,8 +70,8 @@ export default function RevenueTrendChart({ data, lang, currency }: RevenueTrend
         formatter: (params: Array<{ axisValueLabel: string; value: number }>) => {
           const point = params[0];
           return [
-            `<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);text-align:center;">${point.axisValueLabel}</div>`,
-            `<div style="font-size:12px;font-weight:700;line-height:1.1;margin-top:4px;text-align:center;">${formatCurrency(Number(point.value || 0), currency, lang)}</div>`,
+            `<div style="font-size:0.625rem;font-weight:600;color:rgba(255,255,255,0.7);text-align:center;">${point.axisValueLabel}</div>`,
+            `<div style="font-size:0.75rem;font-weight:700;line-height:1.1;margin-top:0.25rem;text-align:center;">${formatCurrency(Number(point.value || 0), currency, lang)}</div>`,
           ].join('');
         },
       },
@@ -133,5 +133,5 @@ export default function RevenueTrendChart({ data, lang, currency }: RevenueTrend
     id: 'Grafik tren pendapatan',
   };
 
-  return <div ref={containerRef} className="h-[220px] w-full" aria-label={ariaLabelByLang[lang]} />;
+  return <div ref={containerRef} className="h-[13.75rem] w-full" aria-label={ariaLabelByLang[lang]} />;
 }

@@ -85,7 +85,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
             {/* Industries / Use Cases Section [NEW] */}
             <section className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-semibold uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[0.625rem] font-semibold uppercase tracking-widest">
                         <i className="fas fa-briefcase"></i>
                         <span>{copy.industriesBadge}</span>
                     </div>
@@ -108,7 +108,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
 
             {/* Testimonials Section [NEW] */}
             <section className="py-20 relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-50/50 rounded-full blur-3xl -z-10"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[62.5rem] h-[31.25rem] bg-blue-50/50 rounded-full blur-3xl -z-10"></div>
                 <div className="max-w-4xl mx-auto text-center space-y-16">
                     <div className="space-y-4">
                         <div className="flex justify-center gap-1 text-amber-400 text-sm mb-4">
@@ -135,7 +135,7 @@ const SEOContent: React.FC<SEOContentProps> = ({ lang }) => {
                                     </div>
                                     <div>
                                         <div className="text-xs font-semibold text-slate-900">{review.name}</div>
-                                        <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{review.role}</div>
+                                        <div className="text-[0.625rem] font-semibold text-slate-400 uppercase tracking-wider">{review.role}</div>
                                     </div>
                                 </div>
                             </div>

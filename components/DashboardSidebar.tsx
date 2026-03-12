@@ -70,13 +70,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     return (
         <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0 left-0 transition-all duration-300 z-50" data-ui-sidebar>
             {/* Brand */}
-            <div className="h-[72px] px-5 border-b border-slate-100 flex items-center justify-between gap-3">
+            <div className="h-[4.5rem] px-5 border-b border-slate-100 flex items-center justify-between gap-3">
                 <div className="min-w-0 flex items-center gap-3">
-                    <div className="bg-blue-600 w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-[0_10px_22px_-12px_rgba(37,99,235,0.58)]">
-                        <i className="fas fa-file-lines text-[14px]"></i>
+                    <div className="bg-blue-600 w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-[0_0.625rem_1.375rem_-0.75rem_rgba(37,99,235,0.58)]">
+                        <i className="fas fa-file-lines text-[0.875rem]"></i>
                     </div>
                     <div className="flex flex-col select-none min-w-0">
-                        <span className="text-[18px] font-semibold text-slate-900 leading-none tracking-[-0.02em]">
+                        <span className="text-[1.125rem] font-semibold text-slate-900 leading-none tracking-[-0.02em]">
                             SmartBill Pro
                         </span>
                     </div>
@@ -87,7 +87,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     title={copy.returnHome}
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 >
-                    <i className="fas fa-house text-[13px]"></i>
+                    <i className="fas fa-house text-[0.8125rem]"></i>
                 </Link>
             </div>
 
@@ -101,12 +101,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             key={item.key}
                             onClick={() => setView(item.id)}
                             className={`w-full flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-200 group relative font-medium ${isActive
-                                ? 'bg-blue-600 text-white shadow-[0_12px_24px_-16px_rgba(37,99,235,0.56)]'
+                                ? 'bg-blue-600 text-white shadow-[0_0.75rem_1.5rem_-1rem_rgba(37,99,235,0.56)]'
                                 : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                                 }`}
                         >
-                            <i className={`${isActive ? item.activeIcon || item.icon : item.icon} w-5 text-center text-[14px] transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}></i>
-                            <span className="text-[12px] tracking-normal">
+                            <i className={`${isActive ? item.activeIcon || item.icon : item.icon} w-5 text-center text-[0.875rem] transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}></i>
+                            <span className="text-[0.75rem] tracking-normal">
                                 {item.label}
                             </span>
                             {isActive && (
@@ -124,7 +124,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-3">
                         <div className="flex items-center gap-3 px-1">
                             <div className="relative">
-                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-50 to-sky-100 flex items-center justify-center text-blue-700 text-[12px] font-semibold shadow-sm ring-2 ring-white overflow-hidden">
+                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-50 to-sky-100 flex items-center justify-center text-blue-700 text-[0.75rem] font-semibold shadow-sm ring-2 ring-white overflow-hidden">
                                     {user.avatar ? (
                                         <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                     ) : (
@@ -134,8 +134,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 <span className="absolute -right-0.5 -bottom-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold text-slate-800 truncate leading-none">{user.name}</p>
-                                <p className="text-[10px] text-slate-400 truncate font-semibold mt-1 uppercase tracking-[0.12em]">
+                                <p className="text-[0.8125rem] font-semibold text-slate-800 truncate leading-none">{user.name}</p>
+                                <p className="text-[0.625rem] text-slate-400 truncate font-semibold mt-1 uppercase tracking-[0.12em]">
                                     {copy.proMember}
                                 </p>
                             </div>
@@ -143,7 +143,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
                         <button
                             onClick={onLogout}
-                            className="mt-3 w-full h-10 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all text-[11px] font-semibold uppercase tracking-[0.18em]"
+                            className="mt-3 w-full h-10 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all text-[0.6875rem] font-semibold uppercase tracking-[0.18em]"
                         >
                             {copy.logout}
                         </button>

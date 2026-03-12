@@ -8,7 +8,7 @@ const config: Config = {
   theme: {
     extend: {
       screens: {
-        xs: "475px",
+        xs: "29.6875rem",
       },
       colors: {
         background: "var(--background)",

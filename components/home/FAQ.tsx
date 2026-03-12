@@ -156,7 +156,7 @@ export function FAQ() {
     <section id="faq" className="bg-white py-14 md:py-20" data-purpose="faq">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
             <i className="fas fa-circle-question"></i>
             {copy.badge}
           </div>
@@ -165,7 +165,7 @@ export function FAQ() {
         </div>
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <details key={index} className="group rounded-[24px] border border-blue-100 bg-white p-0 shadow-sm transition-colors hover:border-blue-200">
+            <details key={index} className="group rounded-[1.5rem] border border-blue-100 bg-white p-0 shadow-sm transition-colors hover:border-blue-200">
               <summary className="flex cursor-pointer list-none items-center justify-between px-6 py-5">
                 <span className="pr-4 text-left text-base font-semibold text-slate-900">{faq.question}</span>
                 <span className="ml-4 shrink-0 text-blue-400 transition-transform group-open:rotate-45">

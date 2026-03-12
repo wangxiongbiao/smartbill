@@ -96,8 +96,8 @@ export default function BillingProfileNameInput(props: BillingProfileNameInputPr
       />
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_50px_-28px_rgba(15,23,42,0.45)]">
-          <div className="border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1.5rem_3.125rem_-1.75rem_rgba(15,23,42,0.45)]">
+          <div className="border-b border-slate-100 px-4 py-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
             {copy.title}
           </div>
 
@@ -121,7 +121,7 @@ export default function BillingProfileNameInput(props: BillingProfileNameInputPr
                   <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-semibold text-slate-900">{profile.name || profile.email || profile.phone || profile.address}</span>
                     {kind === 'sender' && profile.isDefault && (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-emerald-700">
                         {copy.defaultBadge}
                       </span>
                     )}

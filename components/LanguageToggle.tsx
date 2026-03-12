@@ -34,14 +34,14 @@ export default function LanguageToggle({ lang, onChange, ariaLabel }: LanguageTo
         aria-label={ariaLabel}
         className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
       >
-        <i className="fas fa-globe text-[11px]"></i>
+        <i className="fas fa-globe text-[0.6875rem]"></i>
         <span className="sm:hidden">{currentLanguage.shortLabel}</span>
         <span className="hidden sm:inline">{currentLanguage.label}</span>
-        <i className={`fas fa-chevron-down text-[10px] transition-transform ${open ? 'rotate-180' : ''}`}></i>
+        <i className={`fas fa-chevron-down text-[0.625rem] transition-transform ${open ? 'rotate-180' : ''}`}></i>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-[0_18px_38px_-24px_rgba(15,23,42,0.2)]">
+        <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-[0_1.125rem_2.375rem_-1.5rem_rgba(15,23,42,0.2)]">
           {LANGUAGE_OPTIONS.map((option) => (
             <button
               key={option.code}
@@ -57,7 +57,7 @@ export default function LanguageToggle({ lang, onChange, ariaLabel }: LanguageTo
               }`}
             >
               <span>{option.label}</span>
-              {lang === option.code && <i className="fas fa-check text-[11px]"></i>}
+              {lang === option.code && <i className="fas fa-check text-[0.6875rem]"></i>}
             </button>
           ))}
         </div>

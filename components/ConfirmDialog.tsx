@@ -247,7 +247,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         @keyframes scaleIn {
           from {
             opacity: 0;
-            transform: scale(0.9) translateY(20px);
+            transform: scale(0.9) translateY(1.25rem);
           }
           to {
             opacity: 1;
@@ -262,7 +262,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           }
           to {
             opacity: 0;
-            transform: scale(0.9) translateY(20px);
+            transform: scale(0.9) translateY(1.25rem);
           }
         }
 
@@ -285,10 +285,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             transform: translateX(0);
           }
           10%, 30%, 50%, 70%, 90% {
-            transform: translateX(-5px);
+            transform: translateX(-0.3125rem);
           }
           20%, 40%, 60%, 80% {
-            transform: translateX(5px);
+            transform: translateX(0.3125rem);
           }
         }
 

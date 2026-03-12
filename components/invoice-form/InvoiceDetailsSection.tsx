@@ -66,11 +66,11 @@ export default function InvoiceDetailsSection({ invoice, lang, t, onChange, date
   const copy = copyByLang[lang];
 
   return (
-    <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-6">
+    <div className="bg-white rounded-[1.5rem] border border-slate-200 p-6 shadow-sm space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-3 md:col-span-2">
           <label className="text-xs font-semibold text-slate-500 tracking-widest px-1">{copy.documentType}</label>
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl h-[52px]">
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl h-[3.25rem]">
             {(['invoice', 'receipt'] as const).map((type) => (
               <button
                 key={type}
@@ -96,7 +96,7 @@ export default function InvoiceDetailsSection({ invoice, lang, t, onChange, date
               type="text"
               value={invoice.invoiceNumber}
               onChange={(e) => onChange({ invoiceNumber: e.target.value })}
-              className={`w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[52px] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all font-mono font-medium ${invoice.visibility?.invoiceNumber === false ? 'opacity-50' : ''}`}
+              className={`w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[3.25rem] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all font-mono font-medium ${invoice.visibility?.invoiceNumber === false ? 'opacity-50' : ''}`}
             />
             <button
               type="button"
@@ -124,7 +124,7 @@ export default function InvoiceDetailsSection({ invoice, lang, t, onChange, date
           <button
             type="button"
             onClick={() => dateInputRef.current?.showPicker()}
-            className="flex items-center gap-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[48px] text-sm font-medium hover:border-blue-400 hover:shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white"
+            className="flex items-center gap-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[3rem] text-sm font-medium hover:border-blue-400 hover:shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white"
           >
             <i className="fas fa-calendar-alt text-slate-400"></i>
             <span>{invoice.date}</span>
@@ -145,7 +145,7 @@ export default function InvoiceDetailsSection({ invoice, lang, t, onChange, date
           <button
             type="button"
             onClick={() => dueDateInputRef.current?.showPicker()}
-            className="flex items-center gap-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[48px] text-sm font-medium hover:border-blue-400 hover:shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white"
+            className="flex items-center gap-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[3rem] text-sm font-medium hover:border-blue-400 hover:shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white"
           >
             <i className="fas fa-calendar-alt text-slate-400"></i>
             <span>{invoice.dueDate}</span>
@@ -155,7 +155,7 @@ export default function InvoiceDetailsSection({ invoice, lang, t, onChange, date
 
         <div className="space-y-3">
           <label className="text-xs font-semibold text-slate-500 tracking-widest px-1">{t.currency}</label>
-          <select value={invoice.currency} onChange={(e) => onChange({ currency: e.target.value })} className="w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[48px] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all">
+          <select value={invoice.currency} onChange={(e) => onChange({ currency: e.target.value })} className="w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl h-[3rem] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all">
             <optgroup label={copy.currencies.asia}><option value="CNY">🇨🇳 CNY ¥ China</option><option value="JPY">🇯🇵 JPY ¥ Japan</option><option value="HKD">🇭🇰 HKD $ Hong Kong</option><option value="TWD">🇹🇼 TWD $ Taiwan</option><option value="KRW">🇰🇷 KRW ₩ Korea</option></optgroup>
             <optgroup label={copy.currencies.sea}><option value="SGD">🇸🇬 SGD $ Singapore</option><option value="MYR">🇲🇾 MYR RM Malaysia</option><option value="THB">🇹🇭 THB ฿ Thailand</option><option value="PHP">🇵🇭 PHP ₱ Philippines</option><option value="VND">🇻🇳 VND ₫ Vietnam</option><option value="IDR">🇮🇩 IDR Rp Indonesia</option></optgroup>
             <optgroup label={copy.currencies.na}><option value="USD">🇺🇸 USD $ United States</option></optgroup>

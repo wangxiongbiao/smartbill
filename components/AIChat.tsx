@@ -126,14 +126,14 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         <i className="fas fa-sparkles text-yellow-300 text-xs"></i>
                     </div>
                     <div>
-                        <h3 className="font-semibold text-[14px]">{t.aiHeaderTitle}</h3>
-                        <p className="text-[12px] text-white/60">{t.aiHeaderSub}</p>
+                        <h3 className="font-semibold text-[0.875rem]">{t.aiHeaderTitle}</h3>
+                        <p className="text-[0.75rem] text-white/60">{t.aiHeaderSub}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                        <span className="text-[9px] text-white/60">{t.aiStatusOnline}</span>
+                        <span className="text-[0.5625rem] text-white/60">{t.aiStatusOnline}</span>
                     </div>
                     {onClose && (
                         <button
@@ -188,21 +188,21 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         onKeyDown={handleKeyPress}
                         placeholder={t.aiPlaceholderInput}
                         rows={1}
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 text-slate-700 placeholder:text-slate-400 resize-none max-h-[100px] scrollbar-hide"
-                        style={{ minHeight: '36px' }}
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 text-slate-700 placeholder:text-slate-400 resize-none max-h-[6.25rem] scrollbar-hide"
+                        style={{ minHeight: '2.25rem' }}
                     />
                     <button
                         onClick={handleSend}
                         disabled={!input.trim() || isTyping}
                         className={`w-8 h-8 mb-0.5 rounded-md flex items-center justify-center transition-all shrink-0 ${input.trim()
-                            ? 'bg-blue-600 text-white shadow-[0_12px_24px_-18px_rgba(37,99,235,0.52)] hover:bg-blue-700 active:scale-95'
+                            ? 'bg-blue-600 text-white shadow-[0_0.75rem_1.5rem_-1.125rem_rgba(37,99,235,0.52)] hover:bg-blue-700 active:scale-95'
                             : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                             }`}
                     >
                         <i className="fas fa-paper-plane text-xs"></i>
                     </button>
                 </div>
-                {/* <p className="text-[9px] text-slate-400 text-center mt-1">Powered by DeepSeek V3</p> */}
+                {/* <p className="text-[0.5625rem] text-slate-400 text-center mt-1">Powered by DeepSeek V3</p> */}
             </div>
         </div>
     );

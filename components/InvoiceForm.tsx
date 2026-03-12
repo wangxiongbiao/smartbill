@@ -295,7 +295,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, l
           onApplyProfile={handleApplyClientProfile}
         />
       </div>
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-4 sm:p-6 space-y-6">
+      <div className="bg-white rounded-[1.5rem] shadow-sm border border-slate-200 p-4 sm:p-6 space-y-6">
         <ItemsSection invoice={invoice} t={t} lang={lang} columns={columns} sortedColumns={sortedColumns} sensors={sensors} focusItemId={focusItemId} showColumnConfig={showColumnConfig} setShowColumnConfig={setShowColumnConfig} onChange={onChange} addItem={addItem} removeItem={removeItem} handleDragEnd={handleDragEnd} renderCell={renderCell} />
         <InvoiceSummarySection invoice={invoice} lang={lang} t={t} onChange={onChange} />
       </div>

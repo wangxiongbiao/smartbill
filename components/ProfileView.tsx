@@ -357,9 +357,9 @@ function StatCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200 bg-white/75 px-5 py-4 shadow-[0_18px_35px_-28px_rgba(15,23,42,0.5)]">
-      <div className={`text-[28px] font-semibold tracking-[-0.04em] ${accent}`}>{value}</div>
-      <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</div>
+    <div className="rounded-[1.5rem] border border-slate-200 bg-white/75 px-5 py-4 shadow-[0_1.125rem_2.1875rem_-1.75rem_rgba(15,23,42,0.5)]">
+      <div className={`text-[1.75rem] font-semibold tracking-[-0.04em] ${accent}`}>{value}</div>
+      <div className="mt-1 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</div>
     </div>
   );
 }
@@ -375,8 +375,8 @@ function SettingField({
 }) {
   return (
     <div className={wide ? 'md:col-span-2' : ''}>
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</div>
-      <div className="min-h-14 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[15px] font-semibold text-slate-700">
+      <div className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</div>
+      <div className="min-h-14 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[0.9375rem] font-semibold text-slate-700">
         {value}
       </div>
     </div>
@@ -395,16 +395,16 @@ function IntegrationCard({
   tone: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.45)]">
+    <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_1.25rem_2.5rem_-2.125rem_rgba(15,23,42,0.45)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-700">
-          <i className={`${icon} text-[20px]`}></i>
+          <i className={`${icon} text-[1.25rem]`}></i>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${tone}`}>
+        <span className={`rounded-full px-2.5 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.16em] ${tone}`}>
           {status}
         </span>
       </div>
-      <div className="mt-5 text-[17px] font-semibold tracking-[-0.02em] text-slate-900">{name}</div>
+      <div className="mt-5 text-[1.0625rem] font-semibold tracking-[-0.02em] text-slate-900">{name}</div>
     </div>
   );
 }
@@ -506,24 +506,24 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1480px] px-4 py-6 md:px-6 lg:px-8 xl:px-10">
+    <div className="mx-auto w-full max-w-[92.5rem] px-4 py-6 md:px-6 lg:px-8 xl:px-10">
       <div className="space-y-8">
-        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] shadow-[0_28px_60px_-42px_rgba(15,23,42,0.45)]">
-          <div className="grid gap-0 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.95fr)]">
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] shadow-[0_1.75rem_3.75rem_-2.625rem_rgba(15,23,42,0.45)]">
+          <div className="grid gap-0 xl:grid-cols-[minmax(0,1.25fr)_minmax(22.5rem,0.95fr)]">
             <div className="p-6 md:p-8 xl:p-10">
               <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-600">{copy.pageTitle}</div>
+                  <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-blue-600">{copy.pageTitle}</div>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{copy.pageDescription}</p>
                 </div>
-                <span className="rounded-full bg-blue-600 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_12px_22px_-16px_rgba(37,99,235,0.58)]">
+                <span className="rounded-full bg-blue-600 px-3 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0.75rem_1.375rem_-1rem_rgba(37,99,235,0.58)]">
                   PRO
                 </span>
               </div>
 
               <div className="flex flex-col gap-5 md:flex-row md:items-center">
                 <div className="relative shrink-0">
-                  <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-50 via-sky-50 to-blue-200 text-[38px] font-semibold text-slate-800 shadow-[0_20px_45px_-28px_rgba(15,23,42,0.45)] ring-4 ring-white">
+                  <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-50 via-sky-50 to-blue-200 text-[2.375rem] font-semibold text-slate-800 shadow-[0_1.25rem_2.8125rem_-1.75rem_rgba(15,23,42,0.45)] ring-4 ring-white">
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
                     ) : (
@@ -540,7 +540,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         type="text"
                         value={editName}
                         onChange={(event) => setEditName(event.target.value)}
-                        className="h-14 w-full rounded-2xl border border-blue-200 bg-white px-4 text-[30px] font-semibold tracking-[-0.04em] text-slate-900 outline-none ring-0 focus:border-blue-500"
+                        className="h-14 w-full rounded-2xl border border-blue-200 bg-white px-4 text-[1.875rem] font-semibold tracking-[-0.04em] text-slate-900 outline-none ring-0 focus:border-blue-500"
                         autoFocus
                       />
                       <div className="flex flex-wrap gap-2">
@@ -565,10 +565,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   ) : (
                     <>
                       <div className="flex flex-wrap items-center gap-3">
-                        <h1 className="min-w-0 text-[38px] font-semibold tracking-[-0.05em] text-slate-900">{user.name}</h1>
+                        <h1 className="min-w-0 text-[2.375rem] font-semibold tracking-[-0.05em] text-slate-900">{user.name}</h1>
                         <button
                           onClick={() => setIsEditing(true)}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
                         >
                           {copy.editName}
                         </button>
@@ -579,10 +579,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         <span>{copy.memberSince} {formatMonth(user.profile?.created_at, lang)}</span>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                           {copy.accountOwner}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {user.provider}
                         </span>
                       </div>
@@ -603,15 +603,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </section>
 
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_minmax(360px,0.88fr)]">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-40px_rgba(15,23,42,0.4)] md:p-8">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_minmax(22.5rem,0.88fr)]">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_1.75rem_3.75rem_-2.5rem_rgba(15,23,42,0.4)] md:p-8">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <div className="text-[12px] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.businessTitle}</div>
+                <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.businessTitle}</div>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{copy.businessSubtitle}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                   {copy.defaultSenderBadge}
                 </span>
                 {isBusinessEditing ? (
@@ -619,7 +619,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     <button
                       onClick={handleSaveBusinessProfile}
                       disabled={isBusinessSaving || !businessDraft.name.trim()}
-                      className="rounded-full bg-blue-600 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-full bg-blue-600 px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusinessSaving ? copy.saving : copy.saveButton}
                     </button>
@@ -633,7 +633,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         });
                         setIsBusinessEditing(false);
                       }}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
                     >
                       {copy.cancelButton}
                     </button>
@@ -649,7 +649,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       });
                       setIsBusinessEditing(true);
                     }}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-all hover:border-blue-200 hover:text-blue-700"
                   >
                     {copy.editBusiness}
                   </button>
@@ -660,40 +660,40 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             {isBusinessEditing ? (
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.companyName}</div>
+                  <div className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.companyName}</div>
                   <input
                     value={businessDraft.name}
                     onChange={(event) => setBusinessDraft((prev) => ({ ...prev, name: event.target.value }))}
                     placeholder={copy.companyName}
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] font-semibold text-slate-700 outline-none focus:border-blue-500"
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[0.9375rem] font-semibold text-slate-700 outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.billingEmail}</div>
+                  <div className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.billingEmail}</div>
                   <input
                     value={businessDraft.email}
                     onChange={(event) => setBusinessDraft((prev) => ({ ...prev, email: event.target.value }))}
                     placeholder={copy.billingEmail}
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] font-semibold text-slate-700 outline-none focus:border-blue-500"
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[0.9375rem] font-semibold text-slate-700 outline-none focus:border-blue-500"
                   />
                 </div>
                 <SettingField label={copy.website} value={getWebsiteFromEmail(businessDraft.email) || copy.notConfigured} />
                 <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.phone}</div>
+                  <div className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.phone}</div>
                   <input
                     value={businessDraft.phone}
                     onChange={(event) => setBusinessDraft((prev) => ({ ...prev, phone: event.target.value }))}
                     placeholder={copy.phone}
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] font-semibold text-slate-700 outline-none focus:border-blue-500"
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[0.9375rem] font-semibold text-slate-700 outline-none focus:border-blue-500"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.address}</div>
+                  <div className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.address}</div>
                   <textarea
                     value={businessDraft.address}
                     onChange={(event) => setBusinessDraft((prev) => ({ ...prev, address: event.target.value }))}
                     placeholder={copy.address}
-                    className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[15px] font-semibold text-slate-700 outline-none resize-none focus:border-blue-500"
+                    className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[0.9375rem] font-semibold text-slate-700 outline-none resize-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -709,13 +709,13 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </section>
 
           <div className="space-y-8">
-            <section className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#f8fbff_0%,#eaf3ff_58%,#dbeafe_100%)] p-6 text-slate-900 shadow-[0_30px_70px_-35px_rgba(37,99,235,0.18)] md:p-8">
+            <section className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#f8fbff_0%,#eaf3ff_58%,#dbeafe_100%)] p-6 text-slate-900 shadow-[0_1.875rem_4.375rem_-2.1875rem_rgba(37,99,235,0.18)] md:p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-600">{copy.subscriptionEyebrow}</div>
-                  <h2 className="mt-3 text-[34px] font-semibold tracking-[-0.05em]">{copy.subscriptionTitle}</h2>
+                  <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-600">{copy.subscriptionEyebrow}</div>
+                  <h2 className="mt-3 text-[2.125rem] font-semibold tracking-[-0.05em]">{copy.subscriptionTitle}</h2>
                 </div>
-                <span className="rounded-full bg-white/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
+                <span className="rounded-full bg-white/70 px-3 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
                   {copy.activeStatus}
                 </span>
               </div>
@@ -742,9 +742,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               </button>
             </section>
 
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-40px_rgba(15,23,42,0.4)] md:p-8">
+            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_1.75rem_3.75rem_-2.5rem_rgba(15,23,42,0.4)] md:p-8">
               <div>
-                <div className="text-[12px] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.integrationsTitle}</div>
+                <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.integrationsTitle}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{copy.integrationsSubtitle}</p>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -757,11 +757,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-40px_rgba(15,23,42,0.4)] md:p-8">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_23.75rem]">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_1.75rem_3.75rem_-2.5rem_rgba(15,23,42,0.4)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
-                <div className="text-[12px] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.teamTitle}</div>
+                <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-slate-400">{copy.teamTitle}</div>
                 <p className="mt-3 text-base font-semibold tracking-[-0.02em] text-slate-900">{copy.teamSubtitle}</p>
               </div>
               <button
@@ -773,8 +773,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-red-100 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(254,242,242,0.75))] p-6 shadow-[0_28px_60px_-40px_rgba(248,113,113,0.35)] md:p-8">
-            <div className="text-[12px] font-semibold uppercase tracking-[0.22em] text-red-400">{copy.securityTitle}</div>
+          <section className="rounded-[2rem] border border-red-100 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(254,242,242,0.75))] p-6 shadow-[0_1.75rem_3.75rem_-2.5rem_rgba(248,113,113,0.35)] md:p-8">
+            <div className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-red-400">{copy.securityTitle}</div>
             <p className="mt-3 text-sm leading-6 text-slate-500">{copy.securitySubtitle}</p>
             <button
               onClick={onLogout}

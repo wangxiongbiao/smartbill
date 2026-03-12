@@ -49,8 +49,8 @@ export function SeoNarrative() {
   return (
     <section className="bg-white py-14 md:py-20" data-purpose="seo-narrative">
       <div className="px-4 sm:px-6 lg:px-10 2xl:px-14">
-        <div className="rounded-[32px] border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-8 md:p-12 xl:p-14 shadow-sm">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+        <div className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-8 md:p-12 xl:p-14 shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
             <i className="fas fa-magnifying-glass-chart"></i>
             {copy.badge}
           </div>

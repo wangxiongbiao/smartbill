@@ -85,7 +85,7 @@ const ColumnConfigurator: React.FC<ColumnConfiguratorProps> = ({ columns, onChan
                 <h3 className="font-semibold text-slate-700">{t.customizeColumns}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><i className="fas fa-times"></i></button>
             </div>
-            <div className="max-h-[600px] overflow-y-auto mb-4 pr-1">
+            <div className="max-h-[37.5rem] overflow-y-auto mb-4 pr-1">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={columns.map(col => col.id)} strategy={verticalListSortingStrategy}>
                         {columns.map((col) => (<SortableColumnItem key={col.id} column={col} onToggleVisibility={toggleVisibility} onRename={renameColumn} onDelete={deleteColumn} t={t} />))}

@@ -128,10 +128,10 @@ function TemplatePreviewCard({
       }}
       className="group outline-none"
     >
-      <div className="relative overflow-hidden rounded-[28px] bg-slate-100">
-        <div className="overflow-hidden rounded-[28px]">
+      <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-100">
+        <div className="overflow-hidden rounded-[1.75rem]">
           <ScalableInvoiceContainer baseWidth={794} className="pointer-events-none select-none">
-            <div className="w-[794px]">
+            <div className="w-[49.625rem]">
               <InvoicePreview
                 invoice={previewInvoice}
                 template={previewInvoice.template || 'minimalist'}
@@ -145,7 +145,7 @@ function TemplatePreviewCard({
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.26)_100%)] opacity-0 transition-all duration-250 group-hover:opacity-100" />
 
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 opacity-0 transition-all duration-250 group-hover:opacity-100">
-          <div className="pointer-events-auto flex w-full max-w-[320px] translate-y-2 flex-col gap-3 transition-transform duration-250 group-hover:translate-y-0">
+          <div className="pointer-events-auto flex w-full max-w-[20rem] translate-y-2 flex-col gap-3 transition-transform duration-250 group-hover:translate-y-0">
             <button
               type="button"
               onClick={(event) => {
@@ -153,9 +153,9 @@ function TemplatePreviewCard({
                 onUse();
               }}
               disabled={using}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-slate-900 shadow-[0_20px_45px_-24px_rgba(15,23,42,0.55)] transition-all hover:scale-[1.01] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-slate-900 shadow-[0_1.25rem_2.8125rem_-1.5rem_rgba(15,23,42,0.55)] transition-all hover:scale-[1.01] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {using ? <i className="fas fa-spinner animate-spin text-[12px]"></i> : <i className="fas fa-plus text-[12px]"></i>}
+              {using ? <i className="fas fa-spinner animate-spin text-[0.75rem]"></i> : <i className="fas fa-plus text-[0.75rem]"></i>}
               <span>{useLabel}</span>
             </button>
 
@@ -166,9 +166,9 @@ function TemplatePreviewCard({
                   event.stopPropagation();
                   onOpen();
                 }}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900/78 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(15,23,42,0.6)] backdrop-blur-sm transition-all hover:bg-slate-900/88"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900/78 text-sm font-semibold text-white shadow-[0_1.125rem_2.5rem_-1.625rem_rgba(15,23,42,0.6)] backdrop-blur-sm transition-all hover:bg-slate-900/88"
               >
-                <i className="fas fa-eye text-[11px]"></i>
+                <i className="fas fa-eye text-[0.6875rem]"></i>
                 <span>{viewLabel}</span>
               </button>
               <button
@@ -178,10 +178,10 @@ function TemplatePreviewCard({
                   onDelete();
                 }}
                 disabled={deleting}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600/92 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(225,29,72,0.45)] backdrop-blur-sm transition-all hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600/92 text-sm font-semibold text-white shadow-[0_1.125rem_2.5rem_-1.625rem_rgba(225,29,72,0.45)] backdrop-blur-sm transition-all hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
                 title={deleteLabel}
               >
-                {deleting ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <i className="fas fa-trash text-[11px]"></i>}
+                {deleting ? <i className="fas fa-spinner animate-spin text-[0.6875rem]"></i> : <i className="fas fa-trash text-[0.6875rem]"></i>}
                 <span>{deleteLabel}</span>
               </button>
             </div>
@@ -195,7 +195,7 @@ function TemplatePreviewCard({
           <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" />
         </div>
         <div className="min-w-0">
-          <div className="truncate text-[15px] font-semibold tracking-tight text-slate-900">{template.name}</div>
+          <div className="truncate text-[0.9375rem] font-semibold tracking-tight text-slate-900">{template.name}</div>
           <div className="truncate text-sm font-medium text-slate-400">Template by {creatorName}</div>
         </div>
       </div>
@@ -380,7 +380,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
         <button
           type="button"
           onClick={onNewDoc}
-          className="mt-10 flex items-center gap-3 rounded-2xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-[0_18px_34px_-20px_rgba(37,99,235,0.52)] transition-all hover:bg-blue-700 active:scale-95"
+          className="mt-10 flex items-center gap-3 rounded-2xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-[0_1.125rem_2.125rem_-1.25rem_rgba(37,99,235,0.52)] transition-all hover:bg-blue-700 active:scale-95"
         >
           <i className="fas fa-plus"></i>
           <span>{t.newInvoice}</span>
@@ -392,7 +392,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   return (
     <>
       <div className="px-6 py-8 lg:px-8">
-        <div className="mx-auto max-w-[1520px]">
+        <div className="mx-auto max-w-[95rem]">
           <div className="mt-2 flex justify-center overflow-x-auto pb-2">
             <div className="inline-flex items-center gap-9 border-b border-slate-200">
               {TEMPLATE_CATEGORIES.map((category) => {
@@ -406,7 +406,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
                       setActiveCategory(category.key);
                       setCurrentPage(1);
                     }}
-                    className={`whitespace-nowrap border-b-2 pb-4 text-[15px] font-semibold transition-colors ${isActive
+                    className={`whitespace-nowrap border-b-2 pb-4 text-[0.9375rem] font-semibold transition-colors ${isActive
                       ? 'border-blue-600 text-slate-900'
                       : 'border-transparent text-slate-400 hover:text-slate-700'
                       }`}
@@ -419,7 +419,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
           </div>
 
           {currentTemplates.length === 0 ? (
-            <div className="mt-12 rounded-[28px] border border-dashed border-slate-300 bg-white px-8 py-20 text-center">
+            <div className="mt-12 rounded-[1.75rem] border border-dashed border-slate-300 bg-white px-8 py-20 text-center">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
                 <i className="fas fa-layer-group"></i>
               </div>
@@ -457,7 +457,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
               >
                 {copy.prev}
               </button>
-              <span className="min-w-[60px] text-center text-sm font-semibold text-slate-500">
+              <span className="min-w-[3.75rem] text-center text-sm font-semibold text-slate-500">
                 {page} / {totalPages}
               </span>
               <button

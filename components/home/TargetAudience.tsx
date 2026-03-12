@@ -135,7 +135,7 @@ export function TargetAudience() {
 
         <div className="mt-10 grid gap-6 xl:grid-cols-3">
           {audience.map((item) => (
-            <div key={item.title} className="rounded-[28px] border border-blue-100 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
+            <div key={item.title} className="rounded-[1.75rem] border border-blue-100 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 shadow-sm">
                 <i className={`fas ${item.icon}`}></i>
               </div>

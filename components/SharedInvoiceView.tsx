@@ -20,7 +20,7 @@ const SharedInvoiceView = React.forwardRef(({ data, lang }: SharedInvoiceViewPro
     const t = translations[lang] || translations['en'];
 
     return (
-        <div ref={ref} className="bg-white shadow-xl rounded-none sm:rounded-[2.5rem] overflow-hidden print:shadow-none print:rounded-none min-h-[800px] relative">
+        <div ref={ref} className="bg-white shadow-xl rounded-none sm:rounded-[2.5rem] overflow-hidden print:shadow-none print:rounded-none min-h-[50rem] relative">
             {/* Scalable Container to handle mobile viewports */}
             <ScalableInvoiceContainer>
                 {/* Reuse the exact same preview component for 1:1 match */}

@@ -165,30 +165,30 @@ const AboutView: React.FC<AboutViewProps> = ({ lang, onBack, onCreateInvoice }) 
         <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50/50 skew-x-[-15deg] translate-x-1/4 -z-10"></div>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 space-y-8 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white rounded-full text-[10px] font-semibold uppercase tracking-widest shadow-xl shadow-blue-200"><span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>{copy.heroBadge}</div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white rounded-full text-[0.625rem] font-semibold uppercase tracking-widest shadow-xl shadow-blue-200"><span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>{copy.heroBadge}</div>
             <h1 className="text-5xl md:text-8xl font-semibold text-slate-900 leading-[0.85] tracking-tighter uppercase">SmartBill</h1>
             <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0">{copy.heroDescription}</p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8"><div className="flex flex-col"><span className="text-4xl font-semibold text-slate-900">1.2M+</span><span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{copy.invoicesProcessed}</span></div><div className="flex flex-col"><span className="text-4xl font-semibold text-slate-900">150+</span><span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{copy.countriesSupported}</span></div></div>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-8"><div className="flex flex-col"><span className="text-4xl font-semibold text-slate-900">1.2M+</span><span className="text-[0.625rem] font-semibold text-slate-400 uppercase tracking-widest">{copy.invoicesProcessed}</span></div><div className="flex flex-col"><span className="text-4xl font-semibold text-slate-900">150+</span><span className="text-[0.625rem] font-semibold text-slate-400 uppercase tracking-widest">{copy.countriesSupported}</span></div></div>
           </div>
 
           <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
-            <div className="h-64 sm:h-[480px] rounded-[2.5rem] overflow-hidden shadow-2xl relative group sm:col-span-1 bg-slate-100">
+            <div className="h-64 sm:h-[30rem] rounded-[2.5rem] overflow-hidden shadow-2xl relative group sm:col-span-1 bg-slate-100">
               {!loadedImages[0] && <div className="absolute inset-0 bg-slate-200 animate-pulse"></div>}
               <img src={marketInsights[0].image} onLoad={() => handleImageLoad(0)} onError={handleImageError} className={`w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${loadedImages[0] ? 'opacity-100' : 'opacity-0'}`} alt={marketInsights[0].title} />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-              <div className="absolute bottom-8 left-8 text-white"><p className="text-[10px] font-semibold uppercase tracking-widest opacity-70 mb-1">{marketInsights[0].title}</p><h4 className="text-xl font-semibold">{marketInsights[0].focus}</h4></div>
+              <div className="absolute bottom-8 left-8 text-white"><p className="text-[0.625rem] font-semibold uppercase tracking-widest opacity-70 mb-1">{marketInsights[0].title}</p><h4 className="text-xl font-semibold">{marketInsights[0].focus}</h4></div>
             </div>
-            <div className="grid grid-rows-2 gap-4 h-64 sm:h-[480px]">
+            <div className="grid grid-rows-2 gap-4 h-64 sm:h-[30rem]">
               {[marketInsights[1], marketInsights[2]].map((market, idx) => (
                 <div key={market.title} className="rounded-[2.2rem] overflow-hidden shadow-xl relative group bg-slate-100">
                   {!loadedImages[idx + 1] && <div className="absolute inset-0 bg-slate-200 animate-pulse"></div>}
                   <img src={market.image} onLoad={() => handleImageLoad(idx + 1)} onError={handleImageError} className={`w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${loadedImages[idx + 1] ? 'opacity-100' : 'opacity-0'}`} alt={market.title} />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 text-white"><p className="text-[10px] font-semibold uppercase tracking-widest opacity-70 mb-1">{market.title}</p><h4 className="text-base font-semibold">{market.focus}</h4></div>
+                  <div className="absolute bottom-6 left-6 text-white"><p className="text-[0.625rem] font-semibold uppercase tracking-widest opacity-70 mb-1">{market.title}</p><h4 className="text-base font-semibold">{market.focus}</h4></div>
                 </div>
               ))}
             </div>
-            <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 z-20 hidden md:flex items-center gap-3"><div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100"><i className="fas fa-users-cog"></i></div><div className="flex flex-col"><span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{copy.builtFor}</span><span className="text-xs font-semibold text-slate-900">{copy.collaboration}</span></div></div>
+            <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 z-20 hidden md:flex items-center gap-3"><div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100"><i className="fas fa-users-cog"></i></div><div className="flex flex-col"><span className="text-[0.625rem] font-semibold uppercase tracking-widest text-slate-400">{copy.builtFor}</span><span className="text-xs font-semibold text-slate-900">{copy.collaboration}</span></div></div>
           </div>
         </div>
       </section>

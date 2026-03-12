@@ -138,12 +138,12 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1.1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563eb] text-white shadow-[0_12px_28px_-18px_rgba(37,99,235,0.52)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563eb] text-white shadow-[0_0.75rem_1.75rem_-1.125rem_rgba(37,99,235,0.52)]">
                 <i className="fas fa-file-invoice"></i>
               </div>
               <div>
                 <div className="text-xl font-semibold tracking-tight">SmartBill</div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#60a5fa]">{copy.badge}</div>
+                <div className="text-[0.625rem] font-semibold uppercase tracking-[0.22em] text-[#60a5fa]">{copy.badge}</div>
               </div>
             </div>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-600">
@@ -185,7 +185,7 @@ export function Footer() {
 
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#60a5fa]">{copy.contact}</h4>
-            <div className="mt-5 rounded-[24px] border border-[#dbeafe] bg-white p-5 text-sm text-slate-600 shadow-sm">
+            <div className="mt-5 rounded-[1.5rem] border border-[#dbeafe] bg-white p-5 text-sm text-slate-600 shadow-sm">
               <div className="flex items-start gap-3">
                 <i className="fas fa-envelope mt-1 text-[#60a5fa]"></i>
                 <div>

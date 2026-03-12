@@ -25,14 +25,14 @@ export function getHeaderBreadcrumbs({
 
   if (activeView === 'records') {
     crumbs.push(
-      <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
+      <i key="sep1" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <span key="records" className="text-slate-800 font-bold tracking-widest text-xs">{t.breadcrumbRecords}</span>
     );
   } else if (activeView === 'editor' && invoice) {
     crumbs.push(
-      <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
+      <i key="sep1" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <span key="records" className="text-slate-400 font-bold tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>{t.breadcrumbRecords}</span>,
-      <i key="sep2" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
+      <i key="sep2" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <div key="current" className="flex items-center gap-2">
         <span className="text-slate-900 font-bold text-sm">{t.editing}: {invoice.invoiceNumber}</span>
         <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
@@ -40,12 +40,12 @@ export function getHeaderBreadcrumbs({
     );
   } else if (activeView === 'profile') {
     crumbs.push(
-      <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
+      <i key="sep1" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <span key="profile" className="text-slate-900 font-black tracking-widest text-xs">{t.breadcrumbProfile}</span>
     );
   } else if (activeView === 'templates' || activeView === 'template-detail') {
     crumbs.push(
-      <i key="sep1" className="fas fa-chevron-right text-[10px] text-slate-300"></i>,
+      <i key="sep1" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <span key="templates" className="text-slate-900 font-black tracking-widest text-xs">{t.breadcrumbTemplates}</span>
     );
   }

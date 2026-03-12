@@ -203,7 +203,7 @@ export function Features() {
       <div className="space-y-20 px-4 sm:px-6 lg:px-10 2xl:px-14">
         <div className="grid items-center gap-12 xl:grid-cols-[1fr_0.96fr]">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
               <i className="fas fa-credit-card"></i>
               {copy.badge1}
             </div>
@@ -225,18 +225,18 @@ export function Features() {
             </ul>
           </div>
 
-          <div className="relative rounded-[28px] border border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-5 shadow-sm">
-            <div className="overflow-hidden rounded-[24px] border border-blue-100 bg-white">
+          <div className="relative rounded-[1.75rem] border border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-5 shadow-sm">
+            <div className="overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{copy.paymentBlock}</div>
+                  <div className="text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-slate-400">{copy.paymentBlock}</div>
                   <div className="mt-1 text-lg font-semibold text-slate-950">{copy.paymentTitle}</div>
                 </div>
                 <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{copy.ready}</div>
               </div>
               <div className="grid gap-4 p-5 sm:grid-cols-2">
                 <div className="rounded-2xl bg-blue-50 p-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.bankTransfer}</div>
+                  <div className="text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.bankTransfer}</div>
                   <div className="mt-3 space-y-2 text-sm font-semibold text-slate-700">
                     <div className="rounded-xl bg-white px-3 py-2">Bank: DBS Business</div>
                     <div className="rounded-xl bg-white px-3 py-2">Account: SmartBill Studio</div>
@@ -244,13 +244,13 @@ export function Features() {
                   </div>
                 </div>
                 <div className="rounded-2xl border border-dashed border-blue-200 bg-white p-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.qrPayment}</div>
+                  <div className="text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.qrPayment}</div>
                   <div className="mt-3 grid h-28 place-items-center rounded-2xl bg-[linear-gradient(145deg,#2563eb_0%,#60a5fa_100%)] text-white">
                     <div className="grid grid-cols-5 gap-1">
                       {Array.from({ length: 25 }).map((_, index) => (
                         <span
                           key={index}
-                          className={`h-3 w-3 rounded-[2px] ${index % 2 === 0 || index % 7 === 0 ? 'bg-white' : 'bg-white/40'}`}
+                          className={`h-3 w-3 rounded-[0.125rem] ${index % 2 === 0 || index % 7 === 0 ? 'bg-white' : 'bg-white/40'}`}
                         />
                       ))}
                     </div>
@@ -267,11 +267,11 @@ export function Features() {
         </div>
 
         <div className="grid items-center gap-12 xl:grid-cols-[0.96fr_1fr]">
-          <div className="order-2 lg:order-1 rounded-[28px] border border-blue-200 bg-[linear-gradient(145deg,#1d4ed8_0%,#3b82f6_58%,#93c5fd_100%)] p-5 text-white shadow-[0_24px_60px_-38px_rgba(37,99,235,0.45)]">
-            <div className="rounded-[22px] bg-white/10 p-4 backdrop-blur-sm">
+          <div className="order-2 lg:order-1 rounded-[1.75rem] border border-blue-200 bg-[linear-gradient(145deg,#1d4ed8_0%,#3b82f6_58%,#93c5fd_100%)] p-5 text-white shadow-[0_1.5rem_3.75rem_-2.375rem_rgba(37,99,235,0.45)]">
+            <div className="rounded-[1.375rem] bg-white/10 p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between border-b border-white/15 pb-4">
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">{copy.workflow}</div>
+                  <div className="text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-white/55">{copy.workflow}</div>
                   <div className="mt-1 text-lg font-semibold">{copy.reuseTitle}</div>
                 </div>
                 <div className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">{copy.livePreview}</div>
@@ -286,7 +286,7 @@ export function Features() {
               <div className="mt-4 rounded-2xl bg-white p-4 text-slate-950">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.editor}</div>
+                    <div className="text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-blue-500">{copy.editor}</div>
                     <div className="mt-1 text-base font-semibold">{copy.editorTitle}</div>
                   </div>
                   <i className="fas fa-pen-to-square text-blue-300"></i>
@@ -304,7 +304,7 @@ export function Features() {
           </div>
 
           <div className="order-1 lg:order-2">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-blue-700">
               <i className="fas fa-layer-group"></i>
               {copy.badge2}
             </div>

@@ -57,13 +57,13 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
         <div className="lg:w-1/2 flex flex-col gap-6">
           <InvoiceForm invoice={props.invoice} records={props.records} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} showToast={props.showToast} />
           <div className="sm:hidden mt-10 mb-16 px-2">
-            <button onClick={props.onExportPdf} disabled={props.isExporting} className="w-full py-5 bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner">
+            <button onClick={props.onExportPdf} disabled={props.isExporting} className="w-full py-5 bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_1.25rem_2.5rem_-0.9375rem_rgba(37,99,235,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95 active:shadow-inner">
               <span className="text-lg">{props.isExporting ? translations[props.lang].generating : translations[props.lang].exportPdf}</span>
             </button>
           </div>
         </div>
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
-          <div className="min-h-[450px] sm:min-h-[500px] flex justify-center items-start overflow-x-hidden overflow-y-auto">
+          <div className="min-h-[28.125rem] sm:min-h-[31.25rem] flex justify-center items-start overflow-x-hidden overflow-y-auto">
             <ScalableInvoiceContainer>
               <InvoicePreview invoice={props.invoice} template={props.template} isHeaderReversed={props.isHeaderReversed} lang={props.lang} editable onChange={props.onUpdateInvoice} />
             </ScalableInvoiceContainer>
@@ -73,7 +73,7 @@ export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProp
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
         <div className={`pointer-events-auto transition-all duration-300 origin-bottom-right ${props.isAIChatOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-4 pointer-events-none hidden'}`}>
-          <div className="w-[90vw] sm:w-[380px] h-[500px] max-h-[70vh] shadow-2xl shadow-blue-900/20 rounded-2xl overflow-hidden">
+          <div className="w-[90vw] sm:w-[23.75rem] h-[31.25rem] max-h-[70vh] shadow-2xl shadow-blue-900/20 rounded-2xl overflow-hidden">
             <AIChat currentInvoice={props.invoice} onUpdateInvoice={props.onUpdateInvoice} lang={props.lang} onClose={props.onCloseAIChat} />
           </div>
         </div>

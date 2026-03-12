@@ -19,7 +19,7 @@ export default function RecipientSection({
   };
 
   return (
-    <div className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm space-y-4">
+    <div className="bg-white rounded-[1.5rem] border border-slate-200 p-6 shadow-sm space-y-4">
       <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t.billTo}</h3>
       <BillingProfileNameInput
         kind="client"

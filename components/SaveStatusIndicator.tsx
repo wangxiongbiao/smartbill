@@ -64,7 +64,7 @@ const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({ status, lang,
             `}
         >
             {config.icon && <i className={`fas ${config.icon} text-xs`}></i>}
-            <span className="text-[10px] sm:text-xs font-semibold tracking-wider whitespace-nowrap uppercase">{config.text}</span>
+            <span className="text-[0.625rem] sm:text-xs font-semibold tracking-wider whitespace-nowrap uppercase">{config.text}</span>
         </div>
     );
 };

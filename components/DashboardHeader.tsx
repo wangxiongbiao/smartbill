@@ -71,7 +71,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     });
 
     return (
-        <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-[72px] flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]" data-ui-header>
+        <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-[4.5rem] flex items-center justify-between shadow-[0_0.25rem_1.25rem_-0.625rem_rgba(0,0,0,0.05)]" data-ui-header>
             {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
                 {breadcrumbs}
@@ -107,7 +107,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         <button
                             onClick={onExportPdf}
                             disabled={isExporting}
-                            className="px-4 py-2 bg-blue-600 text-white font-semibold text-xs rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-[0_14px_26px_-18px_rgba(37,99,235,0.58)] disabled:opacity-70"
+                            className="px-4 py-2 bg-blue-600 text-white font-semibold text-xs rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.58)] disabled:opacity-70"
                         >
                             {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-pdf"></i>}
                             <span>{isExporting ? t.generating : t.exportPdf}</span>

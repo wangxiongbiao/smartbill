@@ -15,7 +15,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-[100] px-4 sm:hidden pointer-events-none">
-      <nav className="max-w-lg mx-auto h-16 bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] rounded-[2rem] flex items-center justify-around px-1 pointer-events-auto">
+      <nav className="max-w-lg mx-auto h-16 bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-[0_1.25rem_3.125rem_rgba(0,0,0,0.3)] rounded-[2rem] flex items-center justify-around px-1 pointer-events-auto">
         {tabs.map((tab) => {
           const isActive = isNavItemActive(tab.id, activeView);
 
@@ -28,7 +28,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setView, lang }) => {
               <div className="flex flex-col items-center gap-1">
                 <i className={`${isActive ? tab.activeIcon || tab.icon : tab.icon} text-lg transition-all duration-300 ${isActive ? 'text-blue-500 scale-110' : 'text-slate-500'
                   }`}></i>
-                <span className={`text-[8px] font-semibold tracking-tighter uppercase transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'
+                <span className={`text-[0.5rem] font-semibold tracking-tighter uppercase transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'
                   }`}>
                   {tab.label}
                 </span>

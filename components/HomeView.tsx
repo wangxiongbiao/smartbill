@@ -432,8 +432,8 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
   return (
     <div className="max-w-7xl mx-auto px-6 py-5 md:px-8 md:py-6 space-y-3.5">
       {needsLiveRates && (
-        <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <div className="flex flex-col gap-2 text-[11px] font-semibold text-slate-500 sm:flex-row sm:flex-wrap sm:items-center">
+        <section className="rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-2 text-[0.6875rem] font-semibold text-slate-500 sm:flex-row sm:flex-wrap sm:items-center">
             <span>{copy.convertedTo(dashboard.displayCurrency)}</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block"></span>
             <span>{exchangeRateStatus}</span>
@@ -462,82 +462,82 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
         {summaryCards.map(card => (
-          <div key={card.label} className="bg-white rounded-[24px] border border-slate-200 px-4 py-4 shadow-sm hover:shadow-md transition-shadow">
+          <div key={card.label} className="bg-white rounded-[1.5rem] border border-slate-200 px-4 py-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
-              <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shadow-sm ${card.color}`}><i className={`fas ${card.icon} text-[11px]`}></i></div>
-              {card.sub && <span className="text-[10px] font-semibold text-slate-400 tracking-normal">{card.sub}</span>}
+              <div className={`w-8 h-8 rounded-[0.625rem] flex items-center justify-center shadow-sm ${card.color}`}><i className={`fas ${card.icon} text-[0.6875rem]`}></i></div>
+              {card.sub && <span className="text-[0.625rem] font-semibold text-slate-400 tracking-normal">{card.sub}</span>}
             </div>
-            <div className="text-[10px] font-semibold text-slate-500 tracking-normal">{card.label}</div>
-            <div className="mt-1.5 text-[24px] leading-none font-medium text-slate-900 tracking-[-0.02em]">{card.value}</div>
+            <div className="text-[0.625rem] font-semibold text-slate-500 tracking-normal">{card.label}</div>
+            <div className="mt-1.5 text-[1.5rem] leading-none font-medium text-slate-900 tracking-[-0.02em]">{card.value}</div>
           </div>
         ))}
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-3 gap-3.5">
-        <div className="xl:col-span-2 bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
+        <div className="xl:col-span-2 bg-white rounded-[1.5rem] border border-slate-200 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900">{copy.trendTitle}</h2>
-              <p className="text-[11px] text-slate-500">{copy.trendDesc}</p>
+              <h2 className="text-[1rem] font-semibold tracking-[-0.02em] text-slate-900">{copy.trendTitle}</h2>
+              <p className="text-[0.6875rem] text-slate-500">{copy.trendDesc}</p>
             </div>
-            <div className="text-[10px] font-semibold text-slate-400">{copy.last7Days}</div>
+            <div className="text-[0.625rem] font-semibold text-slate-400">{copy.last7Days}</div>
           </div>
-          <div className="mt-4 bg-slate-50/70 rounded-[22px] p-5 border border-slate-100">
+          <div className="mt-4 bg-slate-50/70 rounded-[1.375rem] p-5 border border-slate-100">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-[24px] leading-none font-medium tracking-[-0.015em] text-slate-900">
+                <div className="text-[1.5rem] leading-none font-medium tracking-[-0.015em] text-slate-900">
                   {dashboard.summary.totalAmount === null ? '--' : formatCurrency(dashboard.summary.totalAmount, dashboard.displayCurrency, lang)}
                 </div>
-                <div className="text-[10px] font-semibold text-slate-400 mt-1">{copy.trendTotalDesc}</div>
+                <div className="text-[0.625rem] font-semibold text-slate-400 mt-1">{copy.trendTotalDesc}</div>
               </div>
-              <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-semibold">{copy.thisWeek}</div>
+              <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[0.625rem] font-semibold">{copy.thisWeek}</div>
             </div>
 
             {dashboard.hasConvertedTotals ? (
               <RevenueTrendChart data={dashboard.trend} lang={lang} currency={dashboard.displayCurrency} />
             ) : (
-              <div className="flex h-[220px] w-full items-center justify-center rounded-[18px] border border-dashed border-slate-200 bg-white text-center">
+              <div className="flex h-[13.75rem] w-full items-center justify-center rounded-[1.125rem] border border-dashed border-slate-200 bg-white text-center">
                 <div>
                   <div className="text-sm font-semibold text-slate-600">{exchangeRateStatus}</div>
-                  <div className="mt-2 text-[11px] font-medium text-slate-400">{copy.convertedTo(dashboard.displayCurrency)}</div>
+                  <div className="mt-2 text-[0.6875rem] font-medium text-slate-400">{copy.convertedTo(dashboard.displayCurrency)}</div>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.quickActions}</h2>
-          <p className="text-[11px] text-slate-500 mb-4">{copy.quickActionsDesc}</p>
+        <div className="bg-white rounded-[1.5rem] border border-slate-200 p-4 shadow-sm">
+          <h2 className="text-[1rem] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.quickActions}</h2>
+          <p className="text-[0.6875rem] text-slate-500 mb-4">{copy.quickActionsDesc}</p>
           <div className="space-y-2">
-            <button onClick={onCreateEmpty} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-blue-600 text-white text-[12px] font-semibold hover:bg-blue-700 transition-colors shadow-[0_14px_26px_-18px_rgba(37,99,235,0.52)]"><span>{copy.createFast}</span><i className="fas fa-plus text-[11px]"></i></button>
-            <button onClick={onExportLatest} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[12px] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.exportPdf}</span><i className="fas fa-file-arrow-down text-[11px]"></i></button>
-            <button onClick={onOpenRecords} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[12px] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.openRecords}</span><i className="fas fa-folder-open text-[11px]"></i></button>
-            <button onClick={onOpenTemplates} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[12px] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.openTemplates}</span><i className="fas fa-layer-group text-[11px]"></i></button>
+            <button onClick={onCreateEmpty} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-blue-600 text-white text-[0.75rem] font-semibold hover:bg-blue-700 transition-colors shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.52)]"><span>{copy.createFast}</span><i className="fas fa-plus text-[0.6875rem]"></i></button>
+            <button onClick={onExportLatest} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[0.75rem] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.exportPdf}</span><i className="fas fa-file-arrow-down text-[0.6875rem]"></i></button>
+            <button onClick={onOpenRecords} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[0.75rem] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.openRecords}</span><i className="fas fa-folder-open text-[0.6875rem]"></i></button>
+            <button onClick={onOpenTemplates} className="w-full flex items-center justify-between px-4 h-11 rounded-2xl bg-slate-50 text-slate-700 text-[0.75rem] font-semibold hover:bg-slate-100 transition-colors"><span>{copy.openTemplates}</span><i className="fas fa-layer-group text-[0.6875rem]"></i></button>
           </div>
         </div>
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-3 gap-3.5">
-        <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.performanceTitle}</h2>
-          <p className="text-[11px] text-slate-500 mb-4">{copy.performanceDesc}</p>
+        <div className="bg-white rounded-[1.5rem] border border-slate-200 p-4 shadow-sm">
+          <h2 className="text-[1rem] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.performanceTitle}</h2>
+          <p className="text-[0.6875rem] text-slate-500 mb-4">{copy.performanceDesc}</p>
           <div className="space-y-3.5">
             {dashboard.topClients.length > 0 ? dashboard.topClients.map(client => (
               <div key={client.name} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
                 <div>
-                  <div className="text-[12px] font-semibold text-slate-900 leading-none">{client.name}</div>
-                  <div className="text-[10px] text-slate-400 mt-1">{copy.thisMonth}</div>
+                  <div className="text-[0.75rem] font-semibold text-slate-900 leading-none">{client.name}</div>
+                  <div className="text-[0.625rem] text-slate-400 mt-1">{copy.thisMonth}</div>
                 </div>
-                <div className="text-[12px] font-medium tracking-normal text-slate-900">{client.amount}</div>
+                <div className="text-[0.75rem] font-medium tracking-normal text-slate-900">{client.amount}</div>
               </div>
             )) : (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
-                <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-chart-line text-[12px]"></i></div>
-                <div className="text-[12px] font-semibold text-slate-500">
+                <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-chart-line text-[0.75rem]"></i></div>
+                <div className="text-[0.75rem] font-semibold text-slate-500">
                   {needsLiveRates && !dashboard.hasConvertedTotals ? exchangeRateStatus : copy.noPerformance}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-1">
+                <div className="text-[0.625rem] text-slate-400 mt-1">
                   {needsLiveRates && !dashboard.hasConvertedTotals ? copy.convertedTo(dashboard.displayCurrency) : copy.noPerformanceDesc}
                 </div>
               </div>
@@ -545,37 +545,37 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
           </div>
         </div>
 
-        <div className="bg-white rounded-[24px] border border-slate-200 p-4 shadow-sm xl:col-span-1">
-          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.recentTitle}</h2>
-          <p className="text-[11px] text-slate-500 mb-4">{copy.recentDesc}</p>
+        <div className="bg-white rounded-[1.5rem] border border-slate-200 p-4 shadow-sm xl:col-span-1">
+          <h2 className="text-[1rem] font-semibold tracking-[-0.02em] text-slate-900 mb-1">{copy.recentTitle}</h2>
+          <p className="text-[0.6875rem] text-slate-500 mb-4">{copy.recentDesc}</p>
           <div className="space-y-3.5">
             {dashboard.recentActivity.length > 0 ? dashboard.recentActivity.map(item => (
               <div key={item.id} className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center"><i className="fas fa-file-lines text-[12px]"></i></div>
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center"><i className="fas fa-file-lines text-[0.75rem]"></i></div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-semibold text-slate-900 truncate leading-none">{item.title}</div>
-                  <div className="text-[11px] text-slate-500 truncate mt-1">{item.subtitle}</div>
-                  <div className="text-[10px] text-slate-400 mt-1">{item.status} · {item.date}</div>
+                  <div className="text-[0.75rem] font-semibold text-slate-900 truncate leading-none">{item.title}</div>
+                  <div className="text-[0.6875rem] text-slate-500 truncate mt-1">{item.subtitle}</div>
+                  <div className="text-[0.625rem] text-slate-400 mt-1">{item.status} · {item.date}</div>
                 </div>
-                <div className="text-[11px] font-medium tracking-normal text-slate-700">{item.amount}</div>
+                <div className="text-[0.6875rem] font-medium tracking-normal text-slate-700">{item.amount}</div>
               </div>
-            )) : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center"><div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-clock-rotate-left text-[12px]"></i></div><div className="text-[12px] font-semibold text-slate-500">{copy.noRecent}</div><div className="text-[10px] text-slate-400 mt-1">{copy.noRecentDesc}</div></div>}
+            )) : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center"><div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400"><i className="fas fa-clock-rotate-left text-[0.75rem]"></i></div><div className="text-[0.75rem] font-semibold text-slate-500">{copy.noRecent}</div><div className="text-[0.625rem] text-slate-400 mt-1">{copy.noRecentDesc}</div></div>}
           </div>
         </div>
 
-        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_35%),linear-gradient(135deg,#1d4ed8_0%,#3b82f6_55%,#93c5fd_100%)] rounded-[24px] p-5 shadow-sm text-white border border-blue-200">
+        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_35%),linear-gradient(135deg,#1d4ed8_0%,#3b82f6_55%,#93c5fd_100%)] rounded-[1.5rem] p-5 shadow-sm text-white border border-blue-200">
           <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/15 blur-2xl"></div>
           <div className="absolute right-6 bottom-6 text-white/10 text-6xl"><i className="fas fa-sparkles"></i></div>
           <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/80 ring-1 ring-white/10 mb-4">
-              <i className="fas fa-wand-magic-sparkles text-[10px]"></i>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 text-[0.625rem] font-semibold text-white/80 ring-1 ring-white/10 mb-4">
+              <i className="fas fa-wand-magic-sparkles text-[0.625rem]"></i>
               {copy.aiBadge}
             </div>
-            <h2 className="text-[20px] leading-none font-semibold tracking-[-0.025em] mb-2.5">{copy.aiTitle}</h2>
-            <p className="max-w-[240px] text-white/72 text-[12px] leading-5 mb-5">{copy.aiDesc}</p>
-            <button onClick={onOpenAI} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 h-11 text-[12px] font-semibold text-slate-900 hover:bg-slate-100 transition-colors shadow-[0_12px_24px_-16px_rgba(255,255,255,0.9)]">
+            <h2 className="text-[1.25rem] leading-none font-semibold tracking-[-0.025em] mb-2.5">{copy.aiTitle}</h2>
+            <p className="max-w-[15rem] text-white/72 text-[0.75rem] leading-5 mb-5">{copy.aiDesc}</p>
+            <button onClick={onOpenAI} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 h-11 text-[0.75rem] font-semibold text-slate-900 hover:bg-slate-100 transition-colors shadow-[0_0.75rem_1.5rem_-1rem_rgba(255,255,255,0.9)]">
               <span>{copy.aiCta}</span>
-              <i className="fas fa-arrow-up-right-from-square text-[11px]"></i>
+              <i className="fas fa-arrow-up-right-from-square text-[0.6875rem]"></i>
             </button>
           </div>
         </div>
