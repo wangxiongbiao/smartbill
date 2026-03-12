@@ -1,5 +1,5 @@
 import { apiRequest } from './client';
-import type { Invoice, InvoiceTemplate } from '@/types';
+import type { Invoice, InvoiceTemplate, TemplateCategory } from '@/types';
 
 export async function listTemplates(userId: string) {
   return apiRequest<{ templates: InvoiceTemplate[] }>(`/api/templates?userId=${encodeURIComponent(userId)}`);
@@ -9,10 +9,15 @@ export async function getTemplateById(id: string) {
   return apiRequest<{ template: InvoiceTemplate | null }>(`/api/templates/${encodeURIComponent(id)}`);
 }
 
-export async function createTemplate(name: string, description: string, templateData: Partial<Invoice>) {
+export async function createTemplate(
+  name: string,
+  description: string,
+  templateType: TemplateCategory,
+  templateData: Partial<Invoice>
+) {
   return apiRequest<{ template: InvoiceTemplate }>(`/api/templates`, {
     method: 'POST',
-    body: JSON.stringify({ name, description, templateData })
+    body: JSON.stringify({ name, description, templateType, templateData })
   });
 }
 

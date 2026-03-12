@@ -10,7 +10,7 @@ import ShareDialog from '@/components/ShareDialog';
 import EmailDialog from '@/components/EmailDialog';
 import SaveTemplateDialog from '@/components/SaveTemplateDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import type { Invoice, Language, TemplateType, User } from '@/types';
+import type { Invoice, Language, TemplateCategory, TemplateType, User } from '@/types';
 
 interface InvoiceEditorWorkspaceProps {
   invoice: Invoice;
@@ -35,7 +35,7 @@ interface InvoiceEditorWorkspaceProps {
   onCloseEmailDialog: () => void;
   onCloseSaveTemplateDialog: () => void;
   onCloseNewInvoiceConfirm: () => void;
-  onSaveTemplate: (name: string, description: string) => Promise<void>;
+  onSaveTemplate: (name: string, description: string, templateType: TemplateCategory) => Promise<void>;
   onConfirmCreateInvoice: () => Promise<void>;
   onExportPdf: () => void;
 }

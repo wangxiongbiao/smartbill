@@ -1,7 +1,15 @@
-import { InvoiceTemplate, Invoice } from '../types';
+import { resolveTemplateType } from './template-types';
+import type { Invoice, InvoiceTemplate, TemplateCategory } from '../types';
 import { safeDeepClean } from './utils';
 
 type SupabaseClientLike = any;
+
+function hydrateTemplateRecord(template: InvoiceTemplate): InvoiceTemplate {
+    return {
+        ...template,
+        template_type: resolveTemplateType(template.template_type)
+    };
+}
 
 /**
  * 创建新的发票模板
@@ -11,6 +19,7 @@ export async function saveTemplate(
     userId: string,
     name: string,
     description: string,
+    templateType: TemplateCategory,
     templateData: Partial<Invoice>
 ): Promise<InvoiceTemplate> {
     // Use safeDeepClean for robust sanitization of template data
@@ -38,6 +47,7 @@ export async function saveTemplate(
             user_id: userId,
             name,
             description,
+            template_type: templateType,
             template_data: cleanedData
         })
         .select()
@@ -48,7 +58,7 @@ export async function saveTemplate(
         throw error;
     }
 
-    return data as InvoiceTemplate;
+    return hydrateTemplateRecord(data as InvoiceTemplate);
 }
 
 /**
@@ -66,7 +76,7 @@ export async function getUserTemplates(supabase: SupabaseClientLike, userId: str
         throw error;
     }
 
-    return data as InvoiceTemplate[];
+    return (data as InvoiceTemplate[]).map(hydrateTemplateRecord);
 }
 
 /**
@@ -88,7 +98,7 @@ export async function getTemplate(supabase: SupabaseClientLike, templateId: stri
         throw error;
     }
 
-    return data as InvoiceTemplate;
+    return hydrateTemplateRecord(data as InvoiceTemplate);
 }
 
 /**

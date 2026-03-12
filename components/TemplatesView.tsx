@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { InvoiceTemplate, Language } from '../types';
+import { TEMPLATE_TYPE_OPTIONS, normalizeTemplateType, resolveTemplateType } from '@/lib/template-types';
 import { translations } from '../i18n';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import InvoicePreview from './InvoicePreview';
 import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 import { buildPublicTemplatePreviewInvoice } from '@/lib/public-templates';
+import type { InvoiceTemplate, Language, TemplateCategory } from '../types';
 
 interface TemplatesViewProps {
   lang: Language;
@@ -17,25 +18,6 @@ interface TemplatesViewProps {
   onRefresh?: () => Promise<void>;
 }
 
-type TemplateCategoryKey =
-  | 'business'
-  | 'commercial'
-  | 'service'
-  | 'freelance'
-  | 'contractor'
-  | 'catering'
-  | 'consultation';
-
-const TEMPLATE_CATEGORIES: Array<{ key: TemplateCategoryKey; label: string }> = [
-  { key: 'business', label: 'Business' },
-  { key: 'commercial', label: 'Commercial' },
-  { key: 'service', label: 'Service' },
-  { key: 'freelance', label: 'Freelance' },
-  { key: 'contractor', label: 'Contractor' },
-  { key: 'catering', label: 'Catering' },
-  { key: 'consultation', label: 'Consultation' },
-];
-
 function getInitials(value: string) {
   const parts = value
     .trim()
@@ -45,45 +27,6 @@ function getInitials(value: string) {
 
   if (parts.length === 0) return 'SB';
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
-}
-
-function getTemplateCategory(template: InvoiceTemplate): TemplateCategoryKey {
-  const lookup = [
-    template.name,
-    template.description,
-    template.template_data.sender?.name,
-    template.template_data.client?.name,
-    template.template_data.notes,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  if (/(contract|contractor|construction|build|site|milestone|renovat)/.test(lookup)) {
-    return 'contractor';
-  }
-
-  if (/(cater|kitchen|food|restaurant|event|banquet|menu)/.test(lookup)) {
-    return 'catering';
-  }
-
-  if (/(consult|advis|strategy|coach|therapy|legal|finance)/.test(lookup)) {
-    return 'consultation';
-  }
-
-  if (/(freelance|developer|design|designer|creator|creative|studio|portfolio)/.test(lookup)) {
-    return 'freelance';
-  }
-
-  if (/(service|support|maintenance|repair|subscription|retainer|monthly)/.test(lookup)) {
-    return 'service';
-  }
-
-  if (/(commercial|campaign|marketing|brand|sales|agency)/.test(lookup)) {
-    return 'commercial';
-  }
-
-  return 'business';
 }
 
 function TemplatePreviewCard({
@@ -213,7 +156,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   onNewDoc,
 }) => {
   const t = translations[lang] || translations.en;
-  const [activeCategory, setActiveCategory] = useState<TemplateCategoryKey>('business');
+  const [activeCategory, setActiveCategory] = useState<TemplateCategory>('business');
   const [currentPage, setCurrentPage] = useState(1);
   const [usingId, setUsingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -300,7 +243,9 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       const raw = window.sessionStorage.getItem(templatesViewStateKey);
       if (!raw) return;
       const parsed = JSON.parse(raw);
-      if (typeof parsed.activeCategory === 'string') setActiveCategory(parsed.activeCategory as TemplateCategoryKey);
+      if (typeof parsed.activeCategory === 'string') {
+        setActiveCategory(normalizeTemplateType(parsed.activeCategory) || 'business');
+      }
       if (typeof parsed.currentPage === 'number' && parsed.currentPage > 0) setCurrentPage(parsed.currentPage);
       requestAnimationFrame(() => {
         if (gridScrollRef.current && typeof parsed.scrollTop === 'number') {
@@ -322,7 +267,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   }, [activeCategory, currentPage]);
 
   const filteredTemplates = useMemo(
-    () => templates.filter((template) => getTemplateCategory(template) === activeCategory),
+    () => templates.filter((template) => resolveTemplateType(template.template_type) === activeCategory),
     [activeCategory, templates]
   );
 
@@ -395,15 +340,15 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
         <div className="mx-auto max-w-[95rem]">
           <div className="mt-2 flex justify-center overflow-x-auto pb-2">
             <div className="inline-flex items-center gap-9 border-b border-slate-200">
-              {TEMPLATE_CATEGORIES.map((category) => {
-                const isActive = activeCategory === category.key;
+              {TEMPLATE_TYPE_OPTIONS.map((category) => {
+                const isActive = activeCategory === category.value;
 
                 return (
                   <button
-                    key={category.key}
+                    key={category.value}
                     type="button"
                     onClick={() => {
-                      setActiveCategory(category.key);
+                      setActiveCategory(category.value);
                       setCurrentPage(1);
                     }}
                     className={`whitespace-nowrap border-b-2 pb-4 text-[0.9375rem] font-semibold transition-colors ${isActive

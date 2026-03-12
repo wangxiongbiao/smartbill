@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { bumpTemplateUsage, createTemplate } from '@/lib/api/template';
 import { translations } from '@/i18n';
-import type { Invoice, InvoiceTemplate, Language, ViewType } from '@/types';
+import type { Invoice, InvoiceTemplate, Language, TemplateCategory, ViewType } from '@/types';
 
 interface UseAppActionsParams {
   userId?: string | null;
@@ -89,13 +89,13 @@ export function useAppActions(params: UseAppActionsParams) {
     navigateToView('templates');
   }, [navigateToView]);
 
-  const saveAsTemplate = useCallback(async (name: string, description: string) => {
+  const saveAsTemplate = useCallback(async (name: string, description: string, templateType: TemplateCategory) => {
     if (!userId) {
       showToast('Please login to save templates', 'warning');
       return;
     }
 
-    await createTemplate(name, description, workspace.invoice);
+    await createTemplate(name, description, templateType, workspace.invoice);
     await refreshTemplates();
     showToast(translations[lang].templateSaved || 'Template saved successfully!', 'success');
   }, [lang, refreshTemplates, showToast, userId, workspace.invoice]);

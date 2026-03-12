@@ -4,6 +4,7 @@ CREATE TABLE invoice_templates (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   description TEXT,
+  template_type TEXT NOT NULL DEFAULT 'business',
   template_data JSONB NOT NULL,
   thumbnail TEXT,
   usage_count INTEGER DEFAULT 0,
@@ -11,12 +12,24 @@ CREATE TABLE invoice_templates (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   
   -- 确保名称不为空
-  CONSTRAINT name_not_empty CHECK (char_length(name) > 0)
+  CONSTRAINT name_not_empty CHECK (char_length(name) > 0),
+  CONSTRAINT invoice_templates_template_type_check CHECK (
+    template_type IN (
+      'business',
+      'commercial',
+      'service',
+      'freelance',
+      'contractor',
+      'catering',
+      'consultation'
+    )
+  )
 );
 
 -- 创建索引以优化查询性能
 CREATE INDEX idx_templates_user_id ON invoice_templates(user_id);
 CREATE INDEX idx_templates_created_at ON invoice_templates(created_at DESC);
+CREATE INDEX idx_invoice_templates_user_id_template_type ON invoice_templates(user_id, template_type);
 
 -- 启用行级安全策略 (RLS)
 ALTER TABLE invoice_templates ENABLE ROW LEVEL SECURITY;

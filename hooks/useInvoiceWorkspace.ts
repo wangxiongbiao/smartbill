@@ -5,7 +5,7 @@ import { translations } from '@/i18n';
 import { batchSaveInvoiceRecords, deleteInvoiceRecord, listInvoices, saveInvoiceRecord } from '@/lib/api/invoice';
 import { createTemplate } from '@/lib/api/template';
 import { getDefaultCurrencyForLanguage } from '@/lib/language';
-import type { Invoice, InvoiceTemplate, Language, TemplateType, User, ViewType } from '@/types';
+import type { Invoice, InvoiceTemplate, Language, TemplateCategory, TemplateType, User, ViewType } from '@/types';
 
 export const INITIAL_INVOICE: Invoice = {
   id: '',
@@ -224,13 +224,13 @@ export function useInvoiceWorkspace(params: {
     return duplicatedInvoice;
   }, [setActiveView, showToast, upsertRecordLocally, user?.id]);
 
-  const saveAsTemplate = useCallback(async (name: string, description: string) => {
+  const saveAsTemplate = useCallback(async (name: string, description: string, templateType: TemplateCategory) => {
     if (!user?.id) {
       showToast('Please login to save templates', 'warning');
       return;
     }
 
-    await createTemplate(name, description, invoice);
+    await createTemplate(name, description, templateType, invoice);
     showToast(translations[lang].templateSaved || 'Template saved successfully!', 'success');
   }, [invoice, lang, showToast, user?.id]);
 

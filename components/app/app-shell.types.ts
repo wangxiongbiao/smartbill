@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { Invoice, InvoiceTemplate, Language, TemplateType, User, ViewType } from '@/types';
+import type { Invoice, InvoiceTemplate, Language, TemplateCategory, TemplateType, User, ViewType } from '@/types';
 
 export type ToastLevel = 'success' | 'error' | 'warning' | 'info';
 
@@ -63,7 +63,7 @@ export interface AppShellContextValue {
   openTemplateDetail: (template: InvoiceTemplate) => void;
   closeTemplateDetail: () => void;
   updateInvoice: (updates: Partial<Invoice>) => void;
-  saveAsTemplate: (name: string, description: string) => Promise<void>;
+  saveAsTemplate: (name: string, description: string, templateType: TemplateCategory) => Promise<void>;
   confirmCreateInvoice: () => Promise<void>;
   deleteInvoice: (id: string) => Promise<void>;
   updateInvoiceStatus: (id: string, status: Invoice['status']) => Promise<void>;

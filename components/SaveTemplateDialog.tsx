@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Language } from '../types';
+import { TEMPLATE_TYPE_OPTIONS } from '@/lib/template-types';
 import { translations } from '../i18n';
+import type { Language, TemplateCategory } from '../types';
 
 interface SaveTemplateDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (name: string, description: string) => Promise<void>;
+    onSave: (name: string, description: string, templateType: TemplateCategory) => Promise<void>;
     lang: Language;
     isUpdating?: boolean;
 }
@@ -21,26 +22,104 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [templateType, setTemplateType] = useState<TemplateCategory | ''>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const copy = {
-        subtitle: isUpdating
-            ? (t.updateTemplateInfo || 'Update template information')
-            : (t.saveTemplateSubtitle || 'Save this invoice configuration as a reusable template'),
-        requiredError: `${t.templateName} ${t.requiredField || 'is required'}`,
-        saveFailed: t.saveTemplateFailed || 'Failed to save template. Please try again.',
-        cancel: t.deleteDialogCancel || 'Cancel',
-        loadingText: isUpdating
-            ? `${t.updateAction || 'Update'}...`
-            : `${t.saveAction || 'Save'}...`,
+    const copyByLang: Record<Language, {
+        subtitle: string;
+        requiredNameError: string;
+        requiredTypeError: string;
+        saveFailed: string;
+        cancel: string;
+        loadingText: string;
+        typeLabel: string;
+        typePlaceholder: string;
+    }> = {
+        en: {
+            subtitle: isUpdating
+                ? (t.updateTemplateInfo || 'Update template information')
+                : (t.saveTemplateSubtitle || 'Save this invoice configuration as a reusable template'),
+            requiredNameError: `${t.templateName} ${t.requiredField || 'is required'}`,
+            requiredTypeError: 'Template type is required',
+            saveFailed: t.saveTemplateFailed || 'Failed to save template. Please try again.',
+            cancel: t.deleteDialogCancel || 'Cancel',
+            loadingText: isUpdating
+                ? `${t.updateAction || 'Update'}...`
+                : `${t.saveAction || 'Save'}...`,
+            typeLabel: 'Template Type',
+            typePlaceholder: 'Select a template type',
+        },
+        'zh-CN': {
+            subtitle: isUpdating
+                ? (t.updateTemplateInfo || '更新模板信息')
+                : (t.saveTemplateSubtitle || '将发票配置保存为可重复使用的模板'),
+            requiredNameError: `${t.templateName} ${t.requiredField || '为必填项'}`,
+            requiredTypeError: '模板类型不能为空',
+            saveFailed: t.saveTemplateFailed || '保存模板失败，请重试。',
+            cancel: t.deleteDialogCancel || '取消',
+            loadingText: isUpdating
+                ? `${t.updateAction || '更新'}...`
+                : `${t.saveAction || '保存'}...`,
+            typeLabel: '模板类型',
+            typePlaceholder: '请选择模板类型',
+        },
+        'zh-TW': {
+            subtitle: isUpdating
+                ? (t.updateTemplateInfo || '更新模板資訊')
+                : (t.saveTemplateSubtitle || '將發票配置保存為可重複使用的模板'),
+            requiredNameError: `${t.templateName} ${t.requiredField || '為必填項'}`,
+            requiredTypeError: '模板類型不能為空',
+            saveFailed: t.saveTemplateFailed || '保存模板失敗，請重試。',
+            cancel: t.deleteDialogCancel || '取消',
+            loadingText: isUpdating
+                ? `${t.updateAction || '更新'}...`
+                : `${t.saveAction || '保存'}...`,
+            typeLabel: '模板類型',
+            typePlaceholder: '請選擇模板類型',
+        },
+        th: {
+            subtitle: isUpdating
+                ? (t.updateTemplateInfo || 'อัปเดตข้อมูลเทมเพลต')
+                : (t.saveTemplateSubtitle || 'บันทึกการกำหนดค่านี้เป็นเทมเพลตที่นำมาใช้ซ้ำได้'),
+            requiredNameError: `${t.templateName} ${t.requiredField || 'จำเป็นต้องกรอก'}`,
+            requiredTypeError: 'จำเป็นต้องเลือกประเภทเทมเพลต',
+            saveFailed: t.saveTemplateFailed || 'ไม่สามารถบันทึกเทมเพลต โปรดลองอีกครั้ง',
+            cancel: t.deleteDialogCancel || 'ยกเลิก',
+            loadingText: isUpdating
+                ? `${t.updateAction || 'อัปเดต'}...`
+                : `${t.saveAction || 'บันทึก'}...`,
+            typeLabel: 'ประเภทเทมเพลต',
+            typePlaceholder: 'เลือกประเภทเทมเพลต',
+        },
+        id: {
+            subtitle: isUpdating
+                ? (t.updateTemplateInfo || 'Perbarui informasi templat')
+                : (t.saveTemplateSubtitle || 'Simpan konfigurasi ini sebagai templat yang dapat digunakan kembali'),
+            requiredNameError: `${t.templateName} ${t.requiredField || 'wajib diisi'}`,
+            requiredTypeError: 'Jenis templat wajib dipilih',
+            saveFailed: t.saveTemplateFailed || 'Gagal menyimpan templat. Silakan coba lagi.',
+            cancel: t.deleteDialogCancel || 'Batal',
+            loadingText: isUpdating
+                ? `${t.updateAction || 'Perbarui'}...`
+                : `${t.saveAction || 'Simpan'}...`,
+            typeLabel: 'Jenis Templat',
+            typePlaceholder: 'Pilih jenis templat',
+        },
     };
+
+    const copy = copyByLang[lang] || copyByLang.en;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name.trim()) {
-            setError(copy.requiredError);
+            setError(copy.requiredNameError);
+            return;
+        }
+
+        if (!templateType) {
+            setError(copy.requiredTypeError);
             return;
         }
 
@@ -48,9 +127,10 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
         setError('');
 
         try {
-            await onSave(name.trim(), description.trim());
+            await onSave(name.trim(), description.trim(), templateType);
             setName('');
             setDescription('');
+            setTemplateType('');
             onClose();
         } catch (err) {
             console.error('Error saving template:', err);
@@ -64,6 +144,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
         if (!loading) {
             setName('');
             setDescription('');
+            setTemplateType('');
             setError('');
             onClose();
         }
@@ -116,6 +197,25 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
 
                     <div>
                         <label className="text-[0.625rem] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
+                            {copy.typeLabel} <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={templateType}
+                            onChange={(e) => setTemplateType(e.target.value as TemplateCategory | '')}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            disabled={loading}
+                        >
+                            <option value="">{copy.typePlaceholder}</option>
+                            {TEMPLATE_TYPE_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="text-[0.625rem] uppercase font-semibold text-slate-400 tracking-widest mb-2 block">
                             {t.templateDescription}
                         </label>
                         <textarea
@@ -150,7 +250,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || !name.trim()}
+                            disabled={loading || !name.trim() || !templateType}
                             className="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (

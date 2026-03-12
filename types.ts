@@ -147,6 +147,14 @@ export interface Invoice {
 }
 
 export type TemplateType = "minimalist";
+export type TemplateCategory =
+  | "business"
+  | "commercial"
+  | "service"
+  | "freelance"
+  | "contractor"
+  | "catering"
+  | "consultation";
 export type ViewType =
   | "home"
   | "editor"
@@ -165,6 +173,7 @@ export interface InvoiceTemplate {
   user_id: string; // 所属用户ID
   name: string; // 模板名称
   description?: string; // 模板描述
+  template_type?: TemplateCategory | null; // 模板分类
   template_data: Partial<Invoice>; // 模板数据（基于现有Invoice类型）
   thumbnail?: string; // 预览缩略图（可选，后期优化）
   created_at: string; // 创建时间

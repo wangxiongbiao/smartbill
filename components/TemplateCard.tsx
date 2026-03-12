@@ -1,4 +1,5 @@
 import React from 'react';
+import { getTemplateTypeLabel } from '@/lib/template-types';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import { getLocaleForLanguage } from '@/lib/language';
@@ -60,6 +61,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                     <div className="flex items-center gap-1.5">
                         <i className="fas fa-calendar text-[0.625rem]"></i>
                         <span>{formatDate(template.created_at)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <i className="fas fa-layer-group text-[0.625rem]"></i>
+                        <span>{getTemplateTypeLabel(template.template_type)}</span>
                     </div>
                     {template.template_data.type && (
                         <div className="flex items-center gap-1.5">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getTemplateTypeLabel } from '@/lib/template-types';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import InvoicePreview from './InvoicePreview';
@@ -23,12 +24,12 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
     onBack
 }) => {
     const t = translations[lang] || translations['en'];
-    const copyByLang: Record<Language, { sampleClient: string; sampleAddress: string; type: string; currency: string }> = {
-        en: { sampleClient: 'Sample Client', sampleAddress: '123 Client Street', type: 'Type', currency: 'Currency' },
-        'zh-CN': { sampleClient: '示例客户', sampleAddress: '客户地址示例', type: '类型', currency: '币别' },
-        'zh-TW': { sampleClient: '示例客戶', sampleAddress: '客戶地址示例', type: '類型', currency: '幣別' },
-        th: { sampleClient: 'ลูกค้าตัวอย่าง', sampleAddress: 'ที่อยู่ลูกค้าตัวอย่าง', type: 'ประเภท', currency: 'สกุลเงิน' },
-        id: { sampleClient: 'Klien Contoh', sampleAddress: 'Alamat Klien Contoh', type: 'Tipe', currency: 'Mata uang' },
+    const copyByLang: Record<Language, { sampleClient: string; sampleAddress: string; type: string; templateType: string; currency: string }> = {
+        en: { sampleClient: 'Sample Client', sampleAddress: '123 Client Street', type: 'Document Type', templateType: 'Template Type', currency: 'Currency' },
+        'zh-CN': { sampleClient: '示例客户', sampleAddress: '客户地址示例', type: '单据类型', templateType: '模板类型', currency: '币别' },
+        'zh-TW': { sampleClient: '示例客戶', sampleAddress: '客戶地址示例', type: '單據類型', templateType: '模板類型', currency: '幣別' },
+        th: { sampleClient: 'ลูกค้าตัวอย่าง', sampleAddress: 'ที่อยู่ลูกค้าตัวอย่าง', type: 'ประเภทเอกสาร', templateType: 'ประเภทเทมเพลต', currency: 'สกุลเงิน' },
+        id: { sampleClient: 'Klien Contoh', sampleAddress: 'Alamat Klien Contoh', type: 'Tipe Dokumen', templateType: 'Jenis Templat', currency: 'Mata uang' },
     };
     const copy = copyByLang[lang];
 
@@ -122,6 +123,15 @@ const TemplateDetailView: React.FC<TemplateDetailViewProps> = ({
                                     </span>
                                 </div>
                             )}
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                                    {copy.templateType}
+                                </span>
+                                <span className="text-sm font-medium text-slate-700">
+                                    {getTemplateTypeLabel(template.template_type)}
+                                </span>
+                            </div>
 
                             {template.template_data.currency && (
                                 <div className="flex items-center justify-between">
