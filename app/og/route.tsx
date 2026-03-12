@@ -1,8 +1,10 @@
 import { ImageResponse } from 'next/og';
 import { resolveLanguage } from '@/lib/marketing';
 import { getFallbackTranslationLanguage } from '@/lib/language';
+import { toRem } from '@/lib/css-units';
 
 export const runtime = 'edge';
+const rem = (value: number) => toRem(value);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -102,37 +104,37 @@ export async function GET(request: Request) {
             background: 'radial-gradient(circle at top right, rgba(59,130,246,0.18), transparent 32%), radial-gradient(circle at top left, rgba(15,23,42,0.10), transparent 28%)',
           }}
         />
-        <div style={{ display: 'flex', width: '100%', padding: '64px', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', width: '100%', padding: rem(64), justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'column', width: '62%', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 54, height: 54, borderRadius: 18, background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: rem(14) }}>
+              <div style={{ width: rem(54), height: rem(54), borderRadius: rem(18), background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: rem(24), fontWeight: 900 }}>
                 S
               </div>
-                  <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#475569' }}>{preset.eyebrow}</div>
+                  <div style={{ fontSize: rem(18), fontWeight: 800, letterSpacing: rem(2), textTransform: 'uppercase', color: '#475569' }}>{preset.eyebrow}</div>
             </div>
-            <div style={{ marginTop: 28, fontSize: 58, lineHeight: 1.04, fontWeight: 900, letterSpacing: -2.2 }}>{preset.title}</div>
-            <div style={{ marginTop: 22, fontSize: 24, lineHeight: 1.5, color: '#475569' }}>{preset.subtitle}</div>
-            <div style={{ display: 'flex', gap: 14, marginTop: 28 }}>
+            <div style={{ marginTop: rem(28), fontSize: rem(58), lineHeight: 1.04, fontWeight: 900, letterSpacing: rem(-2.2) }}>{preset.title}</div>
+            <div style={{ marginTop: rem(22), fontSize: rem(24), lineHeight: 1.5, color: '#475569' }}>{preset.subtitle}</div>
+            <div style={{ display: 'flex', gap: rem(14), marginTop: rem(28) }}>
               {preset.tags.map((item) => (
-                <div key={item} style={{ borderRadius: 999, background: '#e2e8f0', padding: '10px 18px', fontSize: 18, fontWeight: 700, color: '#334155' }}>{item}</div>
+                <div key={item} style={{ borderRadius: rem(999), background: '#e2e8f0', padding: `${rem(10)} ${rem(18)}`, fontSize: rem(18), fontWeight: 700, color: '#334155' }}>{item}</div>
               ))}
             </div>
           </div>
 
           <div style={{ width: '32%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '100%', borderRadius: 32, background: '#0f172a', padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 30px 80px rgba(15,23,42,0.22)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 18 }}>
+            <div style={{ width: '100%', borderRadius: rem(32), background: '#0f172a', padding: rem(26), display: 'flex', flexDirection: 'column', boxShadow: `0 ${rem(30)} ${rem(80)} rgba(15,23,42,0.22)` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `${rem(1)} solid rgba(255,255,255,0.08)`, paddingBottom: rem(18) }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.45)' }}>{preset.invoicePdf}</div>
-                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 900, color: '#fff' }}>INV-2048</div>
+                  <div style={{ fontSize: rem(14), fontWeight: 800, textTransform: 'uppercase', letterSpacing: rem(2), color: 'rgba(255,255,255,0.45)' }}>{preset.invoicePdf}</div>
+                  <div style={{ marginTop: rem(8), fontSize: rem(28), fontWeight: 900, color: '#fff' }}>INV-2048</div>
                 </div>
-                <div style={{ borderRadius: 999, background: 'rgba(16,185,129,0.14)', color: '#bbf7d0', padding: '10px 16px', fontSize: 16, fontWeight: 800 }}>{preset.readyLabel}</div>
+                <div style={{ borderRadius: rem(999), background: 'rgba(16,185,129,0.14)', color: '#bbf7d0', padding: `${rem(10)} ${rem(16)}`, fontSize: rem(16), fontWeight: 800 }}>{preset.readyLabel}</div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 18 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: rem(14), marginTop: rem(18) }}>
                 {preset.sections.map((row, index) => (
-                  <div key={row} style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 20, padding: '16px 18px' }}>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>{row}</div>
-                    <div style={{ height: 8, width: `${86 - index * 10}%`, borderRadius: 999, background: 'rgba(255,255,255,0.2)' }} />
+                  <div key={row} style={{ display: 'flex', flexDirection: 'column', gap: rem(8), background: 'rgba(255,255,255,0.06)', borderRadius: rem(20), padding: `${rem(16)} ${rem(18)}` }}>
+                    <div style={{ fontSize: rem(16), fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>{row}</div>
+                    <div style={{ height: rem(8), width: `${86 - index * 10}%`, borderRadius: rem(999), background: 'rgba(255,255,255,0.2)' }} />
                   </div>
                 ))}
               </div>

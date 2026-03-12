@@ -3,9 +3,11 @@ import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/server/rate-limit';
 import { getRequestIp, sanitizeEmail, sanitizeText, sanitizeUrl } from '@/lib/server/request';
+import { toRem } from '@/lib/css-units';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
+const rem = (value: number) => toRem(value);
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,18 +58,18 @@ export async function POST(req: NextRequest) {
       to: [email],
       subject: `Invoice ${invoiceNumber} from ${senderName}`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="font-family: sans-serif; max-width: ${rem(600)}; margin: 0 auto; padding: ${rem(20)};">
           <h2 style="color: #2563eb;">Invoice Shared</h2>
           <p>Hello,</p>
           <p><strong>${senderName}</strong> has shared an invoice with you.</p>
-          <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; margin: 24px 0;">
-            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">Invoice Number</p>
-            <p style="margin: 0; font-weight: bold; font-size: 18px; color: #0f172a;">${invoiceNumber}</p>
+          <div style="background-color: #f8fafc; padding: ${rem(16)}; border-radius: ${rem(8)}; margin: ${rem(24)} 0;">
+            <p style="margin: 0 0 ${rem(8)} 0; color: #64748b; font-size: ${rem(14)};">Invoice Number</p>
+            <p style="margin: 0; font-weight: bold; font-size: ${rem(18)}; color: #0f172a;">${invoiceNumber}</p>
           </div>
-          <a href="${shareUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          <a href="${shareUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: ${rem(12)} ${rem(24)}; text-decoration: none; border-radius: ${rem(6)}; font-weight: bold;">
             View Invoice
           </a>
-          <p style="color: #64748b; font-size: 14px; margin-top: 32px;">
+          <p style="color: #64748b; font-size: ${rem(14)}; margin-top: ${rem(32)};">
             Powered by <a href="https://smartbillpro.com/" style="color: #64748b;">SmartBill</a>
           </p>
         </div>

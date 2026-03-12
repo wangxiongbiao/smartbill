@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
+import { getRootFontSize, toRem } from '@/lib/css-units';
 
 interface ScalableInvoiceContainerProps {
     children: React.ReactNode;
@@ -19,11 +20,6 @@ const ScalableInvoiceContainer: React.FC<ScalableInvoiceContainerProps> = ({
     const baseWidthInRem = baseWidth / 16;
 
     useEffect(() => {
-        const getRootFontSize = () => {
-            const rootFontSize = Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize);
-            return Number.isFinite(rootFontSize) ? rootFontSize : 16;
-        };
-
         const handleResize = () => {
             if (!containerRef.current) return;
 
@@ -41,7 +37,7 @@ const ScalableInvoiceContainer: React.FC<ScalableInvoiceContainerProps> = ({
             // We need to reserve exactly enough space for the scaled content
             if (containerRef.current.firstElementChild) {
                 const childHeight = containerRef.current.firstElementChild.scrollHeight;
-                setContainerHeight(`${childHeight * newScale}px`);
+                setContainerHeight(toRem(childHeight * newScale, rootFontSize));
             }
         };
 

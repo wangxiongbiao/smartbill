@@ -155,14 +155,16 @@ export default async function SharePage({ params, searchParams }: SharePageProps
             </header>
 
             <main className="flex-grow py-8 sm:py-12 px-4 sm:px-6 print:p-0 print:m-0">
-                <div className="max-w-5xl mx-auto print:max-w-none print:w-full">
-                    {share.allow_download && (
-                        <div className="flex justify-end mb-6 print:hidden">
-                            <ClientDownloadButton invoice={invoice} fileName={`${invoice.invoiceNumber}.pdf`} text={t.downloadPdf} />
+                <div className='flex justify-center' >
+                    <div className="print:max-w-none print:w-full">
+                        {share.allow_download && (
+                            <div className="flex justify-end mb-6 print:hidden">
+                                <ClientDownloadButton invoice={invoice} fileName={`${invoice.invoiceNumber}.pdf`} text={t.downloadPdf} />
+                            </div>
+                        )}
+                        <div id="invoice-preview-container" className="print:w-full">
+                            <SharedInvoiceView data={invoice} lang={lang} />
                         </div>
-                    )}
-                    <div id="invoice-preview-container" className="print:w-full">
-                        <SharedInvoiceView data={invoice} lang={lang} />
                     </div>
                 </div>
             </main>

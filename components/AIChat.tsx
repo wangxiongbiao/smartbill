@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Invoice, Language } from '../types';
 import { translations } from '../i18n';
 import { chatWithDeepSeek } from '../services/deepseekService';
+import { getRootFontSize, toRem } from '@/lib/css-units';
 
 interface Message {
     id: string;
@@ -50,6 +51,11 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const resizeComposer = (textarea: HTMLTextAreaElement) => {
+        textarea.style.height = 'auto';
+        textarea.style.height = toRem(Math.min(textarea.scrollHeight, 100), getRootFontSize());
     };
 
     useEffect(() => {
@@ -182,8 +188,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentInvoice, onUpdateInvoice, lang, 
                         value={input}
                         onChange={(e) => {
                             setInput(e.target.value);
-                            e.target.style.height = 'auto';
-                            e.target.style.height = `${Math.min(e.target.scrollHeight, 100)}px`;
+                            resizeComposer(e.target);
                         }}
                         onKeyDown={handleKeyPress}
                         placeholder={t.aiPlaceholderInput}

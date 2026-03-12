@@ -13,6 +13,7 @@ import PaymentInfoSection from './invoice-form/PaymentInfoSection';
 import SignatureSection from './invoice-form/SignatureSection';
 import DisclaimerSection from './invoice-form/DisclaimerSection';
 import { useBillingProfiles } from '@/hooks/useBillingProfiles';
+import { getRootFontSize, toRem } from '@/lib/css-units';
 import {
   applyBillingProfileToClient,
   applyBillingProfileToSender,
@@ -232,16 +233,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, l
     reader.readAsDataURL(file);
   };
 
+  const resizeTextareaToContent = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = toRem(textarea.scrollHeight, getRootFontSize());
+  };
+
   const autoResizeTextarea = (textarea: HTMLTextAreaElement | null) => {
     if (!textarea) return;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+    resizeTextareaToContent(textarea);
   };
 
   const renderCell = (item: InvoiceItem, column: InvoiceColumn) => {
     switch (column.type) {
       case 'system-text':
-        return <textarea ref={autoResizeTextarea} placeholder={column.label} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.description} autoFocus={item.id === focusItemId} onChange={(e) => updateItem(item.id, { description: e.target.value })} rows={1} onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />;
+        return <textarea ref={autoResizeTextarea} placeholder={column.label} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.description} autoFocus={item.id === focusItemId} onChange={(e) => updateItem(item.id, { description: e.target.value })} rows={1} onInput={(e) => resizeTextareaToContent(e.currentTarget)} />;
       case 'system-quantity':
         return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.quantity} onChange={(e) => {
           const nextValue = parseEditableNumberInput(e.target.value);
@@ -258,7 +263,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, records, onChange, l
           if (nextValue !== null) updateItemAmount(item.id, nextValue);
         }} placeholder="0.00" />;
       case 'custom-text':
-        return <textarea ref={autoResizeTextarea} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.customValues?.[column.id] || ''} onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)} rows={1} onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />;
+        return <textarea ref={autoResizeTextarea} className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm resize-none overflow-hidden" value={item.customValues?.[column.id] || ''} onChange={(e) => updateCustomValue(item.id, column.id, e.target.value)} rows={1} onInput={(e) => resizeTextareaToContent(e.currentTarget)} />;
       case 'custom-number':
         return <input type="text" inputMode="decimal" className="w-full bg-white border border-slate-200 px-3 py-1 rounded-lg text-sm" value={item.customValues?.[column.id] || ''} onChange={(e) => {
           const nextValue = parseEditableNumberInput(e.target.value);

@@ -427,7 +427,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
               <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">{copy.emptyFilteredDesc}</p>
             </div>
           ) : (
-            <div className="mt-4 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+            <div className="mt-4 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-5">
               {currentTemplates.map((template) => (
                 <TemplatePreviewCard
                   key={template.id}

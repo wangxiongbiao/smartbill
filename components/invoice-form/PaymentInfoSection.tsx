@@ -1,5 +1,6 @@
 import React from 'react';
 import PaymentFieldConfigurator from '@/components/PaymentFieldConfigurator';
+import { getRootFontSize, toRem } from '@/lib/css-units';
 import type { PaymentInfoSectionProps } from './shared';
 import { updatePaymentInfoFieldValue } from '@/lib/invoice';
 
@@ -60,6 +61,10 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
     configurePaymentFields: string;
   }>;
   const copy = copyByLang[lang];
+  const resizeTextareaToContent = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = toRem(textarea.scrollHeight, getRootFontSize());
+  };
 
   return (
     <div className="bg-white rounded-[1.5rem] border border-slate-200 p-6 shadow-sm space-y-5">
@@ -127,10 +132,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
                     onChange={(e) => updateFieldValue(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl resize-none overflow-hidden text-sm leading-6"
                     rows={1}
-                    onInput={(e) => {
-                      e.currentTarget.style.height = 'auto';
-                      e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                    }}
+                    onInput={(e) => resizeTextareaToContent(e.currentTarget)}
                   />
                 ) : (
                   <input
