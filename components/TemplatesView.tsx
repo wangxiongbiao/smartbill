@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InvoiceTemplate, Language } from '../types';
 import { translations } from '../i18n';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
@@ -93,6 +93,7 @@ function TemplatePreviewCard({
   deleting,
   useLabel,
   deleteLabel,
+  viewLabel,
   onOpen,
   onUse,
   onDelete,
@@ -103,6 +104,7 @@ function TemplatePreviewCard({
   deleting: boolean;
   useLabel: string;
   deleteLabel: string;
+  viewLabel: string;
   onOpen: () => void;
   onUse: () => void;
   onDelete: () => void;
@@ -126,7 +128,7 @@ function TemplatePreviewCard({
       }}
       className="group outline-none"
     >
-      <div className="relative">
+      <div className="relative overflow-hidden rounded-[28px] bg-slate-100">
         <div className="overflow-hidden rounded-[28px]">
           <ScalableInvoiceContainer baseWidth={794} className="pointer-events-none select-none">
             <div className="w-[794px]">
@@ -140,33 +142,50 @@ function TemplatePreviewCard({
           </ScalableInvoiceContainer>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-5 bottom-5 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onUse();
-            }}
-            disabled={using}
-            className="pointer-events-auto rounded-full bg-white/95 px-4 py-2 text-xs font-semibold text-slate-900 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.5)] backdrop-blur disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className="inline-flex items-center gap-2">
-              {using ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <i className="fas fa-plus text-[11px]"></i>}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.26)_100%)] opacity-0 transition-all duration-250 group-hover:opacity-100" />
+
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 opacity-0 transition-all duration-250 group-hover:opacity-100">
+          <div className="pointer-events-auto flex w-full max-w-[320px] translate-y-2 flex-col gap-3 transition-transform duration-250 group-hover:translate-y-0">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onUse();
+              }}
+              disabled={using}
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-slate-900 shadow-[0_20px_45px_-24px_rgba(15,23,42,0.55)] transition-all hover:scale-[1.01] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {using ? <i className="fas fa-spinner animate-spin text-[12px]"></i> : <i className="fas fa-plus text-[12px]"></i>}
               <span>{useLabel}</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onDelete();
-            }}
-            disabled={deleting}
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.5)] backdrop-blur disabled:cursor-not-allowed disabled:opacity-60"
-            title={deleteLabel}
-          >
-            {deleting ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <i className="fas fa-trash text-[11px]"></i>}
-          </button>
+            </button>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpen();
+                }}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900/78 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(15,23,42,0.6)] backdrop-blur-sm transition-all hover:bg-slate-900/88"
+              >
+                <i className="fas fa-eye text-[11px]"></i>
+                <span>{viewLabel}</span>
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete();
+                }}
+                disabled={deleting}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600/92 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(225,29,72,0.45)] backdrop-blur-sm transition-all hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                title={deleteLabel}
+              >
+                {deleting ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <i className="fas fa-trash text-[11px]"></i>}
+                <span>{deleteLabel}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -199,6 +218,8 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   const [usingId, setUsingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteTemplateItem, setDeleteTemplateItem] = useState<InvoiceTemplate | null>(null);
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const templatesViewStateKey = 'smartbill-templates-view-state';
   const itemsPerPage = 5;
 
   const copyByLang = {
@@ -209,6 +230,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       use: 'Use',
       deleteTitle: 'Delete Template?',
       deleteDesc: 'Are you sure you want to delete template {item}? This action cannot be undone.',
+      view: 'View',
       emptyFilteredTitle: 'No templates in this category',
       emptyFilteredDesc: 'Switch tabs or create a new blank canvas.',
     },
@@ -219,6 +241,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       use: '使用',
       deleteTitle: '删除模板？',
       deleteDesc: '你确定要删除模板 {item} 吗？此操作无法恢复。',
+      view: '查看',
       emptyFilteredTitle: '这个分类下还没有模板',
       emptyFilteredDesc: '切换其他分类，或者直接创建空白模板。',
     },
@@ -229,6 +252,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       use: '使用',
       deleteTitle: '刪除模板？',
       deleteDesc: '你確定要刪除模板 {item} 嗎？此操作無法復原。',
+      view: '查看',
       emptyFilteredTitle: '這個分類下還沒有模板',
       emptyFilteredDesc: '切換其他分類，或直接建立空白模板。',
     },
@@ -239,6 +263,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       use: 'ใช้',
       deleteTitle: 'ลบเทมเพลต?',
       deleteDesc: 'คุณแน่ใจหรือไม่ว่าต้องการลบเทมเพลต {item} การกระทำนี้ไม่สามารถย้อนกลับได้',
+      view: 'ดู',
       emptyFilteredTitle: 'ยังไม่มีเทมเพลตในหมวดนี้',
       emptyFilteredDesc: 'สลับหมวดอื่น หรือสร้าง Blank Canvas ใหม่',
     },
@@ -249,6 +274,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       use: 'Pakai',
       deleteTitle: 'Hapus template?',
       deleteDesc: 'Apakah Anda yakin ingin menghapus template {item}? Tindakan ini tidak dapat dibatalkan.',
+      view: 'Lihat',
       emptyFilteredTitle: 'Belum ada template di kategori ini',
       emptyFilteredDesc: 'Pindah kategori atau buat blank canvas baru.',
     },
@@ -262,10 +288,38 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       deleteTitle: string;
       deleteDesc: string;
       emptyFilteredTitle: string;
+      view: string;
       emptyFilteredDesc: string;
     }
   >;
   const copy = copyByLang[lang];
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.sessionStorage.getItem(templatesViewStateKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.activeCategory === 'string') setActiveCategory(parsed.activeCategory as TemplateCategoryKey);
+      if (typeof parsed.currentPage === 'number' && parsed.currentPage > 0) setCurrentPage(parsed.currentPage);
+      requestAnimationFrame(() => {
+        if (gridScrollRef.current && typeof parsed.scrollTop === 'number') {
+          gridScrollRef.current.scrollTop = parsed.scrollTop;
+        }
+      });
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(templatesViewStateKey, JSON.stringify({
+        activeCategory,
+        currentPage,
+        scrollTop: gridScrollRef.current?.scrollTop ?? 0,
+      }));
+    } catch {}
+  }, [activeCategory, currentPage]);
 
   const filteredTemplates = useMemo(
     () => templates.filter((template) => getTemplateCategory(template) === activeCategory),
@@ -383,6 +437,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
                   deleting={deletingId === template.id}
                   useLabel={copy.use}
                   deleteLabel={t.deleteTemplate}
+                  viewLabel={copy.view}
                   onOpen={() => onViewDetail(template)}
                   onUse={() => handleUseTemplate(template)}
                   onDelete={() => setDeleteTemplateItem(template)}

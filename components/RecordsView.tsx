@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Invoice, Language } from '../types';
 import { translations } from '../i18n';
 import ShareDialog from './ShareDialog';
@@ -7,9 +7,12 @@ import DeleteConfirmDialog from './DeleteConfirmDialog';
 import { calculateInvoiceTotal } from '@/lib/invoice';
 import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
 import { getLocaleForLanguage } from '@/lib/language';
+import type { RecordsViewState } from '@/components/app/app-shell.types';
 
 interface RecordsViewProps {
   records: Invoice[];
+  viewState: RecordsViewState;
+  onViewStateChange: React.Dispatch<React.SetStateAction<RecordsViewState>>;
   onEdit: (record: Invoice) => void;
   onDuplicate: (record: Invoice) => void | Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -20,17 +23,19 @@ interface RecordsViewProps {
   isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate, onDelete, onUpdateStatus, onExport, lang, onNewDoc, isDeletingId }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewStateChange, onEdit, onDuplicate, onDelete, onUpdateStatus, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(viewState.currentPage);
   const itemsPerPage = 6;
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState<'all' | number>('all');
+  const [searchQuery, setSearchQuery] = useState(viewState.searchQuery);
+  const [selectedMonth, setSelectedMonth] = useState<'all' | number>(viewState.selectedMonth);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const scrollTopRef = useRef(viewState.scrollTop);
 
   const copyByLang = {
     en: {
@@ -87,6 +92,9 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       editAction: '编辑',
       exportAction: '导出',
       deleteAction: '删除',
+      chooseStatus: '选择状态',
+      statusPendingHint: '等待收款',
+      statusPaidHint: '已收到款项',
     },
     'zh-TW': {
       createNew: '建立新發票',
@@ -142,6 +150,9 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       editAction: 'แก้ไข',
       exportAction: 'ส่งออก',
       deleteAction: 'ลบ',
+      chooseStatus: 'เลือกสถานะ',
+      statusPendingHint: 'รอการชำระเงิน',
+      statusPaidHint: 'ได้รับชำระแล้ว',
     },
     id: {
       createNew: 'Buat baru',
@@ -168,6 +179,9 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       editAction: 'Edit',
       exportAction: 'Ekspor',
       deleteAction: 'Hapus',
+      chooseStatus: 'Pilih status',
+      statusPendingHint: 'Menunggu pembayaran',
+      statusPaidHint: 'Pembayaran diterima',
     },
   } satisfies Record<Language, {
     createNew: string;
@@ -194,6 +208,9 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
     editAction: string;
     exportAction: string;
     deleteAction: string;
+    chooseStatus: string;
+    statusPendingHint: string;
+    statusPaidHint: string;
   }>;
   const copy = copyByLang[lang];
 
@@ -313,6 +330,13 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
   }, [totalPages]);
 
   useEffect(() => {
+    setSearchQuery((prev) => (prev === viewState.searchQuery ? prev : viewState.searchQuery));
+    setSelectedMonth((prev) => (prev === viewState.selectedMonth ? prev : viewState.selectedMonth));
+    setCurrentPage((prev) => (prev === viewState.currentPage ? prev : viewState.currentPage));
+    scrollTopRef.current = viewState.scrollTop;
+  }, [viewState]);
+
+  useEffect(() => {
     if (!openStatusMenuId) return;
 
     const handleClose = () => setOpenStatusMenuId(null);
@@ -328,6 +352,34 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
       document.removeEventListener('keydown', handleEscape);
     };
   }, [openStatusMenuId]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      if (!tableScrollRef.current) return;
+      if (Math.abs(tableScrollRef.current.scrollTop - viewState.scrollTop) < 1) return;
+      tableScrollRef.current.scrollTop = viewState.scrollTop;
+    });
+  }, [viewState.scrollTop]);
+
+  useEffect(() => {
+    onViewStateChange((prev) => {
+      if (
+        prev.searchQuery === searchQuery &&
+        prev.selectedMonth === selectedMonth &&
+        prev.currentPage === currentPage &&
+        prev.scrollTop === scrollTopRef.current
+      ) {
+        return prev;
+      }
+
+      return {
+        searchQuery,
+        selectedMonth,
+        currentPage,
+        scrollTop: scrollTopRef.current,
+      };
+    });
+  }, [currentPage, onViewStateChange, searchQuery, selectedMonth]);
 
   if (records.length === 0) {
     return (
@@ -349,8 +401,8 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
 
   return (
     <>
-      <div className="px-6 py-6 md:px-8 md:py-8">
-        <div className="mx-auto max-w-[1380px]">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden px-6 py-6 md:px-8 md:py-8">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={() => onNewDoc()}
@@ -398,7 +450,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_22px_50px_-36px_rgba(15,23,42,0.28)]">
+          <div className="min-h-0 flex-1 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_22px_50px_-36px_rgba(15,23,42,0.28)]">
             {filteredRecords.length === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
@@ -408,201 +460,213 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, onEdit, onDuplicate,
                 <p className="mt-2 text-sm font-medium text-slate-500">{copy.emptyFilteredDesc}</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-[980px] w-full border-separate border-spacing-0">
-                  <thead>
-                    <tr className="bg-slate-50/90">
-                      <th className="px-7 py-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {t.colClient || 'CLIENT'}
-                      </th>
-                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {t.colAmount || 'TOTAL AMOUNT'}
-                      </th>
-                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {copy.idLabel}
-                      </th>
-                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {t.colDate || 'ISSUE DATE'}
-                      </th>
-                      <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {copy.statusLabel}
-                      </th>
-                      <th className="px-7 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {copy.actionsLabel}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentRecords.map((record) => {
-                      const statusMeta = getStatusMeta(record);
-                      const isStatusMenuOpen = openStatusMenuId === record.id;
-                      const isStatusUpdating = statusUpdatingId === record.id;
-                      const statusOptions = [
-                        {
-                          key: 'pending',
-                          label: copy.pending,
-                          hint: copy.statusPendingHint,
-                          nextStatus: 'Sent' as Invoice['status'],
-                          icon: 'fa-clock',
-                          className: 'border-amber-200 bg-amber-50/80 text-amber-700',
-                          active: statusMeta.key === 'pending' || statusMeta.key === 'overdue',
-                        },
-                        {
-                          key: 'paid',
-                          label: copy.paid,
-                          hint: copy.statusPaidHint,
-                          nextStatus: 'Paid' as Invoice['status'],
-                          icon: 'fa-circle-check',
-                          className: 'border-emerald-200 bg-emerald-50/80 text-emerald-700',
-                          active: statusMeta.key === 'paid',
-                        },
-                      ];
+              <div className="flex h-full min-h-0 flex-col overflow-hidden">
+                <div
+                  ref={tableScrollRef}
+                  onScroll={() => {
+                    const nextScrollTop = tableScrollRef.current?.scrollTop ?? 0;
+                    scrollTopRef.current = nextScrollTop;
+                    onViewStateChange((prev) => (
+                      prev.scrollTop === nextScrollTop ? prev : { ...prev, scrollTop: nextScrollTop }
+                    ));
+                  }}
+                  className="min-h-0 flex-1 overflow-auto"
+                >
+                  <table className="min-w-[980px] w-full border-separate border-spacing-0">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="bg-slate-50/95 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80">
+                        <th className="px-7 py-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {t.colClient || 'CLIENT'}
+                        </th>
+                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {t.colAmount || 'TOTAL AMOUNT'}
+                        </th>
+                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {copy.idLabel}
+                        </th>
+                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {t.colDate || 'ISSUE DATE'}
+                        </th>
+                        <th className="px-6 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {copy.statusLabel}
+                        </th>
+                        <th className="px-7 py-5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {copy.actionsLabel}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentRecords.map((record) => {
+                        const statusMeta = getStatusMeta(record);
+                        const isStatusMenuOpen = openStatusMenuId === record.id;
+                        const isStatusUpdating = statusUpdatingId === record.id;
+                        const statusOptions = [
+                          {
+                            key: 'pending',
+                            label: copy.pending,
+                            hint: copy.statusPendingHint,
+                            nextStatus: 'Sent' as Invoice['status'],
+                            icon: 'fa-clock',
+                            className: 'border-amber-200 bg-amber-50/80 text-amber-700',
+                            active: statusMeta.key === 'pending' || statusMeta.key === 'overdue',
+                          },
+                          {
+                            key: 'paid',
+                            label: copy.paid,
+                            hint: copy.statusPaidHint,
+                            nextStatus: 'Paid' as Invoice['status'],
+                            icon: 'fa-circle-check',
+                            className: 'border-emerald-200 bg-emerald-50/80 text-emerald-700',
+                            active: statusMeta.key === 'paid',
+                          },
+                        ];
 
-                      return (
-                        <tr key={record.id} className="transition-colors hover:bg-slate-50/70">
-                          <td className="border-t border-slate-100 px-7 py-6">
-                            <div className="max-w-[22rem] truncate text-[15px] font-semibold text-slate-900">
-                              {record.client.name || copy.untitledClient}
-                            </div>
-                          </td>
-                          <td className="border-t border-slate-100 px-6 py-6 text-center">
-                            <span className="text-[15px] font-semibold tracking-tight text-slate-900">
-                              {formatAmount(record)}
-                            </span>
-                          </td>
-                          <td className="border-t border-slate-100 px-6 py-6 text-center">
-                            <span className="text-[15px] font-semibold tracking-tight text-slate-800">
-                              {record.invoiceNumber}
-                            </span>
-                          </td>
-                          <td className="border-t border-slate-100 px-6 py-6 text-center">
-                            <span className="text-sm font-semibold text-slate-500">
-                              {formatDate(record.date)}
-                            </span>
-                          </td>
-                          <td className="border-t border-slate-100 px-6 py-6 text-center align-top">
-                            <div className="relative inline-flex flex-col items-center" onClick={(event) => event.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  if (isStatusUpdating) return;
-                                  setOpenStatusMenuId((prev) => (prev === record.id ? null : record.id));
-                                }}
-                                disabled={isStatusUpdating}
-                                aria-haspopup="menu"
-                                aria-expanded={isStatusMenuOpen}
-                                className={`group inline-flex min-w-[8.75rem] items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-70 ${statusMeta.className}`}
-                              >
-                                <span className="flex items-center gap-2">
-                                  {isStatusUpdating ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <span className="h-2 w-2 rounded-full bg-current opacity-80"></span>}
-                                  <span>{statusMeta.label}</span>
-                                </span>
-                                <i className={`fas fa-chevron-down text-[9px] transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}></i>
-                              </button>
-
-                              {isStatusMenuOpen ? (
-                                <div
-                                  role="menu"
-                                  className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 overflow-hidden rounded-[20px] border border-slate-200 bg-white p-2 text-left shadow-[0_22px_42px_-24px_rgba(15,23,42,0.28)]"
+                        return (
+                          <tr key={record.id} className="transition-colors hover:bg-slate-50/70">
+                            <td className="border-t border-slate-100 px-7 py-6">
+                              <div className="max-w-[22rem] truncate text-[15px] font-semibold text-slate-900">
+                                {record.client.name || copy.untitledClient}
+                              </div>
+                            </td>
+                            <td className="border-t border-slate-100 px-6 py-6 text-center">
+                              <span className="text-[15px] font-semibold tracking-tight text-slate-900">
+                                {formatAmount(record)}
+                              </span>
+                            </td>
+                            <td className="border-t border-slate-100 px-6 py-6 text-center">
+                              <span className="text-[15px] font-semibold tracking-tight text-slate-800">
+                                {record.invoiceNumber}
+                              </span>
+                            </td>
+                            <td className="border-t border-slate-100 px-6 py-6 text-center">
+                              <span className="text-sm font-semibold text-slate-500">
+                                {formatDate(record.date)}
+                              </span>
+                            </td>
+                            <td className="border-t border-slate-100 px-6 py-6 text-center align-top">
+                              <div className="relative inline-flex flex-col items-center" onClick={(event) => event.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    if (isStatusUpdating) return;
+                                    setOpenStatusMenuId((prev) => (prev === record.id ? null : record.id));
+                                  }}
+                                  disabled={isStatusUpdating}
+                                  aria-haspopup="menu"
+                                  aria-expanded={isStatusMenuOpen}
+                                  className={`group inline-flex min-w-[8.75rem] items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-70 ${statusMeta.className}`}
                                 >
-                                  <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                                    {copy.chooseStatus}
-                                  </div>
-                                  <div className="space-y-1">
-                                    {statusOptions.map((option) => (
-                                      <button
-                                        key={option.key}
-                                        type="button"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          void handleStatusUpdate(record, option.nextStatus);
-                                        }}
-                                        role="menuitem"
-                                        className={`flex w-full items-center justify-between rounded-2xl border px-3 py-3 transition-all ${option.active ? option.className : 'border-transparent bg-slate-50 text-slate-700 hover:border-slate-200 hover:bg-slate-100'}`}
-                                      >
-                                        <span className="flex items-center gap-3">
-                                          <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${option.active ? 'bg-white/80' : 'bg-white'} shadow-sm`}>
-                                            <i className={`fas ${option.icon} text-[13px]`}></i>
+                                  <span className="flex items-center gap-2">
+                                    {isStatusUpdating ? <i className="fas fa-spinner animate-spin text-[11px]"></i> : <span className="h-2 w-2 rounded-full bg-current opacity-80"></span>}
+                                    <span>{statusMeta.label}</span>
+                                  </span>
+                                  <i className={`fas fa-chevron-down text-[9px] transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}></i>
+                                </button>
+
+                                {isStatusMenuOpen ? (
+                                  <div
+                                    role="menu"
+                                    className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 overflow-hidden rounded-[20px] border border-slate-200 bg-white p-2 text-left shadow-[0_22px_42px_-24px_rgba(15,23,42,0.28)]"
+                                  >
+                                    <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                      {copy.chooseStatus}
+                                    </div>
+                                    <div className="space-y-1">
+                                      {statusOptions.map((option) => (
+                                        <button
+                                          key={option.key}
+                                          type="button"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            void handleStatusUpdate(record, option.nextStatus);
+                                          }}
+                                          role="menuitem"
+                                          className={`flex w-full items-center justify-between rounded-2xl border px-3 py-3 transition-all ${option.active ? option.className : 'border-transparent bg-slate-50 text-slate-700 hover:border-slate-200 hover:bg-slate-100'}`}
+                                        >
+                                          <span className="flex items-center gap-3">
+                                            <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${option.active ? 'bg-white/80' : 'bg-white'} shadow-sm`}>
+                                              <i className={`fas ${option.icon} text-[13px]`}></i>
+                                            </span>
+                                            <span className="flex flex-col items-start">
+                                              <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">{option.label}</span>
+                                              <span className="text-[11px] font-medium normal-case tracking-normal opacity-70">{option.hint}</span>
+                                            </span>
                                           </span>
-                                          <span className="flex flex-col items-start">
-                                            <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">{option.label}</span>
-                                            <span className="text-[11px] font-medium normal-case tracking-normal opacity-70">{option.hint}</span>
-                                          </span>
-                                        </span>
-                                        {option.active ? <i className="fas fa-check text-[11px]"></i> : null}
-                                      </button>
-                                    ))}
+                                          {option.active ? <i className="fas fa-check text-[11px]"></i> : null}
+                                        </button>
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
-                              ) : null}
-                            </div>
-                          </td>
-                          <td className="border-t border-slate-100 px-7 py-6">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button
-                                onClick={() => setShareInvoice(record)}
-                                title={copy.share}
-                                aria-label={copy.share}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <i className="fas fa-share-alt text-xs"></i>
-                              </button>
-                              <button
-                                onClick={() => setEmailInvoice(record)}
-                                title={copy.email}
-                                aria-label={copy.email}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <i className="fas fa-envelope text-xs"></i>
-                              </button>
-                              <button
-                                onClick={() => onEdit(record)}
-                                title={copy.editAction}
-                                aria-label={copy.editAction}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <i className="fas fa-pen-to-square text-xs"></i>
-                              </button>
-                              <button
-                                onClick={() => onDuplicate(record)}
-                                title={copy.duplicate}
-                                aria-label={copy.duplicate}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <i className="fas fa-copy text-xs"></i>
-                              </button>
-                              <button
-                                onClick={() => onExport(record)}
-                                title={copy.exportAction}
-                                aria-label={copy.exportAction}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <i className="fas fa-download text-xs"></i>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (isDeletingId === record.id) return;
-                                  setDeleteInvoice(record);
-                                }}
-                                disabled={isDeletingId === record.id}
-                                title={copy.deleteAction}
-                                aria-label={copy.deleteAction}
-                                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                                  isDeletingId === record.id
-                                    ? 'text-rose-400'
-                                    : 'text-rose-300 hover:bg-rose-50 hover:text-rose-600'
-                                }`}
-                              >
-                                <i className={`fas ${isDeletingId === record.id ? 'fa-spinner fa-spin' : 'fa-trash'} text-xs`}></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                ) : null}
+                              </div>
+                            </td>
+                            <td className="border-t border-slate-100 px-7 py-6">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => setShareInvoice(record)}
+                                  title={copy.share}
+                                  aria-label={copy.share}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                  <i className="fas fa-share-alt text-xs"></i>
+                                </button>
+                                <button
+                                  onClick={() => setEmailInvoice(record)}
+                                  title={copy.email}
+                                  aria-label={copy.email}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                  <i className="fas fa-envelope text-xs"></i>
+                                </button>
+                                <button
+                                  onClick={() => onEdit(record)}
+                                  title={copy.editAction}
+                                  aria-label={copy.editAction}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                  <i className="fas fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button
+                                  onClick={() => onDuplicate(record)}
+                                  title={copy.duplicate}
+                                  aria-label={copy.duplicate}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                  <i className="fas fa-copy text-xs"></i>
+                                </button>
+                                <button
+                                  onClick={() => onExport(record)}
+                                  title={copy.exportAction}
+                                  aria-label={copy.exportAction}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                  <i className="fas fa-download text-xs"></i>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (isDeletingId === record.id) return;
+                                    setDeleteInvoice(record);
+                                  }}
+                                  disabled={isDeletingId === record.id}
+                                  title={copy.deleteAction}
+                                  aria-label={copy.deleteAction}
+                                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                                    isDeletingId === record.id
+                                      ? 'text-rose-400'
+                                      : 'text-rose-300 hover:bg-rose-50 hover:text-rose-600'
+                                  }`}
+                                >
+                                  <i className={`fas ${isDeletingId === record.id ? 'fa-spinner fa-spin' : 'fa-trash'} text-xs`}></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

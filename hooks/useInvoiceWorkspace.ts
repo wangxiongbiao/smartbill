@@ -83,6 +83,7 @@ export function useInvoiceWorkspace(params: {
     try {
       await saveInvoiceRecord(targetInvoice);
       upsertRecordLocally(targetInvoice);
+      await refreshRecords();
       setSaveStatus('saved');
       setLastSavedTime(new Date());
     } catch (error) {
@@ -90,7 +91,7 @@ export function useInvoiceWorkspace(params: {
       setSaveStatus('error');
       throw error;
     }
-  }, [upsertRecordLocally, user?.id]);
+  }, [refreshRecords, upsertRecordLocally, user?.id]);
 
   const buildSenderDraft = useCallback((senderOverride?: Partial<Invoice['sender']>) => ({
     ...INITIAL_INVOICE.sender,

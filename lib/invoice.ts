@@ -102,39 +102,10 @@ export function updateInvoiceItemAmount(items: InvoiceItem[], id: string, newAmo
   if (!item) return items;
 
   if (newAmount === '') {
-    return updateInvoiceItem(items, id, { amount: '', rate: '' });
+    return items.map((entry) => (entry.id === id ? { ...entry, amount: '' } : entry));
   }
 
-  const amount = Number(newAmount);
-  const qty = item.quantity;
-  const rate = item.rate;
-
-  if ((!qty || qty === '') && (!rate || rate === '')) {
-    return updateInvoiceItem(items, id, { quantity: 1, rate: amount, amount });
-  }
-
-  if (qty && qty !== '' && (!rate || rate === '')) {
-    return updateInvoiceItem(items, id, {
-      rate: Number(qty) !== 0 ? amount / Number(qty) : amount,
-      amount,
-    });
-  }
-
-  if ((!qty || qty === '') && rate && rate !== '') {
-    return updateInvoiceItem(items, id, {
-      quantity: Number(rate) !== 0 ? amount / Number(rate) : 1,
-      amount,
-    });
-  }
-
-  if (qty && qty !== '' && rate && rate !== '') {
-    return updateInvoiceItem(items, id, {
-      rate: Number(qty) !== 0 ? amount / Number(qty) : amount,
-      amount,
-    });
-  }
-
-  return updateInvoiceItem(items, id, { amount });
+  return items.map((entry) => (entry.id === id ? { ...entry, amount: newAmount } : entry));
 }
 
 export function updateInvoiceItemCustomValue(items: InvoiceItem[], itemId: string, columnId: string, value: string) {

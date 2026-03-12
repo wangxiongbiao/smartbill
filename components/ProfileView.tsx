@@ -445,9 +445,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   const safeUserName = user?.name || '';
   const safeUserEmail = user?.email || '';
   const initials = safeUserName.slice(0, 2).toUpperCase();
-  const latestCurrency = records.find((record) => record.currency)?.currency || 'USD';
-  const totalBilled = records.reduce((sum, record) => sum + calculateInvoiceTotal(record), 0);
-  const paidCount = records.filter((record) => isInvoicePaid(record)).length;
+  const billableRecords = records.filter((record) => record.status === 'Sent' || record.status === 'Paid');
+  const latestCurrency = billableRecords.find((record) => record.currency)?.currency || records.find((record) => record.currency)?.currency || 'USD';
+  const totalBilled = billableRecords.reduce((sum, record) => sum + calculateInvoiceTotal(record), 0);
+  const paidCount = billableRecords.filter((record) => isInvoicePaid(record)).length;
   const storedDefaultSender = getSenderDefaultsFromBillingProfile(
     billingProfiles.senderProfiles.find((profile) => profile.isDefault)
   );

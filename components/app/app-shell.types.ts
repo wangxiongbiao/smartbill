@@ -3,6 +3,13 @@ import type { Invoice, InvoiceTemplate, Language, TemplateType, User, ViewType }
 
 export type ToastLevel = 'success' | 'error' | 'warning' | 'info';
 
+export interface RecordsViewState {
+  searchQuery: string;
+  selectedMonth: 'all' | number;
+  currentPage: number;
+  scrollTop: number;
+}
+
 export interface AppShellContextValue {
   lang: Language;
   setLang: (lang: Language) => void;
@@ -14,6 +21,8 @@ export interface AppShellContextValue {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   records: Invoice[];
   recordsLoading: boolean;
+  recordsViewState: RecordsViewState;
+  setRecordsViewState: React.Dispatch<React.SetStateAction<RecordsViewState>>;
   templates: InvoiceTemplate[];
   templatesLoading: boolean;
   templateDetailLoading: boolean;

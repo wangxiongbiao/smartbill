@@ -18,8 +18,17 @@ import { getDocumentLanguage, resolveBrowserLanguage } from '@/lib/language';
 import { getViewFromPath } from '@/lib/routes';
 import { getPublicTemplateById } from '@/lib/public-templates';
 import type { DashboardShellProps } from '@/components/app/DashboardShellProps';
-import { PRIVATE_VIEWS, type AppShellContextValue } from '@/components/app/app-shell.types';
+import { PRIVATE_VIEWS, type AppShellContextValue, type RecordsViewState } from '@/components/app/app-shell.types';
 import type { Language } from '@/types';
+
+const DEFAULT_RECORDS_VIEW_STATE: RecordsViewState = {
+  searchQuery: '',
+  selectedMonth: 'all',
+  currentPage: 1,
+  scrollTop: 0,
+};
+
+const RECORDS_VIEW_STATE_STORAGE_KEY = 'smartbill-records-view-state';
 
 function getInvoiceIdFromPath(pathname: string) {
   const match = pathname.match(/^\/invoices\/([^/]+)$/);
@@ -44,6 +53,7 @@ export function useAppShellState() {
   const isNewInvoicePath = pathname === '/invoices/new';
 
   const [lang, setLang] = useState<Language>('en');
+  const [recordsViewState, setRecordsViewState] = useState<RecordsViewState>(DEFAULT_RECORDS_VIEW_STATE);
   const autoCreatePathRef = useRef<string | null>(null);
   const printAreaRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +112,33 @@ export function useAppShellState() {
     if (typeof document === 'undefined') return;
     document.documentElement.lang = getDocumentLanguage(lang);
   }, [lang]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.sessionStorage.getItem(RECORDS_VIEW_STATE_STORAGE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw);
+      setRecordsViewState({
+        searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
+        selectedMonth:
+          parsed.selectedMonth === 'all' ||
+          (typeof parsed.selectedMonth === 'number' && parsed.selectedMonth >= 1 && parsed.selectedMonth <= 12)
+            ? parsed.selectedMonth
+            : 'all',
+        currentPage: typeof parsed.currentPage === 'number' && parsed.currentPage > 0 ? parsed.currentPage : 1,
+        scrollTop: typeof parsed.scrollTop === 'number' && parsed.scrollTop >= 0 ? parsed.scrollTop : 0,
+      });
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(RECORDS_VIEW_STATE_STORAGE_KEY, JSON.stringify(recordsViewState));
+    } catch {}
+  }, [recordsViewState]);
 
   const setConsoleLang = useCallback((nextLang: Language) => {
     setLang(nextLang);
@@ -242,6 +279,8 @@ export function useAppShellState() {
     setUser,
     records,
     recordsLoading,
+    recordsViewState,
+    setRecordsViewState,
     templates,
     templatesLoading,
     templateDetailLoading,
@@ -333,6 +372,7 @@ export function useAppShellState() {
     prevView,
     records,
     recordsLoading,
+    recordsViewState,
     refreshRecords,
     billingProfiles.refresh,
     refreshTemplates,
@@ -355,6 +395,7 @@ export function useAppShellState() {
     workspace.actions.removeInvoice,
     workspace.actions.updateInvoiceStatus,
     workspace.actions.updateInvoice,
+    setRecordsViewState,
   ]);
 
   const dashboardShellProps = useMemo<Omit<DashboardShellProps, 'children'>>(() => ({

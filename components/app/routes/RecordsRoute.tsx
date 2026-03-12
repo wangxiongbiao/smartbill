@@ -13,6 +13,8 @@ export default function RecordsRoute() {
   return (
     <RecordsView
       records={app.records}
+      viewState={app.recordsViewState}
+      onViewStateChange={app.setRecordsViewState}
       lang={app.lang}
       isDeletingId={app.isDeletingId}
       onEdit={app.openInvoice}

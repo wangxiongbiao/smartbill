@@ -18,6 +18,7 @@ interface InvoiceEditorWorkspaceProps {
   template: TemplateType;
   isHeaderReversed: boolean;
   lang: Language;
+  onBack: () => void;
   userId?: User['id'];
   isExporting: boolean;
   isAIChatOpen: boolean;
@@ -42,6 +43,16 @@ interface InvoiceEditorWorkspaceProps {
 export default function InvoiceEditorWorkspace(props: InvoiceEditorWorkspaceProps) {
   return (
     <div className="container mx-auto flex flex-col gap-6 relative p-6">
+      <div className="flex items-center justify-between gap-4">
+        <button
+          type="button"
+          onClick={props.onBack}
+          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900"
+        >
+          <i className="fas fa-arrow-left text-xs"></i>
+          <span>{translations[props.lang].backToRecords || 'Back to invoices'}</span>
+        </button>
+      </div>
       <div className="lg:flex gap-4" style={{ zoom: 0.9 } as React.CSSProperties}>
         <div className="lg:w-1/2 flex flex-col gap-6">
           <InvoiceForm invoice={props.invoice} records={props.records} onChange={props.onUpdateInvoice} lang={props.lang} userId={props.userId} showToast={props.showToast} />

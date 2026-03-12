@@ -26,6 +26,7 @@ export default function EditorRoute() {
       isCreatingNewInvoice={false}
       showToast={app.showToast}
       onUpdateInvoice={app.updateInvoice}
+      onBack={() => window.history.length > 1 ? window.history.back() : app.setView('records')}
       onToggleAIChat={app.toggleAIChat}
       onCloseAIChat={app.closeAIChat}
       onCloseShareDialog={app.closeShareDialog}
