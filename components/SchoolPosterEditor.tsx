@@ -15,10 +15,7 @@ interface SchoolPosterEditorProps {
 function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-5">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{title}</h3>
-        {subtitle && <p className="mt-2 text-sm leading-6 text-slate-500">{subtitle}</p>}
-      </div>
+
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -46,13 +43,53 @@ function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   );
 }
 
-async function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
+interface ImageOptimizeOptions {
+  maxWidth: number;
+  maxHeight: number;
+  quality?: number;
+}
+
+async function readFileAsDataUrl(file: File, options?: ImageOptimizeOptions) {
+  const rawDataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+
+  if (!options || typeof window === 'undefined') {
+    return rawDataUrl;
+  }
+
+  try {
+    const { maxWidth, maxHeight, quality = 0.86 } = options;
+
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const nextImage = new Image();
+      nextImage.onload = () => resolve(nextImage);
+      nextImage.onerror = () => reject(new Error('Failed to decode image'));
+      nextImage.src = rawDataUrl;
+    });
+
+    const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
+    const targetWidth = Math.max(1, Math.round(image.width * scale));
+    const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return rawDataUrl;
+    }
+
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    return canvas.toDataURL('image/webp', quality);
+  } catch {
+    return rawDataUrl;
+  }
 }
 
 function UploadField({
@@ -66,6 +103,11 @@ function UploadField({
   uploadingLabel,
   onUpload,
   onRemove,
+  size = 'default',
+  showHintInEmptyState = true,
+  showHintInFilledState = true,
+  variant = 'default',
+  filledTitle,
 }: {
   label: string;
   value?: string;
@@ -77,35 +119,84 @@ function UploadField({
   uploadingLabel: string;
   onUpload: (file: File) => Promise<void>;
   onRemove: () => void;
+  size?: 'default' | 'compact';
+  showHintInEmptyState?: boolean;
+  showHintInFilledState?: boolean;
+  variant?: 'default' | 'summary';
+  filledTitle?: string;
 }) {
   const inputId = useId();
+  const isCompact = size === 'compact';
+  const isSummary = variant === 'summary';
 
   return (
     <div className="space-y-2">
       <FieldLabel>{label}</FieldLabel>
       {value ? (
-        <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-slate-50">
-          <div className="flex h-40 items-center justify-center overflow-hidden bg-white">
-            <img src={value} alt={label} className="h-full w-full object-contain" />
-          </div>
-          <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3">
-            <p className="text-xs text-slate-500">{hint}</p>
-            <div className="flex gap-2">
-              <label htmlFor={inputId} className="inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">
-                {uploading ? uploadingLabel : changeLabel}
-              </label>
-              <button type="button" onClick={onRemove} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-500">
-                {removeLabel}
-              </button>
+        isSummary ? (
+          <div className="flex h-28 items-center gap-4 rounded-[1.35rem] border border-slate-200 bg-slate-50 px-5">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <img src={value} alt={label} className="h-full w-full object-contain" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-bold text-slate-700">{filledTitle || label}</p>
+              {showHintInFilledState && (
+                <p className="mt-1 text-sm leading-5 text-slate-400">{hint}</p>
+              )}
+              <div className="mt-2 flex items-center gap-3 text-xs font-semibold">
+                <label htmlFor={inputId} className="cursor-pointer text-blue-600 transition hover:text-blue-700">
+                  {uploading ? uploadingLabel : changeLabel}
+                </label>
+                <button type="button" onClick={onRemove} className="text-slate-500 transition hover:text-slate-700">
+                  {removeLabel}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-slate-50">
+            <div className={`flex items-center justify-center overflow-hidden bg-white ${isCompact ? 'h-32' : 'h-40'}`}>
+              <img src={value} alt={label} className="h-full w-full object-contain" />
+            </div>
+            <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3">
+              {showHintInFilledState ? (
+                <p className="text-xs text-slate-500">{hint}</p>
+              ) : (
+                <div />
+              )}
+              <div className="flex gap-2">
+                <label htmlFor={inputId} className="inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">
+                  {uploading ? uploadingLabel : changeLabel}
+                </label>
+                <button type="button" onClick={onRemove} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-500">
+                  {removeLabel}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
       ) : (
-        <label htmlFor={inputId} className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-[1.35rem] border-2 border-dashed border-slate-300 bg-slate-50 text-center transition hover:border-blue-300 hover:bg-blue-50">
-          <i className={`fas ${uploading ? 'fa-circle-notch fa-spin' : 'fa-image'} text-xl text-slate-400`} />
-          <p className="mt-3 text-sm font-semibold text-slate-600">{uploading ? uploadingLabel : selectLabel}</p>
-          <p className="mt-1 text-xs text-slate-400">{hint}</p>
-        </label>
+        isSummary ? (
+          <label htmlFor={inputId} className="flex h-28 cursor-pointer items-center gap-4 rounded-[1.35rem] border-2 border-dashed border-slate-300 bg-slate-50 px-5 transition hover:border-blue-300 hover:bg-blue-50">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
+              <i className={`fas ${uploading ? 'fa-circle-notch fa-spin' : 'fa-image'} text-xl`} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-bold text-slate-700">{uploading ? uploadingLabel : selectLabel}</p>
+              {showHintInEmptyState && (
+                <p className="mt-1 text-sm leading-5 text-slate-400">{hint}</p>
+              )}
+            </div>
+          </label>
+        ) : (
+          <label htmlFor={inputId} className={`flex cursor-pointer flex-col items-center justify-center rounded-[1.35rem] border-2 border-dashed border-slate-300 bg-slate-50 text-center transition hover:border-blue-300 hover:bg-blue-50 ${isCompact ? 'h-32 px-4' : 'h-32'}`}>
+            <i className={`fas ${uploading ? 'fa-circle-notch fa-spin' : 'fa-image'} ${isCompact ? 'text-lg' : 'text-xl'} text-slate-400`} />
+            <p className={`font-semibold text-slate-600 ${isCompact ? 'mt-2 text-xs' : 'mt-3 text-sm'}`}>{uploading ? uploadingLabel : selectLabel}</p>
+            {showHintInEmptyState && (
+              <p className={`text-slate-400 ${isCompact ? 'mt-1 text-[0.6875rem] leading-4' : 'mt-1 text-xs'}`}>{hint}</p>
+            )}
+          </label>
+        )
       )}
       <input
         id={inputId}
@@ -156,10 +247,14 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       heroHint: '用于左侧主图区，建议上传横版或竖版校园图。',
       qrHint: '用于右下角二维码区，不上传则整块自动隐藏。',
       footerPlaceholder: '可写成一行说明，也可以手动换行。',
+      brandLogoReady: '已添加品牌 Logo',
+      brandLogoActionHint: '可点击按钮更换或移除',
       upload: '点击上传图片',
       uploading: '上传中...',
       change: '更换',
       remove: '移除',
+      addLine: '添加一行',
+      removeLine: '删除',
     }
     : {
       back: 'Back to posters',
@@ -189,18 +284,49 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       heroHint: 'Used in the main left-side image block.',
       qrHint: 'Used in the QR code block. Leave empty to hide it.',
       footerPlaceholder: 'Write one line or multiple lines as needed.',
+      brandLogoReady: 'Brand logo added',
+      brandLogoActionHint: 'Use the buttons to replace or remove it',
       upload: 'Click to upload',
       uploading: 'Uploading...',
       change: 'Replace',
       remove: 'Remove',
+      addLine: 'Add line',
+      removeLine: 'Remove',
     };
 
+  const getPlaceholder = (label: string) => (
+    isZh ? `请输入${label}` : `Enter ${label}`
+  );
+
   const updatePoster = (next: SchoolPoster) => onChange(next);
+  const brandSubtitleLines = poster.shell.brand.subtitle.length > 0
+    ? poster.shell.brand.subtitle.split('\n')
+    : [''];
+
+  const updateBrandSubtitleLines = (lines: string[]) => {
+    updatePoster({
+      ...poster,
+      shell: {
+        ...poster.shell,
+        brand: {
+          ...poster.shell.brand,
+          subtitle: lines.join('\n'),
+        },
+      },
+    });
+  };
 
   const handleImageUpload = async (field: 'shell.brand.logo' | 'shell.heroImage' | 'shell.qrCode', file: File) => {
     setUploadingField(field);
     try {
-      const imageData = await readFileAsDataUrl(file);
+      const imageData = await readFileAsDataUrl(
+        file,
+        field === 'shell.heroImage'
+          ? { maxWidth: 1280, maxHeight: 1280, quality: 0.82 }
+          : field === 'shell.qrCode'
+            ? { maxWidth: 720, maxHeight: 720, quality: 0.92 }
+            : { maxWidth: 640, maxHeight: 640, quality: 0.9 }
+      );
 
       if (field === 'shell.brand.logo') {
         updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, logo: imageData } } });
@@ -234,27 +360,71 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       <div className="lg:flex gap-4">
         <div className="lg:w-1/2 flex flex-col gap-6">
           <SectionCard title={copy.brandCard} subtitle={copy.brandHint}>
-            <UploadField
-              label={copy.brandLogo}
-              value={poster.shell.brand.logo}
-              hint={copy.brandHint}
-              uploading={uploadingField === 'shell.brand.logo'}
-              selectLabel={copy.upload}
-              changeLabel={copy.change}
-              removeLabel={copy.remove}
-              uploadingLabel={copy.uploading}
-              onUpload={(file) => handleImageUpload('shell.brand.logo', file)}
-              onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, logo: undefined } } })}
-            />
+            <div className="grid gap-5 md:grid-cols-2 md:items-start">
+              <UploadField
+                label={copy.brandLogo}
+                value={poster.shell.brand.logo}
+                hint={copy.brandLogoActionHint}
+                uploading={uploadingField === 'shell.brand.logo'}
+                selectLabel={copy.upload}
+                changeLabel={copy.change}
+                removeLabel={copy.remove}
+                uploadingLabel={copy.uploading}
+                onUpload={(file) => handleImageUpload('shell.brand.logo', file)}
+                onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, logo: undefined } } })}
+                variant="summary"
+                filledTitle={copy.brandLogoReady}
+              />
 
-            <div className="space-y-2">
-              <FieldLabel>{copy.brandTitle}</FieldLabel>
-              <TextInput value={poster.shell.brand.title} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, title: event.target.value } } })} />
+              <div className="space-y-2">
+                <FieldLabel>{copy.brandTitle}</FieldLabel>
+                <TextInput className="h-28 px-6 text-base" placeholder={getPlaceholder(copy.brandTitle)} value={poster.shell.brand.title} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, title: event.target.value } } })} />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <FieldLabel>{copy.brandSubtitle}</FieldLabel>
-              <TextArea rows={3} value={poster.shell.brand.subtitle} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, subtitle: event.target.value } } })} />
+              <div className="grid gap-3 md:grid-cols-2">
+                {brandSubtitleLines.map((line, index) => (
+                  <div key={`brand-subtitle-${index}`} className="relative">
+                    <TextInput
+                      className="pr-11"
+                      placeholder={isZh ? `请输入${copy.brandSubtitle}${index + 1}` : `${copy.brandSubtitle} ${index + 1}`}
+                      value={line}
+                      onChange={(event) => {
+                        const nextLines = [...brandSubtitleLines];
+                        nextLines[index] = event.target.value;
+                        updateBrandSubtitleLines(nextLines);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (brandSubtitleLines.length === 1) {
+                          updateBrandSubtitleLines(['']);
+                          return;
+                        }
+
+                        const nextLines = brandSubtitleLines.filter((_, lineIndex) => lineIndex !== index);
+                        updateBrandSubtitleLines(nextLines.length > 0 ? nextLines : ['']);
+                      }}
+                      className="absolute right-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-400 shadow-sm transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-600"
+                      aria-label={copy.removeLine}
+                      title={copy.removeLine}
+                    >
+                      <i className="fas fa-times text-[0.5625rem]"></i>
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => updateBrandSubtitleLines([...brandSubtitleLines, ''])}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-500 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                >
+                  <i className="fas fa-plus text-[0.625rem]"></i>
+                  <span>{copy.addLine}</span>
+                </button>
+              </div>
             </div>
           </SectionCard>
 
@@ -262,41 +432,39 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel>{copy.schoolCn}</FieldLabel>
-                <TextInput value={poster.shell.school.nameCn} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, school: { ...poster.shell.school, nameCn: event.target.value } } })} />
+                <TextInput placeholder={getPlaceholder(copy.schoolCn)} value={poster.shell.school.nameCn} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, school: { ...poster.shell.school, nameCn: event.target.value } } })} />
               </div>
               <div className="space-y-2">
                 <FieldLabel>{copy.schoolEn}</FieldLabel>
-                <TextInput value={poster.shell.school.nameEn} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, school: { ...poster.shell.school, nameEn: event.target.value } } })} />
+                <TextInput placeholder={getPlaceholder(copy.schoolEn)} value={poster.shell.school.nameEn} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, school: { ...poster.shell.school, nameEn: event.target.value } } })} />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
               <div className="space-y-2">
                 <FieldLabel>{copy.studentName}</FieldLabel>
-                <TextInput value={poster.shell.student.name} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, name: event.target.value } } })} />
+                <TextInput placeholder={getPlaceholder(copy.studentName)} value={poster.shell.student.name} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, name: event.target.value } } })} />
               </div>
               <div className="space-y-2">
                 <FieldLabel>{copy.studentAge}</FieldLabel>
-                <TextInput value={poster.shell.student.age} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, age: event.target.value } } })} />
+                <TextInput placeholder={getPlaceholder(copy.studentAge)} value={poster.shell.student.age} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, age: event.target.value } } })} />
               </div>
               <div className="space-y-2">
                 <FieldLabel>{copy.studentCity}</FieldLabel>
-                <TextInput value={poster.shell.student.city} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, city: event.target.value } } })} />
+                <TextInput placeholder={getPlaceholder(copy.studentCity)} value={poster.shell.student.city} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, city: event.target.value } } })} />
               </div>
             </div>
 
             <div className="space-y-2">
               <FieldLabel>{copy.applicationPeriod}</FieldLabel>
-              <TextInput value={poster.shell.student.applicationPeriod} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, applicationPeriod: event.target.value } } })} />
+              <TextInput placeholder={getPlaceholder(copy.applicationPeriod)} value={poster.shell.student.applicationPeriod} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, applicationPeriod: event.target.value } } })} />
             </div>
 
             <div className="space-y-2">
               <FieldLabel>{copy.transferPath}</FieldLabel>
-              <TextArea rows={4} value={poster.shell.student.transferPath} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, transferPath: event.target.value } } })} />
+              <TextInput placeholder={getPlaceholder(copy.transferPath)} value={poster.shell.student.transferPath} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, student: { ...poster.shell.student, transferPath: event.target.value } } })} />
             </div>
-          </SectionCard>
 
-          <SectionCard title={copy.assetsCard} subtitle={copy.assetsHint}>
             <UploadField
               label={copy.heroImage}
               value={poster.shell.heroImage}
@@ -309,35 +477,39 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
               onUpload={(file) => handleImageUpload('shell.heroImage', file)}
               onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, heroImage: undefined } })}
             />
-
-            <UploadField
-              label={copy.qrImage}
-              value={poster.shell.qrCode}
-              hint={copy.qrHint}
-              uploading={uploadingField === 'shell.qrCode'}
-              selectLabel={copy.upload}
-              changeLabel={copy.change}
-              removeLabel={copy.remove}
-              uploadingLabel={copy.uploading}
-              onUpload={(file) => handleImageUpload('shell.qrCode', file)}
-              onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, qrCode: undefined } })}
-            />
           </SectionCard>
 
           <SectionCard title={copy.footerCard} subtitle={copy.footerHint}>
-            <div className="space-y-2">
-              <FieldLabel>{copy.tuition}</FieldLabel>
-              <TextInput value={poster.shell.footer.tuition} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, tuition: event.target.value } } })} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <FieldLabel>{copy.tuition}</FieldLabel>
+                <TextInput placeholder={getPlaceholder(copy.tuition)} value={poster.shell.footer.tuition} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, tuition: event.target.value } } })} />
+              </div>
+
+              <div className="space-y-2">
+                <FieldLabel>{copy.pathway}</FieldLabel>
+                <TextInput placeholder={getPlaceholder(copy.pathway)} value={poster.shell.footer.pathway} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, pathway: event.target.value } } })} />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <FieldLabel>{copy.pathway}</FieldLabel>
-              <TextInput value={poster.shell.footer.pathway} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, pathway: event.target.value } } })} />
-            </div>
+            <div className="grid gap-4 md:grid-cols-2 md:items-start">
+              <div className="space-y-2">
+                <FieldLabel>{copy.highlights}</FieldLabel>
+                <TextArea rows={4} value={poster.shell.footer.highlights} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, highlights: event.target.value } } })} placeholder={copy.footerPlaceholder || getPlaceholder(copy.highlights)} />
+              </div>
 
-            <div className="space-y-2">
-              <FieldLabel>{copy.highlights}</FieldLabel>
-              <TextArea rows={4} value={poster.shell.footer.highlights} onChange={(event) => updatePoster({ ...poster, shell: { ...poster.shell, footer: { ...poster.shell.footer, highlights: event.target.value } } })} placeholder={copy.footerPlaceholder} />
+              <UploadField
+                label={copy.qrImage}
+                value={poster.shell.qrCode}
+                hint={copy.qrHint}
+                uploading={uploadingField === 'shell.qrCode'}
+                selectLabel={copy.upload}
+                changeLabel={copy.change}
+                removeLabel={copy.remove}
+                uploadingLabel={copy.uploading}
+                onUpload={(file) => handleImageUpload('shell.qrCode', file)}
+                onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, qrCode: undefined } })}
+              />
             </div>
           </SectionCard>
         </div>

@@ -366,5 +366,10 @@ export function readSchoolPosters(storageKey: string): SchoolPoster[] {
 
 export function writeSchoolPosters(storageKey: string, records: SchoolPoster[]) {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(storageKey, JSON.stringify(records));
+
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(records));
+  } catch (error) {
+    console.error('[writeSchoolPosters] Failed to persist school posters.', error);
+  }
 }

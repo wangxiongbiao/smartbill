@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppShell } from '@/components/app/AppShellClient';
 import ContentSkeleton from '@/components/app/ContentSkeleton';
 import SchoolPosterEditor from '@/components/SchoolPosterEditor';
 import { useSchoolPosters } from '@/hooks/useSchoolPosters';
-import { clearSchoolPosterContent } from '@/lib/school-posters';
-import type { SchoolPoster } from '@/types';
 
 interface SchoolPosterEditorRouteProps {
   posterId: string;
@@ -17,25 +14,7 @@ export default function SchoolPosterEditorRoute({ posterId }: SchoolPosterEditor
   const app = useAppShell();
   const router = useRouter();
   const posters = useSchoolPosters({ userId: app.user?.id });
-  const [draftPoster, setDraftPoster] = useState<SchoolPoster | null>(null);
   const poster = posters.getPoster(posterId);
-
-  useEffect(() => {
-    if (app.isBootstrapping || !app.user || !posters.isHydrated || !poster) return;
-
-    const resetKey = `school_poster_content_reset_v1:${poster.id}`;
-    const alreadyReset = window.localStorage.getItem(resetKey) === '1';
-
-    if (alreadyReset) {
-      setDraftPoster(poster);
-      return;
-    }
-
-    const clearedPoster = clearSchoolPosterContent(poster);
-    window.localStorage.setItem(resetKey, '1');
-    setDraftPoster(clearedPoster);
-    posters.savePoster(clearedPoster);
-  }, [app.isBootstrapping, app.user, poster, posters]);
 
   if (app.isBootstrapping || !app.user || !posters.isHydrated) return <ContentSkeleton blocks={4} />;
 
@@ -64,16 +43,11 @@ export default function SchoolPosterEditorRoute({ posterId }: SchoolPosterEditor
     );
   }
 
-  if (!draftPoster || draftPoster.id !== poster.id) return <ContentSkeleton blocks={4} />;
-
   return (
     <SchoolPosterEditor
-      poster={draftPoster}
+      poster={poster}
       lang={app.lang}
-      onChange={(nextPoster) => {
-        setDraftPoster(nextPoster);
-        posters.savePoster(nextPoster);
-      }}
+      onChange={posters.savePoster}
       onBack={() => router.push('/school-posters')}
     />
   );
