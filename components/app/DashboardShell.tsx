@@ -32,7 +32,7 @@ export default function DashboardShell(props: DashboardShellProps) {
           onShare={props.onShare}
           onSendEmail={props.onSendEmail}
           onLangChange={props.onSetLang}
-          onBack={() => props.onSetView('records')}
+          onBack={() => props.onSetView(props.activeView === 'school-editor' ? 'school-records' : 'records')}
         />
 
         <main className="flex-1" data-ui-main>{props.children}</main>

@@ -5,7 +5,7 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { getProfile } from '@/lib/api/invoice';
 import type { User, ViewType } from '@/types';
 
-const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail'];
+const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail', 'school-records', 'school-editor'];
 
 interface UsePersistentAuthSessionParams {
   activeView: ViewType;

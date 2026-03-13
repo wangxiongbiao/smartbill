@@ -146,6 +146,89 @@ export interface Invoice {
   };
 }
 
+export interface SchoolPosterBrand {
+  logo?: string;
+  title: string;
+  subtitle: string;
+}
+
+export interface SchoolPosterInfo {
+  nameCn: string;
+  nameEn: string;
+}
+
+export interface SchoolPosterStudent {
+  name: string;
+  age: string;
+  city: string;
+  applicationPeriod: string;
+  transferPath: string;
+}
+
+export interface SchoolPosterOfferRow {
+  id: string;
+  item: string;
+  amount: string;
+  dueDate: string;
+}
+
+export type SchoolPosterLayoutId = 'offer-poster' | 'letter-poster';
+export type SchoolPosterDocumentMode = 'offer-table' | 'image';
+
+export interface SchoolPosterShellVisibility {
+  brand: boolean;
+  school: boolean;
+  student: boolean;
+  footer: boolean;
+  qr: boolean;
+}
+
+export interface SchoolPosterDocument {
+  mode: SchoolPosterDocumentMode;
+  logo?: string;
+  image?: string;
+  date: string;
+  reference: string;
+  recipient: string;
+  title: string;
+  greeting: string;
+  introduction: string;
+  confirmation: string;
+  paymentNote: string;
+  totalLabel: string;
+  rows: SchoolPosterOfferRow[];
+}
+
+export interface SchoolPosterShellFooter {
+  tuition: string;
+  pathway: string;
+  highlights: string;
+}
+
+export interface SchoolPosterDocumentFrame {
+  variant: 'placeholder';
+}
+
+export interface SchoolPosterShell {
+  brand: SchoolPosterBrand;
+  school: SchoolPosterInfo;
+  student: SchoolPosterStudent;
+  heroImage?: string;
+  qrCode?: string;
+  footer: SchoolPosterShellFooter;
+  documentFrame: SchoolPosterDocumentFrame;
+  visibility: SchoolPosterShellVisibility;
+}
+
+export interface SchoolPoster {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  layoutId: SchoolPosterLayoutId;
+  shell: SchoolPosterShell;
+  document: SchoolPosterDocument;
+}
+
 export type TemplateType = "minimalist";
 export type TemplateCategory =
   | "business"
@@ -159,6 +242,8 @@ export type ViewType =
   | "home"
   | "editor"
   | "records"
+  | "school-records"
+  | "school-editor"
   | "templates"
   | "template-detail"
   | "profile"

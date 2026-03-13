@@ -81,4 +81,4 @@ export interface AppShellContextValue {
   bumpTemplateUsageAndRefresh: (id: string) => Promise<void>;
 }
 
-export const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail'];
+export const PRIVATE_VIEWS: ViewType[] = ['records', 'profile', 'editor', 'templates', 'template-detail', 'school-records', 'school-editor'];
