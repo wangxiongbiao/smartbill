@@ -195,6 +195,7 @@ export function useAppShellState() {
 
   useEffect(() => {
     if (!invoiceIdFromPath || records.length === 0) return;
+    if (workspace.invoice.id === invoiceIdFromPath) return;
     const targetInvoice = records.find((record) => record.id === invoiceIdFromPath);
     if (!targetInvoice) return;
 
@@ -204,6 +205,7 @@ export function useAppShellState() {
   }, [
     invoiceIdFromPath,
     records,
+    workspace.invoice.id,
     workspace.actions.setInvoice,
     workspace.actions.setTemplate,
     workspace.actions.setIsHeaderReversed,
