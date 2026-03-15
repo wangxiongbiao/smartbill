@@ -38,7 +38,7 @@ export async function saveTemplate(
             address: '',
             phone: ''
         },
-        status: 'Draft'
+        status: 'Pending'
     };
 
     const { data, error } = await supabase

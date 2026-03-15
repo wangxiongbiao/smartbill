@@ -133,7 +133,7 @@ export interface Invoice {
   taxRate: number;
   currency: string;
   notes: string;
-  status?: "Draft" | "Sent" | "Paid";
+  status?: "Pending" | "Paid" | "Draft" | "Sent";
   // Template Configuration
   template?: TemplateType;
   isHeaderReversed?: boolean;

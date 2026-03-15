@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import RevenueTrendChart from '@/components/charts/RevenueTrendChart';
 import { Invoice, Language } from '../types';
 import { calculateInvoiceTotal } from '@/lib/invoice';
-import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
+import { getInvoiceDisplayStatus, normalizeInvoiceStatus } from '@/lib/invoice-status';
 import { getDefaultCurrencyForLanguage, getLocaleForLanguage } from '@/lib/language';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { convertAmountWithRates } from '@/lib/exchange-rates';
@@ -26,7 +26,8 @@ function formatCurrency(amount: number, currency = 'USD', lang: Language = 'en')
 }
 
 function isBillingRecord(invoice: Pick<Invoice, 'status'>) {
-  return invoice.status === 'Sent' || invoice.status === 'Paid';
+  const normalizedStatus = normalizeInvoiceStatus(invoice.status);
+  return normalizedStatus === 'Pending' || normalizedStatus === 'Paid';
 }
 
 const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpenRecords, onOpenTemplates, onOpenAI, onExportLatest }) => {
@@ -368,13 +369,11 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
           id: invoice.id,
           title: invoice.invoiceNumber,
           subtitle: invoice.client.name || copy.unnamedClient,
-          status: invoice.status === 'Draft'
-            ? copy.draftStatus
-            : displayStatus === 'paid'
-              ? copy.paidStatus
-              : displayStatus === 'overdue'
-                ? copy.overdue
-                : copy.pending,
+          status: displayStatus === 'paid'
+            ? copy.paidStatus
+            : displayStatus === 'overdue'
+              ? copy.overdue
+              : copy.pending,
           amount: formatCurrency(calculateInvoiceTotal(invoice), invoice.currency, lang),
           date: invoice.date
         };

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserInvoices } from '@/lib/supabase-db';
 import { calculateInvoiceTotal, calculateInvoiceTotals } from '@/lib/invoice';
-import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
+import { getInvoiceDisplayStatus, normalizeInvoiceStatus } from '@/lib/invoice-status';
 
 function isBillingRecord(invoice: { status?: string }) {
-  return invoice.status === 'Sent' || invoice.status === 'Paid';
+  const normalized = normalizeInvoiceStatus(invoice.status as any);
+  return normalized === 'Pending' || normalized === 'Paid';
 }
 
 export async function GET(request: NextRequest) {

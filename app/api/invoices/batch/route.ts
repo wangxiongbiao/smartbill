@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { batchSaveInvoices } from '@/lib/supabase-db';
+import { normalizeInvoiceStatus } from '@/lib/invoice-status';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -9,7 +10,9 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const invoices = Array.isArray(body?.invoices) ? body.invoices : [];
+  const invoices = Array.isArray(body?.invoices)
+    ? body.invoices.map((invoice) => ({ ...invoice, status: normalizeInvoiceStatus(invoice.status) }))
+    : [];
 
   await batchSaveInvoices(user.id, invoices, supabase);
   return NextResponse.json({ success: true });

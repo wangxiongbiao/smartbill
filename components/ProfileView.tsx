@@ -5,7 +5,7 @@ import { updateProfile } from '@/lib/api/invoice';
 import { useBillingProfiles } from '@/hooks/useBillingProfiles';
 import { getSenderDefaultsFromBillingProfile } from '@/lib/billing-profiles';
 import { calculateInvoiceTotal } from '@/lib/invoice';
-import { isInvoicePaid } from '@/lib/invoice-status';
+import { isInvoicePaid, normalizeInvoiceStatus } from '@/lib/invoice-status';
 import { getLocaleForLanguage } from '@/lib/language';
 
 interface ProfileViewProps {
@@ -445,7 +445,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   const safeUserName = user?.name || '';
   const safeUserEmail = user?.email || '';
   const initials = safeUserName.slice(0, 2).toUpperCase();
-  const billableRecords = records.filter((record) => record.status === 'Sent' || record.status === 'Paid');
+  const billableRecords = records.filter((record) => {
+    const normalizedStatus = normalizeInvoiceStatus(record.status);
+    return normalizedStatus === 'Pending' || normalizedStatus === 'Paid';
+  });
   const latestCurrency = billableRecords.find((record) => record.currency)?.currency || records.find((record) => record.currency)?.currency || 'USD';
   const totalBilled = billableRecords.reduce((sum, record) => sum + calculateInvoiceTotal(record), 0);
   const paidCount = billableRecords.filter((record) => isInvoicePaid(record)).length;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { deleteInvoice, getUserInvoices, saveInvoice } from '@/lib/supabase-db';
 import { syncBillingProfilesForInvoice } from '@/lib/supabase-billing-profiles';
+import { normalizeInvoiceStatus } from '@/lib/invoice-status';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -14,7 +15,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const invoices = await getUserInvoices(user.id, supabase);
+  const invoices = (await getUserInvoices(user.id, supabase)).map((invoice) => ({
+    ...invoice,
+    status: normalizeInvoiceStatus(invoice.status),
+  }));
+
   return NextResponse.json({ invoices });
 }
 
@@ -29,9 +34,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invoice is required' }, { status: 400 });
   }
 
-  await saveInvoice(user.id, body.invoice, supabase);
+  const normalizedInvoice = {
+    ...body.invoice,
+    status: normalizeInvoiceStatus(body.invoice.status),
+  };
+
+  await saveInvoice(user.id, normalizedInvoice, supabase);
   try {
-    await syncBillingProfilesForInvoice(user.id, body.invoice, supabase);
+    await syncBillingProfilesForInvoice(user.id, normalizedInvoice, supabase);
   } catch (error) {
     console.error('Failed to sync billing profiles after saving invoice:', error);
   }

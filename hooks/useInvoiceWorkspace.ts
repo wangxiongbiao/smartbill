@@ -24,7 +24,7 @@ export const INITIAL_INVOICE: Invoice = {
   taxRate: 0,
   currency: 'CNY',
   notes: '感谢您的支持！',
-  status: 'Draft',
+  status: 'Pending',
   visibility: { date: true, dueDate: false }
 };
 
@@ -184,7 +184,7 @@ export function useInvoiceWorkspace(params: {
       date: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       client: { name: '', email: '', address: '' },
-      status: 'Draft'
+      status: 'Pending'
     };
 
     waitForFirstEditRef.current = !!user?.id;
@@ -207,7 +207,7 @@ export function useInvoiceWorkspace(params: {
       invoiceNumber: `INV-${newId.slice(-6)}`,
       date: new Date().toISOString().split('T')[0],
       dueDate: sourceInvoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: 'Draft',
+      status: 'Pending',
       items: sourceInvoice.items.map((item, index) => ({
         ...item,
         id: `${newId}-item-${index + 1}`

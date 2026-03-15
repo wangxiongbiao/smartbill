@@ -505,7 +505,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                             key: 'pending',
                             label: copy.pending,
                             hint: copy.statusPendingHint,
-                            nextStatus: 'Sent' as Invoice['status'],
+                            nextStatus: 'Pending' as Invoice['status'],
                             icon: 'fa-clock',
                             className: 'border-amber-200 bg-amber-50/80 text-amber-700',
                             active: statusMeta.key === 'pending' || statusMeta.key === 'overdue',

@@ -1,6 +1,11 @@
 import type { Invoice } from '@/types';
 
 export type InvoiceDisplayStatus = 'pending' | 'paid' | 'overdue';
+export type NormalizedInvoiceStatus = 'Pending' | 'Paid';
+
+export function normalizeInvoiceStatus(status?: Invoice['status']): NormalizedInvoiceStatus {
+  return status === 'Paid' ? 'Paid' : 'Pending';
+}
 
 function parseLocalDate(value?: string | null) {
   if (!value) return null;
@@ -21,7 +26,7 @@ function getStartOfLocalDay(value = new Date()) {
 }
 
 export function isInvoicePaid(invoice: Pick<Invoice, 'status'>) {
-  return invoice.status === 'Paid';
+  return normalizeInvoiceStatus(invoice.status) === 'Paid';
 }
 
 export function isInvoiceOverdue(invoice: Pick<Invoice, 'status' | 'dueDate'>, today = new Date()) {

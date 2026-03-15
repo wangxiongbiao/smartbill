@@ -265,7 +265,7 @@ export function buildPublicTemplatePreviewInvoice(template: InvoiceTemplate): In
     taxRate: template.template_data.taxRate || 0,
     currency: template.template_data.currency || 'USD',
     notes: template.template_data.notes || '',
-    status: 'Draft',
+    status: 'Pending',
     template: template.template_data.template || 'minimalist',
     isHeaderReversed: template.template_data.isHeaderReversed ?? true,
     visibility: {
