@@ -7,6 +7,10 @@ function getSupabaseClient(supabase?: SupabaseClient) {
     return supabase ?? createBrowserClient();
 }
 
+function isMissingTableError(error: { code?: string; message?: string } | null, tableName: string) {
+    return error?.code === '42P01' || error?.message?.includes(tableName);
+}
+
 /**
  * 获取用户 profile
  */
@@ -23,6 +27,10 @@ export async function getUserProfile(userId: string, supabase?: SupabaseClient):
             console.log('[getUserProfile] Profile not found for user:', userId, '(first-time user)');
             return null;
         }
+        if (isMissingTableError(error, 'profiles')) {
+            console.warn('[getUserProfile] profiles table is missing, returning null profile');
+            return null;
+        }
         console.error('[getUserProfile] Error fetching profile:', error);
         return null;
     }
@@ -36,13 +44,19 @@ export async function updateUserProfile(userId: string, updates: Partial<Pick<Pr
     const client = getSupabaseClient(supabase);
     const { error } = await client
         .from('profiles')
-        .update({
+        .upsert({
+            id: userId,
             ...updates,
             updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
+        }, {
+            onConflict: 'id'
+        });
 
     if (error) {
+        if (isMissingTableError(error, 'profiles')) {
+            console.warn('[updateUserProfile] profiles table is missing, skipping remote profile update');
+            return;
+        }
         console.error('Error updating profile:', error);
         throw error;
     }
@@ -103,11 +117,17 @@ export async function getUserInvoices(userId: string, supabase?: SupabaseClient)
         .order('created_at', { ascending: false });
 
     if (error) {
+        if (isMissingTableError(error, 'invoices')) {
+            console.warn('[getUserInvoices] invoices table is missing, returning empty list');
+            return [];
+        }
         console.error('Error fetching invoices:', error);
         throw error;
     }
 
-    return data.map(row => row.invoice_data as Invoice);
+    return (data || [])
+        .map(row => row.invoice_data as Invoice | null)
+        .filter((invoice): invoice is Invoice => Boolean(invoice?.id));
 }
 
 /**
@@ -124,6 +144,10 @@ export async function getLatestInvoice(userId: string, supabase?: SupabaseClient
         .single();
 
     if (error || !data) {
+        if (isMissingTableError(error ?? null, 'invoices')) {
+            console.warn('[getLatestInvoice] invoices table is missing, returning null');
+            return null;
+        }
         console.log('[getLatestInvoice] No invoice found or error:', error?.message);
         return null;
     }
@@ -148,6 +172,10 @@ export async function deleteInvoice(invoiceId: string, userId?: string, supabase
     const { error } = await query;
 
     if (error) {
+        if (isMissingTableError(error, 'invoices')) {
+            console.warn('[deleteInvoice] invoices table is missing, skipping remote delete');
+            return;
+        }
         console.error('Error deleting invoice:', error);
         throw error;
     }
@@ -173,6 +201,10 @@ export async function batchSaveInvoices(userId: string, invoices: Invoice[], sup
         .upsert(records, { onConflict: 'id' });
 
     if (error) {
+        if (isMissingTableError(error, 'invoices')) {
+            console.warn('[batchSaveInvoices] invoices table is missing, skipping remote batch sync');
+            return;
+        }
         console.error('Error batch saving invoices:', error);
         throw error;
     }

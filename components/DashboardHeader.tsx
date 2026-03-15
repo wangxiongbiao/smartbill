@@ -13,10 +13,10 @@ interface DashboardHeaderProps {
     saveStatus: 'idle' | 'saving' | 'saved' | 'error';
     lastSavedTime?: Date;
     isExporting: boolean;
-    onExportPdf: () => void;
-    onSaveTemplate: () => void;
-    onShare: () => void;
-    onSendEmail: () => void;
+    onExportPdf?: () => void;
+    onSaveTemplate?: () => void;
+    onShare?: () => void;
+    onSendEmail?: () => void;
     onLangChange: (lang: Language) => void;
     onBack?: () => void;
 }
@@ -70,16 +70,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         onBack
     });
 
+    const canRenderEditorActions = isEditorActionView(activeView) && onExportPdf && onSaveTemplate && onShare && onSendEmail;
+
     return (
         <div className="sticky top-0 z-40 flex-shrink-0 bg-white border-b border-slate-100 px-6 h-[4.5rem] flex items-center justify-between shadow-[0_0.25rem_1.25rem_-0.625rem_rgba(0,0,0,0.05)]" data-ui-header>
-            {/* Left: Breadcrumbs */}
             <div className="flex items-center gap-3">
                 {breadcrumbs}
             </div>
 
-            {/* Right: Actions */}
             <div className="flex items-center gap-3">
-                {isEditorActionView(activeView) && (
+                {canRenderEditorActions && (
                     <>
                         <button
                             onClick={onSendEmail}
@@ -113,13 +113,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                             <span>{isExporting ? t.generating : t.exportPdf}</span>
                         </button>
 
-
-
                         <div className="w-px h-6 bg-slate-200 mx-1"></div>
                     </>
                 )}
 
-                {/* Language Selector */}
                 <LanguageToggle lang={lang} onChange={onLangChange} ariaLabel={copy.language} />
             </div>
         </div>

@@ -23,20 +23,20 @@ export default function DashboardShell(props: DashboardShellProps) {
           user={props.user}
           lang={props.lang}
           activeView={props.activeView}
-          invoice={props.invoice}
-          saveStatus={props.saveStatus}
-          lastSavedTime={props.lastSavedTime}
-          isExporting={props.isExporting}
-          onExportPdf={props.onExportPdf}
-          onSaveTemplate={props.onSaveTemplate}
-          onShare={props.onShare}
-          onSendEmail={props.onSendEmail}
+          invoice={props.editorState?.invoice}
+          saveStatus={props.editorState?.saveStatus || 'idle'}
+          lastSavedTime={props.editorState?.lastSavedTime}
+          isExporting={props.editorState?.isExporting || false}
+          onExportPdf={props.editorState?.onExportPdf}
+          onSaveTemplate={props.editorState?.onSaveTemplate}
+          onShare={props.editorState?.onShare}
+          onSendEmail={props.editorState?.onSendEmail}
           onLangChange={props.onSetLang}
-          onBack={() => props.onSetView(props.activeView === 'school-editor' ? 'school-records' : 'records')}
+          onBack={props.editorState?.onBack}
         />
 
         <main className="flex-1" data-ui-main>{props.children}</main>
-        {props.printArea}
+        {props.editorState?.printArea}
         <div className="md:hidden">
           <BottomNav activeView={props.activeView} setView={props.onSetView} lang={props.lang} />
         </div>

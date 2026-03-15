@@ -17,26 +17,43 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
   const [user, setUser] = useState<User | null>(null);
   const syncRef = useRef<string | null>(null);
   const userRef = useRef<User | null>(null);
+  const bootstrappedRef = useRef(false);
+  const activeViewRef = useRef(activeView);
 
   useEffect(() => {
     userRef.current = user;
   }, [user]);
 
   useEffect(() => {
+    activeViewRef.current = activeView;
+  }, [activeView]);
+
+  useEffect(() => {
     let mounted = true;
     const supabase = createSupabaseClient();
 
-    const syncUser = async (authUser: any) => {
+    const finishBootstrapping = () => {
       if (!mounted) return;
-      if (syncRef.current === authUser.id && userRef.current?.id === authUser.id) {
-        setIsBootstrapping(false);
+      bootstrappedRef.current = true;
+      setIsBootstrapping(false);
+    };
+
+    const clearSessionState = () => {
+      syncRef.current = null;
+      setUser(null);
+      localStorage.removeItem('sb_user_session');
+    };
+
+    const syncUser = async (authUser: any, options?: { force?: boolean }) => {
+      if (!mounted) return;
+      if (!options?.force && syncRef.current === authUser.id && userRef.current?.id === authUser.id) {
+        finishBootstrapping();
         return;
       }
 
       syncRef.current = authUser.id;
       try {
         const { profile } = await getProfile(authUser.id);
-
         if (!mounted) return;
 
         const nextUser: User = {
@@ -52,9 +69,7 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
       } catch (error) {
         console.error('[AuthSession] Sync failed:', error);
       } finally {
-        if (mounted) {
-          setIsBootstrapping(false);
-        }
+        finishBootstrapping();
       }
     };
 
@@ -80,13 +95,13 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
           return;
         }
 
-        setUser(null);
-        setIsBootstrapping(false);
+        clearSessionState();
+        finishBootstrapping();
       } catch (error) {
         console.error('[AuthSession] Initial session restore failed:', error);
         if (mounted) {
-          setUser(null);
-          setIsBootstrapping(false);
+          clearSessionState();
+          finishBootstrapping();
         }
       }
     };
@@ -97,30 +112,29 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
       if (!mounted) return;
 
       if (session?.user) {
-        await syncUser(session.user);
+        await syncUser(session.user, { force: event !== 'TOKEN_REFRESHED' });
         return;
       }
 
       if (event === 'SIGNED_OUT') {
-        syncRef.current = null;
-        setUser(null);
-        localStorage.removeItem('sb_user_session');
+        clearSessionState();
       }
 
-      if (!session?.user && PRIVATE_VIEWS.includes(activeView)) {
+      if (!session?.user && PRIVATE_VIEWS.includes(activeViewRef.current)) {
         // 保持壳子稳定，不在这里做整屏跳转
       }
 
-      setIsBootstrapping(false);
+      finishBootstrapping();
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [activeView]);
+  }, []);
 
   useEffect(() => {
+    if (!bootstrappedRef.current) return;
     if (user) localStorage.setItem('sb_user_session', JSON.stringify(user));
     else localStorage.removeItem('sb_user_session');
   }, [user]);

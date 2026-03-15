@@ -1,36 +1,47 @@
 "use client";
 
 import { useEffect } from 'react';
+import { bumpTemplateUsage } from '@/lib/api/template';
 import { useAppShell } from '@/components/app/AppShellClient';
 import ContentSkeleton from '@/components/app/ContentSkeleton';
 import TemplatesView from '@/components/TemplatesView';
+import { useTemplateStore } from '@/hooks/useTemplateStore';
 
 export default function TemplatesRoute() {
   const app = useAppShell();
-  const { ensureTemplatesLoaded } = app;
+  const userId = app.user?.id ?? null;
+  const templateStore = useTemplateStore({
+    userId,
+    pathname: '/templates',
+    showToast: app.showToast,
+  });
 
   useEffect(() => {
-    if (!app.user) return;
-    ensureTemplatesLoaded().catch((error) => {
+    if (!userId) return;
+    templateStore.ensureTemplatesLoaded().catch((error) => {
       console.error('Failed to load templates:', error);
     });
-  }, [app.user, ensureTemplatesLoaded]);
+  }, [templateStore.ensureTemplatesLoaded, userId]);
 
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={5} />;
-  if (app.templatesLoading && app.templates.length === 0) return <ContentSkeleton blocks={5} />;
+  if (templateStore.templatesLoading && templateStore.templates.length === 0) return <ContentSkeleton blocks={5} />;
 
   return (
     <TemplatesView
       lang={app.lang}
-      templates={app.templates}
-      loading={app.templatesLoading && app.templates.length === 0}
-      onUseTemplate={app.useTemplateAndCreateInvoice}
-      onViewDetail={app.openTemplateDetail}
-      onDeleteTemplate={async (template) => {
-        await app.deleteTemplateById(template.id);
+      templates={templateStore.templates}
+      loading={templateStore.templatesLoading && templateStore.templates.length === 0}
+      onUseTemplate={async (template) => {
+        await bumpTemplateUsage(template.id);
+        app.navigateToView('editor', { invoiceId: 'new' });
+        window.location.assign(`/invoices/new?template=${encodeURIComponent(template.id)}`);
       }}
-      onNewDoc={app.createInvoice}
-      onRefresh={app.refreshTemplates}
+      onViewDetail={(template) => app.navigateToView('template-detail', { templateId: template.id })}
+      onDeleteTemplate={async (template) => {
+        await templateStore.deleteTemplateById(template.id);
+      }}
+      onNewDoc={() => app.navigateToView('editor')}
+      onRefresh={templateStore.refreshTemplates}
     />
   );
 }

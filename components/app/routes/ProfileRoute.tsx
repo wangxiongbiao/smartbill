@@ -4,27 +4,40 @@ import { useEffect } from 'react';
 import { useAppShell } from '@/components/app/AppShellClient';
 import ContentSkeleton from '@/components/app/ContentSkeleton';
 import ProfileView from '@/components/ProfileView';
+import { useInvoiceRecordsStore } from '@/hooks/useInvoiceRecordsStore';
+import { useTemplateStore } from '@/hooks/useTemplateStore';
 
 export default function ProfileRoute() {
   const app = useAppShell();
-  const { ensureTemplatesLoaded } = app;
+  const userId = app.user?.id ?? null;
+  const recordsStore = useInvoiceRecordsStore({ userId });
+  const templateStore = useTemplateStore({
+    userId,
+    pathname: '/settings',
+    showToast: app.showToast,
+  });
 
   useEffect(() => {
-    ensureTemplatesLoaded().catch((error) => {
+    if (!userId) return;
+
+    recordsStore.syncRecordsForUser(userId).catch((error) => {
+      console.error('Failed to sync records for profile view:', error);
+    });
+    templateStore.ensureTemplatesLoaded().catch((error) => {
       console.error('Failed to load templates for profile view:', error);
     });
-  }, [ensureTemplatesLoaded]);
+  }, [recordsStore.syncRecordsForUser, templateStore.ensureTemplatesLoaded, userId]);
 
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={3} />;
 
   return (
     <ProfileView
-      records={app.records}
-      templatesCount={app.templates.length}
+      records={recordsStore.records}
+      templatesCount={templateStore.templates.length}
       user={app.user}
       onLogout={app.openLogoutConfirm}
       onUpdateUser={app.setUser}
-      onRefreshBillingProfiles={app.refreshBillingProfiles}
+      onRefreshBillingProfiles={async () => undefined}
       lang={app.lang}
       showToast={app.showToast}
     />

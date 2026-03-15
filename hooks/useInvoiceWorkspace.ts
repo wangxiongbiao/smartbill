@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { translations } from '@/i18n';
-import { batchSaveInvoiceRecords, deleteInvoiceRecord, listInvoices, saveInvoiceRecord } from '@/lib/api/invoice';
+import { deleteInvoiceRecord, saveInvoiceRecord } from '@/lib/api/invoice';
 import { createTemplate } from '@/lib/api/template';
 import { getDefaultCurrencyForLanguage } from '@/lib/language';
 import type { Invoice, InvoiceTemplate, Language, TemplateCategory, TemplateType, User, ViewType } from '@/types';
@@ -28,6 +28,18 @@ export const INITIAL_INVOICE: Invoice = {
   visibility: { date: true, dueDate: false }
 };
 
+function applyWorkspacePresentation(targetInvoice: Invoice, nextTemplate: TemplateType, nextIsHeaderReversed: boolean) {
+  if (targetInvoice.template === nextTemplate && targetInvoice.isHeaderReversed === nextIsHeaderReversed) {
+    return targetInvoice;
+  }
+
+  return {
+    ...targetInvoice,
+    template: nextTemplate,
+    isHeaderReversed: nextIsHeaderReversed,
+  };
+}
+
 export function useInvoiceWorkspace(params: {
   user: User | null;
   defaultSender: Pick<Invoice['sender'], 'name' | 'email' | 'phone' | 'address'>;
@@ -39,15 +51,16 @@ export function useInvoiceWorkspace(params: {
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }) {
   const { user, defaultSender, records, setRecords, activeView, setActiveView, lang, showToast } = params;
-  const [invoice, setInvoice] = useState<Invoice>(INITIAL_INVOICE);
-  const [template, setTemplate] = useState<TemplateType>('minimalist');
-  const [isHeaderReversed, setIsHeaderReversed] = useState(true);
+  const [invoice, setInvoiceState] = useState<Invoice>(INITIAL_INVOICE);
+  const [template, setTemplateState] = useState<TemplateType>('minimalist');
+  const [isHeaderReversed, setIsHeaderReversedState] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastSavedTime, setLastSavedTime] = useState<Date | undefined>();
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const waitForFirstEditRef = useRef(false);
+  const skipNextAutoSaveRef = useRef(false);
 
   const upsertRecordLocally = useCallback((targetInvoice: Invoice) => {
     setRecords(prev => {
@@ -57,23 +70,43 @@ export function useInvoiceWorkspace(params: {
     });
   }, [setRecords]);
 
+  const setInvoice = useCallback((nextInvoice: Invoice | ((prev: Invoice) => Invoice), options?: { skipAutoSave?: boolean }) => {
+    if (options?.skipAutoSave) {
+      skipNextAutoSaveRef.current = true;
+    }
+
+    setInvoiceState(prev => {
+      const resolvedInvoice = typeof nextInvoice === 'function'
+        ? (nextInvoice as (current: Invoice) => Invoice)(prev)
+        : nextInvoice;
+      const nextTemplate = resolvedInvoice.template || template;
+      const nextHeaderReversed = resolvedInvoice.isHeaderReversed ?? isHeaderReversed;
+
+      if (template !== nextTemplate) {
+        setTemplateState(nextTemplate);
+      }
+      if (isHeaderReversed !== nextHeaderReversed) {
+        setIsHeaderReversedState(nextHeaderReversed);
+      }
+
+      return applyWorkspacePresentation(resolvedInvoice, nextTemplate, nextHeaderReversed);
+    });
+  }, [isHeaderReversed, template]);
+
   const updateInvoice = useCallback((updates: Partial<Invoice>) => {
     waitForFirstEditRef.current = false;
-    setInvoice(prev => ({ ...prev, ...updates }));
+    setInvoiceState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  useEffect(() => {
-    setInvoice(prev => {
-      if (prev.template === template && prev.isHeaderReversed === isHeaderReversed) return prev;
-      return { ...prev, template, isHeaderReversed };
-    });
-  }, [template, isHeaderReversed]);
+  const setTemplate = useCallback((nextTemplate: TemplateType) => {
+    setTemplateState(nextTemplate);
+    setInvoiceState(prev => applyWorkspacePresentation(prev, nextTemplate, isHeaderReversed));
+  }, [isHeaderReversed]);
 
-  const refreshRecords = useCallback(async () => {
-    if (!user?.id) return;
-    const { invoices } = await listInvoices(user.id);
-    setRecords(invoices);
-  }, [user?.id, setRecords]);
+  const setIsHeaderReversed = useCallback((nextIsHeaderReversed: boolean) => {
+    setIsHeaderReversedState(nextIsHeaderReversed);
+    setInvoiceState(prev => applyWorkspacePresentation(prev, template, nextIsHeaderReversed));
+  }, [template]);
 
   const persistInvoice = useCallback(async (targetInvoice: Invoice) => {
     if (!user?.id || !targetInvoice.id) return;
@@ -83,7 +116,6 @@ export function useInvoiceWorkspace(params: {
     try {
       await saveInvoiceRecord(targetInvoice);
       upsertRecordLocally(targetInvoice);
-      await refreshRecords();
       setSaveStatus('saved');
       setLastSavedTime(new Date());
     } catch (error) {
@@ -91,7 +123,7 @@ export function useInvoiceWorkspace(params: {
       setSaveStatus('error');
       throw error;
     }
-  }, [refreshRecords, upsertRecordLocally, user?.id]);
+  }, [upsertRecordLocally, user?.id]);
 
   const buildSenderDraft = useCallback((senderOverride?: Partial<Invoice['sender']>) => ({
     ...INITIAL_INVOICE.sender,
@@ -114,7 +146,7 @@ export function useInvoiceWorkspace(params: {
     };
 
     waitForFirstEditRef.current = !!user?.id;
-    setInvoice(nextInvoice);
+    setInvoice(nextInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -123,7 +155,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     return nextInvoice;
-  }, [buildSenderDraft, lang, setActiveView, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, lang, setActiveView, setInvoice, upsertRecordLocally, user?.id]);
 
   const saveCurrentInvoice = useCallback(async () => {
     if (user?.id) {
@@ -134,6 +166,8 @@ export function useInvoiceWorkspace(params: {
     upsertRecordLocally(invoice);
     showToast('账单已本地保存（登录后可同步云端）', 'success');
   }, [invoice, persistInvoice, showToast, upsertRecordLocally, user?.id]);
+
+  const refreshRecords = useCallback(async () => undefined, []);
 
   const removeInvoice = useCallback(async (invoiceId: string) => {
     if (user?.id) {
@@ -160,7 +194,7 @@ export function useInvoiceWorkspace(params: {
     };
 
     setRecords((prev) => prev.map((record) => (record.id === invoiceId ? nextInvoice : record)));
-    setInvoice((prev) => (prev.id === invoiceId ? nextInvoice : prev));
+    setInvoiceState((prev) => (prev.id === invoiceId ? nextInvoice : prev));
 
     if (!user?.id) return;
 
@@ -168,10 +202,10 @@ export function useInvoiceWorkspace(params: {
       await saveInvoiceRecord(nextInvoice);
     } catch (error) {
       setRecords((prev) => prev.map((record) => (record.id === invoiceId ? targetInvoice : record)));
-      setInvoice((prev) => (prev.id === invoiceId ? targetInvoice : prev));
+      setInvoiceState((prev) => (prev.id === invoiceId ? targetInvoice : prev));
       throw error;
     }
-  }, [records, saveInvoiceRecord, setRecords, user?.id]);
+  }, [records, setRecords, user?.id]);
 
   const useTemplate = useCallback(async (templateRecord: InvoiceTemplate) => {
     const newId = Date.now().toString();
@@ -188,7 +222,7 @@ export function useInvoiceWorkspace(params: {
     };
 
     waitForFirstEditRef.current = !!user?.id;
-    setInvoice(nextInvoice);
+    setInvoice(nextInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -197,7 +231,7 @@ export function useInvoiceWorkspace(params: {
     }
 
     return nextInvoice;
-  }, [buildSenderDraft, setActiveView, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, setActiveView, setInvoice, upsertRecordLocally, user?.id]);
 
   const duplicateInvoice = useCallback(async (sourceInvoice: Invoice) => {
     const newId = Date.now().toString();
@@ -215,14 +249,14 @@ export function useInvoiceWorkspace(params: {
     };
 
     waitForFirstEditRef.current = !!user?.id;
-    setInvoice(duplicatedInvoice);
+    setInvoice(duplicatedInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     upsertRecordLocally(duplicatedInvoice);
     showToast(user?.id ? '发票副本已创建，编辑后会自动保存' : '发票已复制到本地', 'success');
     return duplicatedInvoice;
-  }, [setActiveView, showToast, upsertRecordLocally, user?.id]);
+  }, [setActiveView, setInvoice, showToast, upsertRecordLocally, user?.id]);
 
   const saveAsTemplate = useCallback(async (name: string, description: string, templateType: TemplateCategory) => {
     if (!user?.id) {
@@ -234,18 +268,22 @@ export function useInvoiceWorkspace(params: {
     showToast(translations[lang].templateSaved || 'Template saved successfully!', 'success');
   }, [invoice, lang, showToast, user?.id]);
 
-  useEffect(() => {
-    if (!user?.id || !invoice.id || activeView !== 'editor') return;
+  const scheduleAutoSave = useCallback((targetInvoice: Invoice) => {
+    if (!user?.id || !targetInvoice.id || activeView !== 'editor') return;
     if (waitForFirstEditRef.current) return;
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
-    autoSaveTimerRef.current = setTimeout(() => {
-      persistInvoice(invoice).catch(() => undefined);
-    }, 3000);
+    if (skipNextAutoSaveRef.current) {
+      skipNextAutoSaveRef.current = false;
+      return;
+    }
 
-    return () => {
-      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
-    };
-  }, [activeView, invoice, persistInvoice, user?.id]);
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(() => {
+      persistInvoice(targetInvoice).catch(() => undefined);
+    }, 3000);
+  }, [activeView, persistInvoice, user?.id]);
 
   const actions = useMemo(() => ({
     createInvoice,
@@ -260,8 +298,9 @@ export function useInvoiceWorkspace(params: {
     updateInvoice,
     setTemplate,
     setIsHeaderReversed,
-    setIsExporting
-  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, updateInvoice, updateInvoiceStatus, useTemplate]);
+    setIsExporting,
+    scheduleAutoSave,
+  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, scheduleAutoSave, setInvoice, setIsHeaderReversed, setTemplate, updateInvoice, updateInvoiceStatus, useTemplate]);
 
   return {
     invoice,

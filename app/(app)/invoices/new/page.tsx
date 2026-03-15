@@ -1,5 +1,7 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import EditorRoute from '@/components/app/routes/EditorRoute';
+import ContentSkeleton from '@/components/app/ContentSkeleton';
 
 export const metadata: Metadata = {
   title: 'Create New Invoice',
@@ -11,5 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function NewInvoicePage() {
-  return <EditorRoute />;
+  return (
+    <Suspense fallback={<ContentSkeleton blocks={4} />}>
+      <EditorRoute />
+    </Suspense>
+  );
 }
