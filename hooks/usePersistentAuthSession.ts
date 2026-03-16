@@ -32,15 +32,6 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
     let mounted = true;
     const supabase = createSupabaseClient();
 
-    const persistSessionSnapshot = (nextUser: User | null) => {
-      try {
-        if (nextUser) localStorage.setItem('sb_user_session', JSON.stringify(nextUser));
-        else localStorage.removeItem('sb_user_session');
-      } catch (error) {
-        console.warn('[AuthSession] Failed to persist local session snapshot:', error);
-      }
-    };
-
     const finishBootstrapping = () => {
       if (!mounted) return;
       bootstrappedRef.current = true;
@@ -50,7 +41,7 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
     const clearSessionState = () => {
       syncRef.current = null;
       setUser(null);
-      persistSessionSnapshot(null);
+      localStorage.removeItem('sb_user_session');
     };
 
     const syncUser = async (authUser: any, options?: { force?: boolean }) => {
@@ -144,12 +135,8 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
 
   useEffect(() => {
     if (!bootstrappedRef.current) return;
-    try {
-      if (user) localStorage.setItem('sb_user_session', JSON.stringify(user));
-      else localStorage.removeItem('sb_user_session');
-    } catch (error) {
-      console.warn('[AuthSession] Failed to sync local session snapshot:', error);
-    }
+    if (user) localStorage.setItem('sb_user_session', JSON.stringify(user));
+    else localStorage.removeItem('sb_user_session');
   }, [user]);
 
   const logout = useCallback(async (onAfter?: () => void) => {
@@ -158,23 +145,12 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
 
     syncRef.current = null;
     setUser(null);
-    bootstrappedRef.current = true;
-    setIsBootstrapping(false);
-    try {
-      localStorage.removeItem('sb_user_session');
-    } catch (error) {
-      console.warn('[AuthSession] Failed to clear local session snapshot during logout:', error);
-    }
+    localStorage.removeItem('sb_user_session');
 
     const supabase = createSupabaseClient();
-    try {
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch (error) {
-      console.error('[AuthSession] Logout failed:', error);
-    } finally {
-      setIsLoggingOut(false);
+    supabase.auth.signOut().catch(console.error).finally(() => {
       onAfter?.();
-    }
+    });
   }, []);
 
   return {

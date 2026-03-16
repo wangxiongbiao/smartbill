@@ -68,24 +68,12 @@ export function createInvoiceFromTemplate(templateRecord: InvoiceTemplate, param
 
 export function upsertLocalInvoiceRecord(invoice: Invoice) {
   if (typeof window === 'undefined') return;
-  let records: unknown = [];
-
-  try {
-    const raw = window.localStorage.getItem('invoice_records_v2');
-    records = raw ? JSON.parse(raw) : [];
-  } catch (error) {
-    console.warn('[InvoiceDrafts] Failed to read local invoice records:', error);
-  }
-
+  const raw = window.localStorage.getItem('invoice_records_v2');
+  const records = raw ? JSON.parse(raw) : [];
   const next = Array.isArray(records)
     ? records.some((record) => record?.id === invoice.id)
       ? records.map((record) => (record.id === invoice.id ? invoice : record))
       : [invoice, ...records]
     : [invoice];
-
-  try {
-    window.localStorage.setItem('invoice_records_v2', JSON.stringify(next));
-  } catch (error) {
-    console.warn('[InvoiceDrafts] Failed to persist local invoice records:', error);
-  }
+  window.localStorage.setItem('invoice_records_v2', JSON.stringify(next));
 }

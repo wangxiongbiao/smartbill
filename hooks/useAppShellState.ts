@@ -52,13 +52,13 @@ export function useAppShellState() {
   }, [lang]);
 
   useEffect(() => {
-    if (isBootstrapping || isLoggingOut || user) return;
+    if (isBootstrapping || user) return;
     if (!PRIVATE_VIEWS.includes(activeView)) return;
 
     const nextPath = search ? `${pathname}?${search}` : pathname;
     const next = encodeURIComponent(nextPath);
     router.replace(`/?next=${next}`);
-  }, [activeView, isBootstrapping, isLoggingOut, pathname, router, search, user]);
+  }, [activeView, isBootstrapping, pathname, router, search, user]);
 
   const setConsoleLang = useCallback((nextLang: Language) => {
     setLang(nextLang);
