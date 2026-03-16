@@ -22,15 +22,31 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     invoices.map((invoice) => ({ ...invoice, status: normalizeInvoiceStatus(invoice.status) }))
   ), []);
 
-  const readLocalRecords = useCallback(() => {
-    const savedRecords = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!savedRecords) return [] as Invoice[];
-
+  const writeLocalRecords = useCallback((nextRecords: Invoice[]) => {
     try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(nextRecords));
+    } catch (error) {
+      console.warn('[InvoiceRecords] Failed to persist local invoice records:', error);
+    }
+  }, []);
+
+  const clearLocalRecords = useCallback(() => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch (error) {
+      console.warn('[InvoiceRecords] Failed to clear local invoice records:', error);
+    }
+  }, []);
+
+  const readLocalRecords = useCallback(() => {
+    try {
+      const savedRecords = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!savedRecords) return [] as Invoice[];
+
       const parsed = JSON.parse(savedRecords);
       return normalizeInvoices(Array.isArray(parsed) ? parsed : []);
-    } catch {
-      console.warn('[InvoiceRecords] Failed to parse local invoice records');
+    } catch (error) {
+      console.warn('[InvoiceRecords] Failed to read local invoice records:', error);
       return [] as Invoice[];
     }
   }, [normalizeInvoices]);
@@ -122,12 +138,12 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     inFlightSyncRef.current = null;
     setRecords([]);
     setRecordsLoading(false);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-  }, []);
+    clearLocalRecords();
+  }, [clearLocalRecords]);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(records));
-  }, [records]);
+    writeLocalRecords(records);
+  }, [records, writeLocalRecords]);
 
   return {
     records,
