@@ -16,8 +16,8 @@ function splitLines(value?: string) {
     .filter(Boolean);
 }
 
-const SCHOOL_CN_BASE_FONT_REM = 3;
-const SCHOOL_CN_MIN_FONT_REM = 1.4;
+const SCHOOL_CN_BASE_FONT_REM = 2;
+const SCHOOL_CN_MIN_FONT_REM = 1;
 
 export default function PosterShellPreview({ poster }: PosterShellPreviewProps) {
   const { shell } = poster;
@@ -125,11 +125,11 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
           )}
           <div className='pl-8'>
             {showSchoolEn && (
-              <div className='text-[1.7rem]  leading-none font-semibold text-[#777]'>{shell.school.nameEn}</div>
+              <div className='text-[1.3rem]  leading-none font-semibold text-[#777]'>{shell.school.nameEn}</div>
             )}
             <div className='pt-6'>
               {showStudentMeta && (
-                <div className='flex text-[1.3rem] font-bold text-[#222]'>
+                <div className='flex text-[1.1rem] font-bold text-[#222]'>
                   {studentMeta.map((item, index) => (
                     <React.Fragment key={`${item}-${index}`}>
                       {index > 0 && <div>｜</div>}
@@ -139,12 +139,12 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
                 </div>
               )}
               {showApplicationPeriod && (
-                <div className='flex text-[1.3rem] font-bold text-[#222]'>
+                <div className='flex text-[1.1rem] font-bold text-[#222]'>
                   <div>{shell.student.applicationPeriod}</div>
                 </div>
               )}
               {showTransferPath && (
-                <div className='flex text-[1.3rem] font-bold text-[#222]'>
+                <div className='flex text-[1.1rem] font-bold text-[#222]'>
                   <div>{shell.student.transferPath}</div>
                 </div>
               )}
