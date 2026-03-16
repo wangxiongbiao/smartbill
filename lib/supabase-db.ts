@@ -11,6 +11,10 @@ function isMissingTableError(error: { code?: string; message?: string } | null, 
     return error?.code === '42P01' || error?.message?.includes(tableName);
 }
 
+function sanitizeSearchTerm(value: string) {
+    return value.replace(/[,%()]/g, ' ').trim();
+}
+
 /**
  * 获取用户 profile
  */
@@ -128,6 +132,57 @@ export async function getUserInvoices(userId: string, supabase?: SupabaseClient)
     return (data || [])
         .map(row => row.invoice_data as Invoice | null)
         .filter((invoice): invoice is Invoice => Boolean(invoice?.id));
+}
+
+export async function getUserInvoicesPage(
+    userId: string,
+    params: {
+        page: number;
+        pageSize: number;
+        search?: string;
+        month?: number | null;
+    },
+    supabase?: SupabaseClient
+): Promise<{ invoices: Invoice[]; totalCount: number }> {
+    const client = getSupabaseClient(supabase);
+    const page = Math.max(1, Math.floor(params.page));
+    const pageSize = Math.max(1, Math.min(100, Math.floor(params.pageSize)));
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    const search = sanitizeSearchTerm(params.search || '');
+    const month = typeof params.month === 'number' && params.month >= 1 && params.month <= 12 ? params.month : null;
+
+    let query = client
+        .from('invoices')
+        .select('invoice_data', { count: 'exact' })
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (search) {
+        query = query.or(`invoice_number.ilike.%${search}%,invoice_data->client->>name.ilike.%${search}%`);
+    }
+
+    if (month) {
+        query = query.filter('invoice_data->>date', 'like', `____-${month.toString().padStart(2, '0')}-%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) {
+        if (isMissingTableError(error, 'invoices')) {
+            console.warn('[getUserInvoicesPage] invoices table is missing, returning empty page');
+            return { invoices: [], totalCount: 0 };
+        }
+        console.error('Error fetching invoice page:', error);
+        throw error;
+    }
+
+    return {
+        invoices: (data || [])
+            .map(row => row.invoice_data as Invoice | null)
+            .filter((invoice): invoice is Invoice => Boolean(invoice?.id)),
+        totalCount: count || 0,
+    };
 }
 
 /**

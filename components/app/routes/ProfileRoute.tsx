@@ -5,17 +5,13 @@ import { useAppShell } from '@/components/app/AppShellClient';
 import ContentSkeleton from '@/components/app/ContentSkeleton';
 import ProfileView from '@/components/ProfileView';
 import { useInvoiceRecordsStore } from '@/hooks/useInvoiceRecordsStore';
-import { useTemplateStore } from '@/hooks/useTemplateStore';
+import { useTemplateCount } from '@/hooks/useTemplateCount';
 
 export default function ProfileRoute() {
   const app = useAppShell();
   const userId = app.user?.id ?? null;
   const recordsStore = useInvoiceRecordsStore({ userId });
-  const templateStore = useTemplateStore({
-    userId,
-    pathname: '/settings',
-    showToast: app.showToast,
-  });
+  const templateCount = useTemplateCount(userId);
 
   useEffect(() => {
     if (!userId) return;
@@ -23,17 +19,14 @@ export default function ProfileRoute() {
     recordsStore.syncRecordsForUser(userId).catch((error) => {
       console.error('Failed to sync records for profile view:', error);
     });
-    templateStore.ensureTemplatesLoaded().catch((error) => {
-      console.error('Failed to load templates for profile view:', error);
-    });
-  }, [recordsStore.syncRecordsForUser, templateStore.ensureTemplatesLoaded, userId]);
+  }, [recordsStore.syncRecordsForUser, userId]);
 
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={3} />;
 
   return (
     <ProfileView
       records={recordsStore.records}
-      templatesCount={templateStore.templates.length}
+      templatesCount={templateCount.count}
       user={app.user}
       onLogout={app.openLogoutConfirm}
       onUpdateUser={app.setUser}

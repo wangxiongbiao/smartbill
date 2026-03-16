@@ -1,21 +1,28 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { TEMPLATE_TYPE_OPTIONS, normalizeTemplateType, resolveTemplateType } from '@/lib/template-types';
+import React, { useMemo, useState } from 'react';
+import { TEMPLATE_TYPE_OPTIONS } from '@/lib/template-types';
 import { translations } from '../i18n';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import InvoicePreview from './InvoicePreview';
 import ScalableInvoiceContainer from './ScalableInvoiceContainer';
 import { buildPublicTemplatePreviewInvoice } from '@/lib/public-templates';
 import type { InvoiceTemplate, Language, TemplateCategory } from '../types';
+import { buildPaginationItems, TEMPLATES_PAGE_SIZE } from '@/lib/pagination';
 
 interface TemplatesViewProps {
   lang: Language;
   templates: InvoiceTemplate[];
+  totalCount?: number;
+  overallCount?: number;
+  activeCategory: TemplateCategory;
+  currentPage: number;
   loading?: boolean;
+  isPageLoading?: boolean;
   onUseTemplate: (template: InvoiceTemplate) => void | Promise<void>;
   onViewDetail: (template: InvoiceTemplate) => void;
   onDeleteTemplate?: (template: InvoiceTemplate) => Promise<void>;
   onNewDoc: () => void | Promise<void>;
-  onRefresh?: () => Promise<void>;
+  onActiveCategoryChange: (category: TemplateCategory) => void;
+  onCurrentPageChange: (page: number) => void;
 }
 
 function getInitials(value: string) {
@@ -149,21 +156,23 @@ function TemplatePreviewCard({
 const TemplatesView: React.FC<TemplatesViewProps> = ({
   lang,
   templates,
+  totalCount = 0,
+  overallCount = 0,
+  activeCategory,
+  currentPage,
   loading = false,
+  isPageLoading = false,
   onUseTemplate,
   onViewDetail,
   onDeleteTemplate,
   onNewDoc,
+  onActiveCategoryChange,
+  onCurrentPageChange,
 }) => {
   const t = translations[lang] || translations.en;
-  const [activeCategory, setActiveCategory] = useState<TemplateCategory>('business');
-  const [currentPage, setCurrentPage] = useState(1);
   const [usingId, setUsingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteTemplateItem, setDeleteTemplateItem] = useState<InvoiceTemplate | null>(null);
-  const gridScrollRef = useRef<HTMLDivElement>(null);
-  const templatesViewStateKey = 'smartbill-templates-view-state';
-  const itemsPerPage = 5;
 
   const copyByLang = {
     en: {
@@ -237,44 +246,13 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   >;
   const copy = copyByLang[lang];
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.sessionStorage.getItem(templatesViewStateKey);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (typeof parsed.activeCategory === 'string') {
-        setActiveCategory(normalizeTemplateType(parsed.activeCategory) || 'business');
-      }
-      if (typeof parsed.currentPage === 'number' && parsed.currentPage > 0) setCurrentPage(parsed.currentPage);
-      requestAnimationFrame(() => {
-        if (gridScrollRef.current && typeof parsed.scrollTop === 'number') {
-          gridScrollRef.current.scrollTop = parsed.scrollTop;
-        }
-      });
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.sessionStorage.setItem(templatesViewStateKey, JSON.stringify({
-        activeCategory,
-        currentPage,
-        scrollTop: gridScrollRef.current?.scrollTop ?? 0,
-      }));
-    } catch {}
-  }, [activeCategory, currentPage]);
-
-  const filteredTemplates = useMemo(
-    () => templates.filter((template) => resolveTemplateType(template.template_type) === activeCategory),
-    [activeCategory, templates]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(filteredTemplates.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(totalCount / TEMPLATES_PAGE_SIZE));
   const page = Math.min(currentPage, totalPages);
-  const startIndex = (page - 1) * itemsPerPage;
-  const currentTemplates = filteredTemplates.slice(startIndex, startIndex + itemsPerPage);
+  const currentTemplates = templates;
+  const paginationItems = useMemo(
+    () => buildPaginationItems({ totalPages, currentPage: page, siblingCount: 1, boundaryCount: 1 }),
+    [page, totalPages]
+  );
 
   const handleUseTemplate = async (template: InvoiceTemplate) => {
     if (usingId === template.id) return;
@@ -314,7 +292,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
     );
   }
 
-  if (templates.length === 0) {
+  if (overallCount === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-40 text-center">
         <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-slate-100 text-5xl text-slate-300 shadow-inner -rotate-3">
@@ -348,8 +326,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
                     key={category.value}
                     type="button"
                     onClick={() => {
-                      setActiveCategory(category.value);
-                      setCurrentPage(1);
+                      onActiveCategoryChange(category.value);
                     }}
                     className={`whitespace-nowrap border-b-2 pb-4 text-[0.9375rem] font-semibold transition-colors ${isActive
                       ? 'border-blue-600 text-slate-900'
@@ -363,52 +340,86 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
             </div>
           </div>
 
-          {currentTemplates.length === 0 ? (
-            <div className="mt-12 rounded-[1.75rem] border border-dashed border-slate-300 bg-white px-8 py-20 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
-                <i className="fas fa-layer-group"></i>
+          <div className="relative">
+            {currentTemplates.length === 0 ? (
+              <div className="mt-12 rounded-[1.75rem] border border-dashed border-slate-300 bg-white px-8 py-20 text-center">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
+                  <i className="fas fa-layer-group"></i>
+                </div>
+                <h2 className="mt-6 text-2xl font-semibold text-slate-900">{copy.emptyFilteredTitle}</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">{copy.emptyFilteredDesc}</p>
               </div>
-              <h2 className="mt-6 text-2xl font-semibold text-slate-900">{copy.emptyFilteredTitle}</h2>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">{copy.emptyFilteredDesc}</p>
-            </div>
-          ) : (
-            <div className="mt-4 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-5">
-              {currentTemplates.map((template) => (
-                <TemplatePreviewCard
-                  key={template.id}
-                  template={template}
-                  lang={lang}
-                  using={usingId === template.id}
-                  deleting={deletingId === template.id}
-                  useLabel={copy.use}
-                  deleteLabel={t.deleteTemplate}
-                  viewLabel={copy.view}
-                  onOpen={() => onViewDetail(template)}
-                  onUse={() => handleUseTemplate(template)}
-                  onDelete={() => setDeleteTemplateItem(template)}
-                />
-              ))}
+            ) : (
+              <div className="mt-4 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-5">
+                {currentTemplates.map((template) => (
+                  <TemplatePreviewCard
+                    key={template.id}
+                    template={template}
+                    lang={lang}
+                    using={usingId === template.id}
+                    deleting={deletingId === template.id}
+                    useLabel={copy.use}
+                    deleteLabel={t.deleteTemplate}
+                    viewLabel={copy.view}
+                    onOpen={() => onViewDetail(template)}
+                    onUse={() => handleUseTemplate(template)}
+                    onDelete={() => setDeleteTemplateItem(template)}
+                  />
+                ))}
+              </div>
+            )}
 
-            </div>
-          )}
+            {isPageLoading ? (
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[1.75rem] bg-white/68 backdrop-blur-[2px]">
+                <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-600 shadow-[0_1rem_2.25rem_-1.75rem_rgba(15,23,42,0.35)]">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></span>
+                  <span>{copy.loading}</span>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           {totalPages > 1 ? (
             <div className="mt-10 flex items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
-                disabled={page === 1}
+                onClick={() => onCurrentPageChange(Math.max(1, page - 1))}
+                disabled={page === 1 || isPageLoading}
                 className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {copy.prev}
               </button>
-              <span className="min-w-[3.75rem] text-center text-sm font-semibold text-slate-500">
-                {page} / {totalPages}
-              </span>
+              <div className="flex items-center gap-2">
+                {paginationItems.map((item, index) => (
+                  item === 'ellipsis' ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="flex h-10 min-w-10 items-center justify-center text-sm font-semibold text-slate-300"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => onCurrentPageChange(item)}
+                      disabled={isPageLoading}
+                      aria-current={page === item ? 'page' : undefined}
+                      className={`flex h-10 min-w-10 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-colors ${
+                        page === item
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                    >
+                      {item}
+                    </button>
+                  )
+                ))}
+              </div>
               <button
                 type="button"
-                onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
-                disabled={page === totalPages}
+                onClick={() => onCurrentPageChange(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages || isPageLoading}
                 className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {copy.next}

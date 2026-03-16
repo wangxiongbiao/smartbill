@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createTemplate, getTemplateById } from '@/lib/api/template';
 import { useAppShell } from '@/components/app/AppShellClient';
@@ -12,6 +12,7 @@ import { useInvoiceWorkspace } from '@/hooks/useInvoiceWorkspace';
 import { useInvoicePdfExport } from '@/hooks/useInvoicePdfExport';
 import { useInvoiceRecordsStore } from '@/hooks/useInvoiceRecordsStore';
 import { createInvoiceDraft } from '@/lib/invoice-drafts';
+import type { Invoice } from '@/types';
 
 function getInvoiceIdFromPath(pathname: string) {
   const match = pathname.match(/^\/invoices\/([^/]+)$/);
@@ -21,10 +22,18 @@ function getInvoiceIdFromPath(pathname: string) {
 
 export default function EditorRoute() {
   const app = useAppShell();
+  const {
+    isBootstrapping,
+    user,
+    lang,
+    showToast,
+    setEditorState,
+    setView,
+  } = app;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const userId = app.user?.id ?? null;
+  const userId = user?.id ?? null;
   const invoiceIdFromPath = getInvoiceIdFromPath(pathname);
   const launchTemplateId = searchParams.get('template');
   const [workspaceReady, setWorkspaceReady] = useState(false);
@@ -32,32 +41,40 @@ export default function EditorRoute() {
   const recordsStore = useInvoiceRecordsStore({ userId });
   const printAreaRef = useRef<HTMLDivElement>(null);
   const bootstrapKeyRef = useRef<string | null>(null);
+  const bootstrapPendingKeyRef = useRef<string | null>(null);
+  const setInvoiceRef = useRef<((nextInvoice: Invoice, options?: { skipAutoSave?: boolean }) => void) | null>(null);
+  const noopSetActiveView = useCallback(() => undefined, []);
+  const defaultSender = useMemo(() => ({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: '',
+    address: '',
+  }), [user?.email, user?.name]);
 
   const workspace = useInvoiceWorkspace({
-    user: app.user,
-    defaultSender: {
-      name: app.user?.name || '',
-      email: app.user?.email || '',
-      phone: '',
-      address: '',
-    },
+    user,
+    defaultSender,
     records: recordsStore.records,
     setRecords: recordsStore.setRecords,
     activeView: 'editor',
-    setActiveView: () => undefined,
-    lang: app.lang,
-    showToast: app.showToast,
+    setActiveView: noopSetActiveView,
+    lang,
+    showToast,
   });
 
   const pdfExport = useInvoicePdfExport({
     invoice: workspace.invoice,
     template: workspace.template,
     isHeaderReversed: workspace.isHeaderReversed,
-    lang: app.lang,
+    lang,
     isExporting: workspace.isExporting,
     setIsExporting: workspace.actions.setIsExporting,
     printAreaRef,
   });
+
+  useEffect(() => {
+    setInvoiceRef.current = workspace.actions.setInvoice;
+  }, [workspace.actions.setInvoice]);
 
   const existingRecord = useMemo(
     () => (invoiceIdFromPath ? recordsStore.records.find((record) => record.id === invoiceIdFromPath) ?? null : null),
@@ -72,14 +89,23 @@ export default function EditorRoute() {
   }, [recordsStore.syncRecordsForUser, userId]);
 
   useEffect(() => {
+    if (isBootstrapping || !user) return;
+
     const bootstrapKey = [userId ?? 'guest', pathname, launchTemplateId ?? '', existingRecord?.id ?? ''].join('::');
-    if (bootstrapKeyRef.current === bootstrapKey) {
+    if (bootstrapKeyRef.current === bootstrapKey || bootstrapPendingKeyRef.current === bootstrapKey) {
+      return;
+    }
+    if (invoiceIdFromPath && !existingRecord && recordsStore.recordsLoading) {
       return;
     }
 
     let cancelled = false;
+    bootstrapPendingKeyRef.current = bootstrapKey;
 
     const finish = () => {
+      if (bootstrapPendingKeyRef.current === bootstrapKey) {
+        bootstrapPendingKeyRef.current = null;
+      }
       if (!cancelled) {
         setWorkspaceReady(true);
         bootstrapKeyRef.current = bootstrapKey;
@@ -87,13 +113,11 @@ export default function EditorRoute() {
     };
 
     const bootstrapEditor = async () => {
-      if (app.isBootstrapping || !app.user) return;
-
       setWorkspaceReady(false);
 
       if (invoiceIdFromPath) {
         if (existingRecord) {
-          workspace.actions.setInvoice(existingRecord, { skipAutoSave: true });
+          setInvoiceRef.current?.(existingRecord, { skipAutoSave: true });
           finish();
           return;
         }
@@ -107,9 +131,9 @@ export default function EditorRoute() {
       const preset = launchTemplateId
         ? (await getTemplateById(launchTemplateId)).template?.template_data
         : undefined;
-      const nextInvoice = createInvoiceDraft({ lang: app.lang, user: app.user, preset });
+      const nextInvoice = createInvoiceDraft({ lang, user, preset });
 
-      workspace.actions.setInvoice(nextInvoice, { skipAutoSave: true });
+      setInvoiceRef.current?.(nextInvoice, { skipAutoSave: true });
 
       if (userId) {
         const { saveInvoiceRecord } = await import('@/lib/api/invoice');
@@ -127,20 +151,23 @@ export default function EditorRoute() {
 
     bootstrapEditor().catch((error) => {
       console.error('Failed to bootstrap editor route:', error);
+      if (bootstrapPendingKeyRef.current === bootstrapKey) {
+        bootstrapPendingKeyRef.current = null;
+      }
       finish();
     });
 
     return () => {
       cancelled = true;
     };
-  }, [app.isBootstrapping, app.lang, app.user, existingRecord, invoiceIdFromPath, launchTemplateId, pathname, recordsStore.recordsLoading, recordsStore.setRecords, router, userId, workspace.actions]);
+  }, [existingRecord, invoiceIdFromPath, isBootstrapping, lang, launchTemplateId, pathname, recordsStore.recordsLoading, recordsStore.setRecords, router, user, userId]);
 
   useEffect(() => {
     workspace.actions.scheduleAutoSave(workspace.invoice);
-  }, [workspace.actions, workspace.invoice]);
+  }, [workspace.actions.scheduleAutoSave, workspace.invoice]);
 
   useEffect(() => {
-    app.setEditorState({
+    setEditorState({
       invoice: workspace.invoice,
       saveStatus: workspace.saveStatus,
       lastSavedTime: workspace.lastSavedTime,
@@ -149,22 +176,22 @@ export default function EditorRoute() {
       onSaveTemplate: editorUi.openSaveTemplateDialog,
       onShare: editorUi.openShareDialog,
       onSendEmail: editorUi.openEmailDialog,
-      onBack: () => window.history.length > 1 ? window.history.back() : app.setView('records'),
+      onBack: () => window.history.length > 1 ? window.history.back() : setView('records'),
       printArea: (
         <AppShellPrintArea
           invoice={workspace.invoice}
           template={workspace.template}
           isHeaderReversed={workspace.isHeaderReversed}
-          lang={app.lang}
+          lang={lang}
           printAreaRef={printAreaRef}
         />
       ),
     });
 
     return () => {
-      app.setEditorState(null);
+      setEditorState(null);
     };
-  }, [app, app.lang, editorUi.openEmailDialog, editorUi.openSaveTemplateDialog, editorUi.openShareDialog, pdfExport.handleExportPdf, workspace.invoice, workspace.isExporting, workspace.isHeaderReversed, workspace.lastSavedTime, workspace.saveStatus, workspace.template]);
+  }, [editorUi.openEmailDialog, editorUi.openSaveTemplateDialog, editorUi.openShareDialog, lang, pdfExport.handleExportPdf, setEditorState, setView, workspace.invoice, workspace.isExporting, workspace.isHeaderReversed, workspace.lastSavedTime, workspace.saveStatus, workspace.template]);
 
   const isHydratingExistingInvoice = useMemo(() => {
     if (!invoiceIdFromPath) return false;
@@ -172,7 +199,7 @@ export default function EditorRoute() {
     return recordsStore.recordsLoading || !!existingRecord;
   }, [existingRecord, invoiceIdFromPath, recordsStore.recordsLoading, workspace.invoice.id]);
 
-  if (app.isBootstrapping || !app.user || !workspaceReady || isHydratingExistingInvoice) {
+  if (isBootstrapping || !user || !workspaceReady || isHydratingExistingInvoice) {
     return <ContentSkeleton blocks={4} />;
   }
 
@@ -182,8 +209,8 @@ export default function EditorRoute() {
       records={recordsStore.records}
       template={workspace.template}
       isHeaderReversed={workspace.isHeaderReversed}
-      lang={app.lang}
-      userId={app.user?.id}
+      lang={lang}
+      userId={user?.id}
       isExporting={workspace.isExporting}
       isAIChatOpen={editorUi.isAIChatOpen}
       isShareDialogOpen={editorUi.isShareDialogOpen}
@@ -191,9 +218,9 @@ export default function EditorRoute() {
       isSaveTemplateDialogOpen={editorUi.isSaveTemplateDialogOpen}
       isNewInvoiceConfirmOpen={editorUi.isNewInvoiceConfirmOpen}
       isCreatingNewInvoice={false}
-      showToast={app.showToast}
+      showToast={showToast}
       onUpdateInvoice={workspace.actions.updateInvoice}
-      onBack={() => window.history.length > 1 ? window.history.back() : app.setView('records')}
+      onBack={() => window.history.length > 1 ? window.history.back() : setView('records')}
       onToggleAIChat={editorUi.toggleAIChat}
       onCloseAIChat={editorUi.closeAIChat}
       onCloseShareDialog={editorUi.closeShareDialog}
@@ -202,7 +229,7 @@ export default function EditorRoute() {
       onCloseNewInvoiceConfirm={editorUi.closeNewInvoiceConfirm}
       onSaveTemplate={async (name, description, templateType) => {
         await createTemplate(name, description, templateType, workspace.invoice);
-        app.showToast('Template saved successfully!', 'success');
+        showToast('Template saved successfully!', 'success');
       }}
       onConfirmCreateInvoice={async () => {
         router.push('/invoices/new');

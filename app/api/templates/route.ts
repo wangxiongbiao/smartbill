@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserTemplates, saveTemplate } from '@/lib/supabase-templates';
+import { getUserTemplates, getUserTemplatesCount, getUserTemplatesPage, saveTemplate } from '@/lib/supabase-templates';
 import { normalizeTemplateType } from '@/lib/template-types';
 
 export async function GET(request: NextRequest) {
@@ -12,6 +12,26 @@ export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get('userId');
   if (userId && userId !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const pageParam = Number(request.nextUrl.searchParams.get('page'));
+  const pageSizeParam = Number(request.nextUrl.searchParams.get('pageSize'));
+  const templateType = normalizeTemplateType(request.nextUrl.searchParams.get('templateType'));
+  const countOnly = request.nextUrl.searchParams.get('countOnly') === '1';
+
+  if (countOnly) {
+    const totalCount = await getUserTemplatesCount(supabase, user.id);
+    return NextResponse.json({ totalCount });
+  }
+
+  if (Number.isFinite(pageParam) && Number.isFinite(pageSizeParam)) {
+    const { templates, totalCount, overallCount } = await getUserTemplatesPage(supabase, user.id, {
+      page: pageParam,
+      pageSize: pageSizeParam,
+      templateType,
+    });
+
+    return NextResponse.json({ templates, totalCount, overallCount, page: pageParam, pageSize: pageSizeParam });
   }
 
   const templates = await getUserTemplates(supabase, user.id);

@@ -5,6 +5,26 @@ export async function listTemplates(userId: string) {
   return apiRequest<{ templates: InvoiceTemplate[] }>(`/api/templates?userId=${encodeURIComponent(userId)}`);
 }
 
+export async function getTemplatesCount(userId: string) {
+  return apiRequest<{ totalCount: number }>(`/api/templates?userId=${encodeURIComponent(userId)}&countOnly=1`);
+}
+
+export async function listTemplatesPage(userId: string, params: {
+  page: number;
+  pageSize: number;
+  templateType?: TemplateCategory;
+}) {
+  const searchParams = new URLSearchParams({
+    userId,
+    page: params.page.toString(),
+    pageSize: params.pageSize.toString(),
+  });
+
+  if (params.templateType) searchParams.set('templateType', params.templateType);
+
+  return apiRequest<{ templates: InvoiceTemplate[]; totalCount: number; overallCount: number; page: number; pageSize: number }>(`/api/templates?${searchParams.toString()}`);
+}
+
 export async function getTemplateById(id: string) {
   return apiRequest<{ template: InvoiceTemplate | null }>(`/api/templates/${encodeURIComponent(id)}`);
 }

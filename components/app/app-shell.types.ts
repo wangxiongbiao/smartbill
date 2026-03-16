@@ -9,6 +9,7 @@ export interface RecordsViewState {
   selectedMonth: 'all' | number;
   currentPage: number;
   scrollTop: number;
+  shellScrollTop: number;
 }
 
 export interface AppShellContextValue {

@@ -18,6 +18,24 @@ export async function listInvoices(userId: string) {
   return apiRequest<{ invoices: Invoice[] }>(`/api/invoices?userId=${encodeURIComponent(userId)}`);
 }
 
+export async function listInvoicesPage(userId: string, params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  month?: number | 'all';
+}) {
+  const searchParams = new URLSearchParams({
+    userId,
+    page: params.page.toString(),
+    pageSize: params.pageSize.toString(),
+  });
+
+  if (params.search?.trim()) searchParams.set('search', params.search.trim());
+  if (typeof params.month === 'number') searchParams.set('month', params.month.toString());
+
+  return apiRequest<{ invoices: Invoice[]; totalCount: number; page: number; pageSize: number }>(`/api/invoices?${searchParams.toString()}`);
+}
+
 export async function saveInvoiceRecord(invoice: Invoice) {
   return apiRequest<{ success: true }>(`/api/invoices`, {
     method: 'POST',

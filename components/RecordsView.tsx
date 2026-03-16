@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Invoice, Language } from '../types';
 import { translations } from '../i18n';
 import ShareDialog from './ShareDialog';
@@ -8,9 +8,13 @@ import { calculateInvoiceTotal } from '@/lib/invoice';
 import { getInvoiceDisplayStatus } from '@/lib/invoice-status';
 import { getLocaleForLanguage } from '@/lib/language';
 import type { RecordsViewState } from '@/components/app/app-shell.types';
+import { buildPaginationItems } from '@/lib/pagination';
 
 interface RecordsViewProps {
   records: Invoice[];
+  totalCount?: number;
+  paginationMode?: 'client' | 'server';
+  isPageLoading?: boolean;
   viewState: RecordsViewState;
   onViewStateChange: React.Dispatch<React.SetStateAction<RecordsViewState>>;
   onEdit: (record: Invoice) => void;
@@ -23,7 +27,7 @@ interface RecordsViewProps {
   isDeletingId?: string | null;
 }
 
-const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewStateChange, onEdit, onDuplicate, onDelete, onUpdateStatus, onExport, lang, onNewDoc, isDeletingId }) => {
+const RecordsView: React.FC<RecordsViewProps> = ({ records, totalCount, paginationMode = 'client', isPageLoading = false, viewState, onViewStateChange, onEdit, onDuplicate, onDelete, onUpdateStatus, onExport, lang, onNewDoc, isDeletingId }) => {
   const t = translations[lang] || translations['en'];
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useState<Invoice | null>(null);
@@ -36,6 +40,8 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
   const [selectedMonth, setSelectedMonth] = useState<'all' | number>(viewState.selectedMonth);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const scrollTopRef = useRef(viewState.scrollTop);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const isServerPaginated = paginationMode === 'server';
 
   const copyByLang = {
     en: {
@@ -46,6 +52,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       export: 'Export',
       processing: 'Processing...',
       syncing: 'Syncing with cloud...',
+      pageLoading: 'Loading invoices...',
       monthFilter: 'Month',
       allMonths: 'All months',
       emptyFilteredTitle: 'No matching invoices',
@@ -75,6 +82,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       export: '导出',
       processing: '处理中...',
       syncing: '正在与云端同步...',
+      pageLoading: '正在加载发票...',
       monthFilter: '月份',
       allMonths: '全部月份',
       emptyFilteredTitle: '没有符合条件的发票',
@@ -104,6 +112,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       export: '匯出',
       processing: '處理中...',
       syncing: '正在與雲端同步...',
+      pageLoading: '正在載入發票...',
       monthFilter: '月份',
       allMonths: '全部月份',
       emptyFilteredTitle: '沒有符合條件的發票',
@@ -133,6 +142,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       export: 'ส่งออก',
       processing: 'กำลังประมวลผล...',
       syncing: 'กำลังซิงก์กับคลาวด์...',
+      pageLoading: 'กำลังโหลดใบแจ้งหนี้...',
       monthFilter: 'เดือน',
       allMonths: 'ทุกเดือน',
       emptyFilteredTitle: 'ไม่พบใบแจ้งหนี้ที่ตรงเงื่อนไข',
@@ -162,6 +172,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       export: 'Ekspor',
       processing: 'Memproses...',
       syncing: 'Menyinkronkan dengan cloud...',
+      pageLoading: 'Memuat invoice...',
       monthFilter: 'Bulan',
       allMonths: 'Semua bulan',
       emptyFilteredTitle: 'Tidak ada invoice yang cocok',
@@ -191,6 +202,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
     export: string;
     processing: string;
     syncing: string;
+    pageLoading: string;
     monthFilter: string;
     allMonths: string;
     emptyFilteredTitle: string;
@@ -228,12 +240,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
   );
 
   const filteredRecords = useMemo(() => {
-    const lowerQuery = searchQuery.toLowerCase();
+    if (isServerPaginated) return records;
+
+    const normalizedQuery = deferredSearchQuery.trim().toLowerCase();
     return records.filter((record) => {
       const matchesSearch =
-        !searchQuery ||
-        record.invoiceNumber.toLowerCase().includes(lowerQuery) ||
-        record.client.name.toLowerCase().includes(lowerQuery);
+        !normalizedQuery ||
+        record.invoiceNumber.toLowerCase().includes(normalizedQuery) ||
+        record.client.name.toLowerCase().includes(normalizedQuery);
 
       const parsedDate = new Date(record.date);
       const recordMonth = Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getMonth() + 1;
@@ -241,16 +255,25 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
 
       return matchesSearch && matchesMonth;
     });
-  }, [records, searchQuery, selectedMonth]);
+  }, [deferredSearchQuery, isServerPaginated, records, selectedMonth]);
 
-  const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
-  const currentRecords = filteredRecords.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const effectiveTotalCount = isServerPaginated ? (totalCount ?? records.length) : filteredRecords.length;
+  const totalPages = Math.ceil(effectiveTotalCount / itemsPerPage);
+  const page = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1));
+  const currentRecords = isServerPaginated
+    ? records
+    : filteredRecords.slice(
+      (page - 1) * itemsPerPage,
+      page * itemsPerPage
+    );
+
+  const startRecord = effectiveTotalCount === 0 ? 0 : (page - 1) * itemsPerPage + 1;
+  const endRecord = Math.min(page * itemsPerPage, effectiveTotalCount);
+  const paginationItems = useMemo(
+    () => buildPaginationItems({ totalPages, currentPage: page, siblingCount: 1, boundaryCount: 1 }),
+    [page, totalPages]
   );
-
-  const startRecord = (currentPage - 1) * itemsPerPage + 1;
-  const endRecord = Math.min(currentPage * itemsPerPage, filteredRecords.length);
+  const hasActiveFilters = searchQuery.trim().length > 0 || selectedMonth !== 'all';
 
   const handleDeleteConfirm = async () => {
     if (!deleteInvoice || isDeletingId === deleteInvoice.id) return;
@@ -366,7 +389,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       if (
         prev.searchQuery === searchQuery &&
         prev.selectedMonth === selectedMonth &&
-        prev.currentPage === currentPage &&
+        prev.currentPage === page &&
         prev.scrollTop === scrollTopRef.current
       ) {
         return prev;
@@ -375,13 +398,14 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
       return {
         searchQuery,
         selectedMonth,
-        currentPage,
+        currentPage: page,
         scrollTop: scrollTopRef.current,
+        shellScrollTop: prev.shellScrollTop,
       };
     });
-  }, [currentPage, onViewStateChange, searchQuery, selectedMonth]);
+  }, [onViewStateChange, page, searchQuery, selectedMonth]);
 
-  if (records.length === 0) {
+  if (effectiveTotalCount === 0 && !hasActiveFilters) {
     return (
       <div className="flex flex-col items-center justify-center py-40 text-center">
         <div className="bg-slate-100 w-28 h-28 rounded-[2rem] flex items-center justify-center text-slate-300 text-5xl mb-8 shadow-inner rotate-3">
@@ -450,8 +474,8 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_1.375rem_3.125rem_-2.25rem_rgba(15,23,42,0.28)]">
-            {filteredRecords.length === 0 ? (
+          <div className="relative min-h-0 flex-1 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_1.375rem_3.125rem_-2.25rem_rgba(15,23,42,0.28)]">
+            {effectiveTotalCount === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                   <i className="fas fa-calendar-days text-lg"></i>
@@ -669,44 +693,64 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, viewState, onViewSta
                 </div>
               </div>
             )}
+
+            {isPageLoading ? (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/72 backdrop-blur-[2px]">
+                <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-600 shadow-[0_1rem_2.25rem_-1.75rem_rgba(15,23,42,0.35)]">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></span>
+                  <span>{copy.pageLoading}</span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          {filteredRecords.length > 0 && (
+          {effectiveTotalCount > 0 && (
             <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-[1rem] text-slate-500">
                 {t.showingRecords
                   .replace('{start}', startRecord.toString())
                   .replace('{end}', endRecord.toString())
-                  .replace('{count}', filteredRecords.length.toString())
+                  .replace('{count}', effectiveTotalCount.toString())
                 }
               </span>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
+                  disabled={page === 1 || isPageLoading}
                   className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <i className="fas fa-chevron-left text-xs"></i>
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold transition-all ${
-                      currentPage === page
-                        ? 'border-blue-600 bg-blue-600 text-white shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.52)]'
-                        : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                    }`}
-                  >
-                    {page}
-                  </button>
+                {paginationItems.map((item, index) => (
+                  item === 'ellipsis' ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="flex h-10 w-10 items-center justify-center text-sm font-semibold text-slate-300"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      onClick={() => setCurrentPage(item)}
+                      disabled={isPageLoading}
+                      aria-current={page === item ? 'page' : undefined}
+                      className={`flex h-10 min-w-10 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-all ${
+                        page === item
+                          ? 'border-blue-600 bg-blue-600 text-white shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.52)]'
+                          : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                    >
+                      {item}
+                    </button>
+                  )
                 ))}
 
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
+                  disabled={page === totalPages || isPageLoading}
                   className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <i className="fas fa-chevron-right text-xs"></i>

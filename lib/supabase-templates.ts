@@ -4,6 +4,10 @@ import { safeDeepClean } from './utils';
 
 type SupabaseClientLike = any;
 
+function isMissingTemplatesTableError(error: { code?: string; message?: string } | null) {
+    return error?.code === '42P01' || error?.message?.includes('invoice_templates');
+}
+
 function hydrateTemplateRecord(template: InvoiceTemplate): InvoiceTemplate {
     return {
         ...template,
@@ -72,11 +76,96 @@ export async function getUserTemplates(supabase: SupabaseClientLike, userId: str
         .order('created_at', { ascending: false });
 
     if (error) {
+        if (isMissingTemplatesTableError(error)) {
+            console.warn('[getUserTemplates] invoice_templates table is missing, returning empty list');
+            return [];
+        }
         console.error('Error fetching templates:', error);
         throw error;
     }
 
     return (data as InvoiceTemplate[]).map(hydrateTemplateRecord);
+}
+
+export async function getUserTemplatesCount(supabase: SupabaseClientLike, userId: string): Promise<number> {
+    const { count, error } = await supabase
+        .from('invoice_templates')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+    if (error) {
+        if (isMissingTemplatesTableError(error)) {
+            console.warn('[getUserTemplatesCount] invoice_templates table is missing, returning 0');
+            return 0;
+        }
+        console.error('Error fetching template count:', error);
+        throw error;
+    }
+
+    return count || 0;
+}
+
+export async function getUserTemplatesPage(
+    supabase: SupabaseClientLike,
+    userId: string,
+    params: {
+        page: number;
+        pageSize: number;
+        templateType?: TemplateCategory | null;
+    }
+): Promise<{ templates: InvoiceTemplate[]; totalCount: number; overallCount: number }> {
+    const page = Math.max(1, Math.floor(params.page));
+    const pageSize = Math.max(1, Math.min(100, Math.floor(params.pageSize)));
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase
+        .from('invoice_templates')
+        .select('*', { count: 'exact' })
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (params.templateType) {
+        query = query.eq('template_type', params.templateType);
+    }
+
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) {
+        if (isMissingTemplatesTableError(error)) {
+            console.warn('[getUserTemplatesPage] invoice_templates table is missing, returning empty page');
+            return { templates: [], totalCount: 0, overallCount: 0 };
+        }
+        console.error('Error fetching template page:', error);
+        throw error;
+    }
+
+    let overallCount = count || 0;
+
+    if (params.templateType) {
+        const { count: rawOverallCount, error: overallCountError } = await supabase
+            .from('invoice_templates')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', userId);
+
+        if (overallCountError) {
+            if (isMissingTemplatesTableError(overallCountError)) {
+                console.warn('[getUserTemplatesPage] invoice_templates table is missing while counting all templates');
+                overallCount = 0;
+            } else {
+                console.error('Error fetching overall template count:', overallCountError);
+                throw overallCountError;
+            }
+        } else {
+            overallCount = rawOverallCount || 0;
+        }
+    }
+
+    return {
+        templates: (data as InvoiceTemplate[]).map(hydrateTemplateRecord),
+        totalCount: count || 0,
+        overallCount,
+    };
 }
 
 /**

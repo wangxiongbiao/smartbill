@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { deleteInvoice, getUserInvoices, saveInvoice } from '@/lib/supabase-db';
+import { deleteInvoice, getUserInvoices, getUserInvoicesPage, saveInvoice } from '@/lib/supabase-db';
 import { syncBillingProfilesForInvoice } from '@/lib/supabase-billing-profiles';
 import { normalizeInvoiceStatus } from '@/lib/invoice-status';
 
@@ -14,6 +14,22 @@ export async function GET(request: NextRequest) {
     const userId = request.nextUrl.searchParams.get('userId');
     if (userId && userId !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const pageParam = Number(request.nextUrl.searchParams.get('page'));
+    const pageSizeParam = Number(request.nextUrl.searchParams.get('pageSize'));
+    const search = request.nextUrl.searchParams.get('search') || undefined;
+    const monthParam = Number(request.nextUrl.searchParams.get('month'));
+
+    if (Number.isFinite(pageParam) && Number.isFinite(pageSizeParam)) {
+      const { invoices, totalCount } = await getUserInvoicesPage(user.id, {
+        page: pageParam,
+        pageSize: pageSizeParam,
+        search,
+        month: Number.isFinite(monthParam) ? monthParam : null,
+      }, supabase);
+
+      return NextResponse.json({ invoices, totalCount, page: pageParam, pageSize: pageSizeParam });
     }
 
     const invoices = (await getUserInvoices(user.id, supabase)).map((invoice) => ({
