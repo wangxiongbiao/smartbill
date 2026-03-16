@@ -1,6 +1,4 @@
-import React from 'react';
-import image1 from './1.png'
-import image2 from './2.png'
+import React, { useEffect, useRef, useState } from 'react';
 import type { SchoolPoster } from '@/types';
 
 interface PosterShellPreviewProps {
@@ -18,10 +16,14 @@ function splitLines(value?: string) {
     .filter(Boolean);
 }
 
+const SCHOOL_CN_BASE_FONT_REM = 3;
+const SCHOOL_CN_MIN_FONT_REM = 1.4;
+
 export default function PosterShellPreview({ poster }: PosterShellPreviewProps) {
   const { shell } = poster;
   const brandLines = splitLines(shell.brand.subtitle);
-  const showBrandBlock = hasValue(shell.brand.logo) || hasValue(shell.brand.title) || brandLines.length > 0;
+  const showBrandLogo = hasValue(shell.brand.logo);
+  const showBrandBlock = showBrandLogo || hasValue(shell.brand.title) || brandLines.length > 0;
   const showSchoolCn = hasValue(shell.school.nameCn);
   const showSchoolEn = hasValue(shell.school.nameEn);
   const studentMeta = [shell.student.name, shell.student.age, shell.student.city].filter(hasValue);
@@ -32,19 +34,66 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
   const showFooterBlock = footerRows.length > 0;
   const showQrBlock = hasValue(shell.qrCode);
   const showBottomCard = showFooterBlock || showQrBlock;
-  const brandLogoSrc = shell.brand.logo || image1.src;
   const showHeroImage = hasValue(shell.heroImage);
+  const schoolNameRowRef = useRef<HTMLDivElement>(null);
+  const schoolNameMeasureRef = useRef<HTMLDivElement>(null);
+  const [schoolNameFontSizeRem, setSchoolNameFontSizeRem] = useState(SCHOOL_CN_BASE_FONT_REM);
+
+  useEffect(() => {
+    if (!showSchoolCn) {
+      setSchoolNameFontSizeRem(SCHOOL_CN_BASE_FONT_REM);
+      return;
+    }
+
+    const row = schoolNameRowRef.current;
+    const measure = schoolNameMeasureRef.current;
+    if (!row || !measure) return;
+
+    const recalcSchoolNameFontSize = () => {
+      const availableWidth = row.clientWidth;
+      const requiredWidth = measure.scrollWidth;
+      if (!availableWidth || !requiredWidth) return;
+
+      const scaledFontSize = SCHOOL_CN_BASE_FONT_REM * (availableWidth / requiredWidth);
+      const nextFontSize = Math.max(
+        SCHOOL_CN_MIN_FONT_REM,
+        Math.min(SCHOOL_CN_BASE_FONT_REM, scaledFontSize)
+      );
+
+      setSchoolNameFontSizeRem((prev) => (
+        Math.abs(prev - nextFontSize) < 0.01 ? prev : nextFontSize
+      ));
+    };
+
+    recalcSchoolNameFontSize();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => recalcSchoolNameFontSize());
+      resizeObserver.observe(row);
+    }
+
+    const handleResize = () => recalcSchoolNameFontSize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [shell.school.nameCn, showSchoolCn]);
 
   return (
     <div className="relative min-h-[66rem] rounded-3xl overflow-hidden  bg-[#d0f0ff]  text-slate-900 shadow-[0_2.75rem_5.5rem_-2.5rem_rgba(15,23,42,0.32)]">
       {/* 标题 */}
       <div className='relative' style={{ zIndex: 2 }}>
         {showBrandBlock && (
-          <div className="pt-8 px-10 flex">
-            <img src={brandLogoSrc} alt="logo" className=" object-contain  h-[5.5rem]" />
-            <div className='pt-3'>
+          <div className="pt-8 px-10 flex items-start gap-3">
+            {showBrandLogo ? (
+              <img src={shell.brand.logo} alt="logo" className="object-contain h-[5.5rem]" />
+            ) : null}
+            <div className={showBrandLogo ? 'pt-3' : ''}>
               {hasValue(shell.brand.title) && (
-                <div className="text-[0.6rem] font-semibold text-[#466382] mb-[0.2rem] tracking-[0.02em]">{shell.brand.title}</div>
+                <div className="text-[0.8rem] font-semibold text-[#466382] mb-[0.2rem] tracking-[0.02em]">{shell.brand.title}</div>
               )}
               {brandLines.map((line, index) => (
                 <div key={`${line}-${index}`} className="text-[0.9rem] leading-none mb-[0.08rem] font-bold text-[#044195]">{line}</div>
@@ -55,11 +104,24 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
 
         <div className='px-6'>
           {showSchoolCn && (
-            <div className='flex leading-none mb-[0.4rem] text-[3.5rem] font-semibold text-[#044195] mt-10'>
-              <div className='leading-none '>「</div>
-              <div className='leading-none '>{shell.school.nameCn}</div>
-              <div className='leading-none '>」</div>
-            </div>
+            <>
+              <div
+                ref={schoolNameMeasureRef}
+                className='pointer-events-none absolute left-0 top-0 -z-10 whitespace-nowrap opacity-0 text-[3rem] font-semibold leading-none'
+                aria-hidden='true'
+              >
+                「{shell.school.nameCn}」
+              </div>
+              <div
+                ref={schoolNameRowRef}
+                className='flex w-full overflow-hidden whitespace-nowrap leading-none mb-[0.4rem] font-semibold text-[#044195] mt-10'
+                style={{ fontSize: `${schoolNameFontSizeRem}rem` }}
+              >
+                <div className='leading-none '>「</div>
+                <div className='leading-none '>{shell.school.nameCn}</div>
+                <div className='leading-none '>」</div>
+              </div>
+            </>
           )}
           <div className='pl-8'>
             {showSchoolEn && (

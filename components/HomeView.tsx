@@ -392,9 +392,9 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
 
     const topClients = hasConvertedTotals
       ? Array.from(monthlyPerformance)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([name, amount]) => ({ name, amount: formatCurrency(amount, displayCurrency, lang) }))
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([name, amount]) => ({ name, amount: formatCurrency(amount, displayCurrency, lang) }))
       : [];
 
     return {
@@ -429,7 +429,7 @@ const HomeView: React.FC<HomeViewProps> = ({ records, lang, onCreateEmpty, onOpe
     : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-5 md:px-8 md:py-6 space-y-3.5">
+    <div className=" mx-auto px-6 py-5 md:px-8 md:py-6 space-y-3.5">
       {needsLiveRates && (
         <section className="rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
           <div className="flex flex-col gap-2 text-[0.6875rem] font-semibold text-slate-500 sm:flex-row sm:flex-wrap sm:items-center">

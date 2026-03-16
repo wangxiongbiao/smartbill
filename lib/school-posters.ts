@@ -42,27 +42,32 @@ function createDefaultDocumentFrame(): SchoolPosterDocumentFrame {
   };
 }
 
-function createDefaultShell(layoutId: SchoolPosterLayoutId): SchoolPosterShell {
+function createDefaultShell(
+  layoutId: SchoolPosterLayoutId,
+  options?: { withPresetCopy?: boolean }
+): SchoolPosterShell {
+  const withPresetCopy = options?.withPresetCopy ?? false;
+
   return {
     brand: {
-      title: '',
-      subtitle: '',
+      title: withPresetCopy ? '环球视野教育' : '',
+      subtitle: withPresetCopy ? 'GLOBAL\nHORIZONS\nEDU' : '',
     },
     school: {
-      nameCn: '',
-      nameEn: '',
+      nameCn: withPresetCopy ? '新加坡管理学院' : '',
+      nameEn: withPresetCopy ? 'SINGAPORE INSTITUTE OF MANAGEMENT' : '',
     },
     student: {
-      name: '',
-      age: '',
-      city: '',
-      applicationPeriod: '',
-      transferPath: '',
+      name: withPresetCopy ? '张同学' : '',
+      age: withPresetCopy ? '17岁' : '',
+      city: withPresetCopy ? '广州' : '',
+      applicationPeriod: withPresetCopy ? '2026 秋季入学' : '',
+      transferPath: withPresetCopy ? '国际课程衔接路径' : '',
     },
     footer: {
-      tuition: '',
-      pathway: '',
-      highlights: '',
+      tuition: withPresetCopy ? '学费预算：约 S$18,000 / 年' : '',
+      pathway: withPresetCopy ? '升学路径：预科 -> 本科' : '',
+      highlights: withPresetCopy ? '支持材料规划与申请节点管理' : '',
     },
     documentFrame: createDefaultDocumentFrame(),
     visibility: getVisibilityPreset(layoutId),
@@ -113,7 +118,7 @@ export function createSchoolPoster(layoutId: SchoolPosterLayoutId = 'offer-poste
     createdAt: now,
     updatedAt: now,
     layoutId,
-    shell: createDefaultShell(layoutId),
+    shell: createDefaultShell(layoutId, { withPresetCopy: true }),
     document: createDefaultDocument(layoutId),
   };
 }

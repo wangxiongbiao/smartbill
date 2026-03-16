@@ -509,7 +509,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[92.5rem] px-4 py-6 md:px-6 lg:px-8 xl:px-10">
+    <div className="mx-auto w-full px-4 py-6 md:px-6 lg:px-8 xl:px-10">
       <div className="space-y-8">
         <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] shadow-[0_1.75rem_3.75rem_-2.625rem_rgba(15,23,42,0.45)]">
           <div className="grid gap-0 xl:grid-cols-[minmax(0,1.25fr)_minmax(22.5rem,0.95fr)]">

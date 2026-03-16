@@ -597,7 +597,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, totalCount, paginati
   return (
     <>
       <div className="flex h-full min-h-0 flex-col overflow-hidden px-6 py-6 md:px-8 md:py-8">
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[86.25rem] flex-col">
+        <div className="mx-auto flex h-full min-h-0 w-full  flex-col">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={() => onNewDoc()}
@@ -897,11 +897,10 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, totalCount, paginati
                                   disabled={isDeletingId === record.id}
                                   title={copy.deleteAction}
                                   aria-label={copy.deleteAction}
-                                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                                    isDeletingId === record.id
+                                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${isDeletingId === record.id
                                       ? 'text-rose-400'
                                       : 'text-rose-300 hover:bg-rose-50 hover:text-rose-600'
-                                  }`}
+                                    }`}
                                 >
                                   <i className={`fas ${isDeletingId === record.id ? 'fa-spinner fa-spin' : 'fa-trash'} text-xs`}></i>
                                 </button>
@@ -959,11 +958,10 @@ const RecordsView: React.FC<RecordsViewProps> = ({ records, totalCount, paginati
                       onClick={() => setCurrentPage(item)}
                       disabled={isPageLoading}
                       aria-current={page === item ? 'page' : undefined}
-                      className={`flex h-10 min-w-10 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-all ${
-                        page === item
+                      className={`flex h-10 min-w-10 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-all ${page === item
                           ? 'border-blue-600 bg-blue-600 text-white shadow-[0_0.875rem_1.625rem_-1.125rem_rgba(37,99,235,0.52)]'
                           : 'border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                        } disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       {item}
                     </button>
