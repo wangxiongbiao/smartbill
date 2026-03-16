@@ -39,7 +39,7 @@ function sanitizeRichText(value?: string) {
 
 const SCHOOL_CN_BASE_FONT_REM = 2;
 const SCHOOL_CN_MIN_FONT_REM = 1;
-const RICH_TEXT_CARD_SCALE = 0.6;
+const RICH_TEXT_CARD_SCALE = 0.75;
 
 export default function PosterShellPreview({ poster }: PosterShellPreviewProps) {
   const { shell, document } = poster;
