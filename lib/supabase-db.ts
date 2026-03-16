@@ -83,11 +83,16 @@ export async function saveInvoice(userId: string, invoice: Invoice, supabase?: S
         throw new Error('Failed to sanitize invoice data');
     }
 
+    const normalizedInvoice: Invoice = {
+        ...cleanInvoiceData,
+        id: String(cleanInvoiceData.id),
+    };
+
     const payload = {
-        id: cleanInvoiceData.id,
+        id: normalizedInvoice.id,
         user_id: userId,
-        invoice_number: cleanInvoiceData.invoiceNumber,
-        invoice_data: cleanInvoiceData,
+        invoice_number: normalizedInvoice.invoiceNumber,
+        invoice_data: normalizedInvoice,
         updated_at: new Date().toISOString()
     };
 

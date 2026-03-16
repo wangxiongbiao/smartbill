@@ -41,7 +41,10 @@ export function usePaginatedInvoiceRecords(params: UsePaginatedInvoiceRecordsPar
       month: selectedMonth,
     }).then((response) => {
       if (cancelled) return;
-      setRecords(response.invoices);
+      setRecords(response.invoices.map((invoice) => ({
+        ...invoice,
+        id: String(invoice.id),
+      })));
       setTotalCount(response.totalCount);
       setHasLoaded(true);
     }).catch((error) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { translations } from '@/i18n';
 import { deleteInvoiceRecord, saveInvoiceRecord } from '@/lib/api/invoice';
 import { createTemplate } from '@/lib/api/template';
@@ -59,8 +59,16 @@ export function useInvoiceWorkspace(params: {
   const [lastSavedTime, setLastSavedTime] = useState<Date | undefined>();
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const waitForFirstEditRef = useRef(false);
   const skipNextAutoSaveRef = useRef(false);
+  const isPersistingRef = useRef(false);
+  const queuedPersistInvoiceRef = useRef<Invoice | null>(null);
+  const latestInvoiceRef = useRef<Invoice>(INITIAL_INVOICE);
+  const hasPendingChangesRef = useRef(false);
+  const lastSaveErrorToastAtRef = useRef(0);
+
+  useEffect(() => {
+    latestInvoiceRef.current = invoice;
+  }, [invoice]);
 
   const upsertRecordLocally = useCallback((targetInvoice: Invoice) => {
     setRecords(prev => {
@@ -94,7 +102,6 @@ export function useInvoiceWorkspace(params: {
   }, [isHeaderReversed, template]);
 
   const updateInvoice = useCallback((updates: Partial<Invoice>) => {
-    waitForFirstEditRef.current = false;
     setInvoiceState(prev => ({ ...prev, ...updates }));
   }, []);
 
@@ -110,20 +117,43 @@ export function useInvoiceWorkspace(params: {
 
   const persistInvoice = useCallback(async (targetInvoice: Invoice) => {
     if (!user?.id || !targetInvoice.id) return;
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
 
-    setSaveStatus('saving');
-    try {
-      await saveInvoiceRecord(targetInvoice);
-      upsertRecordLocally(targetInvoice);
-      setSaveStatus('saved');
-      setLastSavedTime(new Date());
-    } catch (error) {
-      console.error('Save failed:', error);
-      setSaveStatus('error');
-      throw error;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
     }
-  }, [upsertRecordLocally, user?.id]);
+
+    queuedPersistInvoiceRef.current = targetInvoice;
+    if (isPersistingRef.current) return;
+
+    isPersistingRef.current = true;
+    try {
+      while (queuedPersistInvoiceRef.current) {
+        const pendingInvoice = queuedPersistInvoiceRef.current;
+        queuedPersistInvoiceRef.current = null;
+
+        setSaveStatus('saving');
+        try {
+          await saveInvoiceRecord(pendingInvoice);
+          upsertRecordLocally(pendingInvoice);
+          setSaveStatus('saved');
+          setLastSavedTime(new Date());
+        } catch (error) {
+          console.error('Save failed:', error);
+          setSaveStatus('error');
+          const now = Date.now();
+          if (now - lastSaveErrorToastAtRef.current > 5000) {
+            lastSaveErrorToastAtRef.current = now;
+            showToast('自动保存失败，请检查网络后重试', 'error');
+          }
+          throw error;
+        }
+      }
+      hasPendingChangesRef.current = false;
+    } finally {
+      isPersistingRef.current = false;
+    }
+  }, [showToast, upsertRecordLocally, user?.id]);
 
   const buildSenderDraft = useCallback((senderOverride?: Partial<Invoice['sender']>) => ({
     ...INITIAL_INVOICE.sender,
@@ -145,7 +175,6 @@ export function useInvoiceWorkspace(params: {
       invoiceNumber: `INV-${newId.slice(-6)}`
     };
 
-    waitForFirstEditRef.current = !!user?.id;
     setInvoice(nextInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -221,7 +250,6 @@ export function useInvoiceWorkspace(params: {
       status: 'Pending'
     };
 
-    waitForFirstEditRef.current = !!user?.id;
     setInvoice(nextInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -248,7 +276,6 @@ export function useInvoiceWorkspace(params: {
       }))
     };
 
-    waitForFirstEditRef.current = !!user?.id;
     setInvoice(duplicatedInvoice, { skipAutoSave: true });
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -270,11 +297,11 @@ export function useInvoiceWorkspace(params: {
 
   const scheduleAutoSave = useCallback((targetInvoice: Invoice) => {
     if (!user?.id || !targetInvoice.id || activeView !== 'editor') return;
-    if (waitForFirstEditRef.current) return;
     if (skipNextAutoSaveRef.current) {
       skipNextAutoSaveRef.current = false;
       return;
     }
+    hasPendingChangesRef.current = true;
 
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
@@ -282,8 +309,24 @@ export function useInvoiceWorkspace(params: {
 
     autoSaveTimerRef.current = setTimeout(() => {
       persistInvoice(targetInvoice).catch(() => undefined);
-    }, 3000);
+    }, 1500);
   }, [activeView, persistInvoice, user?.id]);
+
+  const flushAutoSave = useCallback(async () => {
+    if (!user?.id || activeView !== 'editor') return;
+    if (!hasPendingChangesRef.current) return;
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
+    await persistInvoice(latestInvoiceRef.current);
+  }, [activeView, persistInvoice, user?.id]);
+
+  useEffect(() => {
+    scheduleAutoSave(invoice);
+  }, [invoice, scheduleAutoSave]);
 
   const actions = useMemo(() => ({
     createInvoice,
@@ -300,7 +343,8 @@ export function useInvoiceWorkspace(params: {
     setIsHeaderReversed,
     setIsExporting,
     scheduleAutoSave,
-  }), [createInvoice, duplicateInvoice, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, scheduleAutoSave, setInvoice, setIsHeaderReversed, setTemplate, updateInvoice, updateInvoiceStatus, useTemplate]);
+    flushAutoSave,
+  }), [createInvoice, duplicateInvoice, flushAutoSave, refreshRecords, removeInvoice, saveAsTemplate, saveCurrentInvoice, scheduleAutoSave, setInvoice, setIsHeaderReversed, setTemplate, updateInvoice, updateInvoiceStatus, useTemplate]);
 
   return {
     invoice,

@@ -20,7 +20,11 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
   const inFlightSyncRef = useRef<Promise<void> | null>(null);
 
   const normalizeInvoices = useCallback((invoices: Invoice[]) => (
-    invoices.map((invoice) => ({ ...invoice, status: normalizeInvoiceStatus(invoice.status) }))
+    invoices.map((invoice) => ({
+      ...invoice,
+      id: String(invoice.id),
+      status: normalizeInvoiceStatus(invoice.status),
+    }))
   ), []);
 
   const readLocalRecords = useCallback(() => {

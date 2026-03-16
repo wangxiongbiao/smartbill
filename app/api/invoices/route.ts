@@ -16,12 +16,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const pageParam = Number(request.nextUrl.searchParams.get('page'));
-    const pageSizeParam = Number(request.nextUrl.searchParams.get('pageSize'));
+    const pageRaw = request.nextUrl.searchParams.get('page');
+    const pageSizeRaw = request.nextUrl.searchParams.get('pageSize');
+    const pageParam = pageRaw === null ? NaN : Number(pageRaw);
+    const pageSizeParam = pageSizeRaw === null ? NaN : Number(pageSizeRaw);
     const search = request.nextUrl.searchParams.get('search') || undefined;
-    const monthParam = Number(request.nextUrl.searchParams.get('month'));
+    const monthRaw = request.nextUrl.searchParams.get('month');
+    const monthParam = monthRaw === null ? NaN : Number(monthRaw);
 
-    if (Number.isFinite(pageParam) && Number.isFinite(pageSizeParam)) {
+    if (Number.isFinite(pageParam) && pageParam > 0 && Number.isFinite(pageSizeParam) && pageSizeParam > 0) {
       const { invoices, totalCount } = await getUserInvoicesPage(user.id, {
         page: pageParam,
         pageSize: pageSizeParam,
@@ -29,11 +32,18 @@ export async function GET(request: NextRequest) {
         month: Number.isFinite(monthParam) ? monthParam : null,
       }, supabase);
 
-      return NextResponse.json({ invoices, totalCount, page: pageParam, pageSize: pageSizeParam });
+      const normalizedInvoices = invoices.map((invoice) => ({
+        ...invoice,
+        id: String(invoice.id),
+        status: normalizeInvoiceStatus(invoice.status),
+      }));
+
+      return NextResponse.json({ invoices: normalizedInvoices, totalCount, page: pageParam, pageSize: pageSizeParam });
     }
 
     const invoices = (await getUserInvoices(user.id, supabase)).map((invoice) => ({
       ...invoice,
+      id: String(invoice.id),
       status: normalizeInvoiceStatus(invoice.status),
     }));
 
@@ -58,6 +68,7 @@ export async function POST(request: NextRequest) {
 
     const normalizedInvoice = {
       ...body.invoice,
+      id: String(body.invoice.id),
       status: normalizeInvoiceStatus(body.invoice.status),
     };
 
