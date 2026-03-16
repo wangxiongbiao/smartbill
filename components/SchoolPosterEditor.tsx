@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from 'react';
+import dynamic from 'next/dynamic';
 import ScalableInvoiceContainer from '@/components/ScalableInvoiceContainer';
 import SchoolPosterPreview from '@/components/SchoolPosterPreview';
 import type { Language, SchoolPoster } from '@/types';
@@ -40,6 +41,100 @@ function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
       {...props}
       className={`w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-blue-300 focus:bg-white ${props.className || ''}`}
     />
+  );
+}
+
+function hasRichTextValue(value?: string) {
+  if (!value) return false;
+
+  const plainText = value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .trim();
+
+  return plainText.length > 0;
+}
+
+const QuillEditor = dynamic(
+  () => import('react-quill-new'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center rounded-xl border border-white/70 bg-white text-sm text-slate-400">
+        Loading editor...
+      </div>
+    ),
+  }
+) as React.ComponentType<any>;
+
+const QUILL_MODULES = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    [{ font: [] }, { size: ['small', false, 'large', 'huge'] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ color: [] }, { background: [] }],
+    [{ script: 'sub' }, { script: 'super' }],
+    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+    [{ align: [] }],
+    ['blockquote', 'code-block'],
+    ['link', 'image'],
+    ['clean'],
+  ],
+  history: {
+    delay: 500,
+    maxStack: 100,
+    userOnly: true,
+  },
+};
+
+const QUILL_FORMATS = [
+  'header',
+  'font',
+  'size',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'color',
+  'background',
+  'script',
+  'list',
+  'bullet',
+  'indent',
+  'align',
+  'blockquote',
+  'code-block',
+  'link',
+  'image',
+];
+
+function RichTextInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder: string;
+}) {
+  const normalizedValue = hasRichTextValue(value) ? value : '';
+
+  return (
+    <div className="relative w-full rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+      <div className="w-full aspect-[210/297]">
+        <QuillEditor
+          theme="snow"
+          value={normalizedValue}
+          modules={QUILL_MODULES}
+          formats={QUILL_FORMATS}
+          placeholder={placeholder}
+          className="poster-rich-editor h-full"
+          onChange={(nextValue: string) => {
+            onChange(hasRichTextValue(nextValue) ? nextValue : '');
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -229,6 +324,9 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       assetsHint: '上传主图和二维码，文书卡暂时只保留白色占位框。',
       footerCard: '底部文案',
       footerHint: '三条底部文案独立控制，留空即自动隐藏。',
+      richCard: '白色文书卡',
+      richCardHint: '输入富文本后会在海报中生成一张 A4 比例白色卡片，位于背景图之上、蓝色底层之下。',
+      richContent: '富文本内容',
       brandLogo: '品牌 Logo',
       brandTitle: '中文标题',
       brandSubtitle: '英文标题',
@@ -255,6 +353,7 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       remove: '移除',
       addLine: '添加一行',
       removeLine: '删除',
+      richPlaceholder: '请输入文书内容，可设置加粗、斜体、下划线与列表。',
     }
     : {
       back: 'Back to posters',
@@ -266,6 +365,9 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       assetsHint: 'Upload the hero image and QR code. The document card stays as a white placeholder for now.',
       footerCard: 'Footer Copy',
       footerHint: 'Each footer line hides independently when empty.',
+      richCard: 'White Document Card',
+      richCardHint: 'Once entered, an A4-style white card appears above the hero image and below the blue footer layer.',
+      richContent: 'Rich text content',
       brandLogo: 'Brand logo',
       brandTitle: 'Chinese title',
       brandSubtitle: 'English title',
@@ -292,6 +394,7 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       remove: 'Remove',
       addLine: 'Add line',
       removeLine: 'Remove',
+      richPlaceholder: 'Enter rich text. You can use bold, italic, underline, and bullet list.',
     };
 
   const getPlaceholder = (label: string) => (
@@ -509,6 +612,23 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
                 uploadingLabel={copy.uploading}
                 onUpload={(file) => handleImageUpload('shell.qrCode', file)}
                 onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, qrCode: undefined } })}
+              />
+            </div>
+          </SectionCard>
+
+          <SectionCard title={copy.richCard} subtitle={copy.richCardHint}>
+            <div className="space-y-2">
+
+              <RichTextInput
+                value={poster.document.richText}
+                placeholder={copy.richPlaceholder}
+                onChange={(nextValue) => updatePoster({
+                  ...poster,
+                  document: {
+                    ...poster.document,
+                    richText: nextValue,
+                  },
+                })}
               />
             </div>
           </SectionCard>

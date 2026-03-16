@@ -1,3 +1,5 @@
+@import 'react-quill-new/dist/quill.snow.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -41,4 +43,58 @@ html {
 @media print {
   .no-print { display: none !important; }
   .print-only { display: block !important; }
+}
+
+.poster-rich-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.poster-rich-editor .ql-toolbar.ql-snow {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: #ffffff;
+}
+
+.poster-rich-editor .ql-container.ql-snow {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: #ffffff;
+}
+
+.poster-rich-editor .ql-editor {
+  height: 100%;
+  min-height: 0;
+  padding: 1.5rem;
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.75rem;
+}
+
+.poster-rich-editor .ql-editor.ql-blank::before {
+  left: 1.5rem;
+  right: 1.5rem;
+  color: #94a3b8;
+  font-style: normal;
+}
+
+.poster-rich-preview.ql-editor {
+  height: 100%;
+  overflow: hidden;
+  padding: 0;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.65rem;
+}
+
+.poster-rich-preview.ql-editor p {
+  margin: 0;
+}
+
+.poster-rich-preview.ql-editor p + p {
+  margin-top: 0.65rem;
 }

@@ -87,6 +87,7 @@ function createDefaultDocument(layoutId: SchoolPosterLayoutId): SchoolPosterDocu
       confirmation: '',
       paymentNote: '',
       totalLabel: '',
+      richText: '',
       rows: [],
     };
   }
@@ -102,6 +103,7 @@ function createDefaultDocument(layoutId: SchoolPosterLayoutId): SchoolPosterDocu
     confirmation: '',
     paymentNote: '',
     totalLabel: '',
+    richText: '',
     rows: [],
   };
 }
@@ -193,6 +195,7 @@ export function normalizeSchoolPoster(record: any): SchoolPoster {
         mode: record.document.mode === 'image' ? 'image' : 'offer-table',
         logo: typeof record.document.logo === 'string' ? record.document.logo : undefined,
         image: typeof record.document.image === 'string' ? record.document.image : undefined,
+        richText: typeof record.document.richText === 'string' ? record.document.richText : documentDefaults.richText,
         date: typeof record.document.date === 'string' ? record.document.date : documentDefaults.date,
         reference: typeof record.document.reference === 'string' ? record.document.reference : documentDefaults.reference,
         recipient: typeof record.document.recipient === 'string' ? record.document.recipient : documentDefaults.recipient,
@@ -245,6 +248,7 @@ export function normalizeSchoolPoster(record: any): SchoolPoster {
       mode: 'offer-table',
       logo: typeof legacy.offer?.crest === 'string' ? legacy.offer.crest : undefined,
       image: undefined,
+      richText: '',
       date: typeof legacy.offer?.date === 'string' ? legacy.offer.date : documentDefaults.date,
       reference: '',
       recipient: typeof legacy.offer?.recipient === 'string' ? legacy.offer.recipient : documentDefaults.recipient,
@@ -316,6 +320,7 @@ export function clearSchoolPosterContent(record: SchoolPoster): SchoolPoster {
       ...record.document,
       logo: undefined,
       image: undefined,
+      richText: '',
       date: '',
       reference: '',
       recipient: '',

@@ -16,11 +16,33 @@ function splitLines(value?: string) {
     .filter(Boolean);
 }
 
+function hasRichTextValue(value?: string) {
+  if (!value) return false;
+
+  const plainText = value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .trim();
+
+  return plainText.length > 0;
+}
+
+function sanitizeRichText(value?: string) {
+  if (!value) return '';
+
+  return value
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+="[^"]*"/gi, '')
+    .replace(/\son\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '');
+}
+
 const SCHOOL_CN_BASE_FONT_REM = 2;
 const SCHOOL_CN_MIN_FONT_REM = 1;
+const RICH_TEXT_CARD_SCALE = 0.6;
 
 export default function PosterShellPreview({ poster }: PosterShellPreviewProps) {
-  const { shell } = poster;
+  const { shell, document } = poster;
   const brandLines = splitLines(shell.brand.subtitle);
   const showBrandLogo = hasValue(shell.brand.logo);
   const showBrandBlock = showBrandLogo || hasValue(shell.brand.title) || brandLines.length > 0;
@@ -35,6 +57,8 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
   const showQrBlock = hasValue(shell.qrCode);
   const showBottomCard = showFooterBlock || showQrBlock;
   const showHeroImage = hasValue(shell.heroImage);
+  const showRichTextCard = hasRichTextValue(document.richText);
+  const richTextHtml = sanitizeRichText(document.richText);
   const schoolNameRowRef = useRef<HTMLDivElement>(null);
   const schoolNameMeasureRef = useRef<HTMLDivElement>(null);
   const [schoolNameFontSizeRem, setSchoolNameFontSizeRem] = useState(SCHOOL_CN_BASE_FONT_REM);
@@ -194,6 +218,25 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
           )}
         </div>
       )}
+
+      {showRichTextCard ? (
+        <div
+          className="absolute bottom-[8.4rem] right-[3.6rem] origin-bottom-right"
+          style={{
+            zIndex: 2,
+            transform: `scale(${RICH_TEXT_CARD_SCALE})`,
+          }}
+        >
+          <div className="w-[34rem] max-w-none aspect-[210/297] rounded-sm border border-slate-200/70 bg-white shadow-[0_1.5rem_3rem_-1.5rem_rgba(15,23,42,0.45)]">
+            <div className="h-full w-full overflow-hidden p-6 text-[0.9rem] leading-7 text-slate-700">
+              <div
+                className="poster-rich-preview ql-editor h-full w-full overflow-hidden break-words"
+                dangerouslySetInnerHTML={{ __html: richTextHtml }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -187,6 +187,7 @@ export interface SchoolPosterDocument {
   mode: SchoolPosterDocumentMode;
   logo?: string;
   image?: string;
+  richText: string;
   date: string;
   reference: string;
   recipient: string;
