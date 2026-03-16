@@ -14,6 +14,7 @@ const LOCAL_STORAGE_KEY = 'invoice_records_v2';
 export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams) {
   const [records, setRecords] = useState<Invoice[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
+  const recordsRef = useRef<Invoice[]>([]);
   const lastLoadedUserRef = useRef<string | null>(null);
   const inFlightRefreshRef = useRef<Promise<Invoice[]> | null>(null);
   const inFlightSyncRef = useRef<Promise<void> | null>(null);
@@ -41,13 +42,17 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     return normalized;
   }, [readLocalRecords]);
 
+  useEffect(() => {
+    recordsRef.current = records;
+  }, [records]);
+
   const refreshRecords = useCallback(async (options?: { force?: boolean }) => {
     if (!userId) return [] as Invoice[];
 
     if (!options?.force) {
       if (inFlightRefreshRef.current) return inFlightRefreshRef.current;
-      if (lastLoadedUserRef.current === userId && records.length > 0) {
-        return records;
+      if (lastLoadedUserRef.current === userId && recordsRef.current.length > 0) {
+        return recordsRef.current;
       }
     }
 
@@ -67,10 +72,10 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
 
     inFlightRefreshRef.current = request;
     return request;
-  }, [normalizeInvoices, records, userId]);
+  }, [normalizeInvoices, userId]);
 
   const syncRecordsForUser = useCallback(async (authUserId: string, options?: { force?: boolean }) => {
-    if (!options?.force && lastLoadedUserRef.current === authUserId && records.length > 0) {
+    if (!options?.force && lastLoadedUserRef.current === authUserId && recordsRef.current.length > 0) {
       return;
     }
 
@@ -114,7 +119,7 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
 
     inFlightSyncRef.current = request;
     return request;
-  }, [normalizeInvoices, readLocalRecords, records.length, refreshRecords]);
+  }, [normalizeInvoices, readLocalRecords, refreshRecords]);
 
   const resetRecords = useCallback(() => {
     lastLoadedUserRef.current = null;

@@ -15,11 +15,14 @@ import { RECORDS_PAGE_SIZE } from '@/lib/pagination';
 import type { RecordsViewState } from '@/components/app/app-shell.types';
 
 const RECORDS_VIEW_STATE_KEY = 'smartbill-records-view-state';
+const PAGE_SIZE_OPTIONS = [6, 12, 24, 48] as const;
+const DEFAULT_PAGE_SIZE = RECORDS_PAGE_SIZE;
 
 const INITIAL_RECORDS_VIEW_STATE: RecordsViewState = {
   searchQuery: '',
   selectedMonth: 'all',
   currentPage: 1,
+  pageSize: DEFAULT_PAGE_SIZE,
   scrollTop: 0,
   shellScrollTop: 0,
 };
@@ -42,6 +45,10 @@ function parseStoredRecordsViewState(): RecordsViewState {
         typeof parsed.currentPage === 'number' && parsed.currentPage > 0
           ? parsed.currentPage
           : INITIAL_RECORDS_VIEW_STATE.currentPage,
+      pageSize:
+        typeof parsed.pageSize === 'number' && PAGE_SIZE_OPTIONS.includes(parsed.pageSize as (typeof PAGE_SIZE_OPTIONS)[number])
+          ? parsed.pageSize
+          : INITIAL_RECORDS_VIEW_STATE.pageSize,
       scrollTop:
         typeof parsed.scrollTop === 'number' && parsed.scrollTop >= 0
           ? parsed.scrollTop
@@ -60,12 +67,16 @@ export default function RecordsRoute() {
   const app = useAppShell();
   const userId = app.user?.id ?? null;
   const recordsStore = useInvoiceRecordsStore({ userId });
+  const guestHydratedRef = useRef(false);
+  const shellScrollRafRef = useRef<number | null>(null);
+  const shellScrollCommitTimerRef = useRef<number | null>(null);
+  const pendingShellScrollTopRef = useRef(0);
   const [recordsViewState, setRecordsViewState] = useState<RecordsViewState>(INITIAL_RECORDS_VIEW_STATE);
   const [isViewStateReady, setIsViewStateReady] = useState(false);
   const paginatedRecords = usePaginatedInvoiceRecords({
     userId: isViewStateReady ? userId : null,
     page: recordsViewState.currentPage,
-    pageSize: RECORDS_PAGE_SIZE,
+    pageSize: recordsViewState.pageSize,
     searchQuery: recordsViewState.searchQuery,
     selectedMonth: recordsViewState.selectedMonth,
   });
@@ -103,18 +114,38 @@ export default function RecordsRoute() {
     if (!shellContent) return;
 
     const handleScroll = () => {
-      const nextShellScrollTop = shellContent.scrollTop;
-      setRecordsViewState((prev) => (
-        prev.shellScrollTop === nextShellScrollTop
-          ? prev
-          : { ...prev, shellScrollTop: nextShellScrollTop }
-      ));
+      pendingShellScrollTopRef.current = shellContent.scrollTop;
+
+      if (shellScrollRafRef.current !== null) return;
+      shellScrollRafRef.current = window.requestAnimationFrame(() => {
+        shellScrollRafRef.current = null;
+        if (shellScrollCommitTimerRef.current !== null) {
+          window.clearTimeout(shellScrollCommitTimerRef.current);
+        }
+        shellScrollCommitTimerRef.current = window.setTimeout(() => {
+          shellScrollCommitTimerRef.current = null;
+          const nextShellScrollTop = pendingShellScrollTopRef.current;
+          setRecordsViewState((prev) => (
+            prev.shellScrollTop === nextShellScrollTop
+              ? prev
+              : { ...prev, shellScrollTop: nextShellScrollTop }
+          ));
+        }, 120);
+      });
     };
 
     shellContent.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       shellContent.removeEventListener('scroll', handleScroll);
+      if (shellScrollRafRef.current !== null) {
+        window.cancelAnimationFrame(shellScrollRafRef.current);
+        shellScrollRafRef.current = null;
+      }
+      if (shellScrollCommitTimerRef.current !== null) {
+        window.clearTimeout(shellScrollCommitTimerRef.current);
+        shellScrollCommitTimerRef.current = null;
+      }
     };
   }, [isViewStateReady]);
 
@@ -128,15 +159,7 @@ export default function RecordsRoute() {
       if (Math.abs(shellContent.scrollTop - recordsViewState.shellScrollTop) < 1) return;
       shellContent.scrollTop = recordsViewState.shellScrollTop;
     });
-  }, [
-    recordsViewState.shellScrollTop,
-    paginatedRecords.loading,
-    paginatedRecords.records.length,
-    recordsStore.records.length,
-    recordsStore.recordsLoading,
-    isViewStateReady,
-    userId,
-  ]);
+  }, [isViewStateReady, recordsViewState.shellScrollTop]);
 
   const persistRecordsViewState = () => {
     if (typeof window === 'undefined') return;
@@ -155,10 +178,15 @@ export default function RecordsRoute() {
   useEffect(() => {
     if (!isViewStateReady) return;
 
-    if (!userId) {
-      recordsStore.hydrateLocalRecords();
+    if (userId) {
+      guestHydratedRef.current = false;
+      return;
     }
-  }, [isViewStateReady, recordsStore.hydrateLocalRecords, recordsStore.syncRecordsForUser, userId]);
+
+    if (guestHydratedRef.current) return;
+    guestHydratedRef.current = true;
+    recordsStore.hydrateLocalRecords();
+  }, [isViewStateReady, recordsStore.hydrateLocalRecords, userId]);
 
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={5} />;
   if (!isViewStateReady) return <ContentSkeleton blocks={5} />;
@@ -196,6 +224,26 @@ export default function RecordsRoute() {
           await deleteInvoiceRecord(id);
           if (userId) paginatedRecords.refresh();
           else recordsStore.setRecords((prev) => prev.filter((record) => record.id !== id));
+        }}
+        onDeleteMany={async (ids) => {
+          if (ids.length === 0) return;
+
+          const results = await Promise.allSettled(ids.map((id) => deleteInvoiceRecord(id)));
+          const successIds = ids.filter((_, index) => results[index].status === 'fulfilled');
+          const failedCount = ids.length - successIds.length;
+
+          if (successIds.length > 0) {
+            if (userId) {
+              paginatedRecords.refresh();
+            } else {
+              const successIdSet = new Set(successIds);
+              recordsStore.setRecords((prev) => prev.filter((record) => !successIdSet.has(record.id)));
+            }
+          }
+
+          if (failedCount > 0) {
+            throw new Error(`Failed to delete ${failedCount} invoice(s).`);
+          }
         }}
         onUpdateStatus={async (id, status) => {
           const sourceRecords = userId ? paginatedRecords.records : recordsStore.records;

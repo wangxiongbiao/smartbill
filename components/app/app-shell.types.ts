@@ -8,6 +8,7 @@ export interface RecordsViewState {
   searchQuery: string;
   selectedMonth: 'all' | number;
   currentPage: number;
+  pageSize: number;
   scrollTop: number;
   shellScrollTop: number;
 }
