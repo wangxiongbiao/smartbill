@@ -52,13 +52,13 @@ export function useAppShellState() {
   }, [lang]);
 
   useEffect(() => {
-    if (isBootstrapping || user) return;
+    if (isBootstrapping || isLoggingOut || user) return;
     if (!PRIVATE_VIEWS.includes(activeView)) return;
 
     const nextPath = search ? `${pathname}?${search}` : pathname;
     const next = encodeURIComponent(nextPath);
     router.replace(`/?next=${next}`);
-  }, [activeView, isBootstrapping, pathname, router, search, user]);
+  }, [activeView, isBootstrapping, isLoggingOut, pathname, router, search, user]);
 
   const setConsoleLang = useCallback((nextLang: Language) => {
     setLang(nextLang);
@@ -67,9 +67,9 @@ export function useAppShellState() {
 
   const logout = useCallback(async () => {
     await auth.logout(() => {
-      router.push(buildLangHref('/', lang));
+      window.location.replace(buildLangHref('/', lang));
     });
-  }, [auth, lang, router]);
+  }, [auth, lang]);
 
   const contextValue = useMemo<AppShellContextValue>(() => ({
     lang,

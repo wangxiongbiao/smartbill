@@ -139,19 +139,38 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
     else localStorage.removeItem('sb_user_session');
   }, [user]);
 
+  const clearBrowserState = useCallback(() => {
+    try {
+      window.localStorage.clear();
+    } catch (error) {
+      console.warn('[AuthSession] Failed to clear localStorage during logout:', error);
+    }
+
+    try {
+      window.sessionStorage.clear();
+    } catch (error) {
+      console.warn('[AuthSession] Failed to clear sessionStorage during logout:', error);
+    }
+  }, []);
+
   const logout = useCallback(async (onAfter?: () => void) => {
     setIsLoggingOut(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    syncRef.current = null;
-    setUser(null);
-    localStorage.removeItem('sb_user_session');
 
     const supabase = createSupabaseClient();
-    supabase.auth.signOut().catch(console.error).finally(() => {
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (error) {
+      console.error('[AuthSession] Logout failed:', error);
+    } finally {
+      syncRef.current = null;
+      bootstrappedRef.current = true;
+      setIsBootstrapping(false);
+      setUser(null);
+      clearBrowserState();
+      setIsLoggingOut(false);
       onAfter?.();
-    });
-  }, []);
+    }
+  }, [clearBrowserState]);
 
   return {
     isBootstrapping,
