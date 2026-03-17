@@ -68,7 +68,8 @@ function sanitizeDocumentHtml(value?: string) {
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\son\w+="[^"]*"/gi, '')
     .replace(/\son\w+='[^']*'/gi, '')
-    .replace(/javascript:/gi, '');
+    .replace(/javascript:/gi, '')
+    .replace(/<p(\s[^>]*)?>\s*(?:&nbsp;|\u00a0|<br\s*\/?>|\s)*<\/p>/gi, '<p$1><br /></p>');
 }
 
 const EasyCrop = dynamic(

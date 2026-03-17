@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { cloneSchoolPoster, createDefaultSchoolPoster, getSchoolPosterStorageKey, normalizeSchoolPoster, readSchoolPosters, writeSchoolPosters } from '@/lib/school-posters';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { deleteSchoolPosterRecord, listSchoolPosters, saveSchoolPosterRecord } from '@/lib/api/school-poster';
+import { cloneSchoolPoster, createDefaultSchoolPoster, normalizeSchoolPoster } from '@/lib/school-posters';
 import type { SchoolPoster } from '@/types';
 
 interface UseSchoolPostersParams {
@@ -13,58 +14,121 @@ function sortByUpdatedAt(records: SchoolPoster[]) {
 }
 
 export function useSchoolPosters({ userId }: UseSchoolPostersParams) {
-  const storageKey = useMemo(() => getSchoolPosterStorageKey(userId), [userId]);
   const [records, setRecords] = useState<SchoolPoster[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const recordsRef = useRef<SchoolPoster[]>([]);
+  const lastLoadedUserRef = useRef<string | null>(null);
+  const inFlightRefreshRef = useRef<Promise<SchoolPoster[]> | null>(null);
+
+  useEffect(() => {
+    recordsRef.current = records;
+  }, [records]);
 
   const commitRecords = useCallback((nextRecords: SchoolPoster[]) => {
     const sorted = sortByUpdatedAt(nextRecords.map(normalizeSchoolPoster));
     setRecords(sorted);
-    writeSchoolPosters(storageKey, sorted);
     return sorted;
-  }, [storageKey]);
+  }, []);
+
+  const refreshRecords = useCallback(async (options?: { force?: boolean }) => {
+    if (!userId) {
+      setRecords([]);
+      setIsHydrated(true);
+      return [] as SchoolPoster[];
+    }
+
+    if (!options?.force) {
+      if (inFlightRefreshRef.current) return inFlightRefreshRef.current;
+      if (lastLoadedUserRef.current === userId && recordsRef.current.length > 0) {
+        return recordsRef.current;
+      }
+    }
+
+    const request = (async () => {
+      setRecordsLoading(true);
+      try {
+        const { posters } = await listSchoolPosters(userId);
+        const normalized = commitRecords(posters);
+        lastLoadedUserRef.current = userId;
+        setIsHydrated(true);
+        return normalized;
+      } finally {
+        setRecordsLoading(false);
+        inFlightRefreshRef.current = null;
+      }
+    })();
+
+    inFlightRefreshRef.current = request;
+    return request;
+  }, [commitRecords, userId]);
 
   useEffect(() => {
-    setRecords(sortByUpdatedAt(readSchoolPosters(storageKey)));
-    setIsHydrated(true);
-  }, [storageKey]);
+    let cancelled = false;
 
-  useEffect(() => {
-    if (!isHydrated) return;
-    writeSchoolPosters(storageKey, sortByUpdatedAt(records));
-  }, [isHydrated, records, storageKey]);
+    if (!userId) {
+      setRecords([]);
+      setRecordsLoading(false);
+      setIsHydrated(true);
+      lastLoadedUserRef.current = null;
+      inFlightRefreshRef.current = null;
+      return;
+    }
 
-  const createPoster = useCallback(() => {
+    setIsHydrated(false);
+    refreshRecords({ force: true }).catch((error) => {
+      console.error('[SchoolPosters] Failed to load records:', error);
+      if (!cancelled) {
+        setRecords([]);
+        setIsHydrated(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshRecords, userId]);
+
+  const createPoster = useCallback(async () => {
     const next = createDefaultSchoolPoster();
-    commitRecords([next, ...records]);
-    return next;
-  }, [commitRecords, records]);
+    const { poster } = await saveSchoolPosterRecord(next);
+    commitRecords([poster, ...recordsRef.current]);
+    return poster;
+  }, [commitRecords]);
 
-  const savePoster = useCallback((record: SchoolPoster) => {
+  const savePoster = useCallback(async (record: SchoolPoster) => {
     const updated = normalizeSchoolPoster({ ...record, updatedAt: new Date().toISOString() });
-    const exists = records.some((item) => item.id === updated.id);
+    const { poster } = await saveSchoolPosterRecord(updated);
+    const exists = recordsRef.current.some((item) => item.id === poster.id);
     const next = exists
-      ? records.map((item) => (item.id === updated.id ? updated : item))
-      : [updated, ...records];
+      ? recordsRef.current.map((item) => (item.id === poster.id ? poster : item))
+      : [poster, ...recordsRef.current];
     commitRecords(next);
-    return updated;
-  }, [commitRecords, records]);
+    return poster;
+  }, [commitRecords]);
 
-  const deletePoster = useCallback((id: string) => {
-    commitRecords(records.filter((item) => item.id !== id));
-  }, [commitRecords, records]);
+  const deletePoster = useCallback(async (id: string) => {
+    await deleteSchoolPosterRecord(id);
+    commitRecords(recordsRef.current.filter((item) => item.id !== id));
+  }, [commitRecords]);
 
-  const duplicatePoster = useCallback((record: SchoolPoster) => {
+  const duplicatePoster = useCallback(async (record: SchoolPoster) => {
     const duplicate = cloneSchoolPoster(record);
-    commitRecords([duplicate, ...records]);
-    return duplicate;
-  }, [commitRecords, records]);
+    const { poster } = await saveSchoolPosterRecord(duplicate);
+    commitRecords([poster, ...recordsRef.current]);
+    return poster;
+  }, [commitRecords]);
 
   const getPoster = useCallback((id: string) => records.find((item) => item.id === id) || null, [records]);
 
+  const hydratedRecords = useMemo(() => sortByUpdatedAt(records), [records]);
+
   return {
-    records,
+    records: hydratedRecords,
+    setRecords,
+    recordsLoading,
     isHydrated,
+    refreshRecords,
     createPoster,
     savePoster,
     deletePoster,

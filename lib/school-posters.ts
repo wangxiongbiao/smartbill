@@ -110,10 +110,6 @@ function createDefaultDocument(layoutId: SchoolPosterLayoutId): SchoolPosterDocu
   };
 }
 
-export function getSchoolPosterStorageKey(userId?: string | null) {
-  return `school_poster_records_v1:${userId || 'local'}`;
-}
-
 export function createSchoolPoster(layoutId: SchoolPosterLayoutId = 'offer-poster'): SchoolPoster {
   const now = new Date().toISOString();
 
@@ -381,30 +377,4 @@ export function applyDocumentModePreset(record: SchoolPoster, mode: SchoolPoster
       mode,
     },
   });
-}
-
-export function readSchoolPosters(storageKey: string): SchoolPoster[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return [];
-
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.map(normalizeSchoolPoster);
-  } catch {
-    return [];
-  }
-}
-
-export function writeSchoolPosters(storageKey: string, records: SchoolPoster[]) {
-  if (typeof window === 'undefined') return;
-
-  try {
-    window.localStorage.setItem(storageKey, JSON.stringify(records));
-  } catch (error) {
-    console.error('[writeSchoolPosters] Failed to persist school posters.', error);
-  }
 }

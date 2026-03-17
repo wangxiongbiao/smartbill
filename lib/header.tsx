@@ -81,7 +81,12 @@ export function getHeaderBreadcrumbs({
       <i key="sep1" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
       <span key="school-records" className="text-slate-400 font-bold tracking-widest text-xs cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack}>{school.records}</span>,
       <i key="sep2" className="fas fa-chevron-right text-[0.625rem] text-slate-300"></i>,
-      <span key="school-editor" className="text-slate-900 font-bold text-sm">{school.editing}</span>
+      <div key="school-editor" className="flex items-center gap-2">
+        <span className="text-slate-900 font-bold text-sm">{school.editing}</span>
+        {(saveStatus !== 'idle' || lastSavedTime) ? (
+          <SaveStatusIndicator status={saveStatus} lang={lang} lastSavedTime={lastSavedTime} />
+        ) : null}
+      </div>
     );
   }
 
