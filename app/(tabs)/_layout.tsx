@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -28,6 +28,7 @@ function getTabMeta(routeName: string) {
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const activeRouteName = state.routes[state.index]?.name;
   const showCreateButton = activeRouteName === 'index';
 
@@ -35,7 +36,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     <View pointerEvents="box-none" style={styles.wrapper}>
       <View style={[styles.dockBackground, { paddingBottom: insets.bottom }]}>
         {showCreateButton ? (
-          <Pressable style={styles.createButton}>
+          <Pressable onPress={() => router.push('/create-invoice')} style={styles.createButton}>
             <Text allowFontScaling={false} style={styles.createButtonText}>
               Create invoice
             </Text>
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   },
   createButtonText: {
     fontSize: 15,
-    lineHeight: 16,
+    lineHeight: 18,
     fontWeight: '700',
     color: '#ffffff',
   },
