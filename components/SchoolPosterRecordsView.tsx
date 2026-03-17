@@ -23,33 +23,33 @@ export default function SchoolPosterRecordsView({
   const [search, setSearch] = useState('');
   const copy = lang === 'zh-CN' || lang === 'zh-TW'
     ? {
-        title: '院校海报',
-        subtitle: '管理院校海报壳、学校信息和学生展示页面。',
-        create: '新建海报',
-        search: '搜索学校、同学或路径',
-        emptyTitle: '还没有院校海报',
-        emptySubtitle: '先创建一个示例海报，进入左编右预览模式。',
-        edit: '编辑',
-        duplicate: '复制',
-        delete: '删除',
-        updatedAt: '最近更新',
-        student: '学生',
-        posterShell: '海报壳',
-      }
+      title: '院校海报',
+      subtitle: '管理院校海报壳、学校信息和学生展示页面。',
+      create: '新建海报',
+      search: '搜索学校、同学或路径',
+      emptyTitle: '还没有院校海报',
+      emptySubtitle: '先创建一个示例海报，进入左编右预览模式。',
+      edit: '编辑',
+      duplicate: '复制',
+      delete: '删除',
+      updatedAt: '最近更新',
+      student: '学生',
+      posterShell: '海报壳',
+    }
     : {
-        title: 'School Posters',
-        subtitle: 'Manage school poster shells, school info, and student-facing visuals.',
-        create: 'Create Poster',
-        search: 'Search school, student, or pathway',
-        emptyTitle: 'No posters yet',
-        emptySubtitle: 'Create one and open the split editor with live preview.',
-        edit: 'Edit',
-        duplicate: 'Duplicate',
-        delete: 'Delete',
-        updatedAt: 'Updated',
-        student: 'Student',
-        posterShell: 'Poster Shell',
-      };
+      title: 'School Posters',
+      subtitle: 'Manage school poster shells, school info, and student-facing visuals.',
+      create: 'Create Poster',
+      search: 'Search school, student, or pathway',
+      emptyTitle: 'No posters yet',
+      emptySubtitle: 'Create one and open the split editor with live preview.',
+      edit: 'Edit',
+      duplicate: 'Duplicate',
+      delete: 'Delete',
+      updatedAt: 'Updated',
+      student: 'Student',
+      posterShell: 'Poster Shell',
+    };
 
   const filteredRecords = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -120,7 +120,7 @@ export default function SchoolPosterRecordsView({
           {filteredRecords.map((record) => (
             <div key={record.id} className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <div className="relative overflow-hidden bg-[#dbeefb] px-6 py-6">
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-[#2d5eaf]" style={{ clipPath: 'polygon(0 45%, 100% 0, 100% 100%, 0 100%)' }} />
+                {/* <div className="absolute inset-x-0 bottom-0 h-20 bg-[#2d5eaf]" style={{ clipPath: 'polygon(0 45%, 100% 0, 100% 100%, 0 100%)' }} /> */}
                 <div className="relative z-10 flex gap-5">
                   <div className="flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-white shadow-md">
                     {record.shell.heroImage ? (
@@ -152,9 +152,7 @@ export default function SchoolPosterRecordsView({
               </div>
 
               <div className="space-y-4 px-6 py-5">
-                <p className="line-clamp-2 text-sm leading-6 text-slate-500">
-                  {record.shell.student.transferPath || record.shell.footer.pathway || record.shell.footer.tuition}
-                </p>
+
                 <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={() => onEdit(record)} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
                     {copy.edit}

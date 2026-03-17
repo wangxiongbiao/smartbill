@@ -46,8 +46,12 @@ function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   );
 }
 
-function hasRichTextValue(value?: string) {
+function hasDocumentHtmlValue(value?: string) {
   if (!value) return false;
+
+  if (/<(?:img|video|iframe|embed|object)\b/i.test(value)) {
+    return true;
+  }
 
   const plainText = value
     .replace(/<[^>]*>/g, ' ')
@@ -57,17 +61,15 @@ function hasRichTextValue(value?: string) {
   return plainText.length > 0;
 }
 
-const QuillEditor = dynamic(
-  () => import('react-quill-new'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full w-full items-center justify-center rounded-xl border border-white/70 bg-white text-sm text-slate-400">
-        Loading editor...
-      </div>
-    ),
-  }
-) as React.ComponentType<any>;
+function sanitizeDocumentHtml(value?: string) {
+  if (!value) return '';
+
+  return value
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+="[^"]*"/gi, '')
+    .replace(/\son\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '');
+}
 
 const EasyCrop = dynamic(
   () => import('react-easy-crop'),
@@ -85,73 +87,154 @@ const HERO_IMAGE_CROP_ASPECT = 45 / 40;
 const HERO_IMAGE_OUTPUT_WIDTH = 1440;
 const HERO_IMAGE_OUTPUT_HEIGHT = Math.round(HERO_IMAGE_OUTPUT_WIDTH / HERO_IMAGE_CROP_ASPECT);
 
-const QUILL_MODULES = {
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    [{ font: [] }, { size: ['small', false, 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ color: [] }, { background: [] }],
-    [{ script: 'sub' }, { script: 'super' }],
-    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-    [{ align: [] }],
-    ['blockquote', 'code-block'],
-    ['link', 'image'],
-    ['clean'],
-  ],
-  history: {
-    delay: 500,
-    maxStack: 100,
-    userOnly: true,
-  },
-};
+const WORD_IMPORT_ACCEPT = '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-const QUILL_FORMATS = [
-  'header',
-  'font',
-  'size',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'color',
-  'background',
-  'script',
-  'list',
-  'bullet',
-  'indent',
-  'align',
-  'blockquote',
-  'code-block',
-  'link',
-  'image',
-];
-
-function RichTextInput({
+function DocumentImportField({
   value,
+  fileName,
   onChange,
-  placeholder,
+  importWordLabel,
+  importingWordLabel,
+  importWordHint,
+  importWordInvalidLabel,
+  importWordFailedLabel,
+  removeLabel,
+  importedFallbackLabel,
 }: {
   value: string;
-  onChange: (next: string) => void;
-  placeholder: string;
+  fileName?: string;
+  onChange: (next: { html: string; fileName?: string }) => void;
+  importWordLabel: string;
+  importingWordLabel: string;
+  importWordHint: string;
+  importWordInvalidLabel: string;
+  importWordFailedLabel: string;
+  removeLabel: string;
+  importedFallbackLabel: string;
 }) {
-  const normalizedValue = hasRichTextValue(value) ? value : '';
+  const importInputId = useId();
+  const [isImportingWord, setIsImportingWord] = useState(false);
+  const [importWordError, setImportWordError] = useState<string | null>(null);
+  const hasDocument = hasDocumentHtmlValue(value);
+  const sanitizedHtml = sanitizeDocumentHtml(value);
+  const resolvedFileName = (fileName || '').trim() || importedFallbackLabel;
+
+  const handleWordImport = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.currentTarget.value = '';
+
+    if (!file) return;
+
+    if (!/\.docx$/i.test(file.name)) {
+      setImportWordError(importWordInvalidLabel);
+      return;
+    }
+
+    setIsImportingWord(true);
+    setImportWordError(null);
+
+    try {
+      const mammothModule = await import('mammoth/mammoth.browser.js');
+      const mammoth = (mammothModule.default ?? mammothModule) as typeof import('mammoth');
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml(
+        { arrayBuffer },
+        {
+          ignoreEmptyParagraphs: false,
+          styleMap: ['u => u'],
+          convertImage: mammoth.images.imgElement(async (image) => {
+            const encodedImage = await image.read('base64');
+            return {
+              src: `data:${image.contentType};base64,${encodedImage}`,
+            };
+          }),
+        }
+      );
+
+      const importedHtml = sanitizeDocumentHtml(result.value || '');
+      onChange({
+        html: hasDocumentHtmlValue(importedHtml) ? importedHtml : '',
+        fileName: hasDocumentHtmlValue(importedHtml) ? file.name : undefined,
+      });
+
+      if (result.messages.length > 0) {
+        console.info('Word import completed with messages', result.messages);
+      }
+    } catch (error) {
+      console.error('Failed to import Word document into poster document preview', error);
+      setImportWordError(importWordFailedLabel);
+    } finally {
+      setIsImportingWord(false);
+    }
+  }, [importWordFailedLabel, importWordInvalidLabel, onChange]);
 
   return (
-    <div className="relative w-full rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-      <div className="w-full aspect-[210/297]">
-        <QuillEditor
-          theme="snow"
-          value={normalizedValue}
-          modules={QUILL_MODULES}
-          formats={QUILL_FORMATS}
-          placeholder={placeholder}
-          className="poster-rich-editor h-full"
-          onChange={(nextValue: string) => {
-            onChange(hasRichTextValue(nextValue) ? nextValue : '');
-          }}
+    <div className="space-y-3">
+      <div className="space-y-2">
+        {hasDocument ? (
+          <div className="flex items-center gap-4 rounded-[1.35rem] border border-slate-200 bg-slate-50 px-5 py-4">
+            <label htmlFor={importInputId} className="flex min-w-0 flex-1 cursor-pointer items-center gap-4">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
+                <i className={`fas ${isImportingWord ? 'fa-circle-notch fa-spin' : 'fa-file-word'} text-lg`} />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-base font-bold text-slate-700">{isImportingWord ? importingWordLabel : resolvedFileName}</p>
+              </div>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setImportWordError(null);
+                onChange({ html: '', fileName: undefined });
+              }}
+              className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-600"
+              aria-label={removeLabel}
+              title={removeLabel}
+            >
+              <i className="fas fa-times text-xs" />
+            </button>
+          </div>
+        ) : (
+          <label
+            htmlFor={importInputId}
+            className="flex h-28 cursor-pointer items-center gap-4 rounded-[1.35rem] border-2 border-dashed border-slate-300 bg-slate-50 px-5 transition hover:border-blue-300 hover:bg-blue-50"
+          >
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
+              <i className={`fas ${isImportingWord ? 'fa-circle-notch fa-spin' : 'fa-file-word'} text-xl`} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-bold text-slate-700">{isImportingWord ? importingWordLabel : importWordLabel}</p>
+              <p className="mt-1 text-sm leading-5 text-slate-400">{importWordHint}</p>
+            </div>
+          </label>
+        )}
+
+        <input
+          id={importInputId}
+          type="file"
+          accept={WORD_IMPORT_ACCEPT}
+          className="hidden"
+          disabled={isImportingWord}
+          onChange={handleWordImport}
         />
+
+        {importWordError ? (
+          <p className="text-xs leading-5 text-rose-500">{importWordError}</p>
+        ) : null}
       </div>
+
+      {hasDocument ? (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+          <div className="w-full aspect-[210/297] bg-white">
+            <div className="h-full overflow-auto p-6">
+              <div
+                className="poster-document-form-preview h-full w-full break-words"
+                dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -519,13 +602,10 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       brandHint: '对应文书顶部的品牌模块，可上传 logo，并填写中文标题和英文标题。',
       basicCard: '基础信息',
       basicHint: '只保留学校标题和学生信息，空字段会在海报中自动隐藏。',
-      assetsCard: '素材上传',
-      assetsHint: '上传主图和二维码，文书卡暂时只保留白色占位框。',
       footerCard: '底部文案',
       footerHint: '三条底部文案独立控制，留空即自动隐藏。',
-      richCard: '白色文书卡',
-      richCardHint: '输入富文本后会在海报中生成一张 A4 比例白色卡片，位于背景图之上、蓝色底层之下。',
-      richContent: '富文本内容',
+      richCard: '文书导入',
+      richCardHint: '导入 Word 文档后，会在海报中生成一张 A4 比例白色文书卡，位于背景图之上、蓝色底层之下。',
       brandLogo: '品牌 Logo',
       brandTitle: '中文标题',
       brandSubtitle: '英文标题',
@@ -560,7 +640,12 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       remove: '移除',
       addLine: '添加一行',
       removeLine: '删除',
-      richPlaceholder: '请输入文书内容，可设置加粗、斜体、下划线与列表。',
+      importWord: '导入 Word',
+      importingWord: '导入中...',
+      importWordHint: '支持 .docx，导入后会覆盖当前文书内容并自动生成预览。',
+      importWordInvalid: '暂时只支持导入 .docx 文件。',
+      importWordFailed: '导入 Word 失败，请检查文件格式后重试。',
+      importedDocument: '已导入文档',
       exportPdf: '导出 PDF',
       exportingPdf: '导出中...',
     }
@@ -570,13 +655,10 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       brandHint: 'Controls the brand header at the top of the offer document.',
       basicCard: 'Basic Info',
       basicHint: 'Keep only school and student info. Empty fields hide automatically in the poster.',
-      assetsCard: 'Assets',
-      assetsHint: 'Upload the hero image and QR code. The document card stays as a white placeholder for now.',
       footerCard: 'Footer Copy',
       footerHint: 'Each footer line hides independently when empty.',
-      richCard: 'White Document Card',
-      richCardHint: 'Once entered, an A4-style white card appears above the hero image and below the blue footer layer.',
-      richContent: 'Rich text content',
+      richCard: 'Document Import',
+      richCardHint: 'Import a Word document to generate an A4 white document card above the hero image and below the blue footer layer.',
       brandLogo: 'Brand logo',
       brandTitle: 'Chinese title',
       brandSubtitle: 'English title',
@@ -611,7 +693,12 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       remove: 'Remove',
       addLine: 'Add line',
       removeLine: 'Remove',
-      richPlaceholder: 'Enter rich text. You can use bold, italic, underline, and bullet list.',
+      importWord: 'Import Word',
+      importingWord: 'Importing...',
+      importWordHint: 'Supports .docx. Importing replaces the current document content and refreshes the preview.',
+      importWordInvalid: 'Only .docx files are supported right now.',
+      importWordFailed: 'Failed to import the Word document. Please check the file and try again.',
+      importedDocument: 'Imported document',
       exportPdf: 'Export PDF',
       exportingPdf: 'Exporting...',
     };
@@ -916,14 +1003,22 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
           <SectionCard title={copy.richCard} subtitle={copy.richCardHint}>
             <div className="space-y-2">
 
-              <RichTextInput
+              <DocumentImportField
                 value={poster.document.richText}
-                placeholder={copy.richPlaceholder}
+                fileName={poster.document.fileName}
+                importWordLabel={copy.importWord}
+                importingWordLabel={copy.importingWord}
+                importWordHint={copy.importWordHint}
+                importWordInvalidLabel={copy.importWordInvalid}
+                importWordFailedLabel={copy.importWordFailed}
+                removeLabel={copy.remove}
+                importedFallbackLabel={copy.importedDocument}
                 onChange={(nextValue) => updatePoster({
                   ...poster,
                   document: {
                     ...poster.document,
-                    richText: nextValue,
+                    richText: nextValue.html,
+                    fileName: nextValue.fileName,
                   },
                 })}
               />
