@@ -228,7 +228,7 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
           }}
         >
           <div className="w-[34rem] max-w-none aspect-[210/297] rounded-sm border border-slate-200/70 bg-white shadow-[0_1.5rem_3rem_-1.5rem_rgba(15,23,42,0.45)]">
-            <div className="h-full w-full overflow-hidden p-6 text-[0.9rem] leading-7 text-slate-700">
+            <div className="h-full w-full overflow-hidden p-2">
               <div
                 className="poster-rich-preview ql-editor h-full w-full overflow-hidden break-words"
                 dangerouslySetInnerHTML={{ __html: richTextHtml }}

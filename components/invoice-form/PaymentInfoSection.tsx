@@ -98,7 +98,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
             ) : (
               <div className="relative group">
                 <div className="w-full h-[4.75rem] px-4 border border-slate-200 rounded-2xl bg-slate-50 flex items-center justify-between overflow-hidden">
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex flex-1 items-center gap-3 min-w-0">
                     <div className="h-12 w-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                       <img src={invoice.paymentInfo.qrCode} alt="QR Code" className="w-full h-full object-contain p-1" />
                     </div>
@@ -107,7 +107,7 @@ export default function PaymentInfoSection({ invoice, lang, t, onChange, autoRes
                       <div className="text-xs text-slate-400">{copy.qrHint}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <div className="flex flex-shrink-0 items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button type="button" onClick={onOpenQRCodePicker} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">{copy.change}</button>
                     <button type="button" onClick={onRemoveQRCode} className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors">{copy.remove}</button>
                   </div>

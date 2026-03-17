@@ -7,12 +7,14 @@ interface ScalableInvoiceContainerProps {
     children: React.ReactNode;
     baseWidth?: number; // The width at which the content is designed in CSS pixels.
     className?: string;
+    onContentRefChange?: (node: HTMLDivElement | null) => void;
 }
 
 const ScalableInvoiceContainer: React.FC<ScalableInvoiceContainerProps> = ({
     children,
     baseWidth = 794,
-    className = ''
+    className = '',
+    onContentRefChange
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -68,7 +70,10 @@ const ScalableInvoiceContainer: React.FC<ScalableInvoiceContainerProps> = ({
             }}
         >
             <div
-                ref={contentRef}
+                ref={(node) => {
+                    contentRef.current = node;
+                    onContentRefChange?.(node);
+                }}
                 style={{
                     transform: `scale(${scale})`,
                     transformOrigin: 'top center', // Scale from top center to keep it centered

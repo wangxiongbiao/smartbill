@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useId, useState } from 'react';
+import React, { useCallback, useId, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import ScalableInvoiceContainer from '@/components/ScalableInvoiceContainer';
 import SchoolPosterPreview from '@/components/SchoolPosterPreview';
+import { useSchoolPosterPdfExport } from '@/hooks/useSchoolPosterPdfExport';
 import type { Language, SchoolPoster } from '@/types';
 
 interface SchoolPosterEditorProps {
@@ -255,11 +256,11 @@ function UploadField({
             </div>
             <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3">
               {showHintInFilledState ? (
-                <p className="text-xs text-slate-500">{hint}</p>
+                <p className="text-xs text-slate-500 flex-1">{hint}</p>
               ) : (
                 <div />
               )}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <label htmlFor={inputId} className="inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">
                   {uploading ? uploadingLabel : changeLabel}
                 </label>
@@ -311,6 +312,11 @@ function UploadField({
 
 export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: SchoolPosterEditorProps) {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const exportAreaRef = useRef<HTMLDivElement>(null);
+  const handlePreviewContentRefChange = useCallback((node: HTMLDivElement | null) => {
+    exportAreaRef.current = node;
+  }, []);
 
   const isZh = lang === 'zh-CN' || lang === 'zh-TW';
   const copy = isZh
@@ -354,6 +360,8 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       addLine: '添加一行',
       removeLine: '删除',
       richPlaceholder: '请输入文书内容，可设置加粗、斜体、下划线与列表。',
+      exportPdf: '导出 PDF',
+      exportingPdf: '导出中...',
     }
     : {
       back: 'Back to posters',
@@ -395,7 +403,16 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       addLine: 'Add line',
       removeLine: 'Remove',
       richPlaceholder: 'Enter rich text. You can use bold, italic, underline, and bullet list.',
+      exportPdf: 'Export PDF',
+      exportingPdf: 'Exporting...',
     };
+
+  const pdfExport = useSchoolPosterPdfExport({
+    poster,
+    isExporting: isExportingPdf,
+    setIsExporting: setIsExportingPdf,
+    printAreaRef: exportAreaRef,
+  });
 
   const getPlaceholder = (label: string) => (
     isZh ? `请输入${label}` : `Enter ${label}`
@@ -457,6 +474,16 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
         >
           <i className="fas fa-arrow-left text-xs"></i>
           <span>{copy.back}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={pdfExport.handleExportPdf}
+          disabled={isExportingPdf}
+          className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <i className={`fas ${isExportingPdf ? 'fa-circle-notch fa-spin' : 'fa-file-pdf'} text-xs`}></i>
+          <span>{isExportingPdf ? copy.exportingPdf : copy.exportPdf}</span>
         </button>
       </div>
 
@@ -636,7 +663,7 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
 
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
           <div className="min-h-[28.125rem] sm:min-h-[31.25rem] flex justify-center items-start overflow-x-hidden overflow-y-hidden">
-            <ScalableInvoiceContainer baseWidth={720}>
+            <ScalableInvoiceContainer baseWidth={720} onContentRefChange={handlePreviewContentRefChange}>
               <SchoolPosterPreview poster={poster} />
             </ScalableInvoiceContainer>
           </div>
