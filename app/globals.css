@@ -91,10 +91,75 @@ html {
   line-height: 1.65rem;
 }
 
+.poster-rich-editor .ql-editor p,
 .poster-rich-preview.ql-editor p {
-  margin: 0;
+  margin: 0 0 0.55rem;
 }
 
-.poster-rich-preview.ql-editor p + p {
-  margin-top: 0.65rem;
+.poster-rich-editor .ql-editor p:last-child,
+.poster-rich-preview.ql-editor p:last-child {
+  margin-bottom: 0;
+}
+
+.poster-rich-editor .ql-editor h1,
+.poster-rich-editor .ql-editor h2,
+.poster-rich-editor .ql-editor h3,
+.poster-rich-preview.ql-editor h1,
+.poster-rich-preview.ql-editor h2,
+.poster-rich-preview.ql-editor h3 {
+  margin: 0.9rem 0 0.45rem;
+  line-height: 1.25;
+}
+
+.poster-rich-editor .ql-editor h1,
+.poster-rich-preview.ql-editor h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.poster-rich-editor .ql-editor h2,
+.poster-rich-preview.ql-editor h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.poster-rich-editor .ql-editor h3,
+.poster-rich-preview.ql-editor h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+}
+
+.poster-rich-editor .ql-editor ul,
+.poster-rich-editor .ql-editor ol,
+.poster-rich-preview.ql-editor ul,
+.poster-rich-preview.ql-editor ol {
+  margin: 0.35rem 0 0.55rem;
+}
+
+.poster-rich-editor .ql-editor li,
+.poster-rich-preview.ql-editor li {
+  margin: 0.12rem 0;
+}
+
+.poster-rich-editor .ql-editor li p,
+.poster-rich-preview.ql-editor li p {
+  margin-bottom: 0;
+}
+
+.poster-rich-editor .ql-editor blockquote,
+.poster-rich-preview.ql-editor blockquote {
+  margin: 0.7rem 0;
+  padding-left: 0.9rem;
+  border-left: 0.2rem solid #cbd5e1;
+  color: #475569;
+}
+
+.poster-rich-editor .ql-editor > *:first-child,
+.poster-rich-preview.ql-editor > *:first-child {
+  margin-top: 0;
+}
+
+.poster-rich-editor .ql-editor > *:last-child,
+.poster-rich-preview.ql-editor > *:last-child {
+  margin-bottom: 0;
 }
