@@ -2,6 +2,7 @@
 
 import React, { useCallback, useId, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import type { Area } from 'react-easy-crop';
 import ScalableInvoiceContainer from '@/components/ScalableInvoiceContainer';
 import SchoolPosterPreview from '@/components/SchoolPosterPreview';
 import { useSchoolPosterPdfExport } from '@/hooks/useSchoolPosterPdfExport';
@@ -67,6 +68,22 @@ const QuillEditor = dynamic(
     ),
   }
 ) as React.ComponentType<any>;
+
+const EasyCrop = dynamic(
+  () => import('react-easy-crop'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+        Loading cropper...
+      </div>
+    ),
+  }
+) as React.ComponentType<any>;
+
+const HERO_IMAGE_CROP_ASPECT = 45 / 40;
+const HERO_IMAGE_OUTPUT_WIDTH = 1440;
+const HERO_IMAGE_OUTPUT_HEIGHT = Math.round(HERO_IMAGE_OUTPUT_WIDTH / HERO_IMAGE_CROP_ASPECT);
 
 const QUILL_MODULES = {
   toolbar: [
@@ -186,6 +203,177 @@ async function readFileAsDataUrl(file: File, options?: ImageOptimizeOptions) {
   } catch {
     return rawDataUrl;
   }
+}
+
+async function createCroppedImage(
+  imageSrc: string,
+  cropPixels: Area,
+  outputWidth = HERO_IMAGE_OUTPUT_WIDTH,
+  outputHeight = HERO_IMAGE_OUTPUT_HEIGHT
+) {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const nextImage = new Image();
+    nextImage.onload = () => resolve(nextImage);
+    nextImage.onerror = () => reject(new Error('Failed to decode image'));
+    nextImage.src = imageSrc;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Failed to create crop canvas');
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(
+    image,
+    cropPixels.x,
+    cropPixels.y,
+    cropPixels.width,
+    cropPixels.height,
+    0,
+    0,
+    outputWidth,
+    outputHeight
+  );
+
+  return canvas.toDataURL('image/webp', 0.92);
+}
+
+function HeroImageCropDialog({
+  open,
+  imageSrc,
+  crop,
+  zoom,
+  title,
+  hint,
+  zoomLabel,
+  cancelLabel,
+  confirmLabel,
+  savingLabel,
+  onCropChange,
+  onZoomChange,
+  onCropComplete,
+  onClose,
+  onConfirm,
+  isSaving,
+}: {
+  open: boolean;
+  imageSrc: string | null;
+  crop: { x: number; y: number };
+  zoom: number;
+  title: string;
+  hint: string;
+  zoomLabel: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  savingLabel: string;
+  onCropChange: (cropValue: { x: number; y: number }) => void;
+  onZoomChange: (zoomValue: number) => void;
+  onCropComplete: (_croppedArea: Area, croppedAreaPixels: Area) => void;
+  onClose: () => void;
+  onConfirm: () => Promise<void>;
+  isSaving: boolean;
+}) {
+  if (!open || !imageSrc) return null;
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/55 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-5xl rounded-[2rem] border border-slate-200 bg-white shadow-[0_2rem_4rem_-1.5rem_rgba(15,23,42,0.38)]">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+          <div>
+            <h3 className="text-xl font-bold tracking-tight text-slate-900">{title}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{hint}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700"
+            aria-label={cancelLabel}
+          >
+            <i className="fas fa-times text-sm" />
+          </button>
+        </div>
+
+        <div className="grid gap-6 px-6 py-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div className="space-y-4">
+            <div className="relative h-[32rem] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-950">
+              <EasyCrop
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={HERO_IMAGE_CROP_ASPECT}
+                showGrid={false}
+                objectFit="cover"
+                cropShape="rect"
+                onCropChange={onCropChange}
+                onZoomChange={onZoomChange}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+            <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{zoomLabel}</span>
+                <span className="text-sm font-semibold text-slate-600">{zoom.toFixed(2)}x</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(event) => onZoomChange(Number(event.target.value))}
+                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-blue-600"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Preview</p>
+              <div className="mt-4 overflow-hidden rounded-[1.35rem] bg-[#dbeefb]">
+                <div className="relative aspect-[45/40] overflow-hidden" style={{ clipPath: 'polygon(0 0, 100% 60%, 100% 100%, 0 100%)' }}>
+                  <img
+                    src={imageSrc}
+                    alt="hero preview"
+                    className="h-full w-full object-cover"
+                    style={{
+                      transform: `translate(${crop.x}px, ${crop.y}px) scale(${zoom})`,
+                      transformOrigin: 'center center',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={onConfirm}
+                disabled={isSaving}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <i className={`fas ${isSaving ? 'fa-circle-notch fa-spin' : 'fa-crop'} text-sm`} />
+                <span>{isSaving ? savingLabel : confirmLabel}</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSaving}
+                className="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancelLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function UploadField({
@@ -313,6 +501,11 @@ function UploadField({
 export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: SchoolPosterEditorProps) {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [heroCropSource, setHeroCropSource] = useState<string | null>(null);
+  const [heroCrop, setHeroCrop] = useState({ x: 0, y: 0 });
+  const [heroCropZoom, setHeroCropZoom] = useState(1);
+  const [heroCroppedAreaPixels, setHeroCroppedAreaPixels] = useState<Area | null>(null);
+  const [isSavingHeroCrop, setIsSavingHeroCrop] = useState(false);
   const exportAreaRef = useRef<HTMLDivElement>(null);
   const handlePreviewContentRefChange = useCallback((node: HTMLDivElement | null) => {
     exportAreaRef.current = node;
@@ -349,6 +542,14 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       pathway: '路径文案',
       highlights: '补充文案',
       heroHint: '用于左侧主图区，建议上传横版或竖版校园图。',
+      heroCropHint: '上传后可拖动和缩放图片，按照海报主图区的可见区域裁剪。',
+      heroCropAction: '裁剪主图',
+      heroCropTitle: '裁剪校园主图',
+      heroCropDialogHint: '拖动图片位置并调整缩放，保存后会生成与海报主图区更匹配的裁剪图。',
+      heroCropZoom: '缩放',
+      heroCropCancel: '取消',
+      heroCropConfirm: '保存裁剪',
+      heroCropSaving: '保存中...',
       qrHint: '用于右下角二维码区，不上传则整块自动隐藏。',
       footerPlaceholder: '可写成一行说明，也可以手动换行。',
       brandLogoReady: '已添加品牌 Logo',
@@ -392,6 +593,14 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       pathway: 'Pathway copy',
       highlights: 'Extra copy',
       heroHint: 'Used in the main left-side image block.',
+      heroCropHint: 'After upload, drag and zoom the image to crop it for the visible hero area.',
+      heroCropAction: 'Crop hero image',
+      heroCropTitle: 'Crop hero image',
+      heroCropDialogHint: 'Move and zoom the image, then save a crop that matches the poster hero area more closely.',
+      heroCropZoom: 'Zoom',
+      heroCropCancel: 'Cancel',
+      heroCropConfirm: 'Save crop',
+      heroCropSaving: 'Saving...',
       qrHint: 'Used in the QR code block. Leave empty to hide it.',
       footerPlaceholder: 'Write one line or multiple lines as needed.',
       brandLogoReady: 'Brand logo added',
@@ -436,24 +645,37 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
     });
   };
 
+  const openHeroCropDialog = useCallback((imageSrc: string, cropState?: { x: number; y: number; zoom: number }) => {
+    setHeroCropSource(imageSrc);
+    setHeroCrop({
+      x: cropState?.x ?? 0,
+      y: cropState?.y ?? 0,
+    });
+    setHeroCropZoom(cropState?.zoom ?? 1);
+    setHeroCroppedAreaPixels(null);
+  }, []);
+
+  const closeHeroCropDialog = useCallback(() => {
+    if (isSavingHeroCrop) return;
+    setHeroCropSource(null);
+    setHeroCroppedAreaPixels(null);
+  }, [isSavingHeroCrop]);
+
   const handleImageUpload = async (field: 'shell.brand.logo' | 'shell.heroImage' | 'shell.qrCode', file: File) => {
     setUploadingField(field);
     try {
-      const imageData = await readFileAsDataUrl(
-        file,
-        field === 'shell.heroImage'
-          ? { maxWidth: 1280, maxHeight: 1280, quality: 0.82 }
-          : field === 'shell.qrCode'
-            ? { maxWidth: 720, maxHeight: 720, quality: 0.92 }
-            : { maxWidth: 640, maxHeight: 640, quality: 0.9 }
-      );
+      if (field === 'shell.heroImage') {
+        const imageData = await readFileAsDataUrl(file, { maxWidth: 1800, maxHeight: 1800, quality: 0.9 });
+        openHeroCropDialog(imageData);
+        return;
+      }
+
+      const imageData = await readFileAsDataUrl(file, field === 'shell.qrCode'
+        ? { maxWidth: 720, maxHeight: 720, quality: 0.92 }
+        : { maxWidth: 640, maxHeight: 640, quality: 0.9 });
 
       if (field === 'shell.brand.logo') {
         updatePoster({ ...poster, shell: { ...poster.shell, brand: { ...poster.shell.brand, logo: imageData } } });
-      }
-
-      if (field === 'shell.heroImage') {
-        updatePoster({ ...poster, shell: { ...poster.shell, heroImage: imageData } });
       }
 
       if (field === 'shell.qrCode') {
@@ -463,6 +685,32 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
       setUploadingField(null);
     }
   };
+
+  const handleConfirmHeroCrop = useCallback(async () => {
+    if (!heroCropSource || !heroCroppedAreaPixels) return;
+
+    setIsSavingHeroCrop(true);
+    try {
+      const croppedImage = await createCroppedImage(heroCropSource, heroCroppedAreaPixels);
+      updatePoster({
+        ...poster,
+        shell: {
+          ...poster.shell,
+          heroImage: croppedImage,
+          heroImageOriginal: heroCropSource,
+          heroImageCrop: {
+            x: heroCrop.x,
+            y: heroCrop.y,
+            zoom: heroCropZoom,
+          },
+        },
+      });
+      setHeroCropSource(null);
+      setHeroCroppedAreaPixels(null);
+    } finally {
+      setIsSavingHeroCrop(false);
+    }
+  }, [heroCrop.x, heroCrop.y, heroCropSource, heroCropZoom, heroCroppedAreaPixels, poster, updatePoster]);
 
   return (
     <div className="container mx-auto relative flex flex-col gap-6 p-6">
@@ -598,15 +846,37 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
             <UploadField
               label={copy.heroImage}
               value={poster.shell.heroImage}
-              hint={copy.heroHint}
+              hint={poster.shell.heroImage ? copy.heroCropHint : copy.heroHint}
               uploading={uploadingField === 'shell.heroImage'}
               selectLabel={copy.upload}
               changeLabel={copy.change}
               removeLabel={copy.remove}
               uploadingLabel={copy.uploading}
               onUpload={(file) => handleImageUpload('shell.heroImage', file)}
-              onRemove={() => updatePoster({ ...poster, shell: { ...poster.shell, heroImage: undefined } })}
+              onRemove={() => updatePoster({
+                ...poster,
+                shell: {
+                  ...poster.shell,
+                  heroImage: undefined,
+                  heroImageOriginal: undefined,
+                  heroImageCrop: {
+                    x: 0,
+                    y: 0,
+                    zoom: 1,
+                  },
+                },
+              })}
             />
+            {poster.shell.heroImageOriginal ? (
+              <button
+                type="button"
+                onClick={() => openHeroCropDialog(poster.shell.heroImageOriginal || poster.shell.heroImage || '', poster.shell.heroImageCrop)}
+                className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+              >
+                <i className="fas fa-crop text-xs" />
+                <span>{copy.heroCropAction}</span>
+              </button>
+            ) : null}
           </SectionCard>
 
           <SectionCard title={copy.footerCard} subtitle={copy.footerHint}>
@@ -669,6 +939,25 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
           </div>
         </div>
       </div>
+
+      <HeroImageCropDialog
+        open={Boolean(heroCropSource)}
+        imageSrc={heroCropSource}
+        crop={heroCrop}
+        zoom={heroCropZoom}
+        title={copy.heroCropTitle}
+        hint={copy.heroCropDialogHint}
+        zoomLabel={copy.heroCropZoom}
+        cancelLabel={copy.heroCropCancel}
+        confirmLabel={copy.heroCropConfirm}
+        savingLabel={copy.heroCropSaving}
+        isSaving={isSavingHeroCrop}
+        onCropChange={setHeroCrop}
+        onZoomChange={setHeroCropZoom}
+        onCropComplete={(_, croppedAreaPixels) => setHeroCroppedAreaPixels(croppedAreaPixels)}
+        onClose={closeHeroCropDialog}
+        onConfirm={handleConfirmHeroCrop}
+      />
     </div>
   );
 }

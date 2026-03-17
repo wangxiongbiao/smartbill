@@ -206,6 +206,12 @@ export interface SchoolPosterShellFooter {
   highlights: string;
 }
 
+export interface SchoolPosterImageCrop {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
 export interface SchoolPosterDocumentFrame {
   variant: 'placeholder';
 }
@@ -215,6 +221,8 @@ export interface SchoolPosterShell {
   school: SchoolPosterInfo;
   student: SchoolPosterStudent;
   heroImage?: string;
+  heroImageOriginal?: string;
+  heroImageCrop?: SchoolPosterImageCrop;
   qrCode?: string;
   footer: SchoolPosterShellFooter;
   documentFrame: SchoolPosterDocumentFrame;

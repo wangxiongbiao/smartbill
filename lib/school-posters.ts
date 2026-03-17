@@ -176,6 +176,14 @@ export function normalizeSchoolPoster(record: any): SchoolPoster {
           transferPath: typeof record.shell.student?.transferPath === 'string' ? record.shell.student.transferPath : shellDefaults.student.transferPath,
         },
         heroImage: typeof record.shell.heroImage === 'string' ? record.shell.heroImage : undefined,
+        heroImageOriginal: typeof record.shell.heroImageOriginal === 'string'
+          ? record.shell.heroImageOriginal
+          : (typeof record.shell.heroImage === 'string' ? record.shell.heroImage : undefined),
+        heroImageCrop: {
+          x: typeof record.shell.heroImageCrop?.x === 'number' ? record.shell.heroImageCrop.x : 0,
+          y: typeof record.shell.heroImageCrop?.y === 'number' ? record.shell.heroImageCrop.y : 0,
+          zoom: typeof record.shell.heroImageCrop?.zoom === 'number' ? record.shell.heroImageCrop.zoom : 1,
+        },
         qrCode: typeof record.shell.qrCode === 'string' ? record.shell.qrCode : undefined,
         footer: {
           tuition: typeof record.shell.footer?.tuition === 'string' ? record.shell.footer.tuition : shellDefaults.footer.tuition,
@@ -235,6 +243,12 @@ export function normalizeSchoolPoster(record: any): SchoolPoster {
         transferPath: typeof legacy.student?.transferPath === 'string' ? legacy.student.transferPath : shellDefaults.student.transferPath,
       },
       heroImage: typeof legacy.bottom?.heroImage === 'string' ? legacy.bottom.heroImage : undefined,
+      heroImageOriginal: typeof legacy.bottom?.heroImage === 'string' ? legacy.bottom.heroImage : undefined,
+      heroImageCrop: {
+        x: 0,
+        y: 0,
+        zoom: 1,
+      },
       qrCode: typeof legacy.bottom?.qrCode === 'string' ? legacy.bottom.qrCode : undefined,
       footer: {
         tuition: typeof legacy.bottom?.tuition === 'string' ? legacy.bottom.tuition : shellDefaults.footer.tuition,
@@ -300,6 +314,12 @@ export function clearSchoolPosterContent(record: SchoolPoster): SchoolPoster {
         transferPath: '',
       },
       heroImage: undefined,
+      heroImageOriginal: undefined,
+      heroImageCrop: {
+        x: 0,
+        y: 0,
+        zoom: 1,
+      },
       qrCode: undefined,
       footer: {
         ...record.shell.footer,
