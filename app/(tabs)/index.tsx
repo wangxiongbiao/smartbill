@@ -1,140 +1,337 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Feather from '@expo/vector-icons/Feather';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
-  const router = useRouter();
+type InvoiceFilter = 'All' | 'Unpaid' | 'Paid';
+
+type InvoiceItem = {
+  id: string;
+  client: string;
+  ref: string;
+  date: string;
+  amount: number;
+  status: 'unpaid' | 'paid';
+  overdueText?: string;
+  muted?: boolean;
+};
+
+const FILTERS: InvoiceFilter[] = ['All', 'Unpaid', 'Paid'];
+
+const INVOICES: InvoiceItem[] = [
+  {
+    id: 'invoice-0114',
+    client: 'Unknown client',
+    ref: '#KY...0114',
+    date: 'Mar 13',
+    amount: 0,
+    status: 'unpaid',
+    muted: true,
+  },
+  {
+    id: 'invoice-0113',
+    client: 'Alan ~ New energy procurement',
+    ref: '#KY...0113',
+    date: 'Mar 6',
+    amount: 700,
+    status: 'unpaid',
+    overdueText: 'overdue 1d',
+  },
+  {
+    id: 'invoice-0112',
+    client: 'Alan ~ New energy procurement',
+    ref: '#KY...0112',
+    date: 'Jan 13',
+    amount: 480700,
+    status: 'unpaid',
+    overdueText: 'overdue 413d',
+  },
+];
+
+function formatAmount(amount: number) {
+  return `¥${amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export default function InvoicesScreen() {
+  const insets = useSafeAreaInsets();
+  const [activeFilter, setActiveFilter] = useState<InvoiceFilter>('Paid');
+
+  const filteredInvoices = useMemo(() => {
+    if (activeFilter === 'All') {
+      return INVOICES;
+    }
+
+    return INVOICES.filter((invoice) =>
+      activeFilter === 'Paid' ? invoice.status === 'paid' : invoice.status === 'unpaid'
+    );
+  }, [activeFilter]);
+
+  const totalAmount = useMemo(() => {
+    return filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  }, [filteredInvoices]);
+
+  const isEmptyState = filteredInvoices.length === 0;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>SmartBill Pro</Text>
-          <Text style={styles.subtitle}>Professional Invoices in Seconds</Text>
-        </View>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <View style={styles.screen}>
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 248 }]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.topRow}>
+            <Pressable style={styles.iconButton}>
+              <Feather color="#111111" name="message-square" size={22} strokeWidth={2.1} />
+            </Pressable>
+            <Pressable style={styles.iconButton}>
+              <Feather color="#111111" name="settings" size={22} strokeWidth={2.1} />
+            </Pressable>
+          </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.card, styles.primaryCard]}
-            onPress={() => router.push('/editor')}
-          >
-            <View style={styles.iconCircle}>
-              <FontAwesome name="plus" size={24} color="#2563eb" />
+          <View style={styles.hero}>
+            <Text allowFontScaling={false} style={styles.title}>
+              Invoices
+            </Text>
+
+            <View style={styles.segment}>
+              {FILTERS.map((filter) => {
+                const selected = filter === activeFilter;
+
+                return (
+                  <Pressable
+                    key={filter}
+                    onPress={() => setActiveFilter(filter)}
+                    style={[styles.segmentButton, selected && styles.segmentButtonActive]}
+                  >
+                    <Text
+                      allowFontScaling={false}
+                      style={[styles.segmentText, selected && styles.segmentTextActive]}
+                    >
+                      {filter}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
-            <Text style={styles.cardTitle}>New Invoice</Text>
-            <Text style={styles.cardDesc}>Create a new invoice from scratch</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity style={styles.card} onPress={() => router.push('/(tabs)/records')}>
-            <View style={[styles.iconCircle, { backgroundColor: '#f1f5f9' }]}>
-              <FontAwesome name="list" size={24} color="#475569" />
+            {!isEmptyState ? (
+              <Text allowFontScaling={false} style={styles.totalText}>
+                total: {formatAmount(totalAmount)}
+              </Text>
+            ) : null}
+          </View>
+
+          {isEmptyState ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconWrap}>
+                <Feather color="#c7c7cc" name="file-text" size={34} strokeWidth={2} />
+                <View style={styles.emptyCheckBadge}>
+                  <Feather color="#ffffff" name="check" size={12} strokeWidth={3} />
+                </View>
+              </View>
+              <Text allowFontScaling={false} style={styles.emptyText}>
+                Paid invoices will appear here
+              </Text>
             </View>
-            <Text style={[styles.cardTitle, { color: '#0f172a' }]}>Records</Text>
-            <Text style={styles.cardDesc}>View your invoice history</Text>
-          </TouchableOpacity>
-        </View>
+          ) : (
+            <View style={styles.listCard}>
+              {filteredInvoices.map((invoice, index) => (
+                <View
+                  key={invoice.id}
+                  style={[styles.invoiceRow, index < filteredInvoices.length - 1 && styles.rowBorder]}
+                >
+                  <View style={styles.invoiceMain}>
+                    <Text
+                      allowFontScaling={false}
+                      style={[styles.clientText, invoice.muted && styles.mutedClient]}
+                    >
+                      {invoice.client}
+                    </Text>
+                    <Text allowFontScaling={false} style={styles.metaText}>
+                      {invoice.ref}, {invoice.date}
+                    </Text>
+                  </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Templates</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.templateList}>
-            {['Minimalist', 'Business', 'Creative'].map((t, i) => (
-              <TouchableOpacity key={t} style={styles.templateCard} onPress={() => router.push('/editor')}>
-                <View style={[styles.templatePreview, { backgroundColor: i === 0 ? '#e2e8f0' : i === 1 ? '#cbd5e1' : '#94a3b8' }]} />
-                <Text style={styles.templateName}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </ScrollView>
+                  <View style={styles.amountBlock}>
+                    <Text allowFontScaling={false} style={styles.amountText}>
+                      {formatAmount(invoice.amount)}
+                    </Text>
+                    {invoice.overdueText ? (
+                      <Text allowFontScaling={false} style={styles.overdueText}>
+                        {invoice.overdueText}
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f6f5f2',
   },
-  content: {
-    padding: 24,
+  screen: {
+    flex: 1,
+    backgroundColor: '#f6f5f2',
   },
-  header: {
-    marginBottom: 32,
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: 8,
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 58,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#64748b',
-  },
-  actions: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  card: {
-    padding: 24,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#64748b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  primaryCard: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
-  },
-  iconCircle: {
+  iconButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.05,
+    shadowRadius: 24,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: 20,
+  hero: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 31,
+    lineHeight: 36,
+    fontWeight: '800',
+    color: '#050505',
+    marginBottom: 22,
+  },
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: '#e4e3e1',
+    borderRadius: 21,
+    padding: 3,
+  },
+  segmentButton: {
+    minHeight: 34,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 17,
+  },
+  segmentButtonActive: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  segmentText: {
+    fontSize: 13,
+
+    color: '#1b1b1b',
+  },
+  segmentTextActive: {
     fontWeight: '700',
-    color: '#fff',
-    marginBottom: 4,
   },
-  cardDesc: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
+  totalText: {
+    marginTop: 28,
+    fontSize: 11,
+    lineHeight: 14,
+    color: '#9d9ea4',
   },
-  section: {
-    marginBottom: 24,
+  emptyState: {
+    minHeight: 520,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 82,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: 16,
+  emptyIconWrap: {
+    width: 54,
+    height: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 22,
   },
-  templateList: {
-    gap: 16,
+  emptyCheckBadge: {
+    position: 'absolute',
+    right: -1,
+    bottom: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#c7c7cc',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  templateCard: {
-    marginRight: 16,
+  emptyText: {
+    fontSize: 13,
+    lineHeight: 17,
+    color: '#9999a1',
   },
-  templatePreview: {
-    width: 120,
-    height: 160,
-    borderRadius: 12,
-    marginBottom: 8,
+  invoiceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    gap: 14,
   },
-  templateName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#edf0f3',
+  },
+  invoiceMain: {
+    flex: 1,
+    gap: 6,
+  },
+  clientText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#09090b',
+
+  },
+  mutedClient: {
+    color: '#9a9ca3',
+    fontWeight: '500',
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#9a9ca3',
+  },
+  amountBlock: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  amountText: {
+    fontSize: 17,
+    color: '#09090b',
+    lineHeight: 22,
+  },
+  overdueText: {
+    fontSize: 11,
+    color: '#ff4e62',
+  },
+  listCard: {
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.04,
+    shadowRadius: 18,
+    elevation: 2,
   },
 });
