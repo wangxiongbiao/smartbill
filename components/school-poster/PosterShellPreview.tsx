@@ -143,12 +143,12 @@ export default function PosterShellPreview({ poster }: PosterShellPreviewProps) 
               </div>
               <div
                 ref={schoolNameRowRef}
-                className='flex w-full overflow-hidden whitespace-nowrap leading-none mb-[0.4rem] font-semibold text-[#044195] mt-10'
+                className='flex w-full pl-[1.5rem] whitespace-nowrap  mb-[0.4rem] font-semibold text-[#044195] mt-10'
                 style={{ fontSize: `${schoolNameFontSizeRem}rem` }}
               >
-                <div className='leading-none '>「</div>
-                <div className='leading-none '>{shell.school.nameCn}</div>
-                <div className='leading-none '>」</div>
+
+                <div >{shell.school.nameCn}</div>
+
               </div>
             </>
           )}
