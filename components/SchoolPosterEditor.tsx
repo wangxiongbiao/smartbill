@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useId, useRef, useState } from 'react';
+import React, { useCallback, useId, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { Area } from 'react-easy-crop';
 import ScalableInvoiceContainer from '@/components/ScalableInvoiceContainer';
 import SchoolPosterPreview from '@/components/SchoolPosterPreview';
 import { useSchoolPosterPdfExport } from '@/hooks/useSchoolPosterPdfExport';
+import { SCHOOL_POSTER_PREVIEW_BASE_WIDTH } from '@/lib/school-poster-preview';
 import type { Language, SchoolPoster } from '@/types';
 
 interface SchoolPosterEditorProps {
@@ -590,10 +591,6 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
   const [heroCropZoom, setHeroCropZoom] = useState(1);
   const [heroCroppedAreaPixels, setHeroCroppedAreaPixels] = useState<Area | null>(null);
   const [isSavingHeroCrop, setIsSavingHeroCrop] = useState(false);
-  const exportAreaRef = useRef<HTMLDivElement>(null);
-  const handlePreviewContentRefChange = useCallback((node: HTMLDivElement | null) => {
-    exportAreaRef.current = node;
-  }, []);
 
   const isZh = lang === 'zh-CN' || lang === 'zh-TW';
   const copy = isZh
@@ -708,7 +705,6 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
     poster,
     isExporting: isExportingPdf,
     setIsExporting: setIsExportingPdf,
-    printAreaRef: exportAreaRef,
   });
 
   const getPlaceholder = (label: string) => (
@@ -1029,7 +1025,7 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
 
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
           <div className="min-h-[28.125rem] sm:min-h-[31.25rem] flex justify-center items-start overflow-x-hidden overflow-y-hidden">
-            <ScalableInvoiceContainer baseWidth={720} onContentRefChange={handlePreviewContentRefChange}>
+            <ScalableInvoiceContainer baseWidth={SCHOOL_POSTER_PREVIEW_BASE_WIDTH}>
               <SchoolPosterPreview poster={poster} />
             </ScalableInvoiceContainer>
           </div>

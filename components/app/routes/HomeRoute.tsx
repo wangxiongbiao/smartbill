@@ -14,7 +14,10 @@ export default function HomeRoute() {
   const userId = app.user?.id ?? null;
   const recordsStore = useInvoiceRecordsStore({ userId });
   const printAreaRef = useRef<HTMLDivElement>(null);
+  const startedExportInvoiceIdRef = useRef<string | null>(null);
   const [exportInvoice, setExportInvoice] = useState(INITIAL_INVOICE);
+  const [pendingExportInvoiceId, setPendingExportInvoiceId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -32,12 +35,33 @@ export default function HomeRoute() {
     template: exportInvoice.template || 'minimalist',
     isHeaderReversed: exportInvoice.isHeaderReversed ?? true,
     lang: app.lang,
-    isExporting: false,
-    setIsExporting: () => undefined,
+    isExporting,
+    setIsExporting,
     printAreaRef,
   });
 
   const latestInvoice = useMemo(() => recordsStore.records[0] || null, [recordsStore.records]);
+
+  useEffect(() => {
+    if (!pendingExportInvoiceId || exportInvoice.id !== pendingExportInvoiceId || isExporting) return;
+    if (startedExportInvoiceIdRef.current === pendingExportInvoiceId) return;
+
+    startedExportInvoiceIdRef.current = pendingExportInvoiceId;
+
+    const runExport = async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      try {
+        await pdfExport.handleExportPdf();
+      } finally {
+        setPendingExportInvoiceId((current) => (current === pendingExportInvoiceId ? null : current));
+        if (startedExportInvoiceIdRef.current === pendingExportInvoiceId) {
+          startedExportInvoiceIdRef.current = null;
+        }
+      }
+    };
+
+    void runExport();
+  }, [exportInvoice.id, isExporting, pdfExport.handleExportPdf, pendingExportInvoiceId]);
 
   if (app.isBootstrapping) return <ContentSkeleton blocks={4} />;
   if (recordsStore.recordsLoading && recordsStore.records.length === 0) return <ContentSkeleton blocks={4} />;
@@ -54,7 +78,7 @@ export default function HomeRoute() {
         onExportLatest={() => {
           if (!latestInvoice) return;
           setExportInvoice(latestInvoice);
-          setTimeout(() => pdfExport.handleExportPdf(), 50);
+          setPendingExportInvoiceId(latestInvoice.id);
         }}
       />
       <AppShellPrintArea

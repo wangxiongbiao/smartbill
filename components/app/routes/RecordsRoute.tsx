@@ -68,6 +68,7 @@ export default function RecordsRoute() {
   const userId = app.user?.id ?? null;
   const recordsStore = useInvoiceRecordsStore({ userId });
   const guestHydratedRef = useRef(false);
+  const startedExportInvoiceIdRef = useRef<string | null>(null);
   const shellScrollRafRef = useRef<number | null>(null);
   const shellScrollCommitTimerRef = useRef<number | null>(null);
   const pendingShellScrollTopRef = useRef(0);
@@ -81,6 +82,7 @@ export default function RecordsRoute() {
     selectedMonth: recordsViewState.selectedMonth,
   });
   const [exportInvoice, setExportInvoice] = useState(INITIAL_INVOICE);
+  const [pendingExportInvoiceId, setPendingExportInvoiceId] = useState<string | null>(null);
   const printAreaRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const pdfExport = useInvoicePdfExport({
@@ -92,6 +94,27 @@ export default function RecordsRoute() {
     setIsExporting,
     printAreaRef,
   });
+
+  useEffect(() => {
+    if (!pendingExportInvoiceId || exportInvoice.id !== pendingExportInvoiceId || isExporting) return;
+    if (startedExportInvoiceIdRef.current === pendingExportInvoiceId) return;
+
+    startedExportInvoiceIdRef.current = pendingExportInvoiceId;
+
+    const runExport = async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      try {
+        await pdfExport.handleExportPdf();
+      } finally {
+        setPendingExportInvoiceId((current) => (current === pendingExportInvoiceId ? null : current));
+        if (startedExportInvoiceIdRef.current === pendingExportInvoiceId) {
+          startedExportInvoiceIdRef.current = null;
+        }
+      }
+    };
+
+    void runExport();
+  }, [exportInvoice.id, isExporting, pdfExport.handleExportPdf, pendingExportInvoiceId]);
 
   useEffect(() => {
     setRecordsViewState(parseStoredRecordsViewState());
@@ -259,7 +282,7 @@ export default function RecordsRoute() {
         }}
         onExport={(record) => {
           setExportInvoice(record);
-          setTimeout(() => pdfExport.handleExportPdf(), 50);
+          setPendingExportInvoiceId(record.id);
         }}
         onNewDoc={() => {
           persistRecordsViewState();

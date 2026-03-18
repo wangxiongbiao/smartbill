@@ -18,8 +18,17 @@ export default function AppShellPrintArea({
   printAreaRef,
 }: AppShellPrintAreaProps) {
   return (
-    <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1]">
-      <div ref={printAreaRef} style={{ width: '210mm' }}>
+    <div
+      data-invoice-print-shell="true"
+      aria-hidden="true"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: '-10000px',
+        pointerEvents: 'none',
+      }}
+    >
+      <div ref={printAreaRef} data-invoice-export-root="true" style={{ width: '210mm' }}>
         <InvoicePreview
           invoice={invoice}
           template={template}
