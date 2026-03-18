@@ -1,7 +1,10 @@
 import Feather from '@expo/vector-icons/Feather';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { calculateInvoiceTotals } from '@/shared/invoice';
+import { useInvoiceFlow } from '@/shared/invoice-flow';
 
 type InvoiceFilter = 'All' | 'Unpaid' | 'Paid';
 
@@ -11,6 +14,7 @@ type InvoiceItem = {
   ref: string;
   date: string;
   amount: number;
+  currency?: string;
   status: 'unpaid' | 'paid';
   overdueText?: string;
   muted?: boolean;
@@ -25,6 +29,7 @@ const INVOICES: InvoiceItem[] = [
     ref: '#KY...0114',
     date: 'Mar 13',
     amount: 0,
+    currency: 'CNY',
     status: 'unpaid',
     muted: true,
   },
@@ -34,6 +39,7 @@ const INVOICES: InvoiceItem[] = [
     ref: '#KY...0113',
     date: 'Mar 6',
     amount: 700,
+    currency: 'CNY',
     status: 'unpaid',
     overdueText: 'overdue 1d',
   },
@@ -43,31 +49,69 @@ const INVOICES: InvoiceItem[] = [
     ref: '#KY...0112',
     date: 'Jan 13',
     amount: 480700,
+    currency: 'CNY',
     status: 'unpaid',
     overdueText: 'overdue 413d',
   },
 ];
 
-function formatAmount(amount: number) {
-  return `¥${amount.toLocaleString('en-US', {
+function formatAmount(amount: number, currency = 'CNY') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  }).format(amount);
+}
+
+function formatListDate(value: string) {
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export default function InvoicesScreen() {
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<InvoiceFilter>('Paid');
+  const { createdInvoices } = useInvoiceFlow();
+
+  const mergedInvoices = useMemo(() => {
+    const localInvoices: InvoiceItem[] = createdInvoices.map((invoice) => ({
+      id: invoice.id,
+      client: invoice.client.name || 'Unknown client',
+      ref: `#${invoice.invoiceNumber}`,
+      date: formatListDate(invoice.date),
+      amount: calculateInvoiceTotals(invoice.items, invoice.taxRate).total,
+      currency: invoice.currency,
+      status: invoice.status === 'Paid' ? 'paid' : 'unpaid',
+      muted: !invoice.client.name,
+    }));
+
+    return [...localInvoices, ...INVOICES];
+  }, [createdInvoices]);
+
+  useEffect(() => {
+    if (createdInvoices.length > 0 && activeFilter === 'Paid') {
+      setActiveFilter('All');
+    }
+  }, [activeFilter, createdInvoices.length]);
 
   const filteredInvoices = useMemo(() => {
     if (activeFilter === 'All') {
-      return INVOICES;
+      return mergedInvoices;
     }
 
-    return INVOICES.filter((invoice) =>
+    return mergedInvoices.filter((invoice) =>
       activeFilter === 'Paid' ? invoice.status === 'paid' : invoice.status === 'unpaid'
     );
-  }, [activeFilter]);
+  }, [activeFilter, mergedInvoices]);
 
   const totalAmount = useMemo(() => {
     return filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
@@ -157,7 +201,7 @@ export default function InvoicesScreen() {
 
                   <View style={styles.amountBlock}>
                     <Text allowFontScaling={false} style={styles.amountText}>
-                      {formatAmount(invoice.amount)}
+                      {formatAmount(invoice.amount, invoice.currency)}
                     </Text>
                     {invoice.overdueText ? (
                       <Text allowFontScaling={false} style={styles.overdueText}>

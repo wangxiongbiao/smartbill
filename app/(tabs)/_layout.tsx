@@ -4,6 +4,8 @@ import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useInvoiceFlow } from '@/shared/invoice-flow';
+
 function TabIcon(props: {
   name: React.ComponentProps<typeof Feather>['name'];
   color: string;
@@ -29,6 +31,7 @@ function getTabMeta(routeName: string) {
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { resetDraftInvoice } = useInvoiceFlow();
   const activeRouteName = state.routes[state.index]?.name;
   const showCreateButton = activeRouteName === 'index';
 
@@ -36,7 +39,13 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     <View pointerEvents="box-none" style={styles.wrapper}>
       <View style={[styles.dockBackground, { paddingBottom: insets.bottom }]}>
         {showCreateButton ? (
-          <Pressable onPress={() => router.push('/create-invoice')} style={styles.createButton}>
+          <Pressable
+            onPress={() => {
+              resetDraftInvoice();
+              router.push('/create-invoice');
+            }}
+            style={styles.createButton}
+          >
             <Text allowFontScaling={false} style={styles.createButtonText}>
               Create invoice
             </Text>
