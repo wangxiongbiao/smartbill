@@ -6,7 +6,9 @@ import { jsPDF } from 'jspdf';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import PosterShellPreview from '@/components/school-poster/PosterShellPreview';
-import { SCHOOL_POSTER_PREVIEW_BASE_WIDTH_REM } from '@/lib/school-poster-preview';
+import {
+  SCHOOL_POSTER_A4_WIDTH_MM,
+} from '@/lib/school-poster-preview';
 import type { SchoolPoster } from '@/types';
 
 const EXPORT_RENDER_SCALE = 4;
@@ -62,7 +64,7 @@ function createDetachedExportSurface({ poster }: Pick<UseSchoolPosterPdfExportPa
     position: 'fixed',
     top: '0',
     left: '0',
-    width: `${SCHOOL_POSTER_PREVIEW_BASE_WIDTH_REM}rem`,
+    width: `${SCHOOL_POSTER_A4_WIDTH_MM}mm`,
     pointerEvents: 'none',
     background: '#ffffff',
     transform: 'translateX(calc(-100% - 48px))',
@@ -71,7 +73,7 @@ function createDetachedExportSurface({ poster }: Pick<UseSchoolPosterPdfExportPa
 
   const rootNode = document.createElement('div');
   rootNode.setAttribute('data-school-poster-export-root', 'true');
-  rootNode.style.width = `${SCHOOL_POSTER_PREVIEW_BASE_WIDTH_REM}rem`;
+  rootNode.style.width = `${SCHOOL_POSTER_A4_WIDTH_MM}mm`;
   shell.appendChild(rootNode);
   document.body.appendChild(shell);
 
@@ -150,19 +152,20 @@ export function useSchoolPosterPdfExport({ poster, isExporting, setIsExporting }
       });
 
       const pdf = new jsPDF({
-        unit: 'px',
-        format: [width, height],
-        orientation: height >= width ? 'portrait' : 'landscape',
-        hotfixes: ['px_scaling'],
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
       });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
       pdf.addImage(
         canvas.toDataURL('image/png'),
         'PNG',
         0,
         0,
-        width,
-        height
+        pageWidth,
+        pageHeight
       );
 
       const pageCount = pdf.getNumberOfPages();

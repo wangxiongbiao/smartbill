@@ -1026,7 +1026,7 @@ export default function SchoolPosterEditor({ poster, lang, onChange, onBack }: S
         <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
           <div className="min-h-[28.125rem] sm:min-h-[31.25rem] flex justify-center items-start overflow-x-hidden overflow-y-hidden">
             <ScalableInvoiceContainer baseWidth={SCHOOL_POSTER_PREVIEW_BASE_WIDTH}>
-              <SchoolPosterPreview poster={poster} />
+              <SchoolPosterPreview poster={poster} lang={lang} editable onChange={updatePoster} />
             </ScalableInvoiceContainer>
           </div>
         </div>
