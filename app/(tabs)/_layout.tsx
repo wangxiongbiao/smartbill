@@ -17,12 +17,12 @@ function getTabMeta(routeName: string) {
   switch (routeName) {
     case 'index':
       return { label: 'Invoices', icon: 'copy' as const };
-    case 'estimates':
-      return { label: 'Estimates', icon: 'file-text' as const };
-    case 'clients':
-      return { label: 'Clients', icon: 'users' as const };
-    case 'reports':
-      return { label: 'Reports', icon: 'pie-chart' as const };
+    case 'templates':
+      return { label: 'Templates', icon: 'layers' as const };
+    case 'stats':
+      return { label: 'Stats', icon: 'bar-chart-2' as const };
+    case 'my':
+      return { label: 'My', icon: 'user' as const };
     default:
       return { label: routeName, icon: 'circle' as const };
   }
@@ -115,9 +115,9 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Invoices' }} />
-      <Tabs.Screen name="estimates" options={{ title: 'Estimates' }} />
-      <Tabs.Screen name="clients" options={{ title: 'Clients' }} />
-      <Tabs.Screen name="reports" options={{ title: 'Reports' }} />
+      <Tabs.Screen name="templates" options={{ title: 'Templates' }} />
+      <Tabs.Screen name="stats" options={{ title: 'Stats' }} />
+      <Tabs.Screen name="my" options={{ title: 'My' }} />
     </Tabs>
   );
 }
@@ -142,9 +142,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    fontSize: 30,
-
-
   },
   createButtonText: {
     fontSize: 15,

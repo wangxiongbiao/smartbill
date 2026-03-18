@@ -163,6 +163,7 @@ export interface InvoiceTemplateRecord {
   templateType: TemplateCategory;
   templateData: Partial<Invoice>;
   sourceInvoiceId?: string;
+  usageCount?: number;
   createdAt: string;
   updatedAt: string;
 }
