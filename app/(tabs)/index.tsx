@@ -107,51 +107,9 @@ export default function InvoicesScreen() {
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.screen}>
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 248 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 316 }]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.topRow}>
-            <Pressable style={styles.iconButton}>
-              <Feather color="#111111" name="message-square" size={22} strokeWidth={2.1} />
-            </Pressable>
-            <Pressable style={styles.iconButton}>
-              <Feather color="#111111" name="settings" size={22} strokeWidth={2.1} />
-            </Pressable>
-          </View>
-
-          <View style={styles.hero}>
-            <Text allowFontScaling={false} style={styles.title}>
-              Invoices
-            </Text>
-
-            <View style={styles.segment}>
-              {FILTERS.map((filter) => {
-                const selected = filter === activeFilter;
-
-                return (
-                  <Pressable
-                    key={filter}
-                    onPress={() => setActiveFilter(filter)}
-                    style={[styles.segmentButton, selected && styles.segmentButtonActive]}
-                  >
-                    <Text
-                      allowFontScaling={false}
-                      style={[styles.segmentText, selected && styles.segmentTextActive]}
-                    >
-                      {filter}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {!isEmptyState ? (
-              <Text allowFontScaling={false} style={styles.totalText}>
-                total: {formatAmount(totalAmount)}
-              </Text>
-            ) : null}
-          </View>
-
           {isEmptyState ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconWrap}>
@@ -165,40 +123,72 @@ export default function InvoicesScreen() {
               </Text>
             </View>
           ) : (
-            <View style={styles.listCard}>
-              {filteredInvoices.map((invoice, index) => (
-                <Pressable
-                  key={invoice.id}
-                  onPress={() => router.push(`/invoice-detail/${invoice.id}`)}
-                  style={[styles.invoiceRow, index < filteredInvoices.length - 1 && styles.rowBorder]}
-                >
-                  <View style={styles.invoiceMain}>
-                    <Text
-                      allowFontScaling={false}
-                      style={[styles.clientText, invoice.muted && styles.mutedClient]}
-                    >
-                      {invoice.client}
-                    </Text>
-                    <Text allowFontScaling={false} style={styles.metaText}>
-                      {invoice.ref}, {invoice.date}
-                    </Text>
-                  </View>
-
-                  <View style={styles.amountBlock}>
-                    <Text allowFontScaling={false} style={styles.amountText}>
-                      {formatAmount(invoice.amount, invoice.currency)}
-                    </Text>
-                    {invoice.overdueText ? (
-                      <Text allowFontScaling={false} style={styles.overdueText}>
-                        {invoice.overdueText}
+            <View style={styles.listState}>
+              <View style={styles.listCard}>
+                {filteredInvoices.map((invoice, index) => (
+                  <Pressable
+                    key={invoice.id}
+                    onPress={() => router.push(`/invoice-detail/${invoice.id}`)}
+                    style={[styles.invoiceRow, index < filteredInvoices.length - 1 && styles.rowBorder]}
+                  >
+                    <View style={styles.invoiceMain}>
+                      <Text
+                        allowFontScaling={false}
+                        style={[styles.clientText, invoice.muted && styles.mutedClient]}
+                      >
+                        {invoice.client}
                       </Text>
-                    ) : null}
-                  </View>
-                </Pressable>
-              ))}
+                      <Text allowFontScaling={false} style={styles.metaText}>
+                        {invoice.ref}, {invoice.date}
+                      </Text>
+                    </View>
+
+                    <View style={styles.amountBlock}>
+                      <Text allowFontScaling={false} style={styles.amountText}>
+                        {formatAmount(invoice.amount, invoice.currency)}
+                      </Text>
+                      {invoice.overdueText ? (
+                        <Text allowFontScaling={false} style={styles.overdueText}>
+                          {invoice.overdueText}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Text allowFontScaling={false} style={styles.totalText}>
+                total: {formatAmount(totalAmount)}
+              </Text>
             </View>
           )}
         </ScrollView>
+
+        <View
+          pointerEvents="box-none"
+          style={[styles.filterDock, { bottom: insets.bottom + 152 }]}
+        >
+          <View style={[styles.segment, styles.segmentFloating]}>
+            {FILTERS.map((filter) => {
+              const selected = filter === activeFilter;
+
+              return (
+                <Pressable
+                  key={filter}
+                  onPress={() => setActiveFilter(filter)}
+                  style={[styles.segmentButton, selected && styles.segmentButtonActive]}
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={[styles.segmentText, selected && styles.segmentTextActive]}
+                  >
+                    {filter}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -214,37 +204,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f6f5f2',
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 58,
-  },
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.05,
-    shadowRadius: 24,
-    elevation: 2,
-  },
-  hero: {
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 31,
-    lineHeight: 36,
-    fontWeight: '800',
-    color: '#050505',
-    marginBottom: 22,
+    paddingHorizontal: 18,
+    paddingTop: 10,
   },
   segment: {
     flexDirection: 'row',
@@ -267,25 +228,32 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
+  segmentFloating: {
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    elevation: 3,
+  },
   segmentText: {
     fontSize: 13,
-
     color: '#1b1b1b',
   },
   segmentTextActive: {
     fontWeight: '700',
   },
   totalText: {
-    marginTop: 28,
+    alignSelf: 'center',
+    marginTop: 12,
     fontSize: 11,
     lineHeight: 14,
     color: '#9d9ea4',
   },
   emptyState: {
-    minHeight: 520,
+    minHeight: 560,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 82,
+    paddingBottom: 128,
   },
   emptyIconWrap: {
     width: 54,
@@ -362,5 +330,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 18,
     elevation: 2,
+  },
+  listState: {
+    minHeight: 560,
+    justifyContent: 'center',
+  },
+  filterDock: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
   },
 });
