@@ -11,6 +11,12 @@ import {
   View,
 } from 'react-native';
 
+import {
+  getInputKeyboardProps,
+  sanitizeInputValue,
+  type InputFilter,
+} from './inputFilters';
+
 export function TopActionButton({
   dark = false,
   label,
@@ -72,12 +78,14 @@ export function BottomSheetEditor({
   visible,
   onClose,
   bottomInset,
+  scrollEnabled = true,
 }: {
   children: React.ReactNode;
   title: string;
   visible: boolean;
   onClose: () => void;
   bottomInset: number;
+  scrollEnabled?: boolean;
 }) {
   return (
     <Modal
@@ -101,8 +109,10 @@ export function BottomSheetEditor({
             </Pressable>
           </View>
           <ScrollView
+            bounces={scrollEnabled}
             contentContainerStyle={styles.sheetContent}
             keyboardShouldPersistTaps="handled"
+            scrollEnabled={scrollEnabled}
             showsVerticalScrollIndicator={false}
           >
             {children}
@@ -114,6 +124,7 @@ export function BottomSheetEditor({
 }
 
 export function Field({
+  inputFilter,
   label,
   value,
   onChangeText,
@@ -121,6 +132,7 @@ export function Field({
   multiline = false,
   keyboardType = 'default',
 }: {
+  inputFilter?: InputFilter;
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -128,6 +140,9 @@ export function Field({
   multiline?: boolean;
   keyboardType?: TextInputProps['keyboardType'];
 }) {
+  const resolvedFilter = inputFilter || (multiline ? 'multilineText' : 'text');
+  const keyboardProps = getInputKeyboardProps(resolvedFilter, multiline);
+
   return (
     <View style={styles.fieldGroup}>
       <Text allowFontScaling={false} style={styles.fieldLabel}>
@@ -135,12 +150,20 @@ export function Field({
       </Text>
       <TextInput
         allowFontScaling={false}
-        keyboardType={keyboardType}
+        autoCapitalize={keyboardProps.autoCapitalize}
+        autoComplete={keyboardProps.autoComplete}
+        autoCorrect={keyboardProps.autoCorrect}
+        inputMode={keyboardProps.inputMode}
+        keyboardType={keyboardType || keyboardProps.keyboardType}
         multiline={multiline}
         numberOfLines={multiline ? 3 : 1}
-        onChangeText={onChangeText}
+        onChangeText={(nextValue) =>
+          onChangeText(sanitizeInputValue(nextValue, resolvedFilter))
+        }
         placeholder={placeholder}
         placeholderTextColor="#b0b2b8"
+        returnKeyType={keyboardProps.returnKeyType}
+        spellCheck={keyboardProps.spellCheck}
         style={[styles.textField, multiline && styles.textFieldMultiline]}
         textAlignVertical={multiline ? 'top' : 'center'}
         value={value}

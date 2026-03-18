@@ -87,6 +87,7 @@ export function SenderSection({
       />
 
       <Field
+        inputFilter="text"
         label="Name"
         onChangeText={(value) =>
           onUpdateSender({
@@ -98,6 +99,7 @@ export function SenderSection({
         value={sender.name}
       />
       <Field
+        inputFilter="multilineText"
         label="Address"
         multiline
         onChangeText={(value) =>
@@ -111,6 +113,7 @@ export function SenderSection({
       />
       <View style={styles.stack}>
         <Field
+          inputFilter="phone"
           label="Phone"
           keyboardType="phone-pad"
           onChangeText={(value) =>
@@ -123,6 +126,7 @@ export function SenderSection({
           value={sender.phone || ''}
         />
         <Field
+          inputFilter="email"
           keyboardType="email-address"
           label="Email"
           onChangeText={(value) =>

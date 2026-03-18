@@ -28,6 +28,10 @@ import {
   TopActionButton,
 } from '@/components/invoice-create/shared';
 import {
+  getInputKeyboardProps,
+  sanitizeInputValue,
+} from '@/components/invoice-create/inputFilters';
+import {
   calculateInvoiceTotals,
   getSortedInvoiceColumns,
   hasPaymentInfoContent,
@@ -110,6 +114,7 @@ export default function CreateInvoiceScreen() {
     useInvoiceFlow();
   const [activeSheet, setActiveSheet] = useState<SectionKey | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const textKeyboardProps = getInputKeyboardProps('text');
 
   const totals = useMemo(
     () => calculateInvoiceTotals(invoice.items, invoice.taxRate),
@@ -461,9 +466,8 @@ export default function CreateInvoiceScreen() {
     totals.total
   )}`;
   const paymentSummary = invoice.visibility?.paymentInfo
-    ? `${paymentFields.filter((field) => field.visible).length} fields${
-        hasPaymentInfoContent(invoice.paymentInfo) ? ' · ready' : ''
-      }`
+    ? `${paymentFields.filter((field) => field.visible).length} fields${hasPaymentInfoContent(invoice.paymentInfo) ? ' · ready' : ''
+    }`
     : 'Off';
   const signatureSummary = invoice.visibility?.signature
     ? invoice.sender.signature
@@ -482,6 +486,10 @@ export default function CreateInvoiceScreen() {
   const handleSubmit = () => {
     submitDraftInvoice();
     router.replace('/(tabs)');
+  };
+
+  const handlePreview = () => {
+    router.push('/invoice-preview');
   };
 
   const renderSheetContent = () => {
@@ -539,19 +547,23 @@ export default function CreateInvoiceScreen() {
 
               {sortedColumns.map((column) => (
                 <View key={column.id} style={styles.configRow}>
-                  <View style={styles.configCopy}>
-                    <TextInput
-                      allowFontScaling={false}
-                      onChangeText={(value) => updateColumn(column.id, { label: value })}
-                      placeholder="Column label"
-                      placeholderTextColor="#b0b2b8"
-                      style={styles.configInput}
-                      value={column.label}
-                    />
-                    <Text allowFontScaling={false} style={styles.configMeta}>
-                      {column.type}
-                    </Text>
-                  </View>
+                  <TextInput
+                    allowFontScaling={false}
+                    autoCapitalize={textKeyboardProps.autoCapitalize}
+                    autoComplete={textKeyboardProps.autoComplete}
+                    autoCorrect={textKeyboardProps.autoCorrect}
+                    inputMode={textKeyboardProps.inputMode}
+                    keyboardType={textKeyboardProps.keyboardType}
+                    onChangeText={(value) =>
+                      updateColumn(column.id, { label: sanitizeInputValue(value, 'text') })
+                    }
+                    placeholder="Column label"
+                    placeholderTextColor="#b0b2b8"
+                    returnKeyType={textKeyboardProps.returnKeyType}
+                    spellCheck={textKeyboardProps.spellCheck}
+                    style={styles.configInput}
+                    value={column.label}
+                  />
 
                   <View style={styles.configActions}>
                     <ToggleChip
@@ -561,15 +573,6 @@ export default function CreateInvoiceScreen() {
                     />
                     {!column.required ? (
                       <>
-                        <ActionButton
-                          icon="refresh-cw"
-                          label={column.type === 'custom-text' ? 'Text' : 'Number'}
-                          onPress={() =>
-                            updateColumn(column.id, {
-                              type: column.type === 'custom-text' ? 'custom-number' : 'custom-text',
-                            })
-                          }
-                        />
                         <Pressable onPress={() => removeColumn(column.id)} style={styles.iconOnlyButton}>
                           <Feather color="#6a6d75" name="trash-2" size={15} strokeWidth={2.3} />
                         </Pressable>
@@ -588,79 +591,108 @@ export default function CreateInvoiceScreen() {
                 <ActionButton icon="plus" label="Add item" onPress={addItem} />
               </View>
 
-              {invoice.items.map((item, index) => (
+              {invoice.items.map((item) => (
                 <View key={item.id} style={styles.itemCard}>
-                  <View style={styles.itemCardHeader}>
-                    <Text allowFontScaling={false} style={styles.itemCardTitle}>
-                      Item {index + 1}
-                    </Text>
-                    {invoice.items.length > 1 ? (
-                      <Pressable onPress={() => removeItem(item.id)} style={styles.iconOnlyButton}>
+                  {invoice.items.length > 1 ? (
+                    <View style={styles.itemCardHeaderCompact}>
+                      <View />
+                      <Pressable onPress={() => removeItem(item.id)} style={styles.itemDeleteButton}>
                         <Feather color="#6a6d75" name="trash-2" size={15} strokeWidth={2.3} />
                       </Pressable>
-                    ) : null}
+                    </View>
+                  ) : null}
+
+                  <View style={styles.itemFieldsWrap}>
+                    {sortedColumns.map((column) => {
+                      const isWideColumn =
+                        column.type === 'system-text' || column.type === 'custom-text';
+
+                      if (column.type === 'system-text') {
+                        return (
+                          <View
+                            key={column.id}
+                            style={[styles.itemFieldCell, styles.itemFieldCellWide]}
+                          >
+                            <Field
+                              inputFilter="multilineText"
+                              label={column.label}
+                              multiline
+                              onChangeText={(value) =>
+                                updateItemField(item.id, 'description', value)
+                              }
+                              placeholder="Describe the item or service"
+                              value={String(item.description || '')}
+                            />
+                          </View>
+                        );
+                      }
+
+                      if (column.type === 'system-quantity') {
+                        return (
+                          <View key={column.id} style={styles.itemFieldCell}>
+                            <Field
+                              inputFilter="decimal"
+                              keyboardType="numeric"
+                              label={column.label}
+                              onChangeText={(value) => updateItemField(item.id, 'quantity', value)}
+                              placeholder="1"
+                              value={stringifyValue(item.quantity)}
+                            />
+                          </View>
+                        );
+                      }
+
+                      if (column.type === 'system-rate') {
+                        return (
+                          <View key={column.id} style={styles.itemFieldCell}>
+                            <Field
+                              inputFilter="decimal"
+                              keyboardType="numeric"
+                              label={column.label}
+                              onChangeText={(value) => updateItemField(item.id, 'rate', value)}
+                              placeholder="0.00"
+                              value={stringifyValue(item.rate)}
+                            />
+                          </View>
+                        );
+                      }
+
+                      if (column.type === 'system-amount') {
+                        return (
+                          <View
+                            key={column.id}
+                            style={[styles.itemFieldCell, styles.itemFieldCellWide]}
+                          >
+                            <Field
+                              inputFilter="decimal"
+                              keyboardType="numeric"
+                              label={column.label}
+                              onChangeText={(value) => updateItemField(item.id, 'amount', value)}
+                              placeholder="0.00"
+                              value={stringifyValue(item.amount)}
+                            />
+                          </View>
+                        );
+                      }
+
+                      return (
+                        <View
+                          key={column.id}
+                          style={[styles.itemFieldCell, isWideColumn && styles.itemFieldCellWide]}
+                        >
+                          <Field
+                            inputFilter={column.type === 'custom-number' ? 'decimal' : 'multilineText'}
+                            keyboardType={column.type === 'custom-number' ? 'numeric' : 'default'}
+                            label={column.label}
+                            multiline={column.type === 'custom-text'}
+                            onChangeText={(value) => updateItemCustomField(item.id, column.id, value)}
+                            placeholder={column.type === 'custom-number' ? '0.00' : 'Enter details'}
+                            value={String(item.customValues?.[column.id] || '')}
+                          />
+                        </View>
+                      );
+                    })}
                   </View>
-
-                  {sortedColumns.map((column) => {
-                    if (column.type === 'system-text') {
-                      return (
-                        <Field
-                          key={column.id}
-                          label={column.label}
-                          multiline
-                          onChangeText={(value) => updateItemField(item.id, 'description', value)}
-                          value={String(item.description || '')}
-                        />
-                      );
-                    }
-
-                    if (column.type === 'system-quantity') {
-                      return (
-                        <Field
-                          key={column.id}
-                          keyboardType="numeric"
-                          label={column.label}
-                          onChangeText={(value) => updateItemField(item.id, 'quantity', value)}
-                          value={stringifyValue(item.quantity)}
-                        />
-                      );
-                    }
-
-                    if (column.type === 'system-rate') {
-                      return (
-                        <Field
-                          key={column.id}
-                          keyboardType="numeric"
-                          label={column.label}
-                          onChangeText={(value) => updateItemField(item.id, 'rate', value)}
-                          value={stringifyValue(item.rate)}
-                        />
-                      );
-                    }
-
-                    if (column.type === 'system-amount') {
-                      return (
-                        <Field
-                          key={column.id}
-                          keyboardType="numeric"
-                          label={column.label}
-                          onChangeText={(value) => updateItemField(item.id, 'amount', value)}
-                          value={stringifyValue(item.amount)}
-                        />
-                      );
-                    }
-
-                    return (
-                      <Field
-                        key={column.id}
-                        keyboardType={column.type === 'custom-number' ? 'numeric' : 'default'}
-                        label={column.label}
-                        multiline={column.type === 'custom-text'}
-                        onChangeText={(value) => updateItemCustomField(item.id, column.id, value)}
-                        value={String(item.customValues?.[column.id] || '')}
-                      />
-                    );
-                  })}
                 </View>
               ))}
             </View>
@@ -668,6 +700,7 @@ export default function CreateInvoiceScreen() {
             <View style={styles.totalCard}>
               <View style={styles.totalCardTop}>
                 <Field
+                  inputFilter="decimal"
                   keyboardType="numeric"
                   label="Tax rate %"
                   onChangeText={(value) =>
@@ -714,30 +747,36 @@ export default function CreateInvoiceScreen() {
 
             {invoice.visibility?.paymentInfo === true ? (
               <>
-                <View style={styles.mediaCard}>
-                  <Text allowFontScaling={false} style={styles.mediaLabel}>
+                <View style={styles.paymentQrBlock}>
+                  <Text allowFontScaling={false} style={styles.paymentQrLabel}>
                     Payment QR Code
                   </Text>
-                  {invoice.paymentInfo?.qrCode ? (
-                    <Image source={{ uri: invoice.paymentInfo.qrCode }} style={styles.qrPreview} />
-                  ) : (
-                    <View style={styles.mediaPlaceholder}>
-                      <Feather color="#a6a8af" name="grid" size={16} strokeWidth={2.3} />
-                      <Text allowFontScaling={false} style={styles.mediaPlaceholderText}>
-                        No QR code yet
-                      </Text>
-                    </View>
-                  )}
-                  <View style={styles.actionRow}>
-                    <ActionButton
-                      icon="upload"
-                      label={invoice.paymentInfo?.qrCode ? 'Change QR' : 'Upload QR'}
-                      onPress={() => pickImage('qr')}
-                    />
+                  <View style={styles.paymentQrWrap}>
+                    <Pressable onPress={() => pickImage('qr')} style={styles.paymentQrBox}>
+                      {invoice.paymentInfo?.qrCode ? (
+                        <>
+                          <Image source={{ uri: invoice.paymentInfo.qrCode }} style={styles.qrPreview} />
+                          <View style={styles.paymentQrHintBadge}>
+                            <Text allowFontScaling={false} style={styles.paymentQrHintText}>
+                              Tap to replace
+                            </Text>
+                          </View>
+                        </>
+                      ) : (
+                        <View style={styles.paymentQrPlaceholder}>
+                          <Feather color="#8f9198" name="grid" size={18} strokeWidth={2.3} />
+                          <Text allowFontScaling={false} style={styles.paymentQrPlaceholderTitle}>
+                            Upload QR
+                          </Text>
+                          <Text allowFontScaling={false} style={styles.paymentQrPlaceholderText}>
+                            Tap to add a payment QR code
+                          </Text>
+                        </View>
+                      )}
+                    </Pressable>
+
                     {invoice.paymentInfo?.qrCode ? (
-                      <ActionButton
-                        icon="trash-2"
-                        label="Remove"
+                      <Pressable
                         onPress={() =>
                           updateInvoice({
                             paymentInfo: {
@@ -747,7 +786,10 @@ export default function CreateInvoiceScreen() {
                             },
                           })
                         }
-                      />
+                        style={styles.paymentQrRemoveButton}
+                      >
+                        <Feather color="#111111" name="x" size={14} strokeWidth={2.8} />
+                      </Pressable>
                     ) : null}
                   </View>
                 </View>
@@ -761,49 +803,74 @@ export default function CreateInvoiceScreen() {
                   </View>
 
                   {paymentFields.map((field) => (
-                    <View key={field.id} style={styles.paymentFieldCard}>
-                      <View style={styles.paymentFieldHeader}>
-                        <Text allowFontScaling={false} style={styles.paymentFieldTitle}>
-                          {field.required ? 'System field' : 'Custom field'}
-                        </Text>
-                        <View style={styles.configActions}>
-                          <ToggleChip
-                            active={field.visible}
-                            label={field.visible ? 'Shown' : 'Hidden'}
-                            onPress={() => updatePaymentField(field.id, 'visible', !field.visible)}
-                          />
-                          {!field.required ? (
-                            <Pressable
-                              onPress={() => removePaymentField(field.id)}
-                              style={styles.iconOnlyButton}
-                            >
-                              <Feather color="#6a6d75" name="trash-2" size={15} strokeWidth={2.3} />
-                            </Pressable>
-                          ) : null}
-                        </View>
-                      </View>
-
-                      <Field
-                        label="Label"
-                        onChangeText={(value) => updatePaymentField(field.id, 'label', value)}
+                    <View key={field.id} style={styles.configRow}>
+                      <TextInput
+                        allowFontScaling={false}
+                        autoCapitalize={textKeyboardProps.autoCapitalize}
+                        autoComplete={textKeyboardProps.autoComplete}
+                        autoCorrect={textKeyboardProps.autoCorrect}
+                        inputMode={textKeyboardProps.inputMode}
+                        keyboardType={textKeyboardProps.keyboardType}
+                        onChangeText={(value) =>
+                          updatePaymentField(field.id, 'label', sanitizeInputValue(value, 'text'))
+                        }
+                        placeholder="Field label"
+                        placeholderTextColor="#b0b2b8"
+                        returnKeyType={textKeyboardProps.returnKeyType}
+                        spellCheck={textKeyboardProps.spellCheck}
+                        style={styles.configInput}
                         value={field.label}
                       />
-                      <Field
-                        label="Value"
-                        multiline={field.type === 'textarea'}
-                        onChangeText={(value) =>
-                          updateInvoice({
-                            paymentInfo: updatePaymentInfoFieldValue(
-                              invoice.paymentInfo,
-                              field.id,
-                              value
-                            ),
-                          })
-                        }
-                        value={field.value}
-                      />
+
+                      <View style={styles.configActions}>
+                        <ToggleChip
+                          active={field.visible}
+                          label={field.visible ? 'Shown' : 'Hidden'}
+                          onPress={() => updatePaymentField(field.id, 'visible', !field.visible)}
+                        />
+                        {!field.required ? (
+                          <Pressable
+                            onPress={() => removePaymentField(field.id)}
+                            style={styles.iconOnlyButton}
+                          >
+                            <Feather color="#6a6d75" name="trash-2" size={15} strokeWidth={2.3} />
+                          </Pressable>
+                        ) : null}
+                      </View>
                     </View>
                   ))}
+                </View>
+
+                <View style={styles.block}>
+                  <Text allowFontScaling={false} style={styles.blockTitle}>
+                    Payment values
+                  </Text>
+
+                  <View style={styles.paymentValueCard}>
+                    {paymentFields.map((field, index) => (
+                      <View key={`${field.id}-value`} style={styles.paymentValueRow}>
+                        <Field
+                          inputFilter={field.type === 'textarea' ? 'multilineText' : 'text'}
+                          label={field.label || 'Untitled field'}
+                          multiline={field.type === 'textarea'}
+                          placeholder={getPaymentFieldPlaceholder(field)}
+                          onChangeText={(value) =>
+                            updateInvoice({
+                              paymentInfo: updatePaymentInfoFieldValue(
+                                invoice.paymentInfo,
+                                field.id,
+                                value
+                              ),
+                            })
+                          }
+                          value={field.value}
+                        />
+                        {index < paymentFields.length - 1 ? (
+                          <View style={styles.paymentValueDivider} />
+                        ) : null}
+                      </View>
+                    ))}
+                  </View>
                 </View>
               </>
             ) : null}
@@ -887,6 +954,7 @@ export default function CreateInvoiceScreen() {
 
             {invoice.visibility?.disclaimer !== false ? (
               <Field
+                inputFilter="multilineText"
                 label="Text"
                 multiline
                 onChangeText={(value) =>
@@ -913,14 +981,13 @@ export default function CreateInvoiceScreen() {
       <StatusBar style="dark" />
       <View style={styles.screen}>
         <ScrollView
-          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 168 }]}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 226 }]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.topRow}>
             <TopActionButton label="Cancel" onPress={handleCancel} wide />
 
             <View style={styles.topRightActions}>
-              <TopActionButton label="Preview" onPress={() => router.push('/invoice-preview')} wide />
               <TopActionButton dark label="Done" onPress={handleSubmit} />
             </View>
           </View>
@@ -972,10 +1039,15 @@ export default function CreateInvoiceScreen() {
           />
         </ScrollView>
 
-        <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 10 }]}>
+        <View style={[styles.bottomDock, { paddingBottom: insets.bottom }]}>
           <Pressable onPress={handleSubmit} style={styles.submitButton}>
             <Text allowFontScaling={false} style={styles.submitButtonText}>
               Create Invoice
+            </Text>
+          </Pressable>
+          <Pressable onPress={handlePreview} style={styles.previewButton}>
+            <Text allowFontScaling={false} style={styles.previewButtonText}>
+              Preview
             </Text>
           </Pressable>
         </View>
@@ -983,6 +1055,7 @@ export default function CreateInvoiceScreen() {
         <BottomSheetEditor
           bottomInset={insets.bottom}
           onClose={closeSheet}
+          scrollEnabled={!(activeSheet === 'signature' && showSignaturePad)}
           title={activeSheet ? SECTION_TITLES[activeSheet] : ''}
           visible={activeSheet !== null}
         >
@@ -995,6 +1068,23 @@ export default function CreateInvoiceScreen() {
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function getPaymentFieldPlaceholder(field: PaymentInfoField) {
+  switch (field.id) {
+    case 'bankName':
+      return 'Enter bank name';
+    case 'accountName':
+      return 'Enter account holder';
+    case 'accountNumber':
+      return 'Enter account number';
+    case 'address':
+      return 'Enter bank address';
+    case 'extraInfo':
+      return 'Add extra payment notes';
+    default:
+      return field.label || 'Enter value';
+  }
 }
 
 function stringifyValue(value: number | string | undefined) {
@@ -1118,13 +1208,83 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     resizeMode: 'contain',
   },
+  paymentQrBlock: {
+    gap: 8,
+  },
+  paymentQrLabel: {
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: '#111111',
+  },
+  paymentQrWrap: {
+    position: 'relative',
+  },
+  paymentQrBox: {
+    minHeight: 132,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#e6e3de',
+    borderStyle: 'dashed',
+    backgroundColor: '#faf9f7',
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  paymentQrPlaceholder: {
+    minHeight: 132,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+  },
+  paymentQrPlaceholderTitle: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#111111',
+  },
+  paymentQrPlaceholderText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#8f9198',
+  },
   qrPreview: {
-    width: 120,
-    height: 120,
-    borderRadius: 16,
-    alignSelf: 'center',
+    width: '100%',
+    height: 132,
     backgroundColor: '#ffffff',
     resizeMode: 'contain',
+  },
+  paymentQrHintBadge: {
+    position: 'absolute',
+    left: 12,
+    bottom: 12,
+    borderRadius: 999,
+    backgroundColor: 'rgba(17, 17, 17, 0.72)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  paymentQrHintText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  paymentQrRemoveButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
   },
   customFieldCard: {
     borderRadius: 18,
@@ -1155,12 +1315,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#f7f6f4',
     padding: 14,
-    gap: 10,
-  },
-  configCopy: {
-    gap: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   configInput: {
+    flex: 1,
     minHeight: 38,
     borderRadius: 14,
     backgroundColor: '#ffffff',
@@ -1169,33 +1329,47 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: '#111111',
   },
-  configMeta: {
-    fontSize: 11,
-    lineHeight: 14,
-    color: '#8f9198',
-  },
   configActions: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
   },
   itemCard: {
-    borderRadius: 18,
-    backgroundColor: '#f7f6f4',
-    padding: 14,
-    gap: 12,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ebe8e1',
+    padding: 16,
+    gap: 14,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.03,
+    shadowRadius: 20,
+    elevation: 1,
   },
-  itemCardHeader: {
+  itemCardHeaderCompact: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: -2,
   },
-  itemCardTitle: {
-    fontSize: 13,
-    lineHeight: 16,
-    fontWeight: '700',
-    color: '#111111',
+  itemDeleteButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f5f4f1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemFieldsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  itemFieldCell: {
+    width: '48.2%',
+  },
+  itemFieldCellWide: {
+    width: '100%',
   },
   totalCard: {
     borderRadius: 20,
@@ -1233,23 +1407,20 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#ffffff',
   },
-  paymentFieldCard: {
+  paymentValueCard: {
     borderRadius: 18,
-    backgroundColor: '#f7f6f4',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ebe8e1',
     padding: 14,
     gap: 12,
   },
-  paymentFieldHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  paymentValueRow: {
     gap: 12,
   },
-  paymentFieldTitle: {
-    fontSize: 12,
-    lineHeight: 15,
-    fontWeight: '700',
-    color: '#111111',
+  paymentValueDivider: {
+    height: 1,
+    backgroundColor: '#ece9e2',
   },
   signaturePreviewCard: {
     borderRadius: 18,
@@ -1275,6 +1446,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     paddingHorizontal: 18,
     paddingTop: 14,
+    gap: 10,
   },
   submitButton: {
     height: 48,
@@ -1288,5 +1460,20 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  previewButton: {
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#f3f2ef',
+    borderWidth: 1,
+    borderColor: '#e7e4dd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewButtonText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: '#171717',
   },
 });

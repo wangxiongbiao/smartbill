@@ -40,6 +40,7 @@ export function ClientSection({
       />
 
       <Field
+        inputFilter="text"
         label="Client"
         onChangeText={(value) =>
           onUpdateClient({
@@ -51,6 +52,7 @@ export function ClientSection({
         value={client.name}
       />
       <Field
+        inputFilter="multilineText"
         label="Address"
         multiline
         onChangeText={(value) =>
@@ -64,6 +66,7 @@ export function ClientSection({
       />
       <View style={styles.stack}>
         <Field
+          inputFilter="phone"
           label="Phone"
           keyboardType="phone-pad"
           onChangeText={(value) =>
@@ -76,6 +79,7 @@ export function ClientSection({
           value={client.phone || ''}
         />
         <Field
+          inputFilter="email"
           keyboardType="email-address"
           label="Email"
           onChangeText={(value) =>

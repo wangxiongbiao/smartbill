@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { matchesBillingProfile } from '@/shared/billing-profiles';
 import type { BillingProfile, BillingProfileKind } from '@/shared/types';
+import { getInputKeyboardProps, sanitizeInputValue } from './inputFilters';
 
 function getCopy(kind: BillingProfileKind) {
   return {
@@ -46,6 +47,7 @@ export function BillingProfilePicker({
   const copy = getCopy(kind);
   const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState('');
+  const searchKeyboardProps = getInputKeyboardProps('search');
 
   const filteredProfiles = useMemo(() => {
     if (!query.trim()) {
@@ -109,11 +111,16 @@ export function BillingProfilePicker({
               <Feather color="#9aa0a8" name="search" size={15} strokeWidth={2.4} />
               <TextInput
                 allowFontScaling={false}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={setQuery}
+                autoCapitalize={searchKeyboardProps.autoCapitalize}
+                autoComplete={searchKeyboardProps.autoComplete}
+                autoCorrect={searchKeyboardProps.autoCorrect}
+                inputMode={searchKeyboardProps.inputMode}
+                keyboardType={searchKeyboardProps.keyboardType}
+                onChangeText={(value) => setQuery(sanitizeInputValue(value, 'search'))}
                 placeholder={copy.search}
                 placeholderTextColor="#b0b2b8"
+                returnKeyType={searchKeyboardProps.returnKeyType}
+                spellCheck={searchKeyboardProps.spellCheck}
                 style={styles.searchInput}
                 value={query}
               />

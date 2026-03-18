@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { CustomField } from '@/shared/types';
 
 import { ActionButton } from './shared';
+import { getInputKeyboardProps, sanitizeInputValue } from './inputFilters';
 
 export function CustomFieldsEditor({
   addLabel,
@@ -27,6 +28,9 @@ export function CustomFieldsEditor({
   onUpdate: (id: string, key: 'label' | 'value', value: string) => void;
   valuePlaceholder?: string;
 }) {
+  const textKeyboardProps = getInputKeyboardProps('text');
+  const multilineKeyboardProps = getInputKeyboardProps('multilineText', true);
+
   return (
     <View style={styles.block}>
       <Text allowFontScaling={false} style={styles.blockTitle}>
@@ -56,9 +60,17 @@ export function CustomFieldsEditor({
               </Text>
               <TextInput
                 allowFontScaling={false}
-                onChangeText={(value) => onUpdate(field.id, 'label', value)}
+                autoCapitalize={textKeyboardProps.autoCapitalize}
+                autoComplete={textKeyboardProps.autoComplete}
+                autoCorrect={textKeyboardProps.autoCorrect}
+                inputMode={textKeyboardProps.inputMode}
+                onChangeText={(value) =>
+                  onUpdate(field.id, 'label', sanitizeInputValue(value, 'text'))
+                }
                 placeholder={labelPlaceholder || 'Field label'}
                 placeholderTextColor="#b0b2b8"
+                returnKeyType={textKeyboardProps.returnKeyType}
+                spellCheck={textKeyboardProps.spellCheck}
                 style={styles.textField}
                 value={field.label}
               />
@@ -69,11 +81,19 @@ export function CustomFieldsEditor({
               </Text>
               <TextInput
                 allowFontScaling={false}
+                autoCapitalize={multilineKeyboardProps.autoCapitalize}
+                autoComplete={multilineKeyboardProps.autoComplete}
+                autoCorrect={multilineKeyboardProps.autoCorrect}
+                inputMode={multilineKeyboardProps.inputMode}
                 multiline
                 numberOfLines={3}
-                onChangeText={(value) => onUpdate(field.id, 'value', value)}
+                onChangeText={(value) =>
+                  onUpdate(field.id, 'value', sanitizeInputValue(value, 'multilineText'))
+                }
                 placeholder={valuePlaceholder || 'Field value'}
                 placeholderTextColor="#b0b2b8"
+                returnKeyType={multilineKeyboardProps.returnKeyType}
+                spellCheck={multilineKeyboardProps.spellCheck}
                 style={[styles.textField, styles.textFieldMultiline]}
                 textAlignVertical="top"
                 value={field.value}

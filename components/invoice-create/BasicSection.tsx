@@ -179,6 +179,7 @@ export function BasicSection({
           value={invoice.dueDate}
         />
         <Field
+          inputFilter="code"
           label={invoice.type === 'invoice' ? COPY.invoiceNumber : COPY.receiptNumber}
           onChangeText={(value) => onUpdateInvoice({ invoiceNumber: value })}
           placeholder={invoice.type === 'invoice' ? 'Invoice number' : 'Receipt number'}
