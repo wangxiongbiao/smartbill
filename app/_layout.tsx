@@ -56,6 +56,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="create-invoice" options={{ headerShown: false }} />
             <Stack.Screen name="invoice-preview" options={{ headerShown: false }} />
+            <Stack.Screen name="invoice-detail/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ headerShown: false }} />
           </Stack>
         </InvoiceFlowProvider>

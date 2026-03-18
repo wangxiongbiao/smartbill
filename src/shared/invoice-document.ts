@@ -13,7 +13,7 @@ import type {
   PaymentInfoField,
 } from '@/shared/types';
 
-export type InvoiceDocumentMode = 'app-preview' | 'pdf';
+export type InvoiceDocumentMode = 'app-preview' | 'pdf' | 'thumbnail';
 
 type InvoiceDocumentOptions = {
   lang?: Language;
@@ -49,7 +49,7 @@ export function buildInvoiceDocumentHtml(
   const dueDateLabel = invoice.customStrings?.dueDateLabel?.trim() || 'Due Date';
   const locale = LOCALE_BY_LANGUAGE[lang] || LOCALE_BY_LANGUAGE.en;
   const screenScript =
-    mode === 'app-preview'
+    mode === 'app-preview' || mode === 'thumbnail'
       ? `
         <script>
           (function () {
@@ -59,7 +59,7 @@ export function buildInvoiceDocumentHtml(
               var stage = document.getElementById('page-stage');
               if (!shell || !page || !stage) return;
               var width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-              var scale = Math.min((width - 24) / page.offsetWidth, 1);
+              var scale = Math.min((width - ${mode === 'app-preview' ? 24 : 0}) / page.offsetWidth, 1);
               shell.style.transform = 'scale(' + scale + ')';
               stage.style.height = page.offsetHeight * scale + 'px';
             }
@@ -92,7 +92,7 @@ export function buildInvoiceDocumentHtml(
         body {
           margin: 0;
           padding: 0;
-          background: ${mode === 'app-preview' ? '#f6f5f2' : '#ffffff'};
+          background: ${mode === 'app-preview' ? '#f6f5f2' : mode === 'thumbnail' ? 'transparent' : '#ffffff'};
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           color: #1e293b;
         }
@@ -116,7 +116,7 @@ export function buildInvoiceDocumentHtml(
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          ${mode === 'app-preview' ? 'overflow: hidden;' : ''}
+          ${mode === 'app-preview' || mode === 'thumbnail' ? 'overflow: hidden;' : ''}
         }
 
         .page-shell {

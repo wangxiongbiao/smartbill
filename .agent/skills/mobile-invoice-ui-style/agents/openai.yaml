@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mobile Invoice UI Style"
+  short_description: "Use the approved SmartBill mobile UI rules."
+  default_prompt: "Use $mobile-invoice-ui-style to implement or refine SmartBill mobile invoice screens to match the approved layout and styling rules."

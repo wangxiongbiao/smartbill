@@ -146,7 +146,26 @@ export interface Invoice {
 }
 
 export type TemplateType = 'professional' | 'minimalist' | 'modern';
+export type TemplateCategory =
+  | 'business'
+  | 'commercial'
+  | 'service'
+  | 'freelance'
+  | 'contractor'
+  | 'catering'
+  | 'consultation';
 export type ViewType = 'home' | 'editor' | 'records' | 'profile' | 'about' | 'help';
+
+export interface InvoiceTemplateRecord {
+  id: string;
+  name: string;
+  description?: string;
+  templateType: TemplateCategory;
+  templateData: Partial<Invoice>;
+  sourceInvoiceId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface IndustryTemplate {
   id: string;

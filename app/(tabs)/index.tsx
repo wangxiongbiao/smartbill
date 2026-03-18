@@ -1,10 +1,12 @@
 import Feather from '@expo/vector-icons/Feather';
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { calculateInvoiceTotals } from '@/shared/invoice';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { SEEDED_INVOICE_RECORDS } from '@/shared/seed-invoices';
 
 type InvoiceFilter = 'All' | 'Unpaid' | 'Paid';
 
@@ -21,39 +23,6 @@ type InvoiceItem = {
 };
 
 const FILTERS: InvoiceFilter[] = ['All', 'Unpaid', 'Paid'];
-
-const INVOICES: InvoiceItem[] = [
-  {
-    id: 'invoice-0114',
-    client: 'Unknown client',
-    ref: '#KY...0114',
-    date: 'Mar 13',
-    amount: 0,
-    currency: 'CNY',
-    status: 'unpaid',
-    muted: true,
-  },
-  {
-    id: 'invoice-0113',
-    client: 'Alan ~ New energy procurement',
-    ref: '#KY...0113',
-    date: 'Mar 6',
-    amount: 700,
-    currency: 'CNY',
-    status: 'unpaid',
-    overdueText: 'overdue 1d',
-  },
-  {
-    id: 'invoice-0112',
-    client: 'Alan ~ New energy procurement',
-    ref: '#KY...0112',
-    date: 'Jan 13',
-    amount: 480700,
-    currency: 'CNY',
-    status: 'unpaid',
-    overdueText: 'overdue 413d',
-  },
-];
 
 function formatAmount(amount: number, currency = 'CNY') {
   return new Intl.NumberFormat('en-US', {
@@ -79,8 +48,9 @@ function formatListDate(value: string) {
 
 export default function InvoicesScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<InvoiceFilter>('Paid');
-  const { createdInvoices } = useInvoiceFlow();
+  const { createdInvoices, deletedInvoiceIds } = useInvoiceFlow();
 
   const mergedInvoices = useMemo(() => {
     const localInvoices: InvoiceItem[] = createdInvoices.map((invoice) => ({
@@ -94,8 +64,22 @@ export default function InvoicesScreen() {
       muted: !invoice.client.name,
     }));
 
-    return [...localInvoices, ...INVOICES];
-  }, [createdInvoices]);
+    const seededInvoices: InvoiceItem[] = SEEDED_INVOICE_RECORDS.map((record) => ({
+      id: record.invoice.id,
+      client: record.invoice.client.name || 'Unknown client',
+      ref: `#${record.invoice.invoiceNumber}`,
+      date: formatListDate(record.invoice.date),
+      amount: calculateInvoiceTotals(record.invoice.items, record.invoice.taxRate).total,
+      currency: record.invoice.currency,
+      status: record.invoice.status === 'Paid' ? 'paid' : 'unpaid',
+      muted: record.muted,
+      overdueText: record.overdueText,
+    }));
+
+    return [...localInvoices, ...seededInvoices].filter(
+      (invoice) => !deletedInvoiceIds.includes(invoice.id)
+    );
+  }, [createdInvoices, deletedInvoiceIds]);
 
   useEffect(() => {
     if (createdInvoices.length > 0 && activeFilter === 'Paid') {
@@ -183,8 +167,9 @@ export default function InvoicesScreen() {
           ) : (
             <View style={styles.listCard}>
               {filteredInvoices.map((invoice, index) => (
-                <View
+                <Pressable
                   key={invoice.id}
+                  onPress={() => router.push(`/invoice-detail/${invoice.id}`)}
                   style={[styles.invoiceRow, index < filteredInvoices.length - 1 && styles.rowBorder]}
                 >
                   <View style={styles.invoiceMain}>
@@ -209,7 +194,7 @@ export default function InvoicesScreen() {
                       </Text>
                     ) : null}
                   </View>
-                </View>
+                </Pressable>
               ))}
             </View>
           )}
