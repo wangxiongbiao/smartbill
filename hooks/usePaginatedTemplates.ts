@@ -32,7 +32,7 @@ export function usePaginatedTemplates(params: UsePaginatedTemplatesParams) {
 
     setLoading(true);
 
-    listTemplatesPage(userId, {
+    listTemplatesPage({
       page,
       pageSize,
       templateType,

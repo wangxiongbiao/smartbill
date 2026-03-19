@@ -479,7 +479,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       const { profile } = await updateProfile(editName.trim());
       const updatedUser = { ...user, name: editName.trim(), profile: profile || user.profile };
       onUpdateUser(updatedUser);
-      localStorage.setItem('sb_user_session', JSON.stringify(updatedUser));
       setIsEditing(false);
       showToast?.(copy.saveSuccess, 'success');
     } catch (error) {

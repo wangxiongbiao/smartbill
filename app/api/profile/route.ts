@@ -3,18 +3,13 @@ import { createClient } from '@/lib/supabase/server';
 import { getUserProfile, updateUserProfile } from '@/lib/supabase-db';
 import { sanitizeText } from '@/lib/server/request';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const requestedUserId = request.nextUrl.searchParams.get('userId');
-    if (requestedUserId && requestedUserId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const profile = await getUserProfile(user.id, supabase);

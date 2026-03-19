@@ -18,7 +18,7 @@ export function useTemplateCount(userId?: string | null) {
 
     setLoading(true);
 
-    getTemplatesCount(userId).then((response) => {
+    getTemplatesCount().then((response) => {
       if (cancelled) return;
       setCount(response.totalCount);
     }).catch((error) => {

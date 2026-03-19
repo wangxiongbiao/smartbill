@@ -240,32 +240,3 @@ export async function deleteInvoice(invoiceId: string, userId?: string, supabase
         throw error;
     }
 }
-
-/**
- * 批量保存发票 (用于首次同步 localStorage 数据)
- */
-export async function batchSaveInvoices(userId: string, invoices: Invoice[], supabase?: SupabaseClient): Promise<void> {
-    const client = getSupabaseClient(supabase);
-    const cleanInvoices = invoices.map(invoice => safeDeepClean(invoice)).filter(i => i && i.id);
-
-    const records = cleanInvoices.map(invoice => ({
-        id: invoice.id,
-        user_id: userId,
-        invoice_number: invoice.invoiceNumber,
-        invoice_data: invoice,
-        updated_at: new Date().toISOString()
-    }));
-
-    const { error } = await client
-        .from('invoices')
-        .upsert(records, { onConflict: 'id' });
-
-    if (error) {
-        if (isMissingTableError(error, 'invoices')) {
-            console.warn('[batchSaveInvoices] invoices table is missing, skipping remote batch sync');
-            return;
-        }
-        console.error('Error batch saving invoices:', error);
-        throw error;
-    }
-}

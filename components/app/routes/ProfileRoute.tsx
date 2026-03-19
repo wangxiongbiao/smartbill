@@ -16,10 +16,10 @@ export default function ProfileRoute() {
   useEffect(() => {
     if (!userId) return;
 
-    recordsStore.syncRecordsForUser(userId).catch((error) => {
+    recordsStore.refreshRecords().catch((error) => {
       console.error('Failed to sync records for profile view:', error);
     });
-  }, [recordsStore.syncRecordsForUser, userId]);
+  }, [recordsStore.refreshRecords, userId]);
 
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={3} />;
 

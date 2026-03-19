@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { batchSaveInvoiceRecords, listInvoices } from '@/lib/api/invoice';
+import { listInvoices } from '@/lib/api/invoice';
 import { normalizeInvoiceStatus } from '@/lib/invoice-status';
 import type { Invoice } from '@/types';
 
@@ -9,15 +9,12 @@ interface UseInvoiceRecordsStoreParams {
   userId?: string | null;
 }
 
-const LOCAL_STORAGE_KEY = 'invoice_records_v2';
-
 export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams) {
   const [records, setRecords] = useState<Invoice[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const recordsRef = useRef<Invoice[]>([]);
   const lastLoadedUserRef = useRef<string | null>(null);
   const inFlightRefreshRef = useRef<Promise<Invoice[]> | null>(null);
-  const inFlightSyncRef = useRef<Promise<void> | null>(null);
 
   const normalizeInvoices = useCallback((invoices: Invoice[]) => (
     invoices.map((invoice) => ({
@@ -27,28 +24,26 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     }))
   ), []);
 
-  const readLocalRecords = useCallback(() => {
-    const savedRecords = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!savedRecords) return [] as Invoice[];
-
-    try {
-      const parsed = JSON.parse(savedRecords);
-      return normalizeInvoices(Array.isArray(parsed) ? parsed : []);
-    } catch {
-      console.warn('[InvoiceRecords] Failed to parse local invoice records');
-      return [] as Invoice[];
-    }
-  }, [normalizeInvoices]);
-
-  const hydrateLocalRecords = useCallback(() => {
-    const normalized = readLocalRecords();
-    setRecords(normalized);
-    return normalized;
-  }, [readLocalRecords]);
-
   useEffect(() => {
     recordsRef.current = records;
   }, [records]);
+
+  useEffect(() => {
+    if (!userId) {
+      lastLoadedUserRef.current = null;
+      inFlightRefreshRef.current = null;
+      setRecords([]);
+      setRecordsLoading(false);
+      return;
+    }
+
+    if (lastLoadedUserRef.current && lastLoadedUserRef.current !== userId) {
+      lastLoadedUserRef.current = null;
+      inFlightRefreshRef.current = null;
+      setRecords([]);
+      setRecordsLoading(false);
+    }
+  }, [userId]);
 
   const refreshRecords = useCallback(async (options?: { force?: boolean }) => {
     if (!userId) return [] as Invoice[];
@@ -63,7 +58,7 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     const request = (async () => {
       setRecordsLoading(true);
       try {
-        const { invoices } = await listInvoices(userId);
+        const { invoices } = await listInvoices();
         const normalized = normalizeInvoices(invoices);
         setRecords(normalized);
         lastLoadedUserRef.current = userId;
@@ -78,73 +73,18 @@ export function useInvoiceRecordsStore({ userId }: UseInvoiceRecordsStoreParams)
     return request;
   }, [normalizeInvoices, userId]);
 
-  const syncRecordsForUser = useCallback(async (authUserId: string, options?: { force?: boolean }) => {
-    if (!options?.force && lastLoadedUserRef.current === authUserId && recordsRef.current.length > 0) {
-      return;
-    }
-
-    if (inFlightSyncRef.current) return inFlightSyncRef.current;
-
-    const request = (async () => {
-      setRecordsLoading(true);
-      try {
-        const { invoices } = await listInvoices(authUserId);
-        const normalizedInvoices = normalizeInvoices(invoices);
-
-        if (normalizedInvoices.length > 0) {
-          setRecords(normalizedInvoices);
-          lastLoadedUserRef.current = authUserId;
-          return;
-        }
-
-        const localRecords = readLocalRecords();
-        if (localRecords.length > 0) {
-          try {
-            await batchSaveInvoiceRecords(localRecords);
-            const refreshedInvoices = await refreshRecords({ force: true });
-            if (refreshedInvoices.length === 0) {
-              setRecords(localRecords);
-              lastLoadedUserRef.current = authUserId;
-            }
-          } catch (error) {
-            console.error('[InvoiceRecords] Batch sync failed:', error);
-            setRecords(localRecords);
-            lastLoadedUserRef.current = authUserId;
-          }
-        } else {
-          setRecords([]);
-          lastLoadedUserRef.current = authUserId;
-        }
-      } finally {
-        setRecordsLoading(false);
-        inFlightSyncRef.current = null;
-      }
-    })();
-
-    inFlightSyncRef.current = request;
-    return request;
-  }, [normalizeInvoices, readLocalRecords, refreshRecords]);
-
   const resetRecords = useCallback(() => {
     lastLoadedUserRef.current = null;
     inFlightRefreshRef.current = null;
-    inFlightSyncRef.current = null;
     setRecords([]);
     setRecordsLoading(false);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(records));
-  }, [records]);
 
   return {
     records,
     setRecords,
     recordsLoading,
-    hydrateLocalRecords,
     refreshRecords,
-    syncRecordsForUser,
     resetRecords,
   };
 }

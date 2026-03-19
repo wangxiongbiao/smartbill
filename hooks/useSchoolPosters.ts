@@ -48,7 +48,7 @@ export function useSchoolPosters({ userId }: UseSchoolPostersParams) {
     const request = (async () => {
       setRecordsLoading(true);
       try {
-        const { posters } = await listSchoolPosters(userId);
+        const { posters } = await listSchoolPosters();
         const normalized = commitRecords(posters);
         lastLoadedUserRef.current = userId;
         setIsHydrated(true);

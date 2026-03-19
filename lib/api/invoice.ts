@@ -3,8 +3,8 @@ import type { Invoice, Profile } from '@/types';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-export async function getProfile(userId: string) {
-  return apiRequest<{ profile: Profile | null }>(`/api/profile?userId=${encodeURIComponent(userId)}`);
+export async function getProfile() {
+  return apiRequest<{ profile: Profile | null }>(`/api/profile`);
 }
 
 export async function updateProfile(fullName: string) {
@@ -14,18 +14,17 @@ export async function updateProfile(fullName: string) {
   });
 }
 
-export async function listInvoices(userId: string) {
-  return apiRequest<{ invoices: Invoice[] }>(`/api/invoices?userId=${encodeURIComponent(userId)}`);
+export async function listInvoices() {
+  return apiRequest<{ invoices: Invoice[] }>(`/api/invoices`);
 }
 
-export async function listInvoicesPage(userId: string, params: {
+export async function listInvoicesPage(params: {
   page: number;
   pageSize: number;
   search?: string;
   month?: number | 'all';
 }) {
   const searchParams = new URLSearchParams({
-    userId,
     page: params.page.toString(),
     pageSize: params.pageSize.toString(),
   });
@@ -46,12 +45,5 @@ export async function saveInvoiceRecord(invoice: Invoice) {
 export async function deleteInvoiceRecord(invoiceId: string) {
   return apiRequest<{ success: true }>(`/api/invoices?id=${encodeURIComponent(invoiceId)}`, {
     method: 'DELETE'
-  });
-}
-
-export async function batchSaveInvoiceRecords(invoices: Invoice[]) {
-  return apiRequest<{ success: true }>(`/api/invoices/batch`, {
-    method: 'POST',
-    body: JSON.stringify({ invoices })
   });
 }

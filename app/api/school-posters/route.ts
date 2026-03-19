@@ -3,17 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { deleteSchoolPoster, getUserSchoolPosters, saveSchoolPoster } from '@/lib/supabase-school-posters';
 import { normalizeSchoolPoster } from '@/lib/school-posters';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const userId = request.nextUrl.searchParams.get('userId');
-    if (userId && userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
 
     const posters = await getUserSchoolPosters(user.id, supabase);
     return NextResponse.json({ posters });

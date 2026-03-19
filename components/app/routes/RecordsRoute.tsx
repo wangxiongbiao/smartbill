@@ -5,10 +5,9 @@ import { deleteInvoiceRecord, saveInvoiceRecord } from '@/lib/api/invoice';
 import { useAppShell } from '@/components/app/AppShellClient';
 import ContentSkeleton from '@/components/app/ContentSkeleton';
 import RecordsView from '@/components/RecordsView';
-import { useInvoiceRecordsStore } from '@/hooks/useInvoiceRecordsStore';
 import { useInvoicePdfExport } from '@/hooks/useInvoicePdfExport';
 import AppShellPrintArea from '@/components/app/AppShellPrintArea';
-import { duplicateInvoiceDraft, upsertLocalInvoiceRecord } from '@/lib/invoice-drafts';
+import { duplicateInvoiceDraft } from '@/lib/invoice-drafts';
 import { INITIAL_INVOICE } from '@/hooks/useInvoiceWorkspace';
 import { usePaginatedInvoiceRecords } from '@/hooks/usePaginatedInvoiceRecords';
 import { RECORDS_PAGE_SIZE } from '@/lib/pagination';
@@ -66,8 +65,6 @@ function parseStoredRecordsViewState(): RecordsViewState {
 export default function RecordsRoute() {
   const app = useAppShell();
   const userId = app.user?.id ?? null;
-  const recordsStore = useInvoiceRecordsStore({ userId });
-  const guestHydratedRef = useRef(false);
   const startedExportInvoiceIdRef = useRef<string | null>(null);
   const shellScrollRafRef = useRef<number | null>(null);
   const shellScrollCommitTimerRef = useRef<number | null>(null);
@@ -198,31 +195,17 @@ export default function RecordsRoute() {
     } catch {}
   };
 
-  useEffect(() => {
-    if (!isViewStateReady) return;
-
-    if (userId) {
-      guestHydratedRef.current = false;
-      return;
-    }
-
-    if (guestHydratedRef.current) return;
-    guestHydratedRef.current = true;
-    recordsStore.hydrateLocalRecords();
-  }, [isViewStateReady, recordsStore.hydrateLocalRecords, userId]);
-
   if (app.isBootstrapping || !app.user) return <ContentSkeleton blocks={5} />;
   if (!isViewStateReady) return <ContentSkeleton blocks={5} />;
-  if (userId && (!paginatedRecords.hasLoaded || (paginatedRecords.loading && paginatedRecords.records.length === 0))) return <ContentSkeleton blocks={5} />;
-  if (!userId && recordsStore.recordsLoading && recordsStore.records.length === 0) return <ContentSkeleton blocks={5} />;
+  if (!paginatedRecords.hasLoaded || (paginatedRecords.loading && paginatedRecords.records.length === 0)) return <ContentSkeleton blocks={5} />;
 
   return (
     <>
       <RecordsView
-        records={userId ? paginatedRecords.records : recordsStore.records}
-        totalCount={userId ? paginatedRecords.totalCount : undefined}
-        paginationMode={userId ? 'server' : 'client'}
-        isPageLoading={!!userId && paginatedRecords.loading && paginatedRecords.records.length > 0}
+        records={paginatedRecords.records}
+        totalCount={paginatedRecords.totalCount}
+        paginationMode="server"
+        isPageLoading={paginatedRecords.loading && paginatedRecords.records.length > 0}
         viewState={recordsViewState}
         onViewStateChange={setRecordsViewState}
         lang={app.lang}
@@ -234,19 +217,13 @@ export default function RecordsRoute() {
         onDuplicate={async (record) => {
           persistRecordsViewState();
           const nextInvoice = duplicateInvoiceDraft(record);
-          if (userId) {
-            await saveInvoiceRecord(nextInvoice);
-            paginatedRecords.refresh();
-          } else {
-            upsertLocalInvoiceRecord(nextInvoice);
-            recordsStore.setRecords((prev) => [nextInvoice, ...prev.filter((item) => item.id !== nextInvoice.id)]);
-          }
+          await saveInvoiceRecord(nextInvoice);
+          paginatedRecords.refresh();
           app.navigateToView('editor', { invoiceId: nextInvoice.id });
         }}
         onDelete={async (id) => {
           await deleteInvoiceRecord(id);
-          if (userId) paginatedRecords.refresh();
-          else recordsStore.setRecords((prev) => prev.filter((record) => record.id !== id));
+          paginatedRecords.refresh();
         }}
         onDeleteMany={async (ids) => {
           if (ids.length === 0) return;
@@ -256,12 +233,7 @@ export default function RecordsRoute() {
           const failedCount = ids.length - successIds.length;
 
           if (successIds.length > 0) {
-            if (userId) {
-              paginatedRecords.refresh();
-            } else {
-              const successIdSet = new Set(successIds);
-              recordsStore.setRecords((prev) => prev.filter((record) => !successIdSet.has(record.id)));
-            }
+            paginatedRecords.refresh();
           }
 
           if (failedCount > 0) {
@@ -269,16 +241,11 @@ export default function RecordsRoute() {
           }
         }}
         onUpdateStatus={async (id, status) => {
-          const sourceRecords = userId ? paginatedRecords.records : recordsStore.records;
-          const target = sourceRecords.find((record) => record.id === id);
+          const target = paginatedRecords.records.find((record) => record.id === id);
           if (!target) return;
           const nextInvoice = { ...target, status };
           await saveInvoiceRecord(nextInvoice);
-          if (userId) {
-            paginatedRecords.setRecords((prev) => prev.map((record) => record.id === id ? nextInvoice : record));
-          } else {
-            recordsStore.setRecords((prev) => prev.map((record) => record.id === id ? nextInvoice : record));
-          }
+          paginatedRecords.setRecords((prev) => prev.map((record) => record.id === id ? nextInvoice : record));
         }}
         onExport={(record) => {
           setExportInvoice(record);

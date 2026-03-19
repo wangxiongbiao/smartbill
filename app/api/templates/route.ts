@@ -9,11 +9,6 @@ export async function GET(request: NextRequest) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const userId = request.nextUrl.searchParams.get('userId');
-  if (userId && userId !== user.id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
   const pageParam = Number(request.nextUrl.searchParams.get('page'));
   const pageSizeParam = Number(request.nextUrl.searchParams.get('pageSize'));
   const templateType = normalizeTemplateType(request.nextUrl.searchParams.get('templateType'));

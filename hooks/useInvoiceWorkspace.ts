@@ -179,41 +179,41 @@ export function useInvoiceWorkspace(params: {
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (!user?.id) {
-      upsertRecordLocally(nextInvoice);
-    }
-
     return nextInvoice;
-  }, [buildSenderDraft, lang, setActiveView, setInvoice, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, lang, setActiveView, setInvoice]);
 
   const saveCurrentInvoice = useCallback(async () => {
-    if (user?.id) {
-      await persistInvoice(invoice);
+    if (!user?.id) {
+      showToast('请先登录后再保存发票', 'warning');
       return;
     }
 
-    upsertRecordLocally(invoice);
-    showToast('账单已本地保存（登录后可同步云端）', 'success');
-  }, [invoice, persistInvoice, showToast, upsertRecordLocally, user?.id]);
+    await persistInvoice(invoice);
+  }, [invoice, persistInvoice, showToast, user?.id]);
 
   const refreshRecords = useCallback(async () => undefined, []);
 
   const removeInvoice = useCallback(async (invoiceId: string) => {
-    if (user?.id) {
-      setIsDeletingId(invoiceId);
-      try {
-        await deleteInvoiceRecord(invoiceId);
-        setRecords(prev => prev.filter(record => record.id !== invoiceId));
-      } finally {
-        setIsDeletingId(null);
-      }
+    if (!user?.id) {
+      showToast('请先登录后再管理发票', 'warning');
       return;
     }
 
-    setRecords(prev => prev.filter(record => record.id !== invoiceId));
-  }, [setRecords, user?.id]);
+    setIsDeletingId(invoiceId);
+    try {
+      await deleteInvoiceRecord(invoiceId);
+      setRecords(prev => prev.filter(record => record.id !== invoiceId));
+    } finally {
+      setIsDeletingId(null);
+    }
+  }, [setRecords, showToast, user?.id]);
 
   const updateInvoiceStatus = useCallback(async (invoiceId: string, nextStatus: Invoice['status']) => {
+    if (!user?.id) {
+      showToast('请先登录后再管理发票', 'warning');
+      return;
+    }
+
     const targetInvoice = records.find((record) => record.id === invoiceId);
     if (!targetInvoice) return;
 
@@ -225,8 +225,6 @@ export function useInvoiceWorkspace(params: {
     setRecords((prev) => prev.map((record) => (record.id === invoiceId ? nextInvoice : record)));
     setInvoiceState((prev) => (prev.id === invoiceId ? nextInvoice : prev));
 
-    if (!user?.id) return;
-
     try {
       await saveInvoiceRecord(nextInvoice);
     } catch (error) {
@@ -234,7 +232,7 @@ export function useInvoiceWorkspace(params: {
       setInvoiceState((prev) => (prev.id === invoiceId ? targetInvoice : prev));
       throw error;
     }
-  }, [records, setRecords, user?.id]);
+  }, [records, setRecords, showToast, user?.id]);
 
   const useTemplate = useCallback(async (templateRecord: InvoiceTemplate) => {
     const newId = Date.now().toString();
@@ -254,12 +252,8 @@ export function useInvoiceWorkspace(params: {
     setActiveView('editor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (!user?.id) {
-      upsertRecordLocally(nextInvoice);
-    }
-
     return nextInvoice;
-  }, [buildSenderDraft, setActiveView, setInvoice, upsertRecordLocally, user?.id]);
+  }, [buildSenderDraft, setActiveView, setInvoice]);
 
   const duplicateInvoice = useCallback(async (sourceInvoice: Invoice) => {
     const newId = Date.now().toString();
@@ -281,9 +275,9 @@ export function useInvoiceWorkspace(params: {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     upsertRecordLocally(duplicatedInvoice);
-    showToast(user?.id ? '发票副本已创建，编辑后会自动保存' : '发票已复制到本地', 'success');
+    showToast('发票副本已创建，编辑后会自动保存', 'success');
     return duplicatedInvoice;
-  }, [setActiveView, setInvoice, showToast, upsertRecordLocally, user?.id]);
+  }, [setActiveView, setInvoice, showToast, upsertRecordLocally]);
 
   const saveAsTemplate = useCallback(async (name: string, description: string, templateType: TemplateCategory) => {
     if (!user?.id) {

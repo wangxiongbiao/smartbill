@@ -20,15 +20,12 @@ export default function HomeRoute() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    if (!userId) {
-      recordsStore.hydrateLocalRecords();
-      return;
-    }
+    if (!userId) return;
 
-    recordsStore.syncRecordsForUser(userId).catch((error) => {
+    recordsStore.refreshRecords().catch((error) => {
       console.error('Failed to sync invoice records:', error);
     });
-  }, [recordsStore.hydrateLocalRecords, recordsStore.syncRecordsForUser, userId]);
+  }, [recordsStore.refreshRecords, userId]);
 
   const pdfExport = useInvoicePdfExport({
     invoice: exportInvoice,

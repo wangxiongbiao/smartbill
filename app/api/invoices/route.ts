@@ -11,11 +11,6 @@ export async function GET(request: NextRequest) {
 
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const userId = request.nextUrl.searchParams.get('userId');
-    if (userId && userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const pageRaw = request.nextUrl.searchParams.get('page');
     const pageSizeRaw = request.nextUrl.searchParams.get('pageSize');
     const pageParam = pageRaw === null ? NaN : Number(pageRaw);

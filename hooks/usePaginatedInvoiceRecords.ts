@@ -34,7 +34,7 @@ export function usePaginatedInvoiceRecords(params: UsePaginatedInvoiceRecordsPar
 
     setLoading(true);
 
-    listInvoicesPage(userId, {
+    listInvoicesPage({
       page,
       pageSize,
       search: deferredSearchQuery,

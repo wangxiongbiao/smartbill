@@ -65,15 +65,3 @@ export function createInvoiceFromTemplate(templateRecord: InvoiceTemplate, param
     },
   });
 }
-
-export function upsertLocalInvoiceRecord(invoice: Invoice) {
-  if (typeof window === 'undefined') return;
-  const raw = window.localStorage.getItem('invoice_records_v2');
-  const records = raw ? JSON.parse(raw) : [];
-  const next = Array.isArray(records)
-    ? records.some((record) => record?.id === invoice.id)
-      ? records.map((record) => (record.id === invoice.id ? invoice : record))
-      : [invoice, ...records]
-    : [invoice];
-  window.localStorage.setItem('invoice_records_v2', JSON.stringify(next));
-}

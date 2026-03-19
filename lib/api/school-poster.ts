@@ -1,8 +1,8 @@
 import { apiRequest } from '@/lib/api/client';
 import type { SchoolPoster } from '@/types';
 
-export async function listSchoolPosters(userId: string) {
-  return apiRequest<{ posters: SchoolPoster[] }>(`/api/school-posters?userId=${encodeURIComponent(userId)}`);
+export async function listSchoolPosters() {
+  return apiRequest<{ posters: SchoolPoster[] }>(`/api/school-posters`);
 }
 
 export async function saveSchoolPosterRecord(poster: SchoolPoster) {

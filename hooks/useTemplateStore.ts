@@ -23,7 +23,7 @@ export function useTemplateStore(params: UseTemplateStoreParams) {
     if (!userId) return;
     setTemplatesLoading(true);
     try {
-      const data = await listTemplates(userId);
+      const data = await listTemplates();
       setTemplates(data.templates);
       setTemplateMap(prev => {
         const next = { ...prev };

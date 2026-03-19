@@ -86,12 +86,12 @@ export default function EditorRoute() {
     let cancelled = false;
 
     if (!userId) {
-      setRecordsHydrated(true);
+      setRecordsHydrated(false);
       return;
     }
 
     setRecordsHydrated(false);
-    recordsStore.syncRecordsForUser(userId).catch((error) => {
+    recordsStore.refreshRecords().catch((error) => {
       console.error('Failed to sync invoice records:', error);
     }).finally(() => {
       if (!cancelled) {
@@ -102,7 +102,7 @@ export default function EditorRoute() {
     return () => {
       cancelled = true;
     };
-  }, [recordsStore.syncRecordsForUser, userId]);
+  }, [recordsStore.refreshRecords, userId]);
 
   useEffect(() => {
     if (isBootstrapping || !user) return;
@@ -160,16 +160,11 @@ export default function EditorRoute() {
       const nextInvoice = createInvoiceDraft({ lang, user, preset });
 
       setInvoiceRef.current?.(nextInvoice, { skipAutoSave: true });
-
-      if (userId) {
-        const { saveInvoiceRecord } = await import('@/lib/api/invoice');
-        await saveInvoiceRecord(nextInvoice);
-        recordsStore.setRecords((prev) => prev.some((record) => record.id === nextInvoice.id)
-          ? prev.map((record) => record.id === nextInvoice.id ? nextInvoice : record)
-          : [nextInvoice, ...prev]);
-      } else {
-        recordsStore.setRecords((prev) => [nextInvoice, ...prev]);
-      }
+      const { saveInvoiceRecord } = await import('@/lib/api/invoice');
+      await saveInvoiceRecord(nextInvoice);
+      recordsStore.setRecords((prev) => prev.some((record) => record.id === nextInvoice.id)
+        ? prev.map((record) => record.id === nextInvoice.id ? nextInvoice : record)
+        : [nextInvoice, ...prev]);
 
       finish();
       router.replace(`/invoices/${nextInvoice.id}`);

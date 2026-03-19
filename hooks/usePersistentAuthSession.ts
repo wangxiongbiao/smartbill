@@ -28,9 +28,20 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
     activeViewRef.current = activeView;
   }, [activeView]);
 
+  const clearLegacyClientState = useCallback(() => {
+    try {
+      window.localStorage.removeItem('sb_user_session');
+      window.localStorage.removeItem('invoice_records_v2');
+    } catch (error) {
+      console.warn('[AuthSession] Failed to clear legacy client state:', error);
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     const supabase = createSupabaseClient();
+
+    clearLegacyClientState();
 
     const finishBootstrapping = () => {
       if (!mounted) return;
@@ -41,7 +52,7 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
     const clearSessionState = () => {
       syncRef.current = null;
       setUser(null);
-      localStorage.removeItem('sb_user_session');
+      clearLegacyClientState();
     };
 
     const syncUser = async (authUser: any, options?: { force?: boolean }) => {
@@ -53,7 +64,7 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
 
       syncRef.current = authUser.id;
       try {
-        const { profile } = await getProfile(authUser.id);
+        const { profile } = await getProfile();
         if (!mounted) return;
 
         const nextUser: User = {
@@ -131,27 +142,7 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    if (!bootstrappedRef.current) return;
-    if (user) localStorage.setItem('sb_user_session', JSON.stringify(user));
-    else localStorage.removeItem('sb_user_session');
-  }, [user]);
-
-  const clearBrowserState = useCallback(() => {
-    try {
-      window.localStorage.clear();
-    } catch (error) {
-      console.warn('[AuthSession] Failed to clear localStorage during logout:', error);
-    }
-
-    try {
-      window.sessionStorage.clear();
-    } catch (error) {
-      console.warn('[AuthSession] Failed to clear sessionStorage during logout:', error);
-    }
-  }, []);
+  }, [clearLegacyClientState]);
 
   const logout = useCallback(async (onAfter?: () => void) => {
     setIsLoggingOut(true);
@@ -166,11 +157,11 @@ export function usePersistentAuthSession({ activeView }: UsePersistentAuthSessio
       bootstrappedRef.current = true;
       setIsBootstrapping(false);
       setUser(null);
-      clearBrowserState();
+      clearLegacyClientState();
       setIsLoggingOut(false);
       onAfter?.();
     }
-  }, [clearBrowserState]);
+  }, [clearLegacyClientState]);
 
   return {
     isBootstrapping,
