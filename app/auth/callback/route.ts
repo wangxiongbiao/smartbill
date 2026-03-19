@@ -25,11 +25,62 @@ function normalizeNext(next: string) {
     }
 }
 
+const ALLOWED_MOBILE_PROTOCOLS = new Set(['mobile:', 'smartbill:', 'smartbillpro:', 'exp:', 'exps:'])
+const FORWARDED_AUTH_PARAMS = [
+    'code',
+    'access_token',
+    'refresh_token',
+    'error',
+    'error_description',
+]
+
+function resolveMobileRedirect(value: string | null) {
+    if (!value) return null
+
+    try {
+        const url = new URL(value)
+        if (!ALLOWED_MOBILE_PROTOCOLS.has(url.protocol)) {
+            return null
+        }
+        return url
+    } catch {
+        return null
+    }
+}
+
+function buildMobileRedirectUrl(mobileRedirect: URL, searchParams: URLSearchParams) {
+    const target = new URL(mobileRedirect.toString())
+
+    FORWARDED_AUTH_PARAMS.forEach((key) => {
+        const value = searchParams.get(key)
+        if (value) {
+            target.searchParams.set(key, value)
+        }
+    })
+
+    if (!FORWARDED_AUTH_PARAMS.some((key) => target.searchParams.has(key))) {
+        target.searchParams.set('error', 'missing_auth_payload')
+    }
+
+    return target.toString()
+}
+
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
     const next = normalizeNext(searchParams.get('next') ?? '/dashboard')
     const popup = searchParams.get('popup') === '1'
+    const rawMobileRedirect = searchParams.get('mobile_redirect')
+    const mobileRedirect = resolveMobileRedirect(rawMobileRedirect)
+
+    if (rawMobileRedirect && !mobileRedirect) {
+        console.error('[OAuth Callback] Invalid mobile_redirect:', rawMobileRedirect)
+        return NextResponse.redirect(`${origin}/?auth_error=true`)
+    }
+
+    if (mobileRedirect) {
+        return NextResponse.redirect(buildMobileRedirectUrl(mobileRedirect, searchParams))
+    }
 
     if (code) {
         const supabase = await createClient()
