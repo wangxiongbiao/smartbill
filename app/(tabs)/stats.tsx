@@ -13,6 +13,7 @@ import {
   isOverdueInvoice,
   isPaidInvoice,
 } from '@/shared/mobile-hub';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 function formatAmount(amount: number, currency = 'CNY') {
   return new Intl.NumberFormat('en-US', {
@@ -136,7 +137,7 @@ export default function StatsScreen() {
 
         <View style={styles.actionRow}>
           <Pressable onPress={() => router.push('/create-invoice')} style={styles.quickActionCard}>
-            <Feather color="#171f2d" name="plus-circle" size={18} strokeWidth={2.2} />
+            <Feather color={MOBILE_THEME.primaryText} name="plus-circle" size={18} strokeWidth={2.2} />
             <Text allowFontScaling={false} style={styles.quickActionTitle}>
               Create invoice
             </Text>
@@ -145,7 +146,7 @@ export default function StatsScreen() {
             </Text>
           </Pressable>
           <Pressable onPress={() => router.push('/templates')} style={styles.quickActionCard}>
-            <Feather color="#171f2d" name="layers" size={18} strokeWidth={2.2} />
+            <Feather color={MOBILE_THEME.primaryText} name="layers" size={18} strokeWidth={2.2} />
             <Text allowFontScaling={false} style={styles.quickActionTitle}>
               Open templates
             </Text>
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     borderRadius: 24,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     paddingHorizontal: 18,
     paddingVertical: 18,
     marginBottom: 14,
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
   chartBar: {
     width: '100%',
     borderRadius: 14,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     minHeight: 0,
   },
   chartLabel: {

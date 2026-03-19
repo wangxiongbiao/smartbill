@@ -1,12 +1,15 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { buildInvoiceDocumentHtml } from '@/shared/invoice-document';
+import {
+  buildInvoiceDocumentHtml,
+  DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+} from '@/shared/invoice-document';
 import type { Invoice, Language } from '@/shared/types';
 
 export async function generateInvoicePdfFile(
   invoice: Invoice,
-  lang: Language = 'en'
+  lang: Language = DEFAULT_INVOICE_DOCUMENT_LANGUAGE
 ) {
   const html = buildInvoiceDocumentHtml(invoice, {
     lang,
@@ -36,7 +39,10 @@ export async function shareInvoicePdfFile(
     lang?: Language;
   }
 ) {
-  const { uri } = await generateInvoicePdfFile(invoice, options?.lang || 'en');
+  const { uri } = await generateInvoicePdfFile(
+    invoice,
+    options?.lang || DEFAULT_INVOICE_DOCUMENT_LANGUAGE
+  );
   const sharingAvailable = await Sharing.isAvailableAsync();
 
   if (!sharingAvailable) {

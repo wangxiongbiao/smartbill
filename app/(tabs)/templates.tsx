@@ -11,6 +11,7 @@ import {
   getMobileTemplates,
   getInvoiceAmount,
 } from '@/shared/mobile-hub';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
 import type { TemplateCategory } from '@/shared/types';
 
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     borderRadius: 24,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     paddingHorizontal: 18,
     paddingVertical: 18,
     marginBottom: 14,
@@ -259,16 +260,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ecebea',
+    backgroundColor: MOBILE_THEME.primarySoft,
   },
   categoryChipActive: {
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
   },
   categoryChipText: {
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '600',
-    color: '#4b4c52',
+    color: MOBILE_THEME.primaryText,
   },
   categoryChipTextActive: {
     color: '#ffffff',
@@ -385,7 +386,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     borderRadius: 12,
-    backgroundColor: '#eef1f5',
+    backgroundColor: MOBILE_THEME.primarySurface,
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '700',
-    color: '#54657e',
+    color: MOBILE_THEME.primaryText,
   },
   metaRow: {
     flexDirection: 'row',
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
   useButton: {
     height: 44,
     borderRadius: 16,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',

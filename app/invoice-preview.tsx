@@ -5,8 +5,12 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
-import { buildInvoiceDocumentHtml } from '@/shared/invoice-document';
+import {
+  buildInvoiceDocumentHtml,
+  DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+} from '@/shared/invoice-document';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 export default function InvoicePreviewScreen() {
   const insets = useSafeAreaInsets();
@@ -17,7 +21,7 @@ export default function InvoicePreviewScreen() {
   const previewHtml = useMemo(
     () =>
       buildInvoiceDocumentHtml(invoice, {
-        lang: 'en',
+        lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
         mode: 'app-preview',
       }),
     [invoice]
@@ -56,7 +60,7 @@ export default function InvoicePreviewScreen() {
 
           {isLoading ? (
             <View style={styles.loadingOverlay}>
-              <ActivityIndicator color="#171f2d" size="small" />
+              <ActivityIndicator color={MOBILE_THEME.primary} size="small" />
             </View>
           ) : null}
         </View>
@@ -115,7 +119,7 @@ const styles = StyleSheet.create({
   submitButton: {
     height: 48,
     borderRadius: 18,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },

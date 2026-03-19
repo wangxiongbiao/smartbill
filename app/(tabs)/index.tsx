@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { calculateInvoiceTotals } from '@/shared/invoice';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { SEEDED_INVOICE_RECORDS } from '@/shared/seed-invoices';
 
 type InvoiceFilter = 'All' | 'Unpaid' | 'Paid';
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     flexDirection: 'row',
-    backgroundColor: '#e4e3e1',
+    backgroundColor: MOBILE_THEME.primarySoft,
     borderRadius: 21,
     padding: 3,
   },
@@ -221,10 +222,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
   },
   segmentButtonActive: {
-    backgroundColor: '#ffffff',
-    shadowColor: '#0f172a',
+    backgroundColor: MOBILE_THEME.primary,
+    shadowColor: MOBILE_THEME.primary,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.14,
     shadowRadius: 6,
     elevation: 1,
   },
@@ -237,10 +238,11 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: 13,
-    color: '#1b1b1b',
+    color: MOBILE_THEME.primaryText,
   },
   segmentTextActive: {
     fontWeight: '700',
+    color: '#ffffff',
   },
   totalText: {
     alignSelf: 'center',
@@ -269,7 +271,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#c7c7cc',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },

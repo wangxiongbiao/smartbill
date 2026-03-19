@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 function TabIcon(props: {
   name: React.ComponentProps<typeof Feather>['name'];
@@ -87,7 +88,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 onPress={onPress}
                 style={[styles.tabButton, focused && styles.tabButtonActive]}
               >
-                <TabIcon color="#111111" name={icon} />
+                <TabIcon color={focused ? MOBILE_THEME.primary : '#111111'} name={icon} />
                 <Text
                   allowFontScaling={false}
                   style={[styles.tabLabel, focused && styles.tabLabelActive]}
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   createButton: {
     height: 48,
     borderRadius: 18,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#ecebea',
+    backgroundColor: MOBILE_THEME.primarySurface,
   },
   tabLabel: {
     marginTop: 2,
@@ -182,5 +183,6 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     fontWeight: '700',
+    color: MOBILE_THEME.primaryText,
   },
 });

@@ -16,6 +16,7 @@ import {
   sanitizeInputValue,
   type InputFilter,
 } from './inputFilters';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 export function TopActionButton({
   dark = false,
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
   },
   topButtonDark: {
     minWidth: 100,
-    backgroundColor: '#1a1916',
+    backgroundColor: MOBILE_THEME.primary,
   },
   topButtonText: {
     fontSize: 17,
@@ -392,7 +393,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 11,
     lineHeight: 14,
-    color: '#8f9198',
+    color: '#fff',
   },
   textField: {
     minHeight: 46,
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleChipActive: {
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
   },
   toggleChipInactive: {
     backgroundColor: '#ffffff',
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionButtonDark: {
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
   },
   actionButtonText: {
     fontSize: 12,
@@ -458,7 +459,7 @@ const styles = StyleSheet.create({
   summaryMetric: {
     flex: 1,
     borderRadius: 16,
-    backgroundColor: '#253045',
+    backgroundColor: MOBILE_THEME.primaryDark,
     paddingVertical: 12,
     paddingHorizontal: 14,
     gap: 6,
@@ -466,7 +467,7 @@ const styles = StyleSheet.create({
   summaryMetricLabel: {
     fontSize: 11,
     lineHeight: 14,
-    color: '#bfc4cf',
+    color: '#dbeafe',
   },
   summaryMetricValue: {
     fontSize: 15,

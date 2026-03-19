@@ -11,6 +11,7 @@ import {
   getMobileInvoices,
   getMobileTemplates,
 } from '@/shared/mobile-hub';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 function formatAmount(amount: number, currency = 'CNY') {
   return new Intl.NumberFormat('en-US', {
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
   providerBadge: {
     alignSelf: 'flex-start',
     borderRadius: 13,
-    backgroundColor: '#eef1f5',
+    backgroundColor: MOBILE_THEME.primarySurface,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '700',
-    color: '#5a6170',
+    color: MOBILE_THEME.primaryText,
   },
   metricRow: {
     flexDirection: 'row',
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
   },
   sectionBadge: {
     borderRadius: 12,
-    backgroundColor: '#dff7df',
+    backgroundColor: MOBILE_THEME.primarySurface,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
@@ -299,7 +300,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '700',
-    color: '#3f8d52',
+    color: MOBILE_THEME.primaryText,
   },
   senderName: {
     fontSize: 18,

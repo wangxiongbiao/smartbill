@@ -73,7 +73,7 @@ function makeInvoice(overrides: Partial<Invoice>): Invoice {
     notes: '',
     status: 'Pending',
     template: 'minimalist',
-    isHeaderReversed: false,
+    isHeaderReversed: true,
     visibility: BASE_VISIBILITY,
     columnConfig: DEFAULT_INVOICE_COLUMNS,
     customStrings: BASE_CUSTOM_STRINGS,

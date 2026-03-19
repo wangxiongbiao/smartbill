@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { matchesBillingProfile } from '@/shared/billing-profiles';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import type { BillingProfile, BillingProfileKind } from '@/shared/types';
 import { getInputKeyboardProps, sanitizeInputValue } from './inputFilters';
 
@@ -307,8 +308,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   profileCardActive: {
-    borderColor: '#171f2d',
-    backgroundColor: '#f4f5f6',
+    borderColor: MOBILE_THEME.primary,
+    backgroundColor: MOBILE_THEME.primarySurface,
   },
   profileTitleRow: {
     flexDirection: 'row',
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderRadius: 999,
-    backgroundColor: '#e9f8ef',
+    backgroundColor: MOBILE_THEME.primarySurface,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
     fontWeight: '700',
-    color: '#2f855a',
+    color: MOBILE_THEME.primaryText,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },

@@ -49,7 +49,7 @@ export function buildDefaultPaymentFields(): PaymentInfoField[] {
   return [
     {
       id: 'bankName',
-      label: 'Bank name',
+      label: 'Bank Name',
       type: 'text',
       order: 0,
       visible: true,
@@ -58,7 +58,7 @@ export function buildDefaultPaymentFields(): PaymentInfoField[] {
     },
     {
       id: 'accountName',
-      label: 'Account name',
+      label: 'Account Name',
       type: 'text',
       order: 1,
       visible: true,
@@ -67,7 +67,7 @@ export function buildDefaultPaymentFields(): PaymentInfoField[] {
     },
     {
       id: 'accountNumber',
-      label: 'Account number',
+      label: 'Account Number',
       type: 'text',
       order: 2,
       visible: true,
@@ -76,7 +76,7 @@ export function buildDefaultPaymentFields(): PaymentInfoField[] {
     },
     {
       id: 'address',
-      label: 'Bank address',
+      label: 'Bank Address',
       type: 'textarea',
       order: 3,
       visible: true,
@@ -85,7 +85,7 @@ export function buildDefaultPaymentFields(): PaymentInfoField[] {
     },
     {
       id: 'extraInfo',
-      label: 'Extra info',
+      label: 'Additional Info (SWIFT/IBAN)',
       type: 'textarea',
       order: 4,
       visible: true,
@@ -197,6 +197,7 @@ export function hasPaymentInfoContent(paymentInfo: PaymentInfo | undefined) {
       paymentInfo?.bankName ||
       paymentInfo?.accountName ||
       paymentInfo?.accountNumber ||
+      paymentInfo?.address ||
       paymentInfo?.extraInfo ||
       paymentInfo?.qrCode ||
       paymentInfo?.customFields?.length
@@ -251,7 +252,7 @@ export function createEmptyInvoice(): Invoice {
     notes: '',
     status: 'Pending',
     template: 'minimalist',
-    isHeaderReversed: false,
+    isHeaderReversed: true,
     visibility: {
       invoiceNumber: true,
       date: true,

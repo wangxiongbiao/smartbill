@@ -21,8 +21,12 @@ import {
   generateInvoicePdfFile,
   shareInvoicePdfFile,
 } from '@/shared/invoice-actions';
-import { buildInvoiceDocumentHtml } from '@/shared/invoice-document';
+import {
+  buildInvoiceDocumentHtml,
+  DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+} from '@/shared/invoice-document';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { findSeededInvoiceRecordById } from '@/shared/seed-invoices';
 import { getTemplateTypeLabel, TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
 import type { TemplateCategory } from '@/shared/types';
@@ -72,7 +76,7 @@ export default function InvoiceDetailScreen() {
     }
 
     return buildInvoiceDocumentHtml(invoice, {
-      lang: 'en',
+      lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
       mode: 'thumbnail',
     });
   }, [invoice]);
@@ -462,7 +466,7 @@ export default function InvoiceDetailScreen() {
                     {option.label}
                   </Text>
                   {active ? (
-                    <Feather color="#171f2d" name="check" size={16} strokeWidth={2.6} />
+                    <Feather color={MOBILE_THEME.primaryText} name="check" size={16} strokeWidth={2.6} />
                   ) : null}
                 </Pressable>
               );
@@ -553,7 +557,7 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 48,
     borderRadius: 18,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -690,7 +694,7 @@ const styles = StyleSheet.create({
   sheetPrimaryButton: {
     height: 48,
     borderRadius: 18,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -733,8 +737,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   optionRowActive: {
-    borderColor: '#171f2d',
-    backgroundColor: '#f7f7f7',
+    borderColor: MOBILE_THEME.primary,
+    backgroundColor: MOBILE_THEME.primarySurface,
   },
   optionLabel: {
     fontSize: 14,
@@ -743,6 +747,6 @@ const styles = StyleSheet.create({
     color: '#171717',
   },
   optionLabelActive: {
-    color: '#171f2d',
+    color: MOBILE_THEME.primaryText,
   },
 });

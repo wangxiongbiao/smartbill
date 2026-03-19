@@ -116,6 +116,7 @@ export interface PaymentInfo {
   bankName?: string;
   accountName?: string;
   accountNumber?: string;
+  address?: string;
   extraInfo?: string;
   customFields?: CustomField[];
 }

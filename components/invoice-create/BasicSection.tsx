@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import type { DocumentType, Invoice } from '@/shared/types';
 
 import { Field, ToggleChip } from './shared';
@@ -426,7 +427,7 @@ function toIsoDate(date: Date) {
 const styles = StyleSheet.create({
   segment: {
     flexDirection: 'row',
-    backgroundColor: '#ecebea',
+    backgroundColor: MOBILE_THEME.primarySoft,
     borderRadius: 20,
     padding: 4,
   },
@@ -452,6 +453,7 @@ const styles = StyleSheet.create({
   },
   segmentTextActive: {
     fontWeight: '700',
+    color: MOBILE_THEME.primaryText,
   },
   stack: {
     gap: 10,
@@ -552,7 +554,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   dropdownOptionActive: {
-    backgroundColor: '#f3f2f0',
+    backgroundColor: MOBILE_THEME.primarySurface,
   },
   dropdownOptionCopy: {
     flex: 1,
@@ -624,7 +626,7 @@ const styles = StyleSheet.create({
   dateSheetDoneButton: {
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 14,

@@ -46,6 +46,7 @@ import {
   deriveBillingProfilesFromInvoices,
 } from '@/shared/billing-profiles';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import type {
   BillingProfile,
   CustomField,
@@ -90,7 +91,7 @@ const signaturePadStyle = `
     background: #ffffff;
   }
   .m-signature-pad--footer .button {
-    background: #171f2d;
+    background: #2563eb;
     color: #ffffff;
     border-radius: 999px;
     font-size: 12px;
@@ -1373,13 +1374,13 @@ const styles = StyleSheet.create({
   },
   totalCard: {
     borderRadius: 20,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     padding: 16,
     gap: 14,
   },
   totalCardTop: {
     borderRadius: 16,
-    backgroundColor: '#253045',
+    backgroundColor: MOBILE_THEME.primaryDark,
     padding: 12,
   },
   metricsRow: {
@@ -1451,7 +1452,7 @@ const styles = StyleSheet.create({
   submitButton: {
     height: 48,
     borderRadius: 18,
-    backgroundColor: '#171f2d',
+    backgroundColor: MOBILE_THEME.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
