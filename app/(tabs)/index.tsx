@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { calculateInvoiceTotals } from '@/shared/invoice';
@@ -24,6 +24,11 @@ type InvoiceItem = {
 };
 
 const FILTERS: InvoiceFilter[] = ['All', 'Unpaid', 'Paid'];
+const HEADER_ACTIONS = [
+  { key: 'search', icon: 'search' as const },
+  { key: 'settings', icon: 'settings' as const },
+];
+const BRAND_LOGO = require('../../assets/images/pc-brand-icon.png');
 
 function formatAmount(amount: number, currency = 'CNY') {
   return new Intl.NumberFormat('en-US', {
@@ -111,6 +116,30 @@ export default function InvoicesScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 316 }]}
           showsVerticalScrollIndicator={false}
         >
+          <View style={styles.header}>
+            <View style={styles.brandRow}>
+              <View style={styles.logoBadge}>
+                <Image source={BRAND_LOGO} style={styles.logoImage} />
+              </View>
+              <Text allowFontScaling={false} style={styles.brandText}>
+                SmartBill
+              </Text>
+            </View>
+
+            <View style={styles.headerActions}>
+              {HEADER_ACTIONS.map((action) => (
+                <Pressable key={action.key} style={styles.headerActionButton}>
+                  <Feather
+                    color={MOBILE_THEME.primaryText}
+                    name={action.icon}
+                    size={16}
+                    strokeWidth={2.15}
+                  />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
           {isEmptyState ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconWrap}>
@@ -206,7 +235,57 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 18,
-    paddingTop: 10,
+    paddingTop: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logoBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  brandText: {
+    fontSize: 21,
+    lineHeight: 24,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.45,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerActionButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 2,
   },
   segment: {
     flexDirection: 'row',

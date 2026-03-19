@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -57,7 +57,7 @@ export default function InvoiceDetailScreen() {
   const [templateError, setTemplateError] = useState('');
   const [busyAction, setBusyAction] = useState<BusyAction>(null);
 
-  const invoice = useMemo(() => {
+  const invoice = (() => {
     if (!id || deletedInvoiceIds.includes(String(id))) {
       return null;
     }
@@ -68,18 +68,14 @@ export default function InvoiceDetailScreen() {
     }
 
     return findSeededInvoiceRecordById(String(id))?.invoice || createdInvoices[0] || null;
-  }, [createdInvoices, deletedInvoiceIds, id]);
+  })();
 
-  const previewHtml = useMemo(() => {
-    if (!invoice) {
-      return '';
-    }
-
-    return buildInvoiceDocumentHtml(invoice, {
-      lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
-      mode: 'thumbnail',
-    });
-  }, [invoice]);
+  const previewHtml = invoice
+    ? buildInvoiceDocumentHtml(invoice, {
+        lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+        mode: 'thumbnail',
+      })
+    : '';
 
   useEffect(() => {
     setRecipientEmail(invoice?.client.email || '');

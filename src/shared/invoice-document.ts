@@ -341,6 +341,7 @@ export function buildInvoiceDocumentHtml(
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 32px;
+          text-align: left;
         }
 
         .items-head-row {
@@ -368,6 +369,11 @@ export function buildInvoiceDocumentHtml(
           text-align: left;
         }
 
+        .items-head-cell.first-column,
+        .items-body-cell.first-column {
+          text-align: left !important;
+        }
+
         .items-head-cell.right,
         .items-body-cell.right {
           text-align: right;
@@ -391,7 +397,7 @@ export function buildInvoiceDocumentHtml(
 
         .items-body-cell.textual {
           font-weight: 500;
-          white-space: pre-wrap;
+ 
           word-break: break-word;
         }
 
@@ -595,30 +601,28 @@ export function buildInvoiceDocumentHtml(
               <div class="doc-header-grid ${isHeaderReversed ? 'reversed' : ''}">
                 <div class="doc-title-block ${isHeaderReversed ? 'title-right' : 'title-left'}">
                   <h1 class="doc-title">${escapeHtml(docTitle)}</h1>
-                  ${
-                    invoice.visibility?.invoiceNumber !== false
-                      ? `<p class="doc-number">#${escapeHtml(invoice.invoiceNumber)}</p>`
-                      : ''
-                  }
+                  ${invoice.visibility?.invoiceNumber !== false
+      ? `<p class="doc-number">#${escapeHtml(invoice.invoiceNumber)}</p>`
+      : ''
+    }
                 </div>
 
                 <div class="sender-cluster ${isHeaderReversed ? 'reversed' : ''}">
-                  ${
-                    invoice.sender.logo
-                      ? `<img class="sender-logo" src="${escapeAttribute(
-                          invoice.sender.logo
-                        )}" alt="${escapeAttribute(previewCopy.logoAlt)}" />`
-                      : ''
-                  }
+                  ${invoice.sender.logo
+      ? `<img class="sender-logo" src="${escapeAttribute(
+        invoice.sender.logo
+      )}" alt="${escapeAttribute(previewCopy.logoAlt)}" />`
+      : ''
+    }
                   <div>
                     <h2 class="sender-name ${invoice.sender.name.trim() ? '' : 'placeholder'}">${escapeHtml(
-                      invoice.sender.name.trim() || previewCopy.namePlaceholder
-                    )}</h2>
+      invoice.sender.name.trim() || previewCopy.namePlaceholder
+    )}</h2>
                     ${renderPartyLines({
-                      address: invoice.sender.address,
-                      phone: invoice.sender.phone,
-                      email: invoice.sender.email,
-                    }, previewCopy)}
+      address: invoice.sender.address,
+      phone: invoice.sender.phone,
+      email: invoice.sender.email,
+    }, previewCopy)}
                     ${renderCustomFieldLines(invoice.sender.customFields)}
                   </div>
                 </div>
@@ -629,37 +633,35 @@ export function buildInvoiceDocumentHtml(
               <section class="meta-grid">
                 <div class="client-card">
                   <p class="client-name ${invoice.client.name.trim() ? '' : 'placeholder'}">${escapeHtml(
-                    invoice.client.name.trim() || previewCopy.clientName
-                  )}</p>
+      invoice.client.name.trim() || previewCopy.clientName
+    )}</p>
                   ${renderClientLines({
-                    address: invoice.client.address,
-                    phone: invoice.client.phone,
-                    email: invoice.client.email,
-                  }, previewCopy)}
+      address: invoice.client.address,
+      phone: invoice.client.phone,
+      email: invoice.client.email,
+    }, previewCopy)}
                   ${renderClientCustomFieldLines(invoice.client.customFields)}
                 </div>
 
                 <div class="dates-column">
-                  ${
-                    invoice.visibility?.date !== false
-                      ? `
+                  ${invoice.visibility?.date !== false
+      ? `
                         <div class="date-block">
                           <p class="date-label">${escapeHtml(dateLabel)}</p>
                           <p class="date-value">${escapeHtml(invoice.date)}</p>
                         </div>
                       `
-                      : ''
-                  }
-                  ${
-                    invoice.visibility?.dueDate !== false
-                      ? `
+      : ''
+    }
+                  ${invoice.visibility?.dueDate !== false
+      ? `
                         <div class="date-block">
                           <p class="date-label">${escapeHtml(dueDateLabel)}</p>
                           <p class="date-value">${escapeHtml(invoice.dueDate)}</p>
                         </div>
                       `
-                      : ''
-                  }
+      : ''
+    }
                 </div>
               </section>
 
@@ -667,56 +669,55 @@ export function buildInvoiceDocumentHtml(
                 <thead>
                   <tr class="items-head-row">
                     ${visibleColumns
-                      .map(
-                        (column) => `
-                          <th class="items-head-cell ${getColumnAlignmentClass(column)}">
+      .map(
+        (column, columnIndex) => `
+                          <th class="items-head-cell ${getColumnAlignmentClass(column)} ${columnIndex === 0 ? 'first-column' : ''
+          }">
                             ${escapeHtml(column.label)}
                           </th>
                         `
-                      )
-                      .join('')}
+      )
+      .join('')}
                   </tr>
                 </thead>
                 <tbody>
                   ${invoice.items
-                    .map(
-                      (item) => `
+      .map(
+        (item) => `
                         <tr class="items-body-row">
                           ${visibleColumns
-                            .map(
-                              (column) => `
+            .map(
+              (column, columnIndex) => `
                                 <td class="items-body-cell ${getColumnAlignmentClass(
-                                  column
-                                )} ${column.type === 'system-amount' ? 'amount' : ''} ${isTextualColumn(
-                                  column
-                                ) ? 'textual' : ''}">
+                column
+              )} ${columnIndex === 0 ? 'first-column' : ''} ${column.type === 'system-amount' ? 'amount' : ''
+                } ${isTextualColumn(column) ? 'textual' : ''}">
                                   ${renderItemCell(item, column, invoice.currency, locale, previewCopy)}
                                 </td>
                               `
-                            )
-                            .join('')}
+            )
+            .join('')}
                         </tr>
                       `
-                    )
-                    .join('')}
+      )
+      .join('')}
                 </tbody>
               </table>
 
               <section class="summary-row">
                 <div class="signature-wrap">
-                  ${
-                    invoice.visibility?.signature === true
-                      ? `
+                  ${invoice.visibility?.signature === true
+      ? `
                         ${invoice.sender.signature ? `<img class="signature-image" src="${escapeAttribute(invoice.sender.signature)}" alt="Signature" />` : ''}
                         <div class="signature-line">
                           <p class="signature-label">${escapeHtml(previewCopy.authorizedSignature)}</p>
                           <p class="signature-name ${invoice.sender.name.trim() ? '' : 'placeholder'}">${escapeHtml(
-                            invoice.sender.name.trim() || previewCopy.namePlaceholder
-                          )}</p>
+        invoice.sender.name.trim() || previewCopy.namePlaceholder
+      )}</p>
                         </div>
                       `
-                      : ''
-                  }
+      : ''
+    }
                 </div>
 
                 <div class="totals-panel">
@@ -726,8 +727,8 @@ export function buildInvoiceDocumentHtml(
                   </div>
                   <div class="totals-line">
                     <span class="label">${escapeHtml(
-                      `${previewCopy.taxRate} (${String(invoice.taxRate)}%)`
-                    )}</span>
+      `${previewCopy.taxRate} (${String(invoice.taxRate)}%)`
+    )}</span>
                     <span class="value">${formatMoney(locale, invoice.currency, totals.tax)}</span>
                   </div>
                   <div class="totals-line strong">
@@ -737,15 +738,14 @@ export function buildInvoiceDocumentHtml(
                 </div>
               </section>
 
-              ${
-                hasPaymentSection
-                  ? `
+              ${hasPaymentSection
+      ? `
                     <section class="payment-section">
                       <div class="payment-grid">
                         <div class="payment-lines">
                           ${paymentFields
-                            .map(
-                              (field) => `
+        .map(
+          (field) => `
                                 <div class="payment-line">
                                   <span class="payment-label">${escapeHtml(field.label)}:</span>
                                   <span class="payment-value ${field.id === 'accountNumber' ? 'mono' : ''}">
@@ -753,43 +753,41 @@ export function buildInvoiceDocumentHtml(
                                   </span>
                                 </div>
                               `
-                            )
-                            .join('')}
+        )
+        .join('')}
                         </div>
-                        ${
-                          invoice.paymentInfo?.qrCode
-                            ? `
+                        ${invoice.paymentInfo?.qrCode
+        ? `
                               <div class="payment-qr">
                                 <img src="${escapeAttribute(invoice.paymentInfo.qrCode)}" alt="${escapeAttribute(
-                                  previewCopy.paymentQrCode
-                                )}" />
+          previewCopy.paymentQrCode
+        )}" />
                               </div>
                             `
-                            : ''
-                        }
+        : ''
+      }
                       </div>
                     </section>
                   `
-                  : ''
-              }
+      : ''
+    }
             </main>
 
-            ${
-              invoice.visibility?.disclaimer !== false && invoice.sender.disclaimerText
-                ? `
+            ${invoice.visibility?.disclaimer !== false && invoice.sender.disclaimerText
+      ? `
                   <section class="section-footer">
                     <div class="section-footer-row">
                       <span class="section-footer-icon" aria-hidden="true">${getInfoIconSvg(
-                        'disclaimer'
-                      )}</span>
+        'disclaimer'
+      )}</span>
                       <p class="section-footer-copy">${formatMultilineText(
-                        invoice.sender.disclaimerText
-                      )}</p>
+        invoice.sender.disclaimerText
+      )}</p>
                     </div>
                   </section>
                 `
-                : ''
-            }
+      : ''
+    }
 
             <footer class="brand-footer">${escapeHtml(previewCopy.poweredBy)}</footer>
           </article>
@@ -969,6 +967,7 @@ function isTextualColumn(column: InvoiceColumn) {
     column.type === 'system-rate'
   );
 }
+
 
 function renderClientCustomFieldLines(fields: CustomField[] | undefined) {
   return (fields || [])

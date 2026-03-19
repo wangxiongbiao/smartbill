@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -18,14 +18,10 @@ export default function InvoicePreviewScreen() {
   const { draftInvoice: invoice, submitDraftInvoice } = useInvoiceFlow();
   const [isLoading, setIsLoading] = useState(true);
 
-  const previewHtml = useMemo(
-    () =>
-      buildInvoiceDocumentHtml(invoice, {
-        lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
-        mode: 'app-preview',
-      }),
-    [invoice]
-  );
+  const previewHtml = buildInvoiceDocumentHtml(invoice, {
+    lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+    mode: 'app-preview',
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -46,6 +42,7 @@ export default function InvoicePreviewScreen() {
       <View style={styles.screen}>
         <View style={styles.previewFrame}>
           <WebView
+            key={previewHtml}
             bounces={false}
             javaScriptEnabled
             onLoadEnd={() => setIsLoading(false)}
