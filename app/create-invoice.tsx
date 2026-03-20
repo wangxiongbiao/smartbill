@@ -43,7 +43,6 @@ import {
 import {
   applyBillingProfileToClient,
   applyBillingProfileToSender,
-  deriveBillingProfilesFromInvoices,
 } from '@/shared/billing-profiles';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
@@ -106,7 +105,7 @@ export default function CreateInvoiceScreen() {
   const router = useRouter();
   const signatureRef = useRef<SignatureViewRef>(null);
   const {
-    createdInvoices,
+    billingProfiles,
     draftInvoice: invoice,
     resetDraftInvoice,
     setDraftInvoice,
@@ -115,6 +114,7 @@ export default function CreateInvoiceScreen() {
     useInvoiceFlow();
   const [activeSheet, setActiveSheet] = useState<SectionKey | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textKeyboardProps = getInputKeyboardProps('text');
 
   const totals = useMemo(
@@ -128,10 +128,6 @@ export default function CreateInvoiceScreen() {
   const paymentFields = useMemo(
     () => [...(invoice.paymentInfo?.fields || [])].sort((a, b) => a.order - b.order),
     [invoice.paymentInfo?.fields]
-  );
-  const billingProfiles = useMemo(
-    () => deriveBillingProfilesFromInvoices(createdInvoices),
-    [createdInvoices]
   );
   const senderProfiles = useMemo(
     () => billingProfiles.filter((profile) => profile.kind === 'sender'),
@@ -484,9 +480,14 @@ export default function CreateInvoiceScreen() {
     router.back();
   };
 
-  const handleSubmit = () => {
-    submitDraftInvoice();
-    router.replace('/(tabs)');
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      await submitDraftInvoice();
+      router.replace('/(tabs)');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePreview = () => {
@@ -989,7 +990,7 @@ export default function CreateInvoiceScreen() {
             <TopActionButton label="Cancel" onPress={handleCancel} wide />
 
             <View style={styles.topRightActions}>
-              <TopActionButton dark label="Done" onPress={handleSubmit} />
+              <TopActionButton dark label={isSubmitting ? 'Saving...' : 'Done'} onPress={() => void handleSubmit()} />
             </View>
           </View>
 
@@ -1041,10 +1042,16 @@ export default function CreateInvoiceScreen() {
         </ScrollView>
 
         <View style={[styles.bottomDock, { paddingBottom: insets.bottom }]}>
-          <Pressable onPress={handleSubmit} style={styles.submitButton}>
-            <Text allowFontScaling={false} style={styles.submitButtonText}>
-              Create Invoice
-            </Text>
+          <Pressable onPress={() => void handleSubmit()} style={styles.submitButton}>
+            {isSubmitting ? (
+              <Text allowFontScaling={false} style={styles.submitButtonText}>
+                Saving...
+              </Text>
+            ) : (
+              <Text allowFontScaling={false} style={styles.submitButtonText}>
+                Create Invoice
+              </Text>
+            )}
           </Pressable>
           <Pressable onPress={handlePreview} style={styles.previewButton}>
             <Text allowFontScaling={false} style={styles.previewButtonText}>

@@ -7,7 +7,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { calculateInvoiceTotals } from '@/shared/invoice';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
-import { SEEDED_INVOICE_RECORDS } from '@/shared/seed-invoices';
 
 type InvoiceFilter = 'All' | 'Unpaid' | 'Paid';
 
@@ -70,19 +69,7 @@ export default function InvoicesScreen() {
       muted: !invoice.client.name,
     }));
 
-    const seededInvoices: InvoiceItem[] = SEEDED_INVOICE_RECORDS.map((record) => ({
-      id: record.invoice.id,
-      client: record.invoice.client.name || 'Unknown client',
-      ref: `#${record.invoice.invoiceNumber}`,
-      date: formatListDate(record.invoice.date),
-      amount: calculateInvoiceTotals(record.invoice.items, record.invoice.taxRate).total,
-      currency: record.invoice.currency,
-      status: record.invoice.status === 'Paid' ? 'paid' : 'unpaid',
-      muted: record.muted,
-      overdueText: record.overdueText,
-    }));
-
-    return [...localInvoices, ...seededInvoices].filter(
+    return localInvoices.filter(
       (invoice) => !deletedInvoiceIds.includes(invoice.id)
     );
   }, [createdInvoices, deletedInvoiceIds]);

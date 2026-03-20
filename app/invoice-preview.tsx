@@ -17,6 +17,7 @@ export default function InvoicePreviewScreen() {
   const router = useRouter();
   const { draftInvoice: invoice, submitDraftInvoice } = useInvoiceFlow();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const previewHtml = buildInvoiceDocumentHtml(invoice, {
     lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
@@ -27,9 +28,14 @@ export default function InvoicePreviewScreen() {
     setIsLoading(true);
   }, [previewHtml]);
 
-  const handleSubmit = () => {
-    submitDraftInvoice();
-    router.replace('/(tabs)');
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      await submitDraftInvoice();
+      router.replace('/(tabs)');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleContinueEditing = () => {
@@ -63,10 +69,14 @@ export default function InvoicePreviewScreen() {
         </View>
 
         <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 10 }]}>
-          <Pressable onPress={handleSubmit} style={styles.submitButton}>
-            <Text allowFontScaling={false} style={styles.submitButtonText}>
-              Create Invoice
-            </Text>
+          <Pressable onPress={() => void handleSubmit()} style={styles.submitButton}>
+            {isSubmitting ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <Text allowFontScaling={false} style={styles.submitButtonText}>
+                Create Invoice
+              </Text>
+            )}
           </Pressable>
           <Pressable onPress={handleContinueEditing} style={styles.secondaryButton}>
             <Text allowFontScaling={false} style={styles.secondaryButtonText}>

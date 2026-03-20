@@ -1,10 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/shared/auth/AuthProvider';
+
 export default function LoginScreen() {
-  const router = useRouter();
+  const { error, isAuthenticated, isLoading, isSigningIn, signInWithGoogle } = useAuth();
+
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -18,8 +24,8 @@ export default function LoginScreen() {
             <Text style={styles.eyebrow}>SMARTBILL</Text>
             <Text style={styles.title}>Sign in</Text>
             <Text style={styles.subtitle}>
-              Email and password have been removed. Tap the Google button to enter the new tabbed
-              app flow directly.
+              Use Google to sign in. After authentication succeeds, the app will restore your
+              session and enter the invoice workspace automatically.
             </Text>
           </View>
 
@@ -29,13 +35,27 @@ export default function LoginScreen() {
             </View>
             <Text style={styles.googleTitle}>Continue with Google</Text>
             <Text style={styles.helper}>
-              This button does not call Google yet. It takes you straight into the four-tab preview.
+              This mobile flow uses the native app callback. Please test it in a development build
+              or installed app package.
             </Text>
-            <Pressable onPress={() => router.replace('/(tabs)')} style={styles.button}>
-              <View style={styles.buttonIcon}>
-                <Text style={styles.buttonIconText}>G</Text>
-              </View>
-              <Text style={styles.buttonText}>Sign in with Google</Text>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <Pressable
+              disabled={isSigningIn || isLoading}
+              onPress={() => {
+                signInWithGoogle().catch(() => undefined);
+              }}
+              style={[styles.button, (isSigningIn || isLoading) && styles.buttonDisabled]}
+            >
+              {isSigningIn || isLoading ? (
+                <ActivityIndicator color="#2563eb" size="small" />
+              ) : (
+                <>
+                  <View style={styles.buttonIcon}>
+                    <Text style={styles.buttonIconText}>G</Text>
+                  </View>
+                  <Text style={styles.buttonText}>Sign in with Google</Text>
+                </>
+              )}
             </Pressable>
           </View>
         </View>
@@ -148,6 +168,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 18,
   },
+  buttonDisabled: {
+    opacity: 0.72,
+  },
   buttonIcon: {
     width: 28,
     height: 28,
@@ -172,5 +195,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#64748b',
     maxWidth: 280,
+  },
+  errorText: {
+    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#c23b35',
+    textAlign: 'center',
   },
 });

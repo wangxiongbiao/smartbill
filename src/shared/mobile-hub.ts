@@ -1,6 +1,4 @@
 import { calculateInvoiceTotals, createEmptyInvoice } from '@/shared/invoice';
-import { SEEDED_INVOICE_RECORDS } from '@/shared/seed-invoices';
-import { SEEDED_TEMPLATE_RECORDS } from '@/shared/seed-templates';
 import type { Invoice, InvoiceTemplateRecord, Sender } from '@/shared/types';
 
 function cloneCustomFields(fields?: Sender['customFields']) {
@@ -28,9 +26,8 @@ function clonePaymentInfo(paymentInfo: Invoice['paymentInfo']) {
 
 export function getMobileInvoices(createdInvoices: Invoice[], deletedInvoiceIds: string[]) {
   const hiddenIds = new Set(deletedInvoiceIds);
-  const seededInvoices = SEEDED_INVOICE_RECORDS.map((record) => record.invoice);
 
-  return [...createdInvoices, ...seededInvoices].filter((invoice) => !hiddenIds.has(invoice.id));
+  return createdInvoices.filter((invoice) => !hiddenIds.has(invoice.id));
 }
 
 export function getInvoiceAmount(invoice: Invoice) {
@@ -60,7 +57,7 @@ export function isOverdueInvoice(invoice: Invoice) {
 }
 
 export function getMobileTemplates(savedTemplates: InvoiceTemplateRecord[]) {
-  return [...savedTemplates, ...SEEDED_TEMPLATE_RECORDS].sort((a, b) =>
+  return [...savedTemplates].sort((a, b) =>
     new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
 }

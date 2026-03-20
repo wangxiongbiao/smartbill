@@ -1,9 +1,10 @@
 import Feather from '@expo/vector-icons/Feather';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Tabs, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Redirect, Tabs, useRouter } from 'expo-router';
+import { ActivityIndicator, Pressable, StyleSheet, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/shared/auth/AuthProvider';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
 
@@ -105,6 +106,20 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 export default function TabLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator color={MOBILE_THEME.primary} size="small" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect href="/" />;
+  }
+
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -126,6 +141,12 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   wrapper: {
     ...StyleSheet.absoluteFillObject,
+  },
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: '#f6f5f2',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dockBackground: {
     position: 'absolute',

@@ -27,7 +27,6 @@ import {
 } from '@/shared/invoice-document';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
-import { findSeededInvoiceRecordById } from '@/shared/seed-invoices';
 import { getTemplateTypeLabel, TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
 import type { TemplateCategory } from '@/shared/types';
 
@@ -67,7 +66,7 @@ export default function InvoiceDetailScreen() {
       return created;
     }
 
-    return findSeededInvoiceRecordById(String(id))?.invoice || createdInvoices[0] || null;
+    return createdInvoices[0] || null;
   })();
 
   const previewHtml = invoice
@@ -85,8 +84,8 @@ export default function InvoiceDetailScreen() {
     return null;
   }
 
-  const handleDelete = () => {
-    removeInvoice(String(invoice.id));
+  const handleDelete = async () => {
+    await removeInvoice(String(invoice.id));
     setIsMenuVisible(false);
     router.replace('/(tabs)');
   };
@@ -142,7 +141,7 @@ export default function InvoiceDetailScreen() {
 
     try {
       setBusyAction('template');
-      saveTemplate({
+      await saveTemplate({
         invoice,
         name: trimmedName,
         description: trimmedDescription,
@@ -273,7 +272,7 @@ export default function InvoiceDetailScreen() {
                 Remove this invoice from the current list.
               </Text>
 
-              <Pressable onPress={handleDelete} style={styles.deleteButton}>
+              <Pressable onPress={() => void handleDelete()} style={styles.deleteButton}>
                 <Text allowFontScaling={false} style={styles.deleteButtonText}>
                   Delete
                 </Text>

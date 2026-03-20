@@ -1,9 +1,9 @@
 import Feather from '@expo/vector-icons/Feather';
-import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/shared/auth/AuthProvider';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import {
   getDashboardSummary,
@@ -24,8 +24,8 @@ function formatAmount(amount: number, currency = 'CNY') {
 
 export default function MyScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { createdInvoices, deletedInvoiceIds, savedTemplates } = useInvoiceFlow();
+  const { signOut, user } = useAuth();
 
   const invoices = useMemo(
     () => getMobileInvoices(createdInvoices, deletedInvoiceIds),
@@ -49,14 +49,14 @@ export default function MyScreen() {
           </View>
           <View style={styles.accountCopy}>
             <Text allowFontScaling={false} style={styles.accountName}>
-              Gary
+              {user?.name || 'User'}
             </Text>
             <Text allowFontScaling={false} style={styles.accountEmail}>
-              gary@smartbill.app
+              {user?.email || 'No email'}
             </Text>
             <View style={styles.providerBadge}>
               <Text allowFontScaling={false} style={styles.providerBadgeText}>
-                Google sign-in
+                {user?.provider ? `${user.provider} sign-in` : 'Signed in'}
               </Text>
             </View>
           </View>
@@ -172,10 +172,16 @@ export default function MyScreen() {
             Security
           </Text>
           <Text allowFontScaling={false} style={styles.securityText}>
-            This mobile preview still uses your simplified Google sign-in flow. Use the button below to return to the login screen.
+            Your Google session is stored on device. Signing out will clear the local session and
+            return to the login screen.
           </Text>
 
-          <Pressable onPress={() => router.replace('/')} style={styles.logoutButton}>
+          <Pressable
+            onPress={() => {
+              signOut().catch(() => undefined);
+            }}
+            style={styles.logoutButton}
+          >
             <Feather color="#c23b35" name="log-out" size={16} strokeWidth={2.4} />
             <Text allowFontScaling={false} style={styles.logoutButtonText}>
               Sign out
