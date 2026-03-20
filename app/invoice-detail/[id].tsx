@@ -4,10 +4,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Linking,
   Modal,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -16,19 +16,21 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { WebView } from 'react-native-webview';
 
 import { BottomSheetEditor, Field } from '@/components/invoice-create/shared';
-import {
-  buildInvoiceMailtoUrl,
-  generateInvoicePdfFile,
-  shareInvoicePdfFile,
-} from '@/shared/invoice-actions';
+import { shareInvoicePdfFile } from '@/shared/invoice-actions';
+import { API_BASE_URL } from '@/shared/auth/config';
+import { useAuth } from '@/shared/auth/AuthProvider';
 import {
   buildInvoiceDocumentHtml,
   DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
 } from '@/shared/invoice-document';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
+import {
+  createInvoiceShareRemote,
+  sendInvoiceShareEmailRemote,
+} from '@/shared/mobile-api';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { getTemplateTypeLabel, TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
-import type { TemplateCategory } from '@/shared/types';
+import type { Invoice, TemplateCategory } from '@/shared/types';
 
 const DETAIL_ACTIONS = [
   { key: 'download', icon: 'download', label: 'Download' },
@@ -38,13 +40,21 @@ const DETAIL_ACTIONS = [
 ] as const;
 
 type BusyAction = 'download' | 'share' | 'send' | 'template' | null;
+const STATUS_OPTIONS: Invoice['status'][] = ['Draft', 'Pending', 'Sent', 'Paid'];
 
 export default function InvoiceDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { createdInvoices, deletedInvoiceIds, removeInvoice, saveTemplate, setDraftInvoice } =
-    useInvoiceFlow();
+  const { accessToken } = useAuth();
+  const {
+    createdInvoices,
+    deletedInvoiceIds,
+    removeInvoice,
+    saveTemplate,
+    setDraftInvoice,
+    updateInvoiceStatus,
+  } = useInvoiceFlow();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isSendSheetVisible, setIsSendSheetVisible] = useState(false);
   const [isTemplateSheetVisible, setIsTemplateSheetVisible] = useState(false);
@@ -55,18 +65,18 @@ export default function InvoiceDetailScreen() {
   const [templateType, setTemplateType] = useState<TemplateCategory | null>(null);
   const [templateError, setTemplateError] = useState('');
   const [busyAction, setBusyAction] = useState<BusyAction>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{
+    tone: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const invoice = (() => {
     if (!id || deletedInvoiceIds.includes(String(id))) {
       return null;
     }
 
-    const created = createdInvoices.find((item) => item.id === id);
-    if (created) {
-      return created;
-    }
-
-    return createdInvoices[0] || null;
+    return createdInvoices.find((item) => item.id === id) || null;
   })();
 
   const previewHtml = invoice
@@ -112,8 +122,37 @@ export default function InvoiceDetailScreen() {
   const handleShare = async () => {
     try {
       setBusyAction('share');
-      await shareInvoicePdfFile(invoice, {
-        dialogTitle: 'Share invoice',
+      setFeedbackMessage(null);
+
+      if (!accessToken) {
+        throw new Error('Sign in again before sharing an invoice link.');
+      }
+
+      const share = await createInvoiceShareRemote(accessToken, String(invoice.id), {
+        allowDownload: true,
+        expiresInDays: null,
+      });
+
+      if (!share) {
+        throw new Error('Unable to create a share link.');
+      }
+
+      const shareUrl = `${API_BASE_URL}/share/${share.share_token}`;
+      await Share.share({
+        title: `Invoice ${invoice.invoiceNumber}`,
+        message: shareUrl,
+        url: shareUrl,
+      });
+      setFeedbackMessage({
+        tone: 'success',
+        text: 'Share link ready.',
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to create a share link.';
+      setFeedbackMessage({
+        tone: 'error',
+        text: message,
       });
     } finally {
       setBusyAction(null);
@@ -149,6 +188,14 @@ export default function InvoiceDetailScreen() {
       });
       setTemplateError('');
       setIsTemplateSheetVisible(false);
+      setFeedbackMessage({
+        tone: 'success',
+        text: 'Template saved.',
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to save template.';
+      setTemplateError(message);
     } finally {
       setBusyAction(null);
     }
@@ -161,15 +208,72 @@ export default function InvoiceDetailScreen() {
 
     try {
       setBusyAction('send');
-      await generateInvoicePdfFile(invoice);
-      const mailtoUrl = buildInvoiceMailtoUrl(invoice, recipientEmail.trim());
-      const supported = await Linking.canOpenURL(mailtoUrl);
-      if (supported) {
-        await Linking.openURL(mailtoUrl);
+      setFeedbackMessage(null);
+
+      if (!accessToken) {
+        throw new Error('Sign in again before sending invoice email.');
       }
+
+      const share = await createInvoiceShareRemote(accessToken, String(invoice.id), {
+        allowDownload: true,
+        expiresInDays: null,
+      });
+
+      if (!share) {
+        throw new Error('Unable to create a secure share link.');
+      }
+
+      const shareUrl = `${API_BASE_URL}/share/${share.share_token}`;
+      const response = await sendInvoiceShareEmailRemote(accessToken, {
+        email: recipientEmail.trim(),
+        invoiceNumber: invoice.invoiceNumber,
+        shareUrl,
+        senderName: invoice.sender.name || 'SmartBill',
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Unable to send invoice email.');
+      }
+
       setIsSendSheetVisible(false);
+      setFeedbackMessage({
+        tone: 'success',
+        text: response.mock ? 'Email queued in mock mode.' : 'Invoice email sent.',
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to send invoice email.';
+      setFeedbackMessage({
+        tone: 'error',
+        text: message,
+      });
     } finally {
       setBusyAction(null);
+    }
+  };
+
+  const handleStatusChange = async (nextStatus: Invoice['status']) => {
+    if (!nextStatus || nextStatus === invoice.status || isUpdatingStatus) {
+      return;
+    }
+
+    try {
+      setIsUpdatingStatus(true);
+      setFeedbackMessage(null);
+      await updateInvoiceStatus(String(invoice.id), nextStatus);
+      setFeedbackMessage({
+        tone: 'success',
+        text: `Status updated to ${nextStatus}.`,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to update invoice status.';
+      setFeedbackMessage({
+        tone: 'error',
+        text: message,
+      });
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -190,6 +294,67 @@ export default function InvoiceDetailScreen() {
               <Feather color="#111111" name="more-horizontal" size={22} strokeWidth={2.5} />
             </Pressable>
           </View>
+
+          <View style={styles.metaCard}>
+            <View style={styles.metaCopy}>
+              <Text allowFontScaling={false} style={styles.metaEyebrow}>
+                Invoice #{invoice.invoiceNumber}
+              </Text>
+              <Text allowFontScaling={false} style={styles.metaTitle}>
+                {invoice.client.name || 'Untitled client'}
+              </Text>
+              <Text allowFontScaling={false} style={styles.metaSubcopy}>
+                {invoice.date} · {invoice.currency}
+              </Text>
+            </View>
+
+            <View style={styles.statusRow}>
+              {STATUS_OPTIONS.map((status) => {
+                const active = invoice.status === status;
+
+                return (
+                  <Pressable
+                    key={status}
+                    disabled={isUpdatingStatus}
+                    onPress={() => void handleStatusChange(status)}
+                    style={[styles.statusChip, active && styles.statusChipActive]}
+                  >
+                    <Text
+                      allowFontScaling={false}
+                      style={[styles.statusChipText, active && styles.statusChipTextActive]}
+                    >
+                      {status}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {feedbackMessage ? (
+            <View
+              style={[
+                styles.feedbackBanner,
+                feedbackMessage.tone === 'error' && styles.feedbackBannerError,
+              ]}
+            >
+              <Feather
+                color={feedbackMessage.tone === 'error' ? '#b94136' : '#1a6a43'}
+                name={feedbackMessage.tone === 'error' ? 'alert-circle' : 'check-circle'}
+                size={15}
+                strokeWidth={2.4}
+              />
+              <Text
+                allowFontScaling={false}
+                style={[
+                  styles.feedbackText,
+                  feedbackMessage.tone === 'error' && styles.feedbackTextError,
+                ]}
+              >
+                {feedbackMessage.text}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.previewStage}>
             <View style={styles.previewCanvas}>
@@ -298,8 +463,8 @@ export default function InvoiceDetailScreen() {
         >
           <View style={styles.sheetCopy}>
             <Text allowFontScaling={false} style={styles.sheetLead}>
-              This keeps the PC send flow intent, but on mobile it opens your mail app with the
-              invoice subject and message prefilled.
+              This follows the PC flow: SmartBill creates a secure share link and sends the email
+              from the server.
             </Text>
             <Text allowFontScaling={false} style={styles.sheetMeta}>
               Invoice #{invoice.invoiceNumber}
@@ -324,7 +489,7 @@ export default function InvoiceDetailScreen() {
               ]}
             >
               <Text allowFontScaling={false} style={styles.sheetPrimaryButtonText}>
-                Open mail app
+                Send invoice
               </Text>
             </Pressable>
 
@@ -490,7 +655,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 18,
   },
   iconCircle: {
     width: 48,
@@ -504,6 +669,85 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 24,
     elevation: 2,
+  },
+  metaCard: {
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 12,
+    gap: 14,
+  },
+  metaCopy: {
+    gap: 4,
+  },
+  metaEyebrow: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: '#7f8490',
+  },
+  metaTitle: {
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '700',
+    color: '#161616',
+  },
+  metaSubcopy: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#8d9098',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  statusChip: {
+    minHeight: 34,
+    borderRadius: 17,
+    backgroundColor: '#f3f2ef',
+    borderWidth: 1,
+    borderColor: '#ebe8e1',
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusChipActive: {
+    backgroundColor: MOBILE_THEME.primarySurface,
+    borderColor: MOBILE_THEME.primary,
+  },
+  statusChipText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: '#5e6168',
+  },
+  statusChipTextActive: {
+    color: MOBILE_THEME.primaryText,
+  },
+  feedbackBanner: {
+    borderRadius: 18,
+    backgroundColor: '#e7f5ec',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  feedbackBannerError: {
+    backgroundColor: '#fff0ef',
+  },
+  feedbackText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
+    color: '#1a6a43',
+  },
+  feedbackTextError: {
+    color: '#b94136',
   },
   previewStage: {
     minHeight: 760,

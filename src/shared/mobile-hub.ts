@@ -62,7 +62,7 @@ export function getMobileTemplates(savedTemplates: InvoiceTemplateRecord[]) {
   );
 }
 
-export function buildInvoiceFromTemplateData(templateData: Partial<Invoice>) {
+export function buildInvoiceFromTemplateData(templateData: Partial<Invoice>): Invoice {
   const baseInvoice = createEmptyInvoice();
 
   return {
@@ -94,15 +94,27 @@ export function buildInvoiceFromTemplateData(templateData: Partial<Invoice>) {
   };
 }
 
-export function createDraftInvoiceFromTemplate(template: InvoiceTemplateRecord) {
+export function cloneInvoiceRecord(invoice: Invoice): Invoice {
+  return buildInvoiceFromTemplateData(invoice);
+}
+
+export function createDraftInvoiceFromTemplate(
+  template: InvoiceTemplateRecord,
+  senderDefaults?: Pick<Sender, 'name' | 'email' | 'phone' | 'address'>
+): Invoice {
   const baseInvoice = createEmptyInvoice();
   const templateInvoice = buildInvoiceFromTemplateData(template.templateData);
 
   return {
     ...baseInvoice,
     type: templateInvoice.type,
-    sender: templateInvoice.sender,
-    client: templateInvoice.client,
+    sender: {
+      ...templateInvoice.sender,
+      ...(senderDefaults || {}),
+    },
+    client: {
+      ...baseInvoice.client,
+    },
     paymentInfo: templateInvoice.paymentInfo,
     items: cloneItems(templateInvoice.items),
     taxRate: templateInvoice.taxRate,
@@ -110,6 +122,7 @@ export function createDraftInvoiceFromTemplate(template: InvoiceTemplateRecord) 
     notes: templateInvoice.notes,
     template: templateInvoice.template,
     isHeaderReversed: templateInvoice.isHeaderReversed,
+    status: 'Pending',
     visibility: {
       ...templateInvoice.visibility,
     },

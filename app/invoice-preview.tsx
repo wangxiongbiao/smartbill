@@ -15,7 +15,7 @@ import { MOBILE_THEME } from '@/shared/mobile-theme';
 export default function InvoicePreviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { draftInvoice: invoice, submitDraftInvoice } = useInvoiceFlow();
+  const { draftInvoice: invoice, editorMode, submitDraftInvoice } = useInvoiceFlow();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,8 +31,8 @@ export default function InvoicePreviewScreen() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      await submitDraftInvoice();
-      router.replace('/(tabs)');
+      const savedInvoice = await submitDraftInvoice();
+      router.replace(`/invoice-detail/${savedInvoice.id}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -74,7 +74,7 @@ export default function InvoicePreviewScreen() {
               <ActivityIndicator color="#ffffff" size="small" />
             ) : (
               <Text allowFontScaling={false} style={styles.submitButtonText}>
-                Create Invoice
+                {editorMode === 'edit' ? 'Done editing' : 'Done'}
               </Text>
             )}
           </Pressable>

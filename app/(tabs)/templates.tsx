@@ -4,16 +4,16 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BottomSheetEditor } from '@/components/invoice-create/shared';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import {
   buildInvoiceFromTemplateData,
-  createDraftInvoiceFromTemplate,
   getMobileTemplates,
   getInvoiceAmount,
 } from '@/shared/mobile-hub';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
-import type { TemplateCategory } from '@/shared/types';
+import type { InvoiceTemplateRecord, TemplateCategory } from '@/shared/types';
 
 function formatAmount(amount: number, currency = 'CNY') {
   return new Intl.NumberFormat('en-US', {
@@ -41,8 +41,10 @@ function formatDate(value: string) {
 export default function TemplatesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { savedTemplates, setDraftInvoice } = useInvoiceFlow();
+  const { removeTemplate, savedTemplates, useTemplate } = useInvoiceFlow();
   const [activeCategory, setActiveCategory] = useState<TemplateCategory>('business');
+  const [selectedTemplate, setSelectedTemplate] = useState<InvoiceTemplateRecord | null>(null);
+  const [busyAction, setBusyAction] = useState<'use' | 'delete' | null>(null);
 
   const templates = useMemo(() => getMobileTemplates(savedTemplates), [savedTemplates]);
   const activeCategoryLabel =
@@ -53,14 +55,25 @@ export default function TemplatesScreen() {
     [activeCategory, templates]
   );
 
-  const handleUseTemplate = (templateId: string) => {
-    const template = templates.find((item) => item.id === templateId);
-    if (!template) {
-      return;
+  const handleUseTemplate = async (template: InvoiceTemplateRecord) => {
+    try {
+      setBusyAction('use');
+      await useTemplate(template);
+      setSelectedTemplate(null);
+      router.push('/create-invoice');
+    } finally {
+      setBusyAction(null);
     }
+  };
 
-    setDraftInvoice(createDraftInvoiceFromTemplate(template));
-    router.push('/create-invoice');
+  const handleDeleteTemplate = async (template: InvoiceTemplateRecord) => {
+    try {
+      setBusyAction('delete');
+      await removeTemplate(String(template.id));
+      setSelectedTemplate(null);
+    } finally {
+      setBusyAction(null);
+    }
   };
 
   return (
@@ -186,15 +199,26 @@ export default function TemplatesScreen() {
                       </Text>
                     </View>
 
-                    <Pressable
-                      onPress={() => handleUseTemplate(template.id)}
-                      style={styles.useButton}
-                    >
-                      <Feather color="#ffffff" name="plus" size={14} strokeWidth={2.6} />
-                      <Text allowFontScaling={false} style={styles.useButtonText}>
-                        Use template
-                      </Text>
-                    </Pressable>
+                    <View style={styles.cardActions}>
+                      <Pressable
+                        onPress={() => setSelectedTemplate(template)}
+                        style={styles.detailButton}
+                      >
+                        <Text allowFontScaling={false} style={styles.detailButtonText}>
+                          Details
+                        </Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={() => void handleUseTemplate(template)}
+                        style={styles.useButton}
+                      >
+                        <Feather color="#ffffff" name="plus" size={14} strokeWidth={2.6} />
+                        <Text allowFontScaling={false} style={styles.useButtonText}>
+                          Use template
+                        </Text>
+                      </Pressable>
+                    </View>
                   </View>
                 </View>
               );
@@ -202,6 +226,64 @@ export default function TemplatesScreen() {
           </View>
         )}
       </ScrollView>
+
+      <BottomSheetEditor
+        bottomInset={insets.bottom}
+        onClose={() => setSelectedTemplate(null)}
+        title={selectedTemplate?.name || 'Template details'}
+        visible={selectedTemplate !== null}
+      >
+        {selectedTemplate ? (
+          <>
+            <View style={styles.sheetSummary}>
+              <Text allowFontScaling={false} style={styles.sheetSummaryLabel}>
+                {selectedTemplate.description || 'Reusable invoice layout'}
+              </Text>
+              <Text allowFontScaling={false} style={styles.sheetSummaryMeta}>
+                Updated {formatDate(selectedTemplate.updatedAt)} · Used {selectedTemplate.usageCount || 0}{' '}
+                times
+              </Text>
+            </View>
+
+            <View style={styles.sheetMetaCard}>
+              <Text allowFontScaling={false} style={styles.sheetMetaTitle}>
+                {selectedTemplate.templateType}
+              </Text>
+              <Text allowFontScaling={false} style={styles.sheetMetaText}>
+                {(buildInvoiceFromTemplateData(selectedTemplate.templateData).type || 'invoice').toUpperCase()}
+              </Text>
+            </View>
+
+            <View style={styles.sheetActions}>
+              <Pressable
+                disabled={busyAction !== null}
+                onPress={() => void handleUseTemplate(selectedTemplate)}
+                style={[styles.sheetPrimaryButton, busyAction !== null && styles.sheetButtonDisabled]}
+              >
+                <Text allowFontScaling={false} style={styles.sheetPrimaryButtonText}>
+                  {busyAction === 'use' ? 'Preparing...' : 'Use template'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                disabled={busyAction !== null}
+                onPress={() => void handleDeleteTemplate(selectedTemplate)}
+                style={[styles.sheetDangerButton, busyAction !== null && styles.sheetButtonDisabled]}
+              >
+                <Text allowFontScaling={false} style={styles.sheetDangerButtonText}>
+                  {busyAction === 'delete' ? 'Deleting...' : 'Delete template'}
+                </Text>
+              </Pressable>
+
+              <Pressable onPress={() => setSelectedTemplate(null)} style={styles.sheetSecondaryButton}>
+                <Text allowFontScaling={false} style={styles.sheetSecondaryButtonText}>
+                  Close
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        ) : null}
+      </BottomSheetEditor>
     </SafeAreaView>
   );
 }
@@ -413,7 +495,28 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     color: '#c3c4c8',
   },
+  cardActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  detailButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#f3f2ef',
+    borderWidth: 1,
+    borderColor: '#e7e4dd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailButtonText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#171717',
+  },
   useButton: {
+    flex: 1,
     height: 44,
     borderRadius: 16,
     backgroundColor: MOBILE_THEME.primary,
@@ -427,5 +530,89 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  sheetSummary: {
+    gap: 6,
+  },
+  sheetSummaryLabel: {
+    fontSize: 14,
+    lineHeight: 19,
+    color: '#5f636b',
+  },
+  sheetSummaryMeta: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: '#8d9098',
+  },
+  sheetMetaCard: {
+    borderRadius: 18,
+    backgroundColor: '#f7f6f4',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 6,
+  },
+  sheetMetaTitle: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '800',
+    color: MOBILE_THEME.primaryText,
+    textTransform: 'capitalize',
+  },
+  sheetMetaText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#171717',
+  },
+  sheetActions: {
+    gap: 10,
+    marginTop: 6,
+  },
+  sheetPrimaryButton: {
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: MOBILE_THEME.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetPrimaryButtonText: {
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  sheetDangerButton: {
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: '#fff0ef',
+    borderWidth: 1,
+    borderColor: '#f4d0cd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetDangerButtonText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#c23b35',
+  },
+  sheetSecondaryButton: {
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#f3f2ef',
+    borderWidth: 1,
+    borderColor: '#e7e4dd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetSecondaryButtonText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: '#171717',
+  },
+  sheetButtonDisabled: {
+    opacity: 0.45,
   },
 });

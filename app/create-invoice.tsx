@@ -2,7 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -107,9 +107,14 @@ export default function CreateInvoiceScreen() {
   const {
     billingProfiles,
     draftInvoice: invoice,
+    editorError,
+    editorMode,
+    isEditorActive,
+    lastSavedAt,
     resetDraftInvoice,
-    setDraftInvoice,
+    saveStatus,
     submitDraftInvoice,
+    updateDraftInvoice,
   } =
     useInvoiceFlow();
   const [activeSheet, setActiveSheet] = useState<SectionKey | null>(null);
@@ -138,8 +143,14 @@ export default function CreateInvoiceScreen() {
     [billingProfiles]
   );
 
+  useEffect(() => {
+    if (!isEditorActive) {
+      resetDraftInvoice();
+    }
+  }, [isEditorActive, resetDraftInvoice]);
+
   const updateInvoice = (updates: Partial<Invoice>) => {
-    setDraftInvoice({ ...invoice, ...updates });
+    updateDraftInvoice(updates);
   };
 
   const openSheet = (key: SectionKey) => {
@@ -313,6 +324,28 @@ export default function CreateInvoiceScreen() {
     });
   };
 
+  const moveItem = (itemId: string, direction: 'up' | 'down') => {
+    const currentIndex = invoice.items.findIndex((item) => item.id === itemId);
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= invoice.items.length) {
+      return;
+    }
+
+    const nextItems = [...invoice.items];
+    const [movedItem] = nextItems.splice(currentIndex, 1);
+    nextItems.splice(targetIndex, 0, movedItem);
+
+    updateInvoice({
+      items: nextItems,
+    });
+  };
+
   const updateItemField = (itemId: string, field: keyof InvoiceItem, value: string) => {
     if (field === 'amount') {
       updateInvoice({
@@ -475,16 +508,21 @@ export default function CreateInvoiceScreen() {
     ? invoice.sender.disclaimerText || 'Visible'
     : 'Off';
 
-  const handleCancel = () => {
-    resetDraftInvoice();
-    router.back();
+  const handleCancel = async () => {
+    try {
+      setIsSubmitting(true);
+      await submitDraftInvoice();
+      router.back();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      await submitDraftInvoice();
-      router.replace('/(tabs)');
+      const savedInvoice = await submitDraftInvoice();
+      router.replace(`/invoice-detail/${savedInvoice.id}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -597,7 +635,29 @@ export default function CreateInvoiceScreen() {
                 <View key={item.id} style={styles.itemCard}>
                   {invoice.items.length > 1 ? (
                     <View style={styles.itemCardHeaderCompact}>
-                      <View />
+                      <View style={styles.itemCardHeaderActions}>
+                        <Pressable
+                          disabled={invoice.items[0]?.id === item.id}
+                          onPress={() => moveItem(item.id, 'up')}
+                          style={[
+                            styles.itemDeleteButton,
+                            invoice.items[0]?.id === item.id && styles.iconOnlyButtonDisabled,
+                          ]}
+                        >
+                          <Feather color="#6a6d75" name="chevron-up" size={15} strokeWidth={2.3} />
+                        </Pressable>
+                        <Pressable
+                          disabled={invoice.items[invoice.items.length - 1]?.id === item.id}
+                          onPress={() => moveItem(item.id, 'down')}
+                          style={[
+                            styles.itemDeleteButton,
+                            invoice.items[invoice.items.length - 1]?.id === item.id &&
+                              styles.iconOnlyButtonDisabled,
+                          ]}
+                        >
+                          <Feather color="#6a6d75" name="chevron-down" size={15} strokeWidth={2.3} />
+                        </Pressable>
+                      </View>
                       <Pressable onPress={() => removeItem(item.id)} style={styles.itemDeleteButton}>
                         <Feather color="#6a6d75" name="trash-2" size={15} strokeWidth={2.3} />
                       </Pressable>
@@ -994,9 +1054,48 @@ export default function CreateInvoiceScreen() {
             </View>
           </View>
 
-          <Text allowFontScaling={false} style={styles.title}>
-            New invoice
-          </Text>
+          <View style={styles.titleBlock}>
+            <Text allowFontScaling={false} style={styles.title}>
+              {editorMode === 'edit' ? 'Edit invoice' : 'New invoice'}
+            </Text>
+
+            <View style={styles.titleMetaRow}>
+              <View
+                style={[
+                  styles.saveStatusBadge,
+                  saveStatus === 'saved' && styles.saveStatusBadgeSaved,
+                  saveStatus === 'error' && styles.saveStatusBadgeError,
+                ]}
+              >
+                <Feather
+                  color={getSaveStatusColor(saveStatus)}
+                  name={getSaveStatusIcon(saveStatus)}
+                  size={13}
+                  strokeWidth={2.4}
+                />
+                <Text
+                  allowFontScaling={false}
+                  style={[
+                    styles.saveStatusText,
+                    saveStatus === 'saved' && styles.saveStatusTextSaved,
+                    saveStatus === 'error' && styles.saveStatusTextError,
+                  ]}
+                >
+                  {getSaveStatusLabel(saveStatus, lastSavedAt)}
+                </Text>
+              </View>
+
+              <Text allowFontScaling={false} style={styles.invoiceMetaText}>
+                #{invoice.invoiceNumber}
+              </Text>
+            </View>
+
+            {editorError ? (
+              <Text allowFontScaling={false} style={styles.editorErrorText}>
+                {editorError}
+              </Text>
+            ) : null}
+          </View>
 
           <SectionCard
             onPress={() => openSheet('basic')}
@@ -1049,7 +1148,7 @@ export default function CreateInvoiceScreen() {
               </Text>
             ) : (
               <Text allowFontScaling={false} style={styles.submitButtonText}>
-                Create Invoice
+                Done
               </Text>
             )}
           </Pressable>
@@ -1099,6 +1198,54 @@ function stringifyValue(value: number | string | undefined) {
   return value === undefined ? '' : String(value);
 }
 
+function getSaveStatusLabel(
+  status: 'idle' | 'creating' | 'saving' | 'saved' | 'error',
+  lastSavedAt: string | null
+) {
+  switch (status) {
+    case 'creating':
+      return 'Creating draft...';
+    case 'saving':
+      return 'Saving changes...';
+    case 'saved':
+      return lastSavedAt
+        ? `Saved ${new Date(lastSavedAt).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+          })}`
+        : 'Saved';
+    case 'error':
+      return 'Save failed';
+    default:
+      return 'Ready to edit';
+  }
+}
+
+function getSaveStatusIcon(status: 'idle' | 'creating' | 'saving' | 'saved' | 'error') {
+  switch (status) {
+    case 'creating':
+    case 'saving':
+      return 'clock';
+    case 'saved':
+      return 'check-circle';
+    case 'error':
+      return 'alert-circle';
+    default:
+      return 'edit-3';
+  }
+}
+
+function getSaveStatusColor(status: 'idle' | 'creating' | 'saving' | 'saved' | 'error') {
+  switch (status) {
+    case 'saved':
+      return '#1a6a43';
+    case 'error':
+      return '#b94136';
+    default:
+      return '#4d5c74';
+  }
+}
+
 function formatMoney(currency: string, amount: number) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -1137,7 +1284,55 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#050505',
     textAlign: 'center',
+  },
+  titleBlock: {
+    gap: 8,
     marginBottom: 4,
+  },
+  titleMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  saveStatusBadge: {
+    minHeight: 32,
+    borderRadius: 16,
+    backgroundColor: '#edf2fb',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  saveStatusBadgeSaved: {
+    backgroundColor: '#e7f5ec',
+  },
+  saveStatusBadgeError: {
+    backgroundColor: '#fff0ef',
+  },
+  saveStatusText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: '#4d5c74',
+  },
+  saveStatusTextSaved: {
+    color: '#1a6a43',
+  },
+  saveStatusTextError: {
+    color: '#b94136',
+  },
+  invoiceMetaText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: '#848791',
+  },
+  editorErrorText: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#b94136',
   },
   block: {
     gap: 10,
@@ -1360,6 +1555,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: -2,
   },
+  itemCardHeaderActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   itemDeleteButton: {
     width: 32,
     height: 32,
@@ -1367,6 +1566,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f4f1',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconOnlyButtonDisabled: {
+    opacity: 0.42,
   },
   itemFieldsWrap: {
     flexDirection: 'row',

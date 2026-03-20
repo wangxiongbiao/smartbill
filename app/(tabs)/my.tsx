@@ -1,13 +1,13 @@
 import Feather from '@expo/vector-icons/Feather';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BottomSheetEditor, Field } from '@/components/invoice-create/shared';
 import { useAuth } from '@/shared/auth/AuthProvider';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import {
   getDashboardSummary,
-  getDefaultSenderSummary,
   getMobileInvoices,
   getMobileTemplates,
 } from '@/shared/mobile-hub';
@@ -24,16 +24,55 @@ function formatAmount(amount: number, currency = 'CNY') {
 
 export default function MyScreen() {
   const insets = useSafeAreaInsets();
-  const { createdInvoices, deletedInvoiceIds, savedTemplates } = useInvoiceFlow();
+  const {
+    createdInvoices,
+    defaultSender,
+    deletedInvoiceIds,
+    saveDefaultSenderProfile,
+    savedTemplates,
+    syncError,
+  } = useInvoiceFlow();
   const { signOut, user } = useAuth();
+  const [isSenderSheetVisible, setIsSenderSheetVisible] = useState(false);
+  const [isSavingSender, setIsSavingSender] = useState(false);
+  const [senderError, setSenderError] = useState('');
+  const [senderDraft, setSenderDraft] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+  });
 
   const invoices = useMemo(
     () => getMobileInvoices(createdInvoices, deletedInvoiceIds),
     [createdInvoices, deletedInvoiceIds]
   );
   const templates = useMemo(() => getMobileTemplates(savedTemplates), [savedTemplates]);
-  const sender = useMemo(() => getDefaultSenderSummary(invoices), [invoices]);
   const summary = useMemo(() => getDashboardSummary(invoices), [invoices]);
+
+  const openSenderSheet = () => {
+    setSenderError('');
+    setSenderDraft({
+      name: defaultSender.name || '',
+      email: defaultSender.email || '',
+      phone: defaultSender.phone || '',
+      address: defaultSender.address || '',
+    });
+    setIsSenderSheetVisible(true);
+  };
+
+  const handleSaveSender = async () => {
+    try {
+      setIsSavingSender(true);
+      setSenderError('');
+      await saveDefaultSenderProfile(senderDraft);
+      setIsSenderSheetVisible(false);
+    } catch (error) {
+      setSenderError(error instanceof Error ? error.message : 'Unable to save default sender.');
+    } finally {
+      setIsSavingSender(false);
+    }
+  };
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -94,35 +133,48 @@ export default function MyScreen() {
             <Text allowFontScaling={false} style={styles.sectionTitle}>
               Default sender
             </Text>
-            <View style={styles.sectionBadge}>
-              <Text allowFontScaling={false} style={styles.sectionBadgeText}>
-                Active
-              </Text>
+            <View style={styles.sectionHeaderActions}>
+              <View style={styles.sectionBadge}>
+                <Text allowFontScaling={false} style={styles.sectionBadgeText}>
+                  Active
+                </Text>
+              </View>
+              <Pressable onPress={openSenderSheet} style={styles.inlineAction}>
+                <Feather color={MOBILE_THEME.primaryText} name="edit-3" size={13} strokeWidth={2.5} />
+                <Text allowFontScaling={false} style={styles.inlineActionText}>
+                  Edit
+                </Text>
+              </Pressable>
             </View>
           </View>
 
           <Text allowFontScaling={false} style={styles.senderName}>
-            {sender.name}
+            {defaultSender.name || remoteSenderName(user?.name)}
           </Text>
-          {sender.email ? (
+          {defaultSender.email ? (
             <Text allowFontScaling={false} style={styles.senderMeta}>
-              {sender.email}
+              {defaultSender.email}
             </Text>
           ) : null}
-          {sender.phone ? (
+          {defaultSender.phone ? (
             <Text allowFontScaling={false} style={styles.senderMeta}>
-              {sender.phone}
+              {defaultSender.phone}
             </Text>
           ) : null}
-          {sender.address ? (
+          {defaultSender.address ? (
             <Text allowFontScaling={false} style={styles.senderAddress}>
-              {sender.address}
+              {defaultSender.address}
             </Text>
           ) : (
             <Text allowFontScaling={false} style={styles.senderPlaceholder}>
-              Save sender details from the invoice editor to configure this block.
+              Set the sender once here and every new invoice will start with it prefilled.
             </Text>
           )}
+          {syncError ? (
+            <Text allowFontScaling={false} style={styles.senderError}>
+              {syncError}
+            </Text>
+          ) : null}
         </View>
 
         <View style={styles.sectionCard}>
@@ -189,8 +241,75 @@ export default function MyScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <BottomSheetEditor
+        bottomInset={insets.bottom}
+        onClose={() => setIsSenderSheetVisible(false)}
+        title="Default sender"
+        visible={isSenderSheetVisible}
+      >
+        <Field
+          label="Company name"
+          onChangeText={(value) => setSenderDraft((current) => ({ ...current, name: value }))}
+          placeholder="SmartBill Studio"
+          value={senderDraft.name}
+        />
+        <Field
+          inputFilter="email"
+          label="Billing email"
+          onChangeText={(value) => setSenderDraft((current) => ({ ...current, email: value }))}
+          placeholder="billing@example.com"
+          value={senderDraft.email}
+        />
+        <Field
+          inputFilter="phone"
+          label="Phone"
+          onChangeText={(value) => setSenderDraft((current) => ({ ...current, phone: value }))}
+          placeholder="+86 138 0000 0000"
+          value={senderDraft.phone}
+        />
+        <Field
+          inputFilter="multilineText"
+          label="Address"
+          multiline
+          onChangeText={(value) => setSenderDraft((current) => ({ ...current, address: value }))}
+          placeholder="Registered address"
+          value={senderDraft.address}
+        />
+
+        {senderError ? (
+          <Text allowFontScaling={false} style={styles.senderSheetError}>
+            {senderError}
+          </Text>
+        ) : null}
+
+        <View style={styles.sheetActions}>
+          <Pressable
+            disabled={isSavingSender}
+            onPress={() => void handleSaveSender()}
+            style={[styles.sheetPrimaryButton, isSavingSender && styles.sheetPrimaryButtonDisabled]}
+          >
+            <Text allowFontScaling={false} style={styles.sheetPrimaryButtonText}>
+              {isSavingSender ? 'Saving...' : 'Save sender'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setIsSenderSheetVisible(false)}
+            style={styles.sheetSecondaryButton}
+          >
+            <Text allowFontScaling={false} style={styles.sheetSecondaryButtonText}>
+              Cancel
+            </Text>
+          </Pressable>
+        </View>
+      </BottomSheetEditor>
     </SafeAreaView>
   );
+}
+
+function remoteSenderName(fallbackName?: string) {
+  return fallbackName || 'Not configured';
 }
 
 const styles = StyleSheet.create({
@@ -290,6 +409,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  sectionHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   sectionTitle: {
     fontSize: 15,
     lineHeight: 18,
@@ -303,6 +427,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   sectionBadgeText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: MOBILE_THEME.primaryText,
+  },
+  inlineAction: {
+    minHeight: 30,
+    borderRadius: 15,
+    backgroundColor: '#f3f2ef',
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  inlineActionText: {
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '700',
@@ -332,6 +471,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     color: '#a2a4ab',
+  },
+  senderError: {
+    marginTop: 8,
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#b94136',
   },
   settingRow: {
     flexDirection: 'row',
@@ -382,5 +527,46 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '700',
     color: '#c23b35',
+  },
+  senderSheetError: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#b94136',
+    marginTop: -2,
+  },
+  sheetActions: {
+    gap: 10,
+    marginTop: 6,
+  },
+  sheetPrimaryButton: {
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: MOBILE_THEME.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetPrimaryButtonDisabled: {
+    opacity: 0.45,
+  },
+  sheetPrimaryButtonText: {
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  sheetSecondaryButton: {
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#f3f2ef',
+    borderWidth: 1,
+    borderColor: '#e7e4dd',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetSecondaryButtonText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: '#171717',
   },
 });

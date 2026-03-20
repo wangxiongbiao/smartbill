@@ -1,5 +1,14 @@
 import { API_BASE_URL } from '@/shared/auth/config';
-import type { BillingProfile, Invoice, InvoiceTemplateRecord, Profile, TemplateCategory } from '@/shared/types';
+import type {
+  BillingProfile,
+  BillingProfileKind,
+  Client,
+  Invoice,
+  InvoiceTemplateRecord,
+  Profile,
+  Sender,
+  TemplateCategory,
+} from '@/shared/types';
 
 type RemoteTemplateRecord = {
   id: string | number;
@@ -25,6 +34,16 @@ type AuthMePayload = {
     created_at?: string;
     updated_at?: string;
   } | null;
+};
+
+export type RemoteInvoiceShare = {
+  id: string;
+  invoice_id?: string;
+  share_token: string;
+  allow_download?: boolean;
+  expires_at?: string | null;
+  revoked_at?: string | null;
+  created_at: string;
 };
 
 async function apiRequest<T>(path: string, accessToken: string, init?: RequestInit): Promise<T> {
@@ -111,6 +130,24 @@ export async function fetchBillingProfiles(accessToken: string) {
   return payload.profiles || [];
 }
 
+export async function saveBillingProfileRemote(
+  accessToken: string,
+  kind: BillingProfileKind,
+  profile: Partial<Sender | Client>,
+  makeDefault = false
+) {
+  const payload = await apiRequest<{ profile?: BillingProfile | null }>('/api/billing-profiles', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({
+      kind,
+      profile,
+      makeDefault,
+    }),
+  });
+
+  return payload.profile ?? null;
+}
+
 export async function fetchProfile(accessToken: string) {
   const payload = await apiRequest<{ profile?: Profile | null }>('/api/profile', accessToken);
   return payload.profile ?? null;
@@ -118,4 +155,69 @@ export async function fetchProfile(accessToken: string) {
 
 export async function fetchAuthMe(accessToken: string) {
   return apiRequest<AuthMePayload>('/api/auth/me', accessToken);
+}
+
+export async function bumpTemplateUsageRemote(accessToken: string, id: string) {
+  await apiRequest<{ success: boolean }>(
+    `/api/templates/${encodeURIComponent(id)}/usage`,
+    accessToken,
+    {
+      method: 'POST',
+    }
+  );
+}
+
+export async function deleteTemplateRemote(accessToken: string, id: string) {
+  await apiRequest<{ success: boolean }>(
+    `/api/templates/${encodeURIComponent(id)}`,
+    accessToken,
+    {
+      method: 'DELETE',
+    }
+  );
+}
+
+export async function createInvoiceShareRemote(
+  accessToken: string,
+  invoiceId: string,
+  options?: {
+    allowDownload?: boolean;
+    expiresInDays?: number | null;
+  }
+) {
+  const payload = await apiRequest<{ share?: RemoteInvoiceShare | null }>(
+    '/api/share/create',
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        invoiceId,
+        options: {
+          allowDownload: options?.allowDownload ?? true,
+          expiresInDays: options?.expiresInDays ?? null,
+        },
+      }),
+    }
+  );
+
+  return payload.share ?? null;
+}
+
+export async function sendInvoiceShareEmailRemote(
+  accessToken: string,
+  input: {
+    email: string;
+    invoiceNumber: string;
+    shareUrl: string;
+    senderName: string;
+  }
+) {
+  return apiRequest<{ success?: boolean; message?: string; mock?: boolean }>(
+    '/api/share/email',
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }
+  );
 }
