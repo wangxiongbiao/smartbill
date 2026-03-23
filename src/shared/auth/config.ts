@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 
 export const SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -13,7 +14,7 @@ export const API_BASE_URL = (
 export const AUTH_CALLBACK_PATH = 'auth/callback';
 
 export function getAuthRedirectUrl() {
-  return 'mobile://auth/callback';
+  return Linking.createURL(AUTH_CALLBACK_PATH);
 }
 
 export function requiresNativeAuthBuild() {

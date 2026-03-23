@@ -1,7 +1,7 @@
-import type { PropsWithChildren } from 'react';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import * as WebBrowser from 'expo-web-browser';
+import type { PropsWithChildren } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import {
   API_BASE_URL,
@@ -97,10 +97,10 @@ async function fetchCurrentUserProfile(accessToken: string) {
   return {
     profile: profile
       ? {
-          id: payload?.user?.id || undefined,
-          fullName: profile.full_name ?? null,
-          avatarUrl: profile.avatar_url ?? null,
-        }
+        id: payload?.user?.id || undefined,
+        fullName: profile.full_name ?? null,
+        avatarUrl: profile.avatar_url ?? null,
+      }
       : null,
   };
 }
@@ -236,6 +236,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     try {
       const redirectTo = getAuthRedirectUrl();
+      console.log('[AuthProvider] Sign-in redirectTo:', redirectTo);
       const { data, error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
