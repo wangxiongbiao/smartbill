@@ -1,9 +1,10 @@
 import Feather from '@expo/vector-icons/Feather';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Redirect, Tabs, useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, StyleSheet, View, Text } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuthPrompt } from '@/shared/auth/AuthPromptProvider';
 import { useAuth } from '@/shared/auth/AuthProvider';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
@@ -34,17 +35,20 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { resetDraftInvoice } = useInvoiceFlow();
+  const { requireAuth } = useAuthPrompt();
   const activeRouteName = state.routes[state.index]?.name;
   const showCreateButton = activeRouteName === 'index';
 
   return (
     <View pointerEvents="box-none" style={styles.wrapper}>
-      <View style={[styles.dockBackground, { paddingBottom: insets.bottom }]}>
+      <View style={[styles.dockBackground, { paddingBottom: insets.bottom + 10 }]}>
         {showCreateButton ? (
           <Pressable
             onPress={() => {
-              resetDraftInvoice();
-              router.push('/create-invoice');
+              requireAuth(() => {
+                resetDraftInvoice();
+                router.push('/create-invoice');
+              });
             }}
             style={styles.createButton}
           >
@@ -107,6 +111,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -114,10 +119,6 @@ export default function TabLayout() {
         <ActivityIndicator color={MOBILE_THEME.primary} size="small" />
       </View>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/" />;
   }
 
   return (

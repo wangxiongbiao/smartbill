@@ -8,12 +8,13 @@ import 'react-native-reanimated';
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { AuthPromptProvider } from '@/shared/auth/AuthPromptProvider';
 import { AuthProvider } from '@/shared/auth/AuthProvider';
 import { InvoiceFlowProvider } from '@/shared/invoice-flow';
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -44,27 +45,33 @@ export default function RootLayout() {
 }
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AuthProvider>
-          <InvoiceFlowProvider>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="create-invoice" options={{ headerShown: false }} />
-              <Stack.Screen name="invoice-preview" options={{ headerShown: false }} />
-              <Stack.Screen name="invoice-detail/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-            </Stack>
-          </InvoiceFlowProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <AuthProvider>
+            <AuthPromptProvider>
+              <InvoiceFlowProvider>
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="login" options={{ headerShown: false, presentation: 'modal' }} />
+                  <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="create-invoice" options={{ headerShown: false }} />
+                  <Stack.Screen name="invoice-preview" options={{ headerShown: false }} />
+                  <Stack.Screen name="invoice-detail/[id]" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+                </Stack>
+              </InvoiceFlowProvider>
+            </AuthPromptProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

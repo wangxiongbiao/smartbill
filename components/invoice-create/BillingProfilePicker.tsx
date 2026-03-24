@@ -77,8 +77,8 @@ export function BillingProfilePicker({
           <Text allowFontScaling={false} numberOfLines={1} style={styles.triggerHint}>
             {activeProfile
               ? [activeProfile.email, activeProfile.phone].filter(Boolean).join(' · ') ||
-                activeProfile.address ||
-                `${profiles.length} saved profiles`
+              activeProfile.address ||
+              `${profiles.length} saved profiles`
               : profiles.length > 0
                 ? `${profiles.length} saved profiles`
                 : copy.hint}
@@ -97,7 +97,7 @@ export function BillingProfilePicker({
       >
         <View style={styles.overlay}>
           <Pressable onPress={() => setVisible(false)} style={styles.backdrop} />
-          <View style={[styles.sheet, { paddingBottom: insets.bottom + 14 }]}>
+          <View style={[styles.sheet, { paddingBottom: insets.bottom + 24 }]}>
             <View style={styles.handle} />
             <View style={styles.header}>
               <Text allowFontScaling={false} style={styles.title}>

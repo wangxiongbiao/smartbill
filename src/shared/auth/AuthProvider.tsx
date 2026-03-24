@@ -279,9 +279,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     setError(null);
-    await supabase.auth.signOut({ scope: 'global' });
-    setSession(null);
-    setUser(null);
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (e) {
+      console.warn('[AuthProvider] Global signout failed, clearing local session anyway', e);
+    } finally {
+      setSession(null);
+      setUser(null);
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(

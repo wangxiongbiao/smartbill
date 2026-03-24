@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
-import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
@@ -12,11 +12,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import SignatureScreen, { SignatureViewRef } from 'react-native-signature-canvas';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import SignatureScreen, { SignatureViewRef } from 'react-native-signature-canvas';
 
 import { BasicSection } from '@/components/invoice-create/BasicSection';
 import { ClientSection } from '@/components/invoice-create/ClientSection';
+import {
+  getInputKeyboardProps,
+  sanitizeInputValue,
+} from '@/components/invoice-create/inputFilters';
 import { SenderSection } from '@/components/invoice-create/SenderSection';
 import {
   ActionButton,
@@ -28,9 +32,9 @@ import {
   TopActionButton,
 } from '@/components/invoice-create/shared';
 import {
-  getInputKeyboardProps,
-  sanitizeInputValue,
-} from '@/components/invoice-create/inputFilters';
+  applyBillingProfileToClient,
+  applyBillingProfileToSender,
+} from '@/shared/billing-profiles';
 import {
   calculateInvoiceTotals,
   getSortedInvoiceColumns,
@@ -40,10 +44,6 @@ import {
   updateInvoiceItemCustomValue,
   updatePaymentInfoFieldValue,
 } from '@/shared/invoice';
-import {
-  applyBillingProfileToClient,
-  applyBillingProfileToSender,
-} from '@/shared/billing-profiles';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
 import type {
@@ -652,7 +652,7 @@ export default function CreateInvoiceScreen() {
                           style={[
                             styles.itemDeleteButton,
                             invoice.items[invoice.items.length - 1]?.id === item.id &&
-                              styles.iconOnlyButtonDisabled,
+                            styles.iconOnlyButtonDisabled,
                           ]}
                         >
                           <Feather color="#6a6d75" name="chevron-down" size={15} strokeWidth={2.3} />
@@ -1043,7 +1043,7 @@ export default function CreateInvoiceScreen() {
       <StatusBar style="dark" />
       <View style={styles.screen}>
         <ScrollView
-          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 226 }]}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 236 }]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.topRow}>
@@ -1140,7 +1140,7 @@ export default function CreateInvoiceScreen() {
           />
         </ScrollView>
 
-        <View style={[styles.bottomDock, { paddingBottom: insets.bottom }]}>
+        <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 10 }]}>
           <Pressable onPress={() => void handleSubmit()} style={styles.submitButton}>
             {isSubmitting ? (
               <Text allowFontScaling={false} style={styles.submitButtonText}>
@@ -1210,9 +1210,9 @@ function getSaveStatusLabel(
     case 'saved':
       return lastSavedAt
         ? `Saved ${new Date(lastSavedAt).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-          })}`
+          hour: 'numeric',
+          minute: '2-digit',
+        })}`
         : 'Saved';
     case 'error':
       return 'Save failed';

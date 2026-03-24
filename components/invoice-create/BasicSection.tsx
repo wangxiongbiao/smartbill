@@ -266,7 +266,7 @@ export function BasicSection({
           <View
             style={[
               styles.currencySheetContainer,
-              { paddingBottom: insets.bottom + 14 },
+              { paddingBottom: insets.bottom + 24 },
             ]}
           >
             <View style={styles.currencySheetHandle} />
@@ -321,7 +321,7 @@ export function BasicSection({
           <View
             style={[
               styles.currencySheetContainer,
-              { paddingBottom: insets.bottom + 14 },
+              { paddingBottom: insets.bottom + 24 },
             ]}
           >
             <View style={styles.currencySheetHandle} />

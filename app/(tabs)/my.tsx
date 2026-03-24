@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,8 +33,10 @@ export default function MyScreen() {
     savedTemplates,
     syncError,
   } = useInvoiceFlow();
-  const { signOut, user } = useAuth();
+  const { isAuthenticated, signOut, user } = useAuth();
+  const router = useRouter();
   const [isSenderSheetVisible, setIsSenderSheetVisible] = useState(false);
+  const [isLogoutSheetVisible, setIsLogoutSheetVisible] = useState(false);
   const [isSavingSender, setIsSavingSender] = useState(false);
   const [senderError, setSenderError] = useState('');
   const [senderDraft, setSenderDraft] = useState({
@@ -77,7 +80,7 @@ export default function MyScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 132 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 142 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.accountCard}>
@@ -93,11 +96,19 @@ export default function MyScreen() {
             <Text allowFontScaling={false} style={styles.accountEmail}>
               {user?.email || 'No email'}
             </Text>
-            <View style={styles.providerBadge}>
-              <Text allowFontScaling={false} style={styles.providerBadgeText}>
-                {user?.provider ? `${user.provider} sign-in` : 'Signed in'}
-              </Text>
-            </View>
+            {isAuthenticated ? (
+              <View style={styles.providerBadge}>
+                <Text allowFontScaling={false} style={styles.providerBadgeText}>
+                  {user?.provider ? `${user.provider} sign-in` : 'Signed in'}
+                </Text>
+              </View>
+            ) : (
+              <View style={[styles.providerBadge, { backgroundColor: '#f3f2ef' }]}>
+                <Text allowFontScaling={false} style={[styles.providerBadgeText, { color: '#6f727a' }]}>
+                  Guest
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -228,17 +239,27 @@ export default function MyScreen() {
             return to the login screen.
           </Text>
 
-          <Pressable
-            onPress={() => {
-              signOut().catch(() => undefined);
-            }}
-            style={styles.logoutButton}
-          >
-            <Feather color="#c23b35" name="log-out" size={16} strokeWidth={2.4} />
-            <Text allowFontScaling={false} style={styles.logoutButtonText}>
-              Sign out
-            </Text>
-          </Pressable>
+          {isAuthenticated ? (
+            <Pressable
+              onPress={() => setIsLogoutSheetVisible(true)}
+              style={styles.logoutButton}
+            >
+              <Feather color="#c23b35" name="log-out" size={16} strokeWidth={2.4} />
+              <Text allowFontScaling={false} style={styles.logoutButtonText}>
+                Sign out
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => router.push('/login')}
+              style={[styles.logoutButton, { backgroundColor: MOBILE_THEME.primary, borderColor: MOBILE_THEME.primary }]}
+            >
+              <Feather color="#ffffff" name="log-in" size={16} strokeWidth={2.4} />
+              <Text allowFontScaling={false} style={[styles.logoutButtonText, { color: '#ffffff' }]}>
+                Go to Sign in
+              </Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
 
@@ -296,6 +317,41 @@ export default function MyScreen() {
 
           <Pressable
             onPress={() => setIsSenderSheetVisible(false)}
+            style={styles.sheetSecondaryButton}
+          >
+            <Text allowFontScaling={false} style={styles.sheetSecondaryButtonText}>
+              Cancel
+            </Text>
+          </Pressable>
+        </View>
+      </BottomSheetEditor>
+
+      <BottomSheetEditor
+        bottomInset={insets.bottom}
+        onClose={() => setIsLogoutSheetVisible(false)}
+        title="Sign out"
+        visible={isLogoutSheetVisible}
+        scrollEnabled={false}
+      >
+        <Text allowFontScaling={false} style={styles.logoutSheetMessage}>
+          Are you sure you want to sign out? You will need to sign in again to access your invoices.
+        </Text>
+        <View style={styles.logoutSheetActions}>
+          <Pressable
+            onPress={() => {
+              setIsLogoutSheetVisible(false);
+              setTimeout(() => {
+                signOut().catch(() => undefined);
+              }, 400);
+            }}
+            style={styles.sheetDestructiveButton}
+          >
+            <Text allowFontScaling={false} style={styles.sheetDestructiveButtonText}>
+              Sign out
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setIsLogoutSheetVisible(false)}
             style={styles.sheetSecondaryButton}
           >
             <Text allowFontScaling={false} style={styles.sheetSecondaryButtonText}>
@@ -568,5 +624,29 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '600',
     color: '#171717',
+  },
+  logoutSheetMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#6f727a',
+    marginTop: -4,
+    marginBottom: 4,
+  },
+  logoutSheetActions: {
+    gap: 10,
+    marginTop: 6,
+  },
+  sheetDestructiveButton: {
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: '#fff0ef',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetDestructiveButtonText: {
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+    color: '#c23b35',
   },
 });

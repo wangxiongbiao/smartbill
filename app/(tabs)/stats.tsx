@@ -52,7 +52,7 @@ export default function StatsScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 132 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 142 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroCard}>

@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
-import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,9 +16,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { WebView } from 'react-native-webview';
 
 import { BottomSheetEditor, Field } from '@/components/invoice-create/shared';
-import { shareInvoicePdfFile } from '@/shared/invoice-actions';
-import { API_BASE_URL } from '@/shared/auth/config';
 import { useAuth } from '@/shared/auth/AuthProvider';
+import { API_BASE_URL } from '@/shared/auth/config';
+import { shareInvoicePdfFile } from '@/shared/invoice-actions';
 import {
   buildInvoiceDocumentHtml,
   DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
@@ -81,9 +81,9 @@ export default function InvoiceDetailScreen() {
 
   const previewHtml = invoice
     ? buildInvoiceDocumentHtml(invoice, {
-        lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
-        mode: 'thumbnail',
-      })
+      lang: DEFAULT_INVOICE_DOCUMENT_LANGUAGE,
+      mode: 'thumbnail',
+    })
     : '';
 
   useEffect(() => {
@@ -282,7 +282,7 @@ export default function InvoiceDetailScreen() {
       <StatusBar style="dark" />
       <View style={styles.screen}>
         <ScrollView
-          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 228 }]}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 238 }]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.topRow}>
@@ -371,7 +371,7 @@ export default function InvoiceDetailScreen() {
           </View>
         </ScrollView>
 
-        <View style={[styles.bottomDock, { paddingBottom: insets.bottom }]}>
+        <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 10 }]}>
           <View style={styles.actionRow}>
             {DETAIL_ACTIONS.map((action) => (
               <Pressable

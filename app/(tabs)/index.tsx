@@ -100,7 +100,7 @@ export default function InvoicesScreen() {
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.screen}>
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 316 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 326 }]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
@@ -183,7 +183,7 @@ export default function InvoicesScreen() {
 
         <View
           pointerEvents="box-none"
-          style={[styles.filterDock, { bottom: insets.bottom + 152 }]}
+          style={[styles.filterDock, { bottom: insets.bottom + 162 }]}
         >
           <View style={[styles.segment, styles.segmentFloating]}>
             {FILTERS.map((filter) => {

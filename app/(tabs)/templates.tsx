@@ -5,11 +5,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomSheetEditor } from '@/components/invoice-create/shared';
+import { useAuthPrompt } from '@/shared/auth/AuthPromptProvider';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import {
   buildInvoiceFromTemplateData,
-  getMobileTemplates,
   getInvoiceAmount,
+  getMobileTemplates,
 } from '@/shared/mobile-hub';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
 import { TEMPLATE_TYPE_OPTIONS } from '@/shared/template-types';
@@ -41,6 +42,7 @@ function formatDate(value: string) {
 export default function TemplatesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { requireAuth } = useAuthPrompt();
   const { removeTemplate, savedTemplates, useTemplate } = useInvoiceFlow();
   const [activeCategory, setActiveCategory] = useState<TemplateCategory>('business');
   const [selectedTemplate, setSelectedTemplate] = useState<InvoiceTemplateRecord | null>(null);
@@ -56,30 +58,34 @@ export default function TemplatesScreen() {
   );
 
   const handleUseTemplate = async (template: InvoiceTemplateRecord) => {
-    try {
-      setBusyAction('use');
-      await useTemplate(template);
-      setSelectedTemplate(null);
-      router.push('/create-invoice');
-    } finally {
-      setBusyAction(null);
-    }
+    requireAuth(async () => {
+      try {
+        setBusyAction('use');
+        await useTemplate(template);
+        setSelectedTemplate(null);
+        router.push('/create-invoice');
+      } finally {
+        setBusyAction(null);
+      }
+    });
   };
 
   const handleDeleteTemplate = async (template: InvoiceTemplateRecord) => {
-    try {
-      setBusyAction('delete');
-      await removeTemplate(String(template.id));
-      setSelectedTemplate(null);
-    } finally {
-      setBusyAction(null);
-    }
+    requireAuth(async () => {
+      try {
+        setBusyAction('delete');
+        await removeTemplate(String(template.id));
+        setSelectedTemplate(null);
+      } finally {
+        setBusyAction(null);
+      }
+    });
   };
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 132 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 142 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.summaryCard}>

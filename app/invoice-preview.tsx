@@ -1,5 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -68,7 +68,7 @@ export default function InvoicePreviewScreen() {
           ) : null}
         </View>
 
-        <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 10 }]}>
+        <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 20 }]}>
           <Pressable onPress={() => void handleSubmit()} style={styles.submitButton}>
             {isSubmitting ? (
               <ActivityIndicator color="#ffffff" size="small" />

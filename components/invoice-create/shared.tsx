@@ -7,16 +7,16 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  type TextInputProps,
   View,
+  type TextInputProps,
 } from 'react-native';
 
+import { MOBILE_THEME } from '@/shared/mobile-theme';
 import {
   getInputKeyboardProps,
   sanitizeInputValue,
   type InputFilter,
 } from './inputFilters';
-import { MOBILE_THEME } from '@/shared/mobile-theme';
 
 export function TopActionButton({
   dark = false,
@@ -99,7 +99,7 @@ export function BottomSheetEditor({
     >
       <View style={styles.sheetOverlay}>
         <Pressable onPress={onClose} style={styles.sheetBackdrop} />
-        <View style={[styles.sheetContainer, { paddingBottom: bottomInset + 14 }]}>
+        <View style={[styles.sheetContainer, { paddingBottom: bottomInset + 24 }]}>
           <View style={styles.sheetHandle} />
           <View style={styles.sheetHeader}>
             <Text allowFontScaling={false} style={styles.sheetTitle}>
