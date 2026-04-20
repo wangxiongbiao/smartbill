@@ -49,8 +49,8 @@ export default function LoginScreen() {
             </View>
             <Text style={styles.googleTitle}>Continue with Google</Text>
             <Text style={styles.helper}>
-              This mobile flow uses the native app callback. Please test it in a development build
-              or installed app package.
+              Native apps now use the Google Sign-In SDK directly. Web keeps a browser fallback for
+              debugging, but device testing should happen in a development build or installed app.
             </Text>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <Pressable

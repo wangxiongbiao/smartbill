@@ -1,9 +1,10 @@
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { filterInvoicesByQuery } from '@/shared/invoice-search';
 import { calculateInvoiceTotals } from '@/shared/invoice';
 import { useInvoiceFlow } from '@/shared/invoice-flow';
 import { MOBILE_THEME } from '@/shared/mobile-theme';
@@ -55,6 +56,8 @@ export default function InvoicesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<InvoiceFilter>('Paid');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { createdInvoices, deletedInvoiceIds } = useInvoiceFlow();
 
   const mergedInvoices = useMemo(() => {
@@ -81,20 +84,40 @@ export default function InvoicesScreen() {
   }, [activeFilter, createdInvoices.length]);
 
   const filteredInvoices = useMemo(() => {
-    if (activeFilter === 'All') {
-      return mergedInvoices;
-    }
+    const statusFilteredInvoices = activeFilter === 'All'
+      ? mergedInvoices
+      : mergedInvoices.filter((invoice) =>
+          activeFilter === 'Paid' ? invoice.status === 'paid' : invoice.status === 'unpaid'
+        );
 
-    return mergedInvoices.filter((invoice) =>
-      activeFilter === 'Paid' ? invoice.status === 'paid' : invoice.status === 'unpaid'
-    );
-  }, [activeFilter, mergedInvoices]);
+    return filterInvoicesByQuery(statusFilteredInvoices, searchQuery);
+  }, [activeFilter, mergedInvoices, searchQuery]);
 
   const totalAmount = useMemo(() => {
     return filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
   }, [filteredInvoices]);
 
+  const hasInvoices = mergedInvoices.length > 0;
+  const hasSearchQuery = searchQuery.trim().length > 0;
   const isEmptyState = filteredInvoices.length === 0;
+
+  const emptyStateText = hasSearchQuery
+    ? `No invoices match “${searchQuery.trim()}”`
+    : activeFilter === 'Paid'
+      ? 'Paid invoices will appear here'
+      : activeFilter === 'Unpaid'
+        ? 'Unpaid invoices will appear here'
+        : 'Invoices will appear here';
+
+  const handleHeaderActionPress = (actionKey: (typeof HEADER_ACTIONS)[number]['key']) => {
+    if (actionKey === 'search') {
+      if (isSearchOpen) {
+        setSearchQuery('');
+      }
+
+      setIsSearchOpen((current) => !current);
+    }
+  };
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -115,7 +138,11 @@ export default function InvoicesScreen() {
 
             <View style={styles.headerActions}>
               {HEADER_ACTIONS.map((action) => (
-                <Pressable key={action.key} style={styles.headerActionButton}>
+                <Pressable
+                  key={action.key}
+                  onPress={() => handleHeaderActionPress(action.key)}
+                  style={styles.headerActionButton}
+                >
                   <Feather
                     color={MOBILE_THEME.primaryText}
                     name={action.icon}
@@ -127,6 +154,28 @@ export default function InvoicesScreen() {
             </View>
           </View>
 
+          {isSearchOpen ? (
+            <View style={styles.searchCard}>
+              <Feather color="#94a3b8" name="search" size={16} strokeWidth={2.2} />
+              <TextInput
+                allowFontScaling={false}
+                autoCapitalize="none"
+                autoCorrect={false}
+                clearButtonMode="while-editing"
+                onChangeText={setSearchQuery}
+                placeholder={hasInvoices ? 'Search by client, ref, date, or amount' : 'Search invoices'}
+                placeholderTextColor="#94a3b8"
+                style={styles.searchInput}
+                value={searchQuery}
+              />
+              {hasSearchQuery ? (
+                <Pressable hitSlop={8} onPress={() => setSearchQuery('')} style={styles.searchClearButton}>
+                  <Feather color="#64748b" name="x" size={15} strokeWidth={2.3} />
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+
           {isEmptyState ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconWrap}>
@@ -136,7 +185,7 @@ export default function InvoicesScreen() {
                 </View>
               </View>
               <Text allowFontScaling={false} style={styles.emptyText}>
-                Paid invoices will appear here
+                {emptyStateText}
               </Text>
             </View>
           ) : (
@@ -229,6 +278,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 14,
+  },
+  searchCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbeafe',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 18,
+    color: '#0f172a',
+    paddingVertical: 0,
+  },
+  searchClearButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f1f5f9',
   },
   brandRow: {
     flexDirection: 'row',

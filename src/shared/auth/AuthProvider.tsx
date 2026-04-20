@@ -2,13 +2,19 @@ import type { Session, User } from '@supabase/supabase-js';
 import * as WebBrowser from 'expo-web-browser';
 import type { PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
 
 import {
   API_BASE_URL,
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
   getAuthRedirectUrl,
   hasSupabaseConfig,
-  requiresNativeAuthBuild,
 } from '@/shared/auth/config';
+import {
+  buildNativeGoogleSignInConfig,
+  getGoogleIdTokenFromSignInResult,
+} from '@/shared/auth/native-google';
 import { registerSupabaseAppStateListener, supabase } from '@/shared/auth/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -103,6 +109,36 @@ async function fetchCurrentUserProfile(accessToken: string) {
       }
       : null,
   };
+}
+
+async function signInWithGoogleNative() {
+  const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+
+  GoogleSignin.configure(
+    buildNativeGoogleSignInConfig({
+      iosClientId: GOOGLE_IOS_CLIENT_ID,
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+    })
+  );
+
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  const nativeResult = await GoogleSignin.signIn();
+  const idToken = getGoogleIdTokenFromSignInResult(nativeResult);
+
+  if (!idToken) {
+    throw new Error('Google sign-in completed without an ID token. Check your Google client configuration.');
+  }
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: idToken,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return { data, nativeResult };
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -226,17 +262,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    if (requiresNativeAuthBuild()) {
-      setError('Google 登录请使用 development build 或正式安装包，Expo Go 不支持这条回跳链路。');
-      return;
-    }
-
     setIsSigningIn(true);
     setError(null);
 
     try {
+      if (Platform.OS !== 'web') {
+        await signInWithGoogleNative();
+        return;
+      }
+
       const redirectTo = getAuthRedirectUrl();
-      console.log('[AuthProvider] Sign-in redirectTo:', redirectTo);
+      console.log('[AuthProvider] Web fallback redirectTo:', redirectTo);
       const { data, error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -259,8 +295,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-      if (result.type === 'cancel' || result.type === 'dismiss') {
-        throw new Error('Google sign-in was cancelled.');
+      if (result.type === 'cancel') {
+        throw new Error('Google sign-in was cancelled by the user.');
+      }
+
+      if (result.type === 'dismiss') {
+        throw new Error('Google sign-in browser closed before the app callback completed.');
       }
 
       if (result.type !== 'success' || !result.url) {
@@ -269,9 +309,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       await completeAuthFromUrl(result.url);
     } catch (authError) {
-      const message =
-        authError instanceof Error ? authError.message : 'Google sign-in failed.';
-      setError(message);
+      if (
+        authError &&
+        typeof authError === 'object' &&
+        'code' in authError &&
+        authError.code === 'SIGN_IN_CANCELLED'
+      ) {
+        setError('Google sign-in was cancelled by the user.');
+      } else {
+        const message =
+          authError instanceof Error ? authError.message : 'Google sign-in failed.';
+        setError(message);
+      }
     } finally {
       setIsSigningIn(false);
     }
