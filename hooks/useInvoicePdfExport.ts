@@ -5,8 +5,10 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import type React from 'react';
-import InvoicePreview from '@/components/InvoicePreview';
+import type { RefObject } from 'react';
+import InvoicePdfPage from '@/components/invoice-preview/InvoicePdfPage';
+import { buildInvoicePdfExportState } from '@/lib/invoice-pdf-export';
+import { measureDetachedInvoicePdf } from '@/lib/invoice-pdf-measure-client';
 import type { Invoice, Language, TemplateType } from '@/types';
 
 interface UseInvoicePdfExportParams {
@@ -16,7 +18,15 @@ interface UseInvoicePdfExportParams {
   lang: Language;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  printAreaRef: React.RefObject<HTMLDivElement | null>;
+  printAreaRef: RefObject<HTMLDivElement | null>;
+}
+
+interface CreateDetachedExportPageSurfaceParams {
+  invoice: Invoice;
+  template: TemplateType;
+  isHeaderReversed: boolean;
+  lang: Language;
+  pageModel: ReturnType<typeof buildInvoicePdfExportState>['renderPages'][number]['pageModel'];
 }
 
 function sanitizeFilenamePart(value: string) {
@@ -57,12 +67,13 @@ async function waitForNextPaint() {
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-function createDetachedExportSurface({
+function createDetachedExportPageSurface({
   invoice,
   template,
   isHeaderReversed,
   lang,
-}: Pick<UseInvoicePdfExportParams, 'invoice' | 'template' | 'isHeaderReversed' | 'lang'>) {
+  pageModel,
+}: CreateDetachedExportPageSurfaceParams) {
   const shell = document.createElement('div');
   shell.setAttribute('data-invoice-export-shell', 'true');
   Object.assign(shell.style, {
@@ -85,12 +96,12 @@ function createDetachedExportSurface({
   const root = createRoot(rootNode);
   flushSync(() => {
     root.render(
-      createElement(InvoicePreview, {
+      createElement(InvoicePdfPage, {
         invoice,
         template,
         isHeaderReversed,
-        isForPdf: true,
         lang,
+        pageModel,
       })
     );
   });
@@ -102,6 +113,57 @@ function createDetachedExportSurface({
       shell.remove();
     },
   };
+}
+
+async function renderInvoicePdfPageCanvas(target: HTMLElement) {
+  await waitForFonts();
+  await waitForImages(target);
+  await waitForNextPaint();
+
+  const targetRect = target.getBoundingClientRect();
+  const width = Math.max(
+    1,
+    Math.round(target.scrollWidth),
+    Math.round(target.clientWidth),
+    Math.round(targetRect.width)
+  );
+  const height = Math.max(
+    1,
+    Math.round(target.scrollHeight),
+    Math.round(target.clientHeight),
+    Math.round(targetRect.height)
+  );
+
+  const canvas = await html2canvas(target, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    width,
+    height,
+    windowWidth: width,
+    windowHeight: height,
+    scrollX: 0,
+    scrollY: 0,
+    onclone: (clonedDoc) => {
+      const clonedShell = clonedDoc.querySelector<HTMLElement>('[data-invoice-export-shell="true"]');
+      if (clonedShell) {
+        clonedShell.style.position = 'fixed';
+        clonedShell.style.top = '0';
+        clonedShell.style.left = '0';
+        clonedShell.style.transform = 'none';
+        clonedShell.style.pointerEvents = 'none';
+        clonedShell.style.background = '#ffffff';
+      }
+
+      const clonedTarget = clonedDoc.querySelector<HTMLElement>('[data-invoice-export-root="true"]');
+      if (clonedTarget) {
+        clonedTarget.style.width = `${width}px`;
+        clonedTarget.style.maxWidth = 'none';
+      }
+    },
+  });
+
+  return canvas;
 }
 
 export function useInvoicePdfExport({
@@ -117,62 +179,17 @@ export function useInvoicePdfExport({
 
     setIsExporting(true);
     const filename = `${sanitizeFilenamePart(invoice.client.name || 'Client')}_${sanitizeFilenamePart(invoice.invoiceNumber || 'invoice')}.pdf`;
-    let exportSurface: ReturnType<typeof createDetachedExportSurface> | null = null;
 
     try {
-      exportSurface = createDetachedExportSurface({
+      const measurements = await measureDetachedInvoicePdf({
         invoice,
         template,
         isHeaderReversed,
         lang,
       });
-
-      const target = exportSurface.rootNode;
-      await waitForFonts();
-      await waitForImages(target);
-      await waitForNextPaint();
-
-      const targetRect = target.getBoundingClientRect();
-      const width = Math.max(
-        1,
-        Math.round(target.scrollWidth),
-        Math.round(target.clientWidth),
-        Math.round(targetRect.width)
-      );
-      const height = Math.max(
-        1,
-        Math.round(target.scrollHeight),
-        Math.round(target.clientHeight),
-        Math.round(targetRect.height)
-      );
-
-      const canvas = await html2canvas(target, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width,
-        height,
-        windowWidth: width,
-        windowHeight: height,
-        scrollX: 0,
-        scrollY: 0,
-        onclone: (clonedDoc) => {
-          const clonedShell = clonedDoc.querySelector<HTMLElement>('[data-invoice-export-shell="true"]');
-          if (clonedShell) {
-            clonedShell.style.position = 'fixed';
-            clonedShell.style.top = '0';
-            clonedShell.style.left = '0';
-            clonedShell.style.transform = 'none';
-            clonedShell.style.pointerEvents = 'none';
-            clonedShell.style.background = '#ffffff';
-          }
-
-          const clonedTarget = clonedDoc.querySelector<HTMLElement>('[data-invoice-export-root="true"]');
-          if (clonedTarget) {
-            clonedTarget.style.width = `${width}px`;
-            clonedTarget.style.maxWidth = 'none';
-          }
-        },
+      const exportState = buildInvoicePdfExportState({
+        invoice,
+        measurements,
       });
 
       const pdf = new jsPDF({
@@ -182,58 +199,42 @@ export function useInvoicePdfExport({
       });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const pageHeightPx = Math.max(1, Math.floor((canvas.width * pageHeight) / pageWidth));
-      let renderedHeight = 0;
-      let pageIndex = 0;
 
-      while (renderedHeight < canvas.height) {
-        const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = sliceHeight;
+      for (const [pageIndex, renderPage] of exportState.renderPages.entries()) {
+        const exportSurface = createDetachedExportPageSurface({
+          invoice,
+          template,
+          isHeaderReversed,
+          lang,
+          pageModel: renderPage.pageModel,
+        });
 
-        const context = pageCanvas.getContext('2d');
-        if (!context) {
-          throw new Error('Failed to create export canvas context.');
+        try {
+          const canvas = await renderInvoicePdfPageCanvas(exportSurface.rootNode);
+
+          if (pageIndex > 0) {
+            pdf.addPage();
+          }
+
+          pdf.addImage(
+            canvas.toDataURL('image/jpeg', 0.98),
+            'JPEG',
+            0,
+            0,
+            pageWidth,
+            pageHeight,
+            undefined,
+            'FAST'
+          );
+        } finally {
+          exportSurface.cleanup();
         }
-
-        context.drawImage(
-          canvas,
-          0,
-          renderedHeight,
-          canvas.width,
-          sliceHeight,
-          0,
-          0,
-          canvas.width,
-          sliceHeight
-        );
-
-        const imageHeight = (sliceHeight * pageWidth) / canvas.width;
-        if (pageIndex > 0) {
-          pdf.addPage();
-        }
-
-        pdf.addImage(
-          pageCanvas.toDataURL('image/jpeg', 0.98),
-          'JPEG',
-          0,
-          0,
-          pageWidth,
-          imageHeight,
-          undefined,
-          'FAST'
-        );
-
-        renderedHeight += sliceHeight;
-        pageIndex += 1;
       }
 
       pdf.save(filename);
     } catch (error) {
       console.error('Invoice PDF generation failed', error);
     } finally {
-      exportSurface?.cleanup();
       setIsExporting(false);
     }
   }, [invoice, invoice.client.name, invoice.invoiceNumber, isExporting, isHeaderReversed, lang, setIsExporting, template]);
