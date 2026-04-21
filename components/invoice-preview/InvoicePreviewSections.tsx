@@ -308,6 +308,29 @@ export function InvoicePreviewTableHeader({
   );
 }
 
+export function InvoicePreviewItemRow({
+  item,
+  visibleColumns,
+  renderCell,
+  rowProps,
+}: Pick<InvoicePreviewSectionCommonProps, 'visibleColumns' | 'renderCell'> & {
+  item: InvoiceItem;
+  rowProps?: React.HTMLAttributes<HTMLTableRowElement>;
+}) {
+  return (
+    <tr {...rowProps} className={`text-xs ${rowProps?.className ?? ''}`.trim()}>
+      {visibleColumns.map((col) => (
+        <td
+          key={col.id}
+          className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-semibold' : col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium'} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap' : ''}`}
+        >
+          {renderCell(item, col)}
+        </td>
+      ))}
+    </tr>
+  );
+}
+
 export function InvoicePreviewItemsTable({
   invoice,
   visibleColumns,
@@ -322,16 +345,7 @@ export function InvoicePreviewItemsTable({
       <InvoicePreviewTableHeader visibleColumns={visibleColumns} styles={styles} />
       <tbody className="divide-y divide-slate-100">
         {rows.map((item) => (
-          <tr key={item.id} className="text-xs">
-            {visibleColumns.map((col) => (
-              <td
-                key={col.id}
-                className={`px-6 py-4 ${col.type === 'system-amount' ? 'text-right font-semibold' : col.type === 'system-quantity' || col.type === 'system-rate' ? 'text-center' : 'font-medium'} ${col.type === 'system-text' || col.type === 'custom-text' ? 'whitespace-pre-wrap' : ''}`}
-              >
-                {renderCell(item, col)}
-              </td>
-            ))}
-          </tr>
+          <InvoicePreviewItemRow key={item.id} item={item} visibleColumns={visibleColumns} renderCell={renderCell} />
         ))}
       </tbody>
     </table>
@@ -491,7 +505,7 @@ export function InvoicePreviewFooter({
   return (
     <>
       {invoice.sender.disclaimerText && invoice.visibility?.disclaimer !== false && (
-        <div className="px-8 py-4 border-t border-slate-50 text-center">
+        <div data-invoice-pdf-footer-block="disclaimer" className="px-8 py-4 border-t border-slate-50 text-center">
           <div className="flex items-start justify-center gap-2 text-[0.625rem] text-slate-400 leading-relaxed">
             <i className="fas fa-graduation-cap mt-0.5 flex-shrink-0"></i>
             <EditableTextValue
@@ -507,7 +521,7 @@ export function InvoicePreviewFooter({
         </div>
       )}
 
-      <div className="p-8 border-t border-slate-50 text-center text-[0.625rem] text-slate-300 uppercase tracking-widest">
+      <div data-invoice-pdf-footer-block="footer" className="p-8 border-t border-slate-50 text-center text-[0.625rem] text-slate-300 uppercase tracking-widest">
         {t.poweredBy}
       </div>
     </>
