@@ -7,7 +7,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import type { RefObject } from 'react';
 import InvoicePdfPage from '@/components/invoice-preview/InvoicePdfPage';
-import { buildInvoicePdfExportState } from '@/lib/invoice-pdf-export';
+import { buildInvoicePdfExportState, prepareInvoiceForPdf } from '@/lib/invoice-pdf-export';
 import { measureDetachedInvoicePdf } from '@/lib/invoice-pdf-measure-client';
 import type { Invoice, Language, TemplateType } from '@/types';
 
@@ -181,14 +181,15 @@ export function useInvoicePdfExport({
     const filename = `${sanitizeFilenamePart(invoice.client.name || 'Client')}_${sanitizeFilenamePart(invoice.invoiceNumber || 'invoice')}.pdf`;
 
     try {
+      const invoiceForPdf = prepareInvoiceForPdf(invoice);
       const measurements = await measureDetachedInvoicePdf({
-        invoice,
+        invoice: invoiceForPdf,
         template,
         isHeaderReversed,
         lang,
       });
       const exportState = buildInvoicePdfExportState({
-        invoice,
+        invoice: invoiceForPdf,
         measurements,
       });
 
@@ -202,7 +203,7 @@ export function useInvoicePdfExport({
 
       for (const [pageIndex, renderPage] of exportState.renderPages.entries()) {
         const exportSurface = createDetachedExportPageSurface({
-          invoice,
+          invoice: exportState.invoiceForPdf,
           template,
           isHeaderReversed,
           lang,

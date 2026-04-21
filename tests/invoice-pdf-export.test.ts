@@ -5,6 +5,7 @@ import { createInvoicePdfMeasurements } from '../lib/invoice-pdf-measure';
 import {
   buildInvoicePdfExportState,
   getInvoicePdfPageItems,
+  prepareInvoiceForPdf,
 } from '../lib/invoice-pdf-export';
 
 function createItem(id: string): InvoiceItem {
@@ -27,14 +28,24 @@ function createInvoice(items: InvoiceItem[]): Invoice {
     sender: {
       name: 'Sender',
       email: 'sender@example.com',
+      phone: '',
       address: '123 Test St',
       disclaimerText: 'Pay within 7 days',
       signature: 'signature.png',
+      customFields: [
+        { id: 'sender-empty', label: 'Empty', value: '   ' },
+        { id: 'sender-tax', label: 'Tax ID', value: 'AB-123' },
+      ],
     },
     client: {
       name: 'Client',
-      email: 'client@example.com',
+      email: '',
+      phone: '',
       address: '456 Client Rd',
+      customFields: [
+        { id: 'client-empty', label: 'Client Empty', value: '' },
+        { id: 'client-ref', label: 'Reference', value: 'REF-1' },
+      ],
     },
     paymentInfo: {
       fields: [
@@ -46,6 +57,15 @@ function createInvoice(items: InvoiceItem[]): Invoice {
           visible: true,
           required: true,
           value: 'Test Bank',
+        },
+        {
+          id: 'blankField',
+          label: 'Blank Field',
+          type: 'text',
+          order: 1,
+          visible: true,
+          required: false,
+          value: '   ',
         },
       ],
     },
@@ -78,6 +98,21 @@ function createMeasurements(itemHeights: Record<string, number>) {
     itemHeights,
   });
 }
+
+test('prepareInvoiceForPdf removes empty optional fields so placeholders do not pollute PDF output', () => {
+  const invoice = createInvoice([createItem('a')]);
+  const prepared = prepareInvoiceForPdf(invoice);
+
+  assert.equal(prepared.sender.phone, '');
+  assert.equal(prepared.client.email, '');
+  assert.deepEqual(prepared.sender.customFields, [
+    { id: 'sender-tax', label: 'Tax ID', value: 'AB-123' },
+  ]);
+  assert.deepEqual(prepared.client.customFields, [
+    { id: 'client-ref', label: 'Reference', value: 'REF-1' },
+  ]);
+  assert.deepEqual(prepared.paymentInfo?.fields?.map((field) => field.id), ['bankName']);
+});
 
 test('getInvoicePdfPageItems returns the exact page subset while preserving invoice order', () => {
   const invoice = createInvoice([createItem('a'), createItem('b'), createItem('c')]);
@@ -114,4 +149,7 @@ test('buildInvoicePdfExportState creates ordered render pages from paginated pla
   ]);
   assert.equal(state.renderPages[0]?.pageModel.pageNumber, 1);
   assert.equal(state.renderPages[1]?.pageModel.pageNumber, 2);
+  assert.deepEqual(state.invoiceForPdf.sender.customFields, [
+    { id: 'sender-tax', label: 'Tax ID', value: 'AB-123' },
+  ]);
 });

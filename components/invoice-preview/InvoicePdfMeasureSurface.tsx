@@ -3,8 +3,6 @@
 import React from 'react';
 import type { Invoice, InvoiceColumn, InvoiceItem, Language, TemplateType } from '@/types';
 import { translations } from '@/i18n';
-import EditableDateValue from '@/components/preview-editable/EditableDateValue';
-import EditableTextValue from '@/components/preview-editable/EditableTextValue';
 import {
   calculateInvoiceTotals,
   getInvoiceColumns,
@@ -30,6 +28,16 @@ import {
   invoicePreviewCopyByLang,
   invoicePreviewStyles,
 } from './invoicePreviewShared';
+
+function PdfStaticTextValue({ value, className = '' }: { value?: string; className?: string }) {
+  if (!value) return null;
+  return <span className={className}>{value}</span>;
+}
+
+function PdfStaticDateValue({ value, className = '' }: { value?: string; className?: string }) {
+  if (!value) return null;
+  return <span className={className}>{value}</span>;
+}
 
 interface InvoicePdfMeasureSurfaceProps {
   invoice: Invoice;
@@ -108,7 +116,8 @@ export default function InvoicePdfMeasureSurface({
             previewEditable={false}
             isHeaderReversed={isHeaderReversed}
             docTitle={docTitle}
-            EditableTextValue={EditableTextValue}
+            EditableTextValue={PdfStaticTextValue}
+            hideEmptyFields
           />
         </div>
 
@@ -118,7 +127,8 @@ export default function InvoicePdfMeasureSurface({
             copy={copy}
             previewEditable={false}
             docTitle={docTitle}
-            EditableTextValue={EditableTextValue}
+            EditableTextValue={PdfStaticTextValue}
+            hideEmptyFields
           />
         </div>
 
@@ -130,8 +140,9 @@ export default function InvoicePdfMeasureSurface({
               copy={copy}
               previewEditable={false}
               styles={invoicePreviewStyles}
-              EditableTextValue={EditableTextValue}
-              EditableDateValue={EditableDateValue}
+              EditableTextValue={PdfStaticTextValue}
+              EditableDateValue={PdfStaticDateValue}
+              hideEmptyFields
             />
           </div>
 
@@ -178,7 +189,8 @@ export default function InvoicePdfMeasureSurface({
               t={t}
               copy={copy}
               previewEditable={false}
-              EditableTextValue={EditableTextValue}
+              EditableTextValue={PdfStaticTextValue}
+              hideEmptyFields
             />
           </div>
         </div>
@@ -189,7 +201,8 @@ export default function InvoicePdfMeasureSurface({
             t={t}
             copy={copy}
             previewEditable={false}
-            EditableTextValue={EditableTextValue}
+            EditableTextValue={PdfStaticTextValue}
+            hideEmptyFields
           />
         </div>
       </div>

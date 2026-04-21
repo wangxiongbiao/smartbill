@@ -3,9 +3,6 @@
 import React from 'react';
 import type { Invoice, InvoiceColumn, InvoiceItem, Language, TemplateType } from '@/types';
 import { translations } from '@/i18n';
-import EditableDateValue from '@/components/preview-editable/EditableDateValue';
-import EditableNumberValue from '@/components/preview-editable/EditableNumberValue';
-import EditableTextValue from '@/components/preview-editable/EditableTextValue';
 import {
   calculateInvoiceTotals,
   getInvoiceColumns,
@@ -26,6 +23,16 @@ import {
   invoicePreviewCopyByLang,
   invoicePreviewStyles,
 } from './invoicePreviewShared';
+
+function PdfStaticTextValue({ value, className = '' }: { value?: string; className?: string }) {
+  if (!value) return null;
+  return <span className={className}>{value}</span>;
+}
+
+function PdfStaticDateValue({ value, className = '' }: { value?: string; className?: string }) {
+  if (!value) return null;
+  return <span className={className}>{value}</span>;
+}
 
 interface InvoicePdfPageProps {
   invoice: Invoice;
@@ -81,17 +88,18 @@ export default function InvoicePdfPage({
   return (
     <div className="bg-white mx-auto text-slate-800 flex flex-col min-h-[296mm] overflow-visible" data-invoice-pdf-page-kind={pageModel.kind}>
       {pageModel.sections.header && (
-        <InvoicePreviewHeader
-          invoice={invoice}
-          t={t}
-          copy={copy}
-          styles={invoicePreviewStyles}
-          previewEditable={false}
-          isHeaderReversed={isHeaderReversed}
-          docTitle={docTitle}
-          EditableTextValue={EditableTextValue}
-        />
-      )}
+          <InvoicePreviewHeader
+            invoice={invoice}
+            t={t}
+            copy={copy}
+            styles={invoicePreviewStyles}
+            previewEditable={false}
+            isHeaderReversed={isHeaderReversed}
+            docTitle={docTitle}
+            EditableTextValue={PdfStaticTextValue}
+            hideEmptyFields
+          />
+)}
 
       {pageModel.sections.compactHeader && (
         <InvoicePreviewCompactHeader
@@ -99,7 +107,7 @@ export default function InvoicePdfPage({
           copy={copy}
           previewEditable={false}
           docTitle={docTitle}
-          EditableTextValue={EditableTextValue}
+          EditableTextValue={PdfStaticTextValue}
         />
       )}
 
@@ -111,8 +119,9 @@ export default function InvoicePdfPage({
             copy={copy}
             previewEditable={false}
             styles={invoicePreviewStyles}
-            EditableTextValue={EditableTextValue}
-            EditableDateValue={EditableDateValue}
+            EditableTextValue={PdfStaticTextValue}
+            EditableDateValue={PdfStaticDateValue}
+            hideEmptyFields
           />
         )}
 
@@ -154,7 +163,8 @@ export default function InvoicePdfPage({
                   t={t}
                   copy={copy}
                   previewEditable={false}
-                  EditableTextValue={EditableTextValue}
+                  EditableTextValue={PdfStaticTextValue}
+                  hideEmptyFields
                 />
               )}
             </div>
@@ -170,7 +180,8 @@ export default function InvoicePdfPage({
               t={t}
               copy={copy}
               previewEditable={false}
-              EditableTextValue={EditableTextValue}
+              EditableTextValue={PdfStaticTextValue}
+              hideEmptyFields
             />
           )}
           {!pageModel.sections.disclaimer && pageModel.sections.footer && (

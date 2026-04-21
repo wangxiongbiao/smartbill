@@ -23,6 +23,7 @@ export interface InvoicePreviewSectionCommonProps {
   EditableTextValue: ComponentType<any>;
   EditableNumberValue: ComponentType<any>;
   EditableDateValue: ComponentType<any>;
+  hideEmptyFields?: boolean;
 }
 
 export function InvoicePreviewHeader({
@@ -35,10 +36,19 @@ export function InvoicePreviewHeader({
   docTitle,
   onChange,
   EditableTextValue,
+  hideEmptyFields = false,
 }: Pick<
   InvoicePreviewSectionCommonProps,
-  'invoice' | 't' | 'copy' | 'styles' | 'previewEditable' | 'isHeaderReversed' | 'docTitle' | 'onChange' | 'EditableTextValue'
+  'invoice' | 't' | 'copy' | 'styles' | 'previewEditable' | 'isHeaderReversed' | 'docTitle' | 'onChange' | 'EditableTextValue' | 'hideEmptyFields'
 >) {
+  const senderCustomFields = hideEmptyFields
+    ? invoice.sender.customFields?.filter((field) => field.label?.trim() && field.value?.trim())
+    : invoice.sender.customFields;
+  const showInvoiceNumber = invoice.visibility?.invoiceNumber !== false && (!hideEmptyFields || Boolean(invoice.invoiceNumber?.trim()));
+  const showSenderAddress = !hideEmptyFields || Boolean(invoice.sender.address?.trim());
+  const showSenderPhone = !hideEmptyFields || Boolean(invoice.sender.phone?.trim());
+  const showSenderEmail = !hideEmptyFields || Boolean(invoice.sender.email?.trim());
+
   return (
     <div className={styles.header}>
       <div className={`flex justify-between items-start gap-6 ${isHeaderReversed ? 'flex-row-reverse' : ''}`}>
@@ -53,7 +63,7 @@ export function InvoicePreviewHeader({
               onChange={(value) => onChange?.({ customStrings: { ...invoice.customStrings, invoiceTitle: value } })}
             />
           </h1>
-          {invoice.visibility?.invoiceNumber !== false && (
+          {showInvoiceNumber && (
             <p className="opacity-80">
               #
               <EditableTextValue
@@ -80,41 +90,47 @@ export function InvoicePreviewHeader({
                 onChange={(value) => onChange?.({ sender: { ...invoice.sender, name: value } })}
               />
             </h2>
-            <p className="text-xs opacity-80 whitespace-pre-wrap mt-2">
-              <i className="fas fa-map-marker-alt mr-1"></i>
-              <EditableTextValue
-                value={invoice.sender.address}
-                placeholder={t.addrPlaceholder}
-                editable={previewEditable}
-                multiline
-                className="inline whitespace-pre-wrap"
-                inputClassName="text-xs"
-                onChange={(value) => onChange?.({ sender: { ...invoice.sender, address: value } })}
-              />
-            </p>
-            <p className="text-xs opacity-80 mt-1">
-              <i className="fas fa-phone mr-1"></i>{' '}
-              <EditableTextValue
-                value={invoice.sender.phone || ''}
-                placeholder={copy.addPhone}
-                editable={previewEditable}
-                className="inline"
-                inputClassName="text-xs"
-                onChange={(value) => onChange?.({ sender: { ...invoice.sender, phone: value } })}
-              />
-            </p>
-            <p className="text-xs opacity-80 mt-1">
-              <i className="fas fa-envelope mr-1"></i>{' '}
-              <EditableTextValue
-                value={invoice.sender.email || ''}
-                placeholder={copy.addEmail}
-                editable={previewEditable}
-                className="inline"
-                inputClassName="text-xs"
-                onChange={(value) => onChange?.({ sender: { ...invoice.sender, email: value } })}
-              />
-            </p>
-            {invoice.sender.customFields?.map((field) => (
+            {showSenderAddress && (
+              <p className="text-xs opacity-80 whitespace-pre-wrap mt-2">
+                <i className="fas fa-map-marker-alt mr-1"></i>
+                <EditableTextValue
+                  value={invoice.sender.address}
+                  placeholder={t.addrPlaceholder}
+                  editable={previewEditable}
+                  multiline
+                  className="inline whitespace-pre-wrap"
+                  inputClassName="text-xs"
+                  onChange={(value) => onChange?.({ sender: { ...invoice.sender, address: value } })}
+                />
+              </p>
+            )}
+            {showSenderPhone && (
+              <p className="text-xs opacity-80 mt-1">
+                <i className="fas fa-phone mr-1"></i>{' '}
+                <EditableTextValue
+                  value={invoice.sender.phone || ''}
+                  placeholder={copy.addPhone}
+                  editable={previewEditable}
+                  className="inline"
+                  inputClassName="text-xs"
+                  onChange={(value) => onChange?.({ sender: { ...invoice.sender, phone: value } })}
+                />
+              </p>
+            )}
+            {showSenderEmail && (
+              <p className="text-xs opacity-80 mt-1">
+                <i className="fas fa-envelope mr-1"></i>{' '}
+                <EditableTextValue
+                  value={invoice.sender.email || ''}
+                  placeholder={copy.addEmail}
+                  editable={previewEditable}
+                  className="inline"
+                  inputClassName="text-xs"
+                  onChange={(value) => onChange?.({ sender: { ...invoice.sender, email: value } })}
+                />
+              </p>
+            )}
+            {senderCustomFields?.map((field) => (
               <p key={field.id} className="text-xs opacity-80 mt-1">
                 <span className="font-semibold">{field.label}</span>{' '}
                 <span className="whitespace-pre-wrap">{field.value}</span>
@@ -134,10 +150,13 @@ export function InvoicePreviewCompactHeader({
   docTitle,
   onChange,
   EditableTextValue,
+  hideEmptyFields = false,
 }: Pick<
   InvoicePreviewSectionCommonProps,
-  'invoice' | 'copy' | 'previewEditable' | 'docTitle' | 'onChange' | 'EditableTextValue'
+  'invoice' | 'copy' | 'previewEditable' | 'docTitle' | 'onChange' | 'EditableTextValue' | 'hideEmptyFields'
 >) {
+  const showInvoiceNumber = invoice.visibility?.invoiceNumber !== false && (!hideEmptyFields || Boolean(invoice.invoiceNumber?.trim()));
+  const showSenderName = !hideEmptyFields || Boolean(invoice.sender.name?.trim());
   return (
     <div className="px-12 py-6 border-b border-slate-200">
       <div className="flex items-start justify-between gap-6">
@@ -152,7 +171,7 @@ export function InvoicePreviewCompactHeader({
               onChange={(value) => onChange?.({ customStrings: { ...invoice.customStrings, invoiceTitle: value } })}
             />
           </p>
-          {invoice.visibility?.invoiceNumber !== false && (
+          {showInvoiceNumber && (
             <p className="text-xs text-slate-500 mt-1">
               #
               <EditableTextValue
@@ -168,16 +187,18 @@ export function InvoicePreviewCompactHeader({
         </div>
 
         <div className="text-right text-xs text-slate-500 space-y-1">
-          <p className="font-semibold text-slate-800">
-            <EditableTextValue
-              value={invoice.sender.name}
-              placeholder={copy.logoAlt}
-              editable={previewEditable}
-              className="inline"
-              inputClassName="text-xs font-semibold"
-              onChange={(value) => onChange?.({ sender: { ...invoice.sender, name: value } })}
-            />
-          </p>
+          {showSenderName && (
+            <p className="font-semibold text-slate-800">
+              <EditableTextValue
+                value={invoice.sender.name}
+                placeholder={copy.logoAlt}
+                editable={previewEditable}
+                className="inline"
+                inputClassName="text-xs font-semibold"
+                onChange={(value) => onChange?.({ sender: { ...invoice.sender, name: value } })}
+              />
+            </p>
+          )}
           {invoice.sender.logo && <img src={invoice.sender.logo} alt={copy.logoAlt} className="ml-auto max-h-12 object-contain" />}
         </div>
       </div>
@@ -194,10 +215,20 @@ export function InvoicePreviewMeta({
   onChange,
   EditableTextValue,
   EditableDateValue,
+  hideEmptyFields = false,
 }: Pick<
   InvoicePreviewSectionCommonProps,
-  'invoice' | 't' | 'copy' | 'previewEditable' | 'styles' | 'onChange' | 'EditableTextValue' | 'EditableDateValue'
+  'invoice' | 't' | 'copy' | 'previewEditable' | 'styles' | 'onChange' | 'EditableTextValue' | 'EditableDateValue' | 'hideEmptyFields'
 >) {
+  const clientCustomFields = hideEmptyFields
+    ? invoice.client.customFields?.filter((field) => field.label?.trim() && field.value?.trim())
+    : invoice.client.customFields;
+  const showClientAddress = !hideEmptyFields || Boolean(invoice.client.address?.trim());
+  const showClientPhone = !hideEmptyFields || Boolean(invoice.client.phone?.trim());
+  const showClientEmail = !hideEmptyFields || Boolean(invoice.client.email?.trim());
+  const showDate = invoice.visibility?.date !== false && (!hideEmptyFields || Boolean(invoice.date?.trim()));
+  const showDueDate = invoice.visibility?.dueDate !== false && (!hideEmptyFields || Boolean(invoice.dueDate?.trim()));
+
   return (
     <div className="grid grid-cols-2 gap-12 mb-10">
       <div>
@@ -212,41 +243,47 @@ export function InvoicePreviewMeta({
               onChange={(value) => onChange?.({ client: { ...invoice.client, name: value } })}
             />
           </p>
-          <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">
-            <i className="fas fa-map-marker-alt mr-1 opacity-60"></i>
-            <EditableTextValue
-              value={invoice.client.address}
-              placeholder={t.clientAddr}
-              editable={previewEditable}
-              multiline
-              className="inline whitespace-pre-wrap"
-              inputClassName="text-xs"
-              onChange={(value) => onChange?.({ client: { ...invoice.client, address: value } })}
-            />
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            <i className="fas fa-phone mr-1 opacity-60"></i>{' '}
-            <EditableTextValue
-              value={invoice.client.phone || ''}
-              placeholder={copy.addPhone}
-              editable={previewEditable}
-              className="inline"
-              inputClassName="text-xs"
-              onChange={(value) => onChange?.({ client: { ...invoice.client, phone: value } })}
-            />
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            <i className="fas fa-envelope mr-1 opacity-60"></i>{' '}
-            <EditableTextValue
-              value={invoice.client.email || ''}
-              placeholder={copy.addEmail}
-              editable={previewEditable}
-              className="inline"
-              inputClassName="text-xs"
-              onChange={(value) => onChange?.({ client: { ...invoice.client, email: value } })}
-            />
-          </p>
-          {invoice.client.customFields?.map((field) => (
+          {showClientAddress && (
+            <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">
+              <i className="fas fa-map-marker-alt mr-1 opacity-60"></i>
+              <EditableTextValue
+                value={invoice.client.address}
+                placeholder={t.clientAddr}
+                editable={previewEditable}
+                multiline
+                className="inline whitespace-pre-wrap"
+                inputClassName="text-xs"
+                onChange={(value) => onChange?.({ client: { ...invoice.client, address: value } })}
+              />
+            </p>
+          )}
+          {showClientPhone && (
+            <p className="text-xs text-slate-500 mt-1">
+              <i className="fas fa-phone mr-1 opacity-60"></i>{' '}
+              <EditableTextValue
+                value={invoice.client.phone || ''}
+                placeholder={copy.addPhone}
+                editable={previewEditable}
+                className="inline"
+                inputClassName="text-xs"
+                onChange={(value) => onChange?.({ client: { ...invoice.client, phone: value } })}
+              />
+            </p>
+          )}
+          {showClientEmail && (
+            <p className="text-xs text-slate-500 mt-1">
+              <i className="fas fa-envelope mr-1 opacity-60"></i>{' '}
+              <EditableTextValue
+                value={invoice.client.email || ''}
+                placeholder={copy.addEmail}
+                editable={previewEditable}
+                className="inline"
+                inputClassName="text-xs"
+                onChange={(value) => onChange?.({ client: { ...invoice.client, email: value } })}
+              />
+            </p>
+          )}
+          {clientCustomFields?.map((field) => (
             <p key={field.id} className="text-xs text-slate-500 mt-1">
               <span className="font-semibold">{field.label}</span>{' '}
               <span className="whitespace-pre-wrap">{field.value}</span>
@@ -255,7 +292,7 @@ export function InvoicePreviewMeta({
         </div>
       </div>
       <div className="text-right">
-        {invoice.visibility?.date !== false && (
+        {showDate && (
           <>
             <p className="text-[0.625rem] font-semibold text-slate-400 mb-1">{invoice.customStrings?.dateLabel ?? t.invoiceDate}</p>
             <p className="text-sm font-medium mb-4">
@@ -269,7 +306,7 @@ export function InvoicePreviewMeta({
             </p>
           </>
         )}
-        {invoice.visibility?.dueDate !== false && (
+        {showDueDate && (
           <>
             <p className="text-[0.625rem] font-semibold text-slate-400 mb-1">{invoice.customStrings?.dueDateLabel ?? t.dueDate}</p>
             <p className={`text-sm font-semibold text-${styles.accentColor}`}>
@@ -411,10 +448,19 @@ export function InvoicePreviewPaymentInfo({
   previewEditable,
   onChange,
   EditableTextValue,
+  hideEmptyFields = false,
 }: Pick<
   InvoicePreviewSectionCommonProps,
-  'invoice' | 't' | 'copy' | 'previewEditable' | 'onChange' | 'EditableTextValue'
+  'invoice' | 't' | 'copy' | 'previewEditable' | 'onChange' | 'EditableTextValue' | 'hideEmptyFields'
 >) {
+  const paymentFields = invoice.paymentInfo?.fields
+    ?.filter((field) => field.visible)
+    ?.filter((field) => !hideEmptyFields || Boolean(field.label?.trim() && field.value?.trim()))
+    ?.sort((a, b) => a.order - b.order);
+  const paymentCustomFields = hideEmptyFields
+    ? invoice.paymentInfo?.customFields?.filter((field) => field.label?.trim() && field.value?.trim())
+    : invoice.paymentInfo?.customFields;
+
   if (!hasPaymentInfoContent(invoice.paymentInfo) || invoice.visibility?.paymentInfo !== true) {
     return null;
   }
@@ -423,10 +469,7 @@ export function InvoicePreviewPaymentInfo({
     <div className="pt-4 border-t border-slate-100">
       <div className="flex justify-between w-full items-start gap-8">
         <div className="space-y-1 text-xs text-slate-600 flex-1 min-w-0">
-          {invoice.paymentInfo?.fields
-            ?.filter((field) => field.visible)
-            ?.sort((a, b) => a.order - b.order)
-            ?.map((field) => (
+          {paymentFields?.map((field) => (
               <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
                 <span className="font-medium text-slate-400 min-w-[6.25rem]">{field.label}:</span>
                 <span className={`font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left ${field.id === 'accountNumber' ? 'font-mono' : ''}`}>
@@ -471,7 +514,7 @@ export function InvoicePreviewPaymentInfo({
                   <span className="font-semibold text-slate-800 font-mono whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{invoice.paymentInfo.extraInfo}</span>
                 </div>
               )}
-              {invoice.paymentInfo?.customFields?.map((field) => (
+              {paymentCustomFields?.map((field) => (
                 <div key={field.id} className="flex justify-between sm:justify-start gap-4 items-baseline">
                   <span className="font-medium text-slate-400 min-w-[6.25rem]">{field.label}:</span>
                   <span className="font-semibold text-slate-800 whitespace-pre-wrap break-words min-w-0 flex-1 text-right sm:text-left">{field.value}</span>
@@ -498,10 +541,12 @@ export function InvoicePreviewFooter({
   previewEditable,
   onChange,
   EditableTextValue,
+  hideEmptyFields = false,
 }: Pick<
   InvoicePreviewSectionCommonProps,
-  'invoice' | 't' | 'copy' | 'previewEditable' | 'onChange' | 'EditableTextValue'
+  'invoice' | 't' | 'copy' | 'previewEditable' | 'onChange' | 'EditableTextValue' | 'hideEmptyFields'
 >) {
+  void hideEmptyFields;
   return (
     <>
       {invoice.sender.disclaimerText && invoice.visibility?.disclaimer !== false && (
