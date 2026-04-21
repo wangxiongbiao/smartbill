@@ -3,24 +3,7 @@
 import React, { type ComponentType } from 'react';
 import type { Invoice, InvoiceColumn, InvoiceItem } from '@/types';
 import { hasPaymentInfoContent, updatePaymentInfoFieldValue } from '@/lib/invoice';
-
-export interface InvoicePreviewCopy {
-  addPhone: string;
-  addEmail: string;
-  addValue: string;
-  addDisclaimer: string;
-  paymentQrCode: string;
-  signatureAlt: string;
-  logoAlt: string;
-  subtotal: string;
-}
-
-export interface InvoicePreviewStyles {
-  header: string;
-  tableHeader: string;
-  accentColor: string;
-  signatureBorder: string;
-}
+import type { InvoicePreviewCopy, InvoicePreviewStyles } from './invoicePreviewShared';
 
 export interface InvoicePreviewSectionCommonProps {
   invoice: Invoice;
@@ -138,6 +121,64 @@ export function InvoicePreviewHeader({
               </p>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function InvoicePreviewCompactHeader({
+  invoice,
+  copy,
+  previewEditable,
+  docTitle,
+  onChange,
+  EditableTextValue,
+}: Pick<
+  InvoicePreviewSectionCommonProps,
+  'invoice' | 'copy' | 'previewEditable' | 'docTitle' | 'onChange' | 'EditableTextValue'
+>) {
+  return (
+    <div className="px-12 py-6 border-b border-slate-200">
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <p className="text-lg font-semibold text-slate-900">
+            <EditableTextValue
+              value={docTitle}
+              placeholder={invoice.type === 'invoice' ? 'INVOICE' : 'RECEIPT'}
+              editable={previewEditable}
+              className="inline"
+              inputClassName="text-lg font-semibold"
+              onChange={(value) => onChange?.({ customStrings: { ...invoice.customStrings, invoiceTitle: value } })}
+            />
+          </p>
+          {invoice.visibility?.invoiceNumber !== false && (
+            <p className="text-xs text-slate-500 mt-1">
+              #
+              <EditableTextValue
+                value={invoice.invoiceNumber}
+                placeholder="INV-001"
+                editable={previewEditable}
+                className="inline"
+                inputClassName="text-xs"
+                onChange={(value) => onChange?.({ invoiceNumber: value })}
+              />
+            </p>
+          )}
+        </div>
+
+        <div className="text-right text-xs text-slate-500 space-y-1">
+          <p className="font-semibold text-slate-800">
+            <EditableTextValue
+              value={invoice.sender.name}
+              placeholder={copy.logoAlt}
+              editable={previewEditable}
+              className="inline"
+              inputClassName="text-xs font-semibold"
+              onChange={(value) => onChange?.({ sender: { ...invoice.sender, name: value } })}
+            />
+          </p>
+          {invoice.sender.logo && <img src={invoice.sender.logo} alt={copy.logoAlt} className="ml-auto max-h-12 object-contain" />}
         </div>
       </div>
     </div>
@@ -272,12 +313,15 @@ export function InvoicePreviewItemsTable({
   visibleColumns,
   styles,
   renderCell,
-}: Pick<InvoicePreviewSectionCommonProps, 'invoice' | 'visibleColumns' | 'styles' | 'renderCell'>) {
+  items,
+}: Pick<InvoicePreviewSectionCommonProps, 'invoice' | 'visibleColumns' | 'styles' | 'renderCell'> & { items?: InvoiceItem[] }) {
+  const rows = items ?? invoice.items;
+
   return (
     <table className="w-full text-left mb-8">
       <InvoicePreviewTableHeader visibleColumns={visibleColumns} styles={styles} />
       <tbody className="divide-y divide-slate-100">
-        {invoice.items.map((item) => (
+        {rows.map((item) => (
           <tr key={item.id} className="text-xs">
             {visibleColumns.map((col) => (
               <td
