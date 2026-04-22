@@ -8,6 +8,7 @@ import {
   getInvoiceColumns,
 } from '@/lib/invoice';
 import type { InvoicePdfPageModel } from '@/lib/invoice-pdf';
+import { getInvoicePdfPageFrameStyle } from '@/lib/invoice-pdf-page-frame';
 import {
   InvoicePreviewCompactHeader,
   InvoicePreviewFooter,
@@ -84,9 +85,17 @@ export default function InvoicePdfPage({
   };
 
   void template;
+  const pageFrameStyle = getInvoicePdfPageFrameStyle();
+  const hasSummarySections = pageModel.sections.signature || pageModel.sections.totals || pageModel.sections.paymentInfo;
+  const bodyClassName = hasSummarySections ? 'px-12 py-10 flex-1 flex flex-col' : 'px-12 py-10';
+  const contentClassName = hasSummarySections ? 'flex-1 flex flex-col' : '';
 
   return (
-    <div className="bg-white mx-auto text-slate-800 flex flex-col min-h-[296mm] overflow-visible" data-invoice-pdf-page-kind={pageModel.kind}>
+    <div
+      className="bg-white mx-auto text-slate-800 flex flex-col"
+      style={pageFrameStyle}
+      data-invoice-pdf-page-kind={pageModel.kind}
+    >
       {pageModel.sections.header && (
           <InvoicePreviewHeader
             invoice={invoice}
@@ -108,10 +117,16 @@ export default function InvoicePdfPage({
           previewEditable={false}
           docTitle={docTitle}
           EditableTextValue={PdfStaticTextValue}
+          hideEmptyFields
+          pageNumber={pageModel.pageNumber}
+          totalPages={pageModel.totalPages}
+          dateLabel={invoice.customStrings?.dateLabel ?? t.invoiceDate}
+          clientLabel={t.clientName}
+          pageLabel="Page"
         />
       )}
 
-      <div className="px-12 py-10 flex-1 flex flex-col">
+      <div className={bodyClassName}>
         {pageModel.sections.meta && (
           <InvoicePreviewMeta
             invoice={invoice}
@@ -125,7 +140,7 @@ export default function InvoicePdfPage({
           />
         )}
 
-        <div className="flex-1 flex flex-col">
+        <div className={contentClassName}>
           <InvoicePreviewItemsTable
             invoice={invoice}
             visibleColumns={visibleColumns}

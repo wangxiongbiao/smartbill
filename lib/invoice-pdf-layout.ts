@@ -5,6 +5,7 @@ import {
   type InvoicePdfPlan,
 } from './invoice-pdf';
 import {
+  getInvoicePdfFallbackItemHeight,
   getInvoicePdfSectionHeight,
   sumInvoicePdfItemHeights,
   type InvoicePdfMeasurements,
@@ -18,13 +19,13 @@ export interface PaginateInvoicePdfParams {
 function getInvoicePdfFixedSectionKeys(kind: InvoicePdfPageKind) {
   switch (kind) {
     case 'single':
-      return ['header', 'meta', 'tableHeader', 'signature', 'totals', 'paymentInfo', 'disclaimer', 'footer'] as const;
+      return ['header', 'meta', 'tableHeader', 'summary', 'disclaimer', 'footer'] as const;
     case 'first':
       return ['header', 'meta', 'tableHeader', 'footer'] as const;
     case 'middle':
       return ['compactHeader', 'tableHeader', 'footer'] as const;
     case 'last':
-      return ['compactHeader', 'tableHeader', 'signature', 'totals', 'paymentInfo', 'disclaimer', 'footer'] as const;
+      return ['compactHeader', 'tableHeader', 'summary', 'disclaimer', 'footer'] as const;
     default:
       return ['tableHeader', 'footer'] as const;
   }
@@ -50,7 +51,8 @@ function canFitItemsOnPage(
   availableItemHeight: number
 ): boolean {
   if (items.length <= 1) return true;
-  return sumInvoicePdfItemHeights(measurements, items.map((item) => item.id)) <= availableItemHeight;
+  const fallbackItemHeight = getInvoicePdfFallbackItemHeight(measurements);
+  return sumInvoicePdfItemHeights(measurements, items.map((item) => item.id), fallbackItemHeight) <= availableItemHeight;
 }
 
 function takeLeadingItemsForPage(
@@ -64,10 +66,11 @@ function takeLeadingItemsForPage(
 
   const selected: InvoiceItem[] = [];
   let usedHeight = 0;
+  const fallbackItemHeight = getInvoicePdfFallbackItemHeight(measurements);
 
   for (let index = 0; index < maxSelectable; index += 1) {
     const item = items[index]!;
-    const nextHeight = measurements.itemHeights[item.id] ?? 0;
+    const nextHeight = measurements.itemHeights[item.id] ?? fallbackItemHeight;
 
     if (selected.length === 0) {
       selected.push(item);

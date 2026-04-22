@@ -185,3 +185,55 @@ test('paginateInvoicePdf still assigns at least one item to the last page when t
   assert.deepEqual(plan.pages[0]?.itemIds, ['a']);
   assert.deepEqual(plan.pages[1]?.itemIds, ['b']);
 });
+
+test('paginateInvoicePdf falls back to a conservative row height when some measured item heights are missing', () => {
+  const invoice = createInvoice([
+    createItem('a'),
+    createItem('b'),
+    createItem('c'),
+    createItem('d'),
+  ]);
+
+  const plan = paginateInvoicePdf({
+    invoice,
+    measurements: createMeasurements({
+      a: 170,
+      b: 170,
+    }),
+  });
+
+  assert.equal(plan.summary.totalPages, 2);
+  assert.deepEqual(plan.pages.map((page) => page.kind), ['first', 'last']);
+  assert.deepEqual(plan.pages[0]?.itemIds, ['a', 'b', 'c']);
+  assert.deepEqual(plan.pages[1]?.itemIds, ['d']);
+});
+
+test('paginateInvoicePdf uses measured summary wrapper height so totals/payment are pushed to a last page when needed', () => {
+  const invoice = createInvoice([createItem('a'), createItem('b')]);
+  const measurements = createInvoicePdfMeasurements({
+    pageHeight: 1000,
+    sectionHeights: {
+      header: 180,
+      compactHeader: 90,
+      meta: 120,
+      tableHeader: 60,
+      signature: 90,
+      totals: 140,
+      paymentInfo: 160,
+      summary: 446,
+      disclaimer: 70,
+      footer: 50,
+    },
+    itemHeights: {
+      a: 60,
+      b: 60,
+    },
+  });
+
+  const plan = paginateInvoicePdf({ invoice, measurements });
+
+  assert.equal(plan.summary.totalPages, 2);
+  assert.deepEqual(plan.pages.map((page) => page.kind), ['first', 'last']);
+  assert.deepEqual(plan.pages[0]?.itemIds, ['a']);
+  assert.deepEqual(plan.pages[1]?.itemIds, ['b']);
+});

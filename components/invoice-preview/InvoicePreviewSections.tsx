@@ -151,39 +151,69 @@ export function InvoicePreviewCompactHeader({
   onChange,
   EditableTextValue,
   hideEmptyFields = false,
+  pageNumber,
+  totalPages,
+  dateLabel,
+  clientLabel,
+  pageLabel = 'Page',
 }: Pick<
   InvoicePreviewSectionCommonProps,
   'invoice' | 'copy' | 'previewEditable' | 'docTitle' | 'onChange' | 'EditableTextValue' | 'hideEmptyFields'
->) {
+> & {
+  pageNumber?: number;
+  totalPages?: number;
+  dateLabel?: string;
+  clientLabel?: string;
+  pageLabel?: string;
+}) {
   const showInvoiceNumber = invoice.visibility?.invoiceNumber !== false && (!hideEmptyFields || Boolean(invoice.invoiceNumber?.trim()));
   const showSenderName = !hideEmptyFields || Boolean(invoice.sender.name?.trim());
+  const showClientName = !hideEmptyFields || Boolean(invoice.client.name?.trim());
+  const showDate = Boolean(invoice.date?.trim());
+  const showPageNumber = Boolean(pageNumber && totalPages && totalPages > 1);
+
   return (
-    <div className="px-12 py-6 border-b border-slate-200">
+    <div className="px-12 py-5 border-b border-slate-200 bg-slate-50/60">
       <div className="flex items-start justify-between gap-6">
         <div>
-          <p className="text-lg font-semibold text-slate-900">
+          <p className="text-base font-semibold text-slate-900">
             <EditableTextValue
               value={docTitle}
               placeholder={invoice.type === 'invoice' ? 'INVOICE' : 'RECEIPT'}
               editable={previewEditable}
               className="inline"
-              inputClassName="text-lg font-semibold"
+              inputClassName="text-base font-semibold"
               onChange={(value) => onChange?.({ customStrings: { ...invoice.customStrings, invoiceTitle: value } })}
             />
           </p>
-          {showInvoiceNumber && (
-            <p className="text-xs text-slate-500 mt-1">
-              #
-              <EditableTextValue
-                value={invoice.invoiceNumber}
-                placeholder="INV-001"
-                editable={previewEditable}
-                className="inline"
-                inputClassName="text-xs"
-                onChange={(value) => onChange?.({ invoiceNumber: value })}
-              />
-            </p>
-          )}
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-slate-500">
+            {showInvoiceNumber && (
+              <span>
+                #
+                <EditableTextValue
+                  value={invoice.invoiceNumber}
+                  placeholder="INV-001"
+                  editable={previewEditable}
+                  className="inline"
+                  inputClassName="text-[0.7rem]"
+                  onChange={(value) => onChange?.({ invoiceNumber: value })}
+                />
+              </span>
+            )}
+            {showDate && (
+              <span>
+                {dateLabel ?? 'Date'}: {invoice.date}
+              </span>
+            )}
+            {showClientName && (
+              <span>
+                {clientLabel ?? 'Client'}: {invoice.client.name}
+              </span>
+            )}
+            {showPageNumber && (
+              <span>{pageLabel} {pageNumber} / {totalPages}</span>
+            )}
+          </div>
         </div>
 
         <div className="text-right text-xs text-slate-500 space-y-1">
@@ -199,7 +229,7 @@ export function InvoicePreviewCompactHeader({
               />
             </p>
           )}
-          {invoice.sender.logo && <img src={invoice.sender.logo} alt={copy.logoAlt} className="ml-auto max-h-12 object-contain" />}
+          {invoice.sender.logo && <img src={invoice.sender.logo} alt={copy.logoAlt} className="ml-auto max-h-10 object-contain" />}
         </div>
       </div>
     </div>

@@ -7,8 +7,13 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import type { RefObject } from 'react';
 import InvoicePdfPage from '@/components/invoice-preview/InvoicePdfPage';
-import { buildInvoicePdfExportState, prepareInvoiceForPdf } from '@/lib/invoice-pdf-export';
-import { measureDetachedInvoicePdf } from '@/lib/invoice-pdf-measure-client';
+import { buildInvoicePdfExportStateFromPlan, prepareInvoiceForPdf } from '@/lib/invoice-pdf-export';
+import { paginateInvoicePdfByFitting } from '@/lib/invoice-pdf-fit';
+import { createInvoicePdfPageModel } from '@/lib/invoice-pdf';
+import {
+  INVOICE_PDF_PAGE_HEIGHT_MM,
+  INVOICE_PDF_PAGE_WIDTH_MM,
+} from '@/lib/invoice-pdf-page-frame';
 import type { Invoice, Language, TemplateType } from '@/types';
 
 interface UseInvoicePdfExportParams {
@@ -26,7 +31,7 @@ interface CreateDetachedExportPageSurfaceParams {
   template: TemplateType;
   isHeaderReversed: boolean;
   lang: Language;
-  pageModel: ReturnType<typeof buildInvoicePdfExportState>['renderPages'][number]['pageModel'];
+  pageModel: ReturnType<typeof createInvoicePdfPageModel>;
 }
 
 function sanitizeFilenamePart(value: string) {
@@ -80,7 +85,8 @@ function createDetachedExportPageSurface({
     position: 'fixed',
     top: '0',
     left: '0',
-    width: '210mm',
+    width: `${INVOICE_PDF_PAGE_WIDTH_MM}mm`,
+    height: `${INVOICE_PDF_PAGE_HEIGHT_MM}mm`,
     pointerEvents: 'none',
     background: '#ffffff',
     transform: 'translateX(calc(-100% - 48px))',
@@ -89,7 +95,8 @@ function createDetachedExportPageSurface({
 
   const rootNode = document.createElement('div');
   rootNode.setAttribute('data-invoice-export-root', 'true');
-  rootNode.style.width = '210mm';
+  rootNode.style.width = `${INVOICE_PDF_PAGE_WIDTH_MM}mm`;
+  rootNode.style.height = `${INVOICE_PDF_PAGE_HEIGHT_MM}mm`;
   shell.appendChild(rootNode);
   document.body.appendChild(shell);
 
@@ -166,6 +173,52 @@ async function renderInvoicePdfPageCanvas(target: HTMLElement) {
   return canvas;
 }
 
+async function pageSurfaceFitsWithinFrame(target: HTMLElement) {
+  await waitForFonts();
+  await waitForImages(target);
+  await waitForNextPaint();
+
+  const pageElement = target.querySelector<HTMLElement>('[data-invoice-pdf-page-kind]');
+  if (!pageElement) {
+    throw new Error('Invoice PDF fit check could not find the rendered page element.');
+  }
+
+  return pageElement.scrollHeight <= pageElement.clientHeight + 1
+    && pageElement.scrollWidth <= pageElement.clientWidth + 1;
+}
+
+async function paginateInvoicePdfByRendering({
+  invoice,
+  template,
+  isHeaderReversed,
+  lang,
+}: {
+  invoice: Invoice;
+  template: TemplateType;
+  isHeaderReversed: boolean;
+  lang: Language;
+}) {
+  return paginateInvoicePdfByFitting({
+    invoice,
+    canFitPage: async ({ kind, items }) => {
+      const pageModel = createInvoicePdfPageModel(kind, 1, items);
+      const exportSurface = createDetachedExportPageSurface({
+        invoice,
+        template,
+        isHeaderReversed,
+        lang,
+        pageModel,
+      });
+
+      try {
+        return await pageSurfaceFitsWithinFrame(exportSurface.rootNode);
+      } finally {
+        exportSurface.cleanup();
+      }
+    },
+  });
+}
+
 export function useInvoicePdfExport({
   invoice,
   template,
@@ -182,15 +235,16 @@ export function useInvoicePdfExport({
 
     try {
       const invoiceForPdf = prepareInvoiceForPdf(invoice);
-      const measurements = await measureDetachedInvoicePdf({
+      const plan = await paginateInvoicePdfByRendering({
         invoice: invoiceForPdf,
         template,
         isHeaderReversed,
         lang,
       });
-      const exportState = buildInvoicePdfExportState({
+      const exportState = buildInvoicePdfExportStateFromPlan({
         invoice: invoiceForPdf,
-        measurements,
+        plan,
+        invoiceAlreadyPrepared: true,
       });
 
       const pdf = new jsPDF({

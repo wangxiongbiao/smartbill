@@ -12,6 +12,7 @@ import {
   INVOICE_PDF_MEASURE_PAGE_ATTR,
   INVOICE_PDF_MEASURE_SECTION_ATTR,
 } from '@/lib/invoice-pdf-measure';
+import { getInvoicePdfPageFrameStyle } from '@/lib/invoice-pdf-page-frame';
 import {
   InvoicePreviewCompactHeader,
   InvoicePreviewFooter,
@@ -86,6 +87,7 @@ export default function InvoicePdfMeasureSurface({
   };
 
   void template;
+  const pageFrameStyle = getInvoicePdfPageFrameStyle();
 
   return (
     <div
@@ -104,7 +106,8 @@ export default function InvoicePdfMeasureSurface({
       }}
     >
       <div
-        className="bg-white mx-auto text-slate-800 flex flex-col min-h-[296mm] overflow-visible"
+        className="bg-white mx-auto text-slate-800 flex flex-col"
+        style={pageFrameStyle}
         {...{ [INVOICE_PDF_MEASURE_PAGE_ATTR]: 'true' }}
       >
         <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'header' }}>
@@ -129,6 +132,11 @@ export default function InvoicePdfMeasureSurface({
             docTitle={docTitle}
             EditableTextValue={PdfStaticTextValue}
             hideEmptyFields
+            pageNumber={2}
+            totalPages={2}
+            dateLabel={invoice.customStrings?.dateLabel ?? t.invoiceDate}
+            clientLabel={t.clientName}
+            pageLabel="Page"
           />
         </div>
 
@@ -167,31 +175,35 @@ export default function InvoicePdfMeasureSurface({
             ))}
           </div>
 
-          <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'signature' }}>
-            <InvoicePreviewSignature invoice={invoice} t={t} copy={copy} styles={invoicePreviewStyles} />
-          </div>
+          <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'summary' }} className="space-y-8">
+            <div className="flex justify-between pt-6 border-t border-slate-100">
+              <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'signature' }}>
+                <InvoicePreviewSignature invoice={invoice} t={t} copy={copy} styles={invoicePreviewStyles} />
+              </div>
 
-          <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'totals' }}>
-            <InvoicePreviewTotals
-              invoice={invoice}
-              t={t}
-              copy={copy}
-              subtotal={subtotal}
-              tax={tax}
-              total={total}
-              currencyFormatter={currencyFormatter}
-            />
-          </div>
+              <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'totals' }}>
+                <InvoicePreviewTotals
+                  invoice={invoice}
+                  t={t}
+                  copy={copy}
+                  subtotal={subtotal}
+                  tax={tax}
+                  total={total}
+                  currencyFormatter={currencyFormatter}
+                />
+              </div>
+            </div>
 
-          <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'paymentInfo' }}>
-            <InvoicePreviewPaymentInfo
-              invoice={invoice}
-              t={t}
-              copy={copy}
-              previewEditable={false}
-              EditableTextValue={PdfStaticTextValue}
-              hideEmptyFields
-            />
+            <div {...{ [INVOICE_PDF_MEASURE_SECTION_ATTR]: 'paymentInfo' }}>
+              <InvoicePreviewPaymentInfo
+                invoice={invoice}
+                t={t}
+                copy={copy}
+                previewEditable={false}
+                EditableTextValue={PdfStaticTextValue}
+                hideEmptyFields
+              />
+            </div>
           </div>
         </div>
 

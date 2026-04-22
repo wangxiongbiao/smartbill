@@ -100,7 +100,7 @@ test('verification matrix: short invoice keeps full content on one page', () => 
   assertLastPageHasFinalSections(state);
 });
 
-test('verification matrix: medium invoice repeats compact header on middle/last pages', () => {
+test('verification matrix: medium invoice uses a compact continuation header on later pages', () => {
   const items = Array.from({ length: 15 }, (_, index) => createItem(`m-${index}`));
   const heights = Object.fromEntries(items.map((item) => [item.id, 160]));
   const state = buildInvoicePdfExportState({
@@ -110,6 +110,8 @@ test('verification matrix: medium invoice repeats compact header on middle/last 
 
   assert.equal(state.plan.summary.totalPages > 2, true);
   assert.equal(state.plan.pages[0]?.sections.header, true);
+  assert.equal(state.plan.pages[1]?.sections.header, false);
+  assert.equal(state.plan.pages[1]?.sections.meta, false);
   assert.equal(state.plan.pages[1]?.sections.compactHeader, true);
   assertLastPageHasFinalSections(state);
 });

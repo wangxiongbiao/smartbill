@@ -87,6 +87,7 @@ test('createInvoicePdfPage builds explicit range, item ids, and section visibili
   });
   assert.equal(page.sections.header, false);
   assert.equal(page.sections.compactHeader, true);
+  assert.equal(page.sections.meta, false);
   assert.equal(page.sections.totals, false);
   assert.equal(page.sections.footer, true);
 });
@@ -104,6 +105,10 @@ test('createInvoicePdfSectionVisibility keeps totals and payment info only on si
   assert.equal(last.paymentInfo, true);
   assert.equal(first.compactHeader, false);
   assert.equal(last.compactHeader, true);
+  assert.equal(first.header, true);
+  assert.equal(last.header, false);
+  assert.equal(first.meta, true);
+  assert.equal(last.meta, false);
 });
 
 test('buildInvoicePdfPlan creates a single-page explicit plan from grouped page items', () => {

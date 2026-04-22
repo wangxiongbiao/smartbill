@@ -90,6 +90,24 @@ export function buildInvoicePdfExportState({
   const invoiceForPdf = prepareInvoiceForPdf(invoice);
   const plan = paginateInvoicePdf({ invoice: invoiceForPdf, measurements });
 
+  return buildInvoicePdfExportStateFromPlan({
+    invoice: invoiceForPdf,
+    plan,
+    invoiceAlreadyPrepared: true,
+  });
+}
+
+export function buildInvoicePdfExportStateFromPlan({
+  invoice,
+  plan,
+  invoiceAlreadyPrepared = false,
+}: {
+  invoice: Invoice;
+  plan: InvoicePdfPlan;
+  invoiceAlreadyPrepared?: boolean;
+}): InvoicePdfExportState {
+  const invoiceForPdf = invoiceAlreadyPrepared ? invoice : prepareInvoiceForPdf(invoice);
+
   return {
     invoiceForPdf,
     plan,

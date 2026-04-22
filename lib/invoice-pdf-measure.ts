@@ -10,6 +10,7 @@ export const INVOICE_PDF_MEASURE_SECTION_KEYS = [
   'compactHeader',
   'meta',
   'tableHeader',
+  'summary',
   'signature',
   'totals',
   'paymentInfo',
@@ -44,6 +45,7 @@ function createEmptyInvoicePdfSectionHeights(): InvoicePdfMeasuredSectionHeights
     compactHeader: 0,
     meta: 0,
     tableHeader: 0,
+    summary: 0,
     signature: 0,
     totals: 0,
     paymentInfo: 0,
@@ -61,6 +63,12 @@ export function createInvoicePdfMeasurements({
 
   for (const key of INVOICE_PDF_MEASURE_SECTION_KEYS) {
     normalizedSectionHeights[key] = normalizeInvoicePdfMeasuredHeight(sectionHeights?.[key]);
+  }
+
+  if (normalizedSectionHeights.summary === 0) {
+    normalizedSectionHeights.summary = normalizeInvoicePdfMeasuredHeight(
+      normalizedSectionHeights.signature + normalizedSectionHeights.totals + normalizedSectionHeights.paymentInfo
+    );
   }
 
   const normalizedItemHeights = Object.fromEntries(
@@ -90,8 +98,18 @@ export function getInvoicePdfItemHeight(
   return measurements.itemHeights[itemId] ?? fallback;
 }
 
-export function sumInvoicePdfItemHeights(measurements: InvoicePdfMeasurements, itemIds: string[]): number {
-  return itemIds.reduce((total, itemId) => total + getInvoicePdfItemHeight(measurements, itemId), 0);
+export function getInvoicePdfFallbackItemHeight(measurements: InvoicePdfMeasurements, fallback = 44): number {
+  const measuredHeights = Object.values(measurements.itemHeights).filter((value) => value > 0);
+  if (measuredHeights.length === 0) return fallback;
+  return Math.max(...measuredHeights, fallback);
+}
+
+export function sumInvoicePdfItemHeights(
+  measurements: InvoicePdfMeasurements,
+  itemIds: string[],
+  fallback = 0
+): number {
+  return itemIds.reduce((total, itemId) => total + getInvoicePdfItemHeight(measurements, itemId, fallback), 0);
 }
 
 function readMeasuredElementHeight(root: ParentNode, selector: string): number {
