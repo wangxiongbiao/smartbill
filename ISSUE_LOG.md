@@ -82,3 +82,10 @@
   2. 将 `app.config.js` 中的 `web.output` 从 `"static"` 调整为 `"single"`（SPA 动态 Web 模式）；
   3. 重启 Expo Web 根路径 2 秒内完成构建，`http://127.0.0.1:8081/` 返回 HTTP 200，Web 端单页应用正常加载。
 
+### 2026-08-06 问题 15：Vercel 部署路径与线上验证
+- 原因：Hermes 环境下 Vercel CLI 需指定全局 HOME 与显式路径 `/Users/admin/.npm-global/bin/vercel`；项目需关联远端项目 `smartbill-4fw6`。
+- 解决方式与线上验证：
+  1. 在 `smartbill-web-local` 中执行 `vercel link --project smartbill-4fw6 --yes`；
+  2. 执行 `HOME=/Users/admin /Users/admin/.npm-global/bin/vercel --prod --yes` 完成线上生产构建与发布；
+  3. 通过 `curl` 验证正式域名 `https://smartbillpro.com` 根路径返回 HTTP 200，API 接口 `https://smartbillpro.com/api/auth/me` 返回 HTTP 401（未登录门禁正常拦截），线上发布完毕。
+
