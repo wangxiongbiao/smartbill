@@ -33,6 +33,11 @@ yarn-error.*
 # local env files
 .env*.local
 
+# backups & dumps
+*.storage.zip
+*.dump
+*.sql.gz
+
 # typescript
 *.tsbuildinfo
 
