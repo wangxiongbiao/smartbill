@@ -89,3 +89,10 @@
   2. 执行 `HOME=/Users/admin /Users/admin/.npm-global/bin/vercel --prod --yes` 完成线上生产构建与发布；
   3. 通过 `curl` 验证正式域名 `https://smartbillpro.com` 根路径返回 HTTP 200，API 接口 `https://smartbillpro.com/api/auth/me` 返回 HTTP 401（未登录门禁正常拦截），线上发布完毕。
 
+### 2026-08-06 问题 16：线上 Google 登录重定向地址回退到 http://127.0.0.1:3000
+- 原因：此前本地 `supabase/config.toml` 中 `[auth]` 配置的 `site_url` 误写为 `http://127.0.0.1:3000`。在执行 `deploy:prod` 同步 `supabase config push` 时，远端 Supabase Auth 的 Site URL 被覆盖为本地开发地址。当线上前端发起 OAuth 登录时，Supabase 校验合法回调白名单未通过，自动回退到了全局 Site URL。
+- 解决方式：
+  1. 修改 `supabase/config.toml` 中 `site_url` 为 `https://smartbillpro.com`，并将允许的回调白名单 `additional_redirect_urls` 配置完整；
+  2. 修复 `storage.vector.enabled` 免去免费版套餐接口限制；
+  3. 执行 `HOME=/Users/admin supabase config push --yes` 将正确的 Site URL 与回调白名单立即推送到远端 Supabase 项目。
+
